@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-04 Mon 18:21 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The reading pile</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Rémi Louf" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">The reading pile</h1>
+<blockquote>
+<p>
+Nothings beats the feeling of buying a book and the illusion that you just transformed cash into knowledge.
+</p>
+</blockquote>
+
+<p>
+A list of the books that are on a pile and ready to read. Hopefully most will make it to the <a href="20220103103303-what_i_have_read.html#ID-911c1ce7-5f95-4047-b724-91cd06761533">"read" page</a>. I now try to <a href="20220314152613-read_with_a_purpose.html#ID-aef6e42f-47e2-4206-ae84-cbbfbe016339">read with a purpose</a>: new references are gathered in notebooks throughout this garden, so this list will dwindle and does not reflect my current reading pile.
+</p>
+
+<div id="outline-container-orgfe6d63f" class="outline-2">
+<h2 id="orgfe6d63f"><a href="20220103161656-economics.html#ID-5fecd21c-5701-48af-9fd8-a2a2ab9b36a8">Economics</a></h2>
+<div class="outline-text-2" id="text-orgfe6d63f">
+<ul class="org-ul">
+<li>Blanchard - Macroeconomics: a european perspective</li>
+<li>Graeber - Bullshit jobs</li>
+<li>Colombi - Où va l'argent des pauvres</li>
+<li>Mazzucato - The entrepreneurial state</li>
+</ul>
+</div>
+
+<div id="outline-container-orgf962c36" class="outline-3">
+<h3 id="orgf962c36">Essays</h3>
+<div class="outline-text-3" id="text-orgf962c36">
+<ul class="org-ul">
+<li>Keen - Debunking economics</li>
+<li>Keen - The New Economics</li>
+<li>Renahy - Là où est l'argent</li>
+<li>Mazzucato - Mission economy</li>
+<li>Wainwright - Narconomics</li>
+<li>Vinsel &amp; Russel - The innovation delusion</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf64e6be" class="outline-3">
+<h3 id="orgf64e6be">General</h3>
+<div class="outline-text-3" id="text-orgf64e6be">
+<ul class="org-ul">
+<li>Adam Smith - The wealth of nations</li>
+<li>Nozick - Anarchy, State and Utopia</li>
+<li>John Stuart Mill - Collection of texts</li>
+<li>Hayek - The road to serfdom</li>
+<li>Polanyi - La grande transformation</li>
+<li>Ponsot et al - L'économie post-kéneysienne</li>
+<li>King - The economic superorganism</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2c3c9cf" class="outline-3">
+<h3 id="org2c3c9cf"><a href="20220103155456-money.html#ID-ee38c3b2-8037-4f20-9c78-701a629f140a">Money</a></h3>
+<div class="outline-text-3" id="text-org2c3c9cf">
+<ul class="org-ul">
+<li>Randall Wray - Modern Money Theory</li>
+<li>Goldstein - Money</li>
+<li>Weatherford - The history of money</li>
+<li>Ferguson - The ascent of money</li>
+<li>Mosler - Soft Currency Economics II</li>
+<li>Prasad - The future of money</li>
+<li>Ingham - The Nature of money</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga0bd687" class="outline-3">
+<h3 id="orga0bd687">Taxation</h3>
+<div class="outline-text-3" id="text-orga0bd687">
+<ul class="org-ul">
+<li>Young - The myth of the millionaire tax flight</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org827fda1" class="outline-3">
+<h3 id="org827fda1"><a href="20220103155222-monetary_systems.html#ID-1a53642d-c03e-4ae9-92e2-e164869927b3">Monetary systems</a></h3>
+<div class="outline-text-3" id="text-org827fda1">
+<ul class="org-ul">
+<li>Benn - The battle of Bretton Woods</li>
+<li>De Grauwe - Economics of monetary union</li>
+<li>Mody - Eurotragedy</li>
+<li>Marsch - The Euro</li>
+<li>Eichengreen - Globalizing Capital: A History of the International Monetary System</li>
+<li>Howell - Capital wars</li>
+<li>Xu - Empire of silver</li>
+<li>Prasad - The future of money</li>
+<li>Klein - Trade wars are class wars</li>
+<li>Stiglitz - <a href="stiglitz2016.html">The euro: how a common currency threatens the future of Europe</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge4ee631" class="outline-3">
+<h3 id="orge4ee631"><a href="20220103161950-public_debt_public.html#ID-8e188107-bab9-438e-bc23-f9863f50f783">Debt</a></h3>
+<div class="outline-text-3" id="text-orge4ee631">
+<ul class="org-ul">
+<li>Graeber - Debt</li>
+<li>Lemoine - L'ordre de la dette</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org0a57e35" class="outline-3">
+<h3 id="org0a57e35"><a href="20210514171828-inflation.html#ID-d0110ef7-f82f-4568-bb0d-9ac077994b8e">Inflation</a></h3>
+<div class="outline-text-3" id="text-org0a57e35">
+<ul class="org-ul">
+<li>Fischer - The great wave</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org121dcb9" class="outline-3">
+<h3 id="org121dcb9"><a href="20210512203922-inegalites.html#ID-c5b081da-6903-4f3a-9a46-90c1465c4408">Inequality</a></h3>
+<div class="outline-text-3" id="text-org121dcb9">
+<ul class="org-ul">
+<li>Kwak - Bad Economis and the Rise of Inequality</li>
+<li>Saez &amp; Zucman - The triumph of injustice</li>
+<li>Piketty - Capital au XXIe siècle</li>
+<li>Piketty - Capital et idéologie</li>
+<li>Clark - The son also rises</li>
+<li>Clark - A farewell to alms</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org94238e6" class="outline-3">
+<h3 id="org94238e6">Finance</h3>
+<div class="outline-text-3" id="text-org94238e6">
+<ul class="org-ul">
+<li>Cassis - The world of private banking</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcb2f0ca" class="outline-2">
+<h2 id="orgcb2f0ca">History</h2>
+<div class="outline-text-2" id="text-orgcb2f0ca">
+<p>
+It realized that my historical knowledge is close to nonexistant, so I am trying to catch up. I am currently focusing on building a mental 4D map of events so I can next focus on specific periods / events / locations.
+</p>
+
+<p>
+<i>Belin</i> edits a great series on French history that I highly recommend.
+</p>
+
+<ul class="org-ul">
+<li>Chalmin - Une brève histoire économique</li>
+</ul>
+</div>
+
+<div id="outline-container-orgf7a9beb" class="outline-3">
+<h3 id="orgf7a9beb">Big History</h3>
+<div class="outline-text-3" id="text-orgf7a9beb">
+<ul class="org-ul">
+<li>Turchin - Ultrasociety</li>
+<li>Turchin - Ages of discord</li>
+<li>Diamond - Guns, germs and steel</li>
+<li>Fukuyama - Political order and political decay</li>
+<li>Norenzayan - Big Gods</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org98c8233" class="outline-3">
+<h3 id="org98c8233">Ancient Greece</h3>
+<div class="outline-text-3" id="text-org98c8233">
+<ul class="org-ul">
+<li>Ober - The rise and fall of classical Greece</li>
+<li>Ober - Democracy and knowledge</li>
+<li>Ober - Mass and Elite in democratic Athens</li>
+<li>Samons &amp; Loren - What's wrong with democracy?</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org117073b" class="outline-3">
+<h3 id="org117073b">Histoire de France</h3>
+<div class="outline-text-3" id="text-org117073b">
+<ul class="org-ul">
+<li>Bührer-Thierry &amp; Mériaux - La France avant la France (481-888)</li>
+<li>Mazel - Féodalités (888-1180)</li>
+<li>Cassard - L'âge d'or capétien (1180-1328)</li>
+<li>Woronoff - Histoire de l'industrie en France</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf261549" class="outline-3">
+<h3 id="orgf261549">Religion</h3>
+<div class="outline-text-3" id="text-orgf261549">
+<p>
+Je comptais lire les évangiles apocryphe en préparation d'un roman que je suis en train d'écrire. <i>Preneur si vous en connaissez d'autres !</i>
+</p>
+
+<ul class="org-ul">
+<li>Leloup - L'évangile de Thomas</li>
+<li>Leloup - L'évangile de Marie</li>
+<li>Leloup - L'évangile de Philippe</li>
+<li>L'évangile de Judas</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgbb93a94" class="outline-3">
+<h3 id="orgbb93a94">Biographies</h3>
+<div class="outline-text-3" id="text-orgbb93a94">
+<ul class="org-ul">
+<li>Etiévent - Ambroise Croizat ou l'invention sociale</li>
+<li>Logson - John F. Kennedy and the race to the moon</li>
+<li>Dallek - An unfinished life (John F. Kennedy 1917-1963)</li>
+<li>Brands - Traitor to his class</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1f544bb" class="outline-3">
+<h3 id="org1f544bb">History of thouhgts</h3>
+<div class="outline-text-3" id="text-org1f544bb">
+<ul class="org-ul">
+<li>Audier - Néo-libétalisme(s)</li>
+<li>Stiegler - Il faut s'adapter</li>
+<li>Plehwe et al - Nine lives of neoliberalism</li>
+<li>Jones - Masters of the universe</li>
+<li>Finley - Democracy Ancient and Modern</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3a8a5fe" class="outline-2">
+<h2 id="org3a8a5fe">Essays</h2>
+<div class="outline-text-2" id="text-org3a8a5fe">
+<ul class="org-ul">
+<li>Amable &amp; Palombarini - L'illusion du bloc bourgeois</li>
+<li>Farah - Fake state</li>
+<li>Frank - What's the matter with Kansas?</li>
+<li>Todd - Après la démocratie</li>
+<li>Todd - Le destin des immigrés</li>
+<li>Klein - La stratégie du choc</li>
+<li>Mischi - Le communisme désarmé</li>
+<li>Todd - L'invention de l'Europe</li>
+<li>Todd - Les luttes de classe en France au XXIe siècle</li>
+<li>Herman &amp; Chomsky - Manufacturing consent</li>
+<li>Arendt - The origins of totalitarianism</li>
+<li>Crétois - La part commune</li>
+<li>Herzog - A short history of european laws</li>
+<li>Kaczynski - Industrial society and its future</li>
+<li>Perrow - Normal accidents</li>
+<li>Seely - Honeybee democracy</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf80a25d" class="outline-2">
+<h2 id="orgf80a25d">Practical</h2>
+<div class="outline-text-2" id="text-orgf80a25d">
+<ul class="org-ul">
+<li>McCormick - Preparing for climate change</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org06391f6" class="outline-2">
+<h2 id="org06391f6">Energy</h2>
+<div class="outline-text-2" id="text-org06391f6">
+<ul class="org-ul">
+<li>Parisi &amp; Ball - The future of fusion energy</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org94ac723" class="outline-2">
+<h2 id="org94ac723">Blockchain</h2>
+<div class="outline-text-2" id="text-org94ac723">
+<ul class="org-ul">
+<li>Antanopoulos - Mastering ethereum</li>
+<li>Gecko - How to DeFi: beginner</li>
+<li>Gecko - How to DeFi: advanced</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgff9e235" class="outline-2">
+<h2 id="orgff9e235">Sharpening the saw</h2>
+<div class="outline-text-2" id="text-orgff9e235">
+<ul class="org-ul">
+<li>Adlet - How to read a book</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga60e4db" class="outline-2">
+<h2 id="orga60e4db">Technical</h2>
+<div class="outline-text-2" id="text-orga60e4db">
+<ul class="org-ul">
+<li>Petzold - Code</li>
+<li>The little schemer</li>
+<li>The reasoned schemer</li>
+</ul>
+</div>
+
+<div id="outline-container-org3f9255b" class="outline-3">
+<h3 id="org3f9255b">Statistics</h3>
+<div class="outline-text-3" id="text-org3f9255b">
+<ul class="org-ul">
+<li>Grimmet &amp; Stirzaker - Probability and random processes</li>
+<li>Spiegelhalter - The art of statistics: learning from data</li>
+<li>Masters &amp; Spiegelhalter - Covid by numbers</li>
+<li>Martin &amp; Kumar &amp; Lao - Bayesian modeling and computation with python</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org3dd793c" class="outline-3">
+<h3 id="org3dd793c">Visualisation</h3>
+<div class="outline-text-3" id="text-org3dd793c">
+<ul class="org-ul">
+<li>Rougier - Scientific visualization with Python and Matplotlib</li>
+<li>Tufte - The visual display of quantitative information</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcea0d75" class="outline-2">
+<h2 id="orgcea0d75">Links to this note</h2>
+<div class="outline-text-2" id="text-orgcea0d75">
+<ul class="org-ul">
+<li><a href="./books.html">What I am reading</a></li>
+<li><a href="./books.html">What I am reading</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

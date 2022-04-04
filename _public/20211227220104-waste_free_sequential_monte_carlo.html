@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-04 Mon 18:21 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Waste-free Sequential Monte Carlo</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Rémi Louf" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Waste-free Sequential Monte Carlo</h1>
+<dl class="org-dl">
+<dt>tags</dt><dd><a href="20220109161529-sampling.html#ID-4f97031f-68e8-49ed-b814-ae366b7886b6">Sampling</a></dd>
+</dl>
+
+<p>
+Algorithm from <a href="https://arxiv.org/abs/2011.02328">this article.</a>
+</p>
+
+<ul class="org-ul">
+<li>How many MCMC steps needed for optimal performace? (always set arbitratily)</li>
+<li>Number of steps should be set adaptively, especially for situation like tmpering.</li>
+<li><p>
+Intermediate steps are wasted.
+</p>
+
+<p>
+Waste-free SMC uses intermediate steps as new particles.
+</p></li>
+</ul>
+
+
+<div id="outline-container-orgb17edee" class="outline-2">
+<h2 id="orgb17edee">Principle</h2>
+<div class="outline-text-2" id="text-orgb17edee">
+<p>
+If there are \(N\) particles, we only resample \(M = N/P\) particles. Each resampled particle is moved \(P-1\) times and each iterate is taken to form a new sample of size \(N\).
+</p>
+
+<p>
+How can we integrate both processes in the same algorithm?
+</p>
+
+<p>
+The implement of sequential MC first consists in a resampling step:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">resampling_idx</span> = resampling_fn(weights, rng_key, num_resampled)
+<span style="font-weight: bold; font-style: italic;">particles</span> = jax.tree_map(<span style="font-weight: bold;">lambda</span> x: x[resampling_index], particles)
+</pre>
+</div>
+
+<p>
+We can only resample between \(1\) and \(N\) particles. But since we dont'
+</p>
+
+<p>
+Waste-free SMC may be recast as a standard SMC sampler that propopagates and reweighs particles that are markov chains of length P.
+</p>
+
+<p>
+Indeed we have \(M\) chains of length \(P\).
+</p>
+
+<p>
+\(z \in \mathcal{Z} = \Xi^P\). The potential functions are as:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
+  G^{wf}(z) = <span style="font-weight: bold;">\frac</span>{1}{P} <span style="font-weight: bold;">\sum</span>_{p=1}^{P} G_{t}(z[p])
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+</pre>
+</div>
+
+\begin{equation}
+  G^{wf}(z) = \frac{1}{P} \sum_{p=1}^{P} G_{t}(z[p])
+\end{equation}
+
+<p>
+and the initial distribution
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
+  <span style="font-weight: bold;">\nu</span>^{wf}(<span style="font-weight: bold;">\mathrm</span>{d}z) = <span style="font-weight: bold;">\prod</span>_{p=1}^{P} <span style="font-weight: bold;">\nu</span>(<span style="font-weight: bold;">\mathrm</span>{d}z[p])
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+</pre>
+</div>
+
+\begin{equation}
+  \nu^{wf}(\mathrm{d}z) = \prod_{p=1}^{P} \nu(\mathrm{d}z[p])
+\end{equation}
+
+<p>
+And the transition kernel:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
+ M_{t}^{wf}(z_{t-1}, <span style="font-weight: bold;">\mathrm</span>{d}z_{t}) = <span style="font-weight: bold;">\left\{\sum</span>_{p=1}^{P}<span style="font-weight: bold;">\right\}</span>
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+</pre>
+</div>
+
+<ol class="org-ol">
+<li>Choose one chain of length \(P\) with probability \(\propto \sum_p G_{t-1}(z_{t-1}[p])\);</li>
+<li>Choose one component \(q\) randomly with probability \(\propto G_{t-1}(z_{t-1}[q])\) to be the starting point of the next chain;</li>
+<li>Repeat</li>
+</ol>
+
+<p>
+Which leads to the algorithm 2 in the paper:
+</p>
+
+<ol class="org-ol">
+<li>sampled<sub>idx</sub> &lt;- resample(M, weights)</li>
+<li>sampled<sub>particles</sub> = particles[sampled<sub>idx</sub>]</li>
+<li>traces = jax.scan(jax.vmap(mcmc)(keys, new<sub>particles</sub>), P)</li>
+<li>particles = traces.flatten()</li>
+<li>weights = G(particles)</li>
+<li>return particles, weights</li>
+</ol>
+
+
+<p>
+The equivalent algorithm 1 would be:
+</p>
+
+<ol class="org-ol">
+<li>sampled<sub>particles</sub> = particles</li>
+<li>traces = jax.scan(jax.vmap(mcmc)(keys, new<sub>particles</sub>), P)</li>
+<li>particles = traces[-1, :]</li>
+<li>weights = G(particles)</li>
+<li>return particles, weights</li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-orgaf67c9f" class="outline-2">
+<h2 id="orgaf67c9f">Code</h2>
+<div class="outline-text-2" id="text-orgaf67c9f">
+<p>
+Let us now refactor the original smc code:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">smc</span>(
+    mcmc_kernel_factory: Callable,
+    mcmc_state_generator: Callable,
+    resampling_fn: Callable,
+    num_mcmc_iterations: <span style="font-weight: bold;">int</span>,
+    is_waste_free: <span style="font-weight: bold;">bool</span> = <span style="font-weight: bold; text-decoration: underline;">False</span>,
+):
+
+    <span style="font-weight: bold;">if</span> is_waste_free:
+        <span style="font-weight: bold; font-style: italic;">num_mcmc_iterations</span> = num_mcmc_iterations - 1
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">kernel</span>(
+        rng_key: PRNGKey,
+        state: SMCState,
+        logprob_fn: Callable,
+        log_weight_fn: Callable,
+    ) -&gt; Tuple[SMCState, SMCInfo]:
+
+        <span style="font-weight: bold; font-style: italic;">weights</span>, <span style="font-weight: bold; font-style: italic;">particles</span> = state
+        <span style="font-weight: bold; font-style: italic;">scan_key</span>, <span style="font-weight: bold; font-style: italic;">resampling_key</span> = jax.random.split(rng_key, 2)
+
+        <span style="font-weight: bold; font-style: italic;">num_particles</span> = weights.shape[0]
+        <span style="font-weight: bold;">if</span> is_waste_free:
+            <span style="font-weight: bold; font-style: italic;">sub_num_particles</span>, <span style="font-weight: bold; font-style: italic;">remainder</span> = <span style="font-weight: bold;">divmod</span>(
+                num_particles, num_mcmc_iterations + 1
+            )
+            <span style="font-weight: bold;">if</span> remainder &gt; 0:
+                <span style="font-weight: bold;">raise</span> <span style="font-weight: bold; text-decoration: underline;">ValueError</span>(
+                    <span style="font-style: italic;">"`num_mcmc_iterations` must be a divider "</span>
+                    f<span style="font-style: italic;">"of `num_particles`, {num_mcmc_iterations} and "</span>
+                    f<span style="font-style: italic;">"{num_particles} were given"</span>
+                )
+        <span style="font-weight: bold;">else</span>:
+            <span style="font-weight: bold; font-style: italic;">sub_num_particles</span> = num_particles
+
+        <span style="font-weight: bold; font-style: italic;">resampling_index</span> = resampling_fn(weights, resampling_key, sub_num_particles)
+        <span style="font-weight: bold; font-style: italic;">particles</span> = jax.tree_map(<span style="font-weight: bold;">lambda</span> x: x[resampling_index], particles)
+
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">First advance the particles using the MCMC kernel</span>
+        <span style="font-weight: bold; font-style: italic;">mcmc_kernel</span> = mcmc_kernel_factory(logprob_fn)
+
+        <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">mcmc_body_fn</span>(carry, curr_key):
+            <span style="font-weight: bold; font-style: italic;">curr_particles</span>, <span style="font-weight: bold; font-style: italic;">n_accepted</span> = carry
+            <span style="font-weight: bold; font-style: italic;">keys</span> = jax.random.split(curr_key, sub_num_particles)
+            <span style="font-weight: bold; font-style: italic;">new_particles</span>, <span style="font-weight: bold; font-style: italic;">mcmc_info</span> = jax.vmap(mcmc_kernel, in_axes=(0, 0))(
+                keys, curr_particles
+            )
+            <span style="font-weight: bold; font-style: italic;">n_accepted</span> = n_accepted + mcmc_info.is_accepted
+            <span style="font-weight: bold;">return</span> (new_particles, n_accepted), new_particles
+
+        <span style="font-weight: bold; font-style: italic;">mcmc_state</span> = jax.vmap(mcmc_state_generator, in_axes=(0, <span style="font-weight: bold; text-decoration: underline;">None</span>))(
+            particles, logprob_fn
+        )
+
+        <span style="font-weight: bold; font-style: italic;">keys</span> = jax.random.split(scan_key, num_mcmc_iterations)
+        (proposed_states, total_accepted), <span style="font-weight: bold; font-style: italic;">proposed_states_history</span> = jax.lax.scan(
+            mcmc_body_fn, (mcmc_state, jnp.zeros((sub_num_particles,))), keys
+        )
+        <span style="font-weight: bold; font-style: italic;">acceptance_rate</span> = jnp.mean(total_accepted / num_mcmc_iterations)
+
+        <span style="font-weight: bold;">if</span> is_waste_free:
+            <span style="font-weight: bold; font-style: italic;">initial_position</span>, <span style="font-weight: bold; font-style: italic;">tree_def</span> = jax.tree_flatten(mcmc_state.position)
+            <span style="font-weight: bold; font-style: italic;">chains_history</span>, <span style="font-weight: bold; font-style: italic;">_</span> = jax.tree_flatten(proposed_states_history.position)
+
+            <span style="font-weight: bold; font-style: italic;">position_history</span> = [
+                jnp.concatenate([jnp.expand_dims(elem1, 0), elem2])
+                <span style="font-weight: bold;">for</span> elem1, elem2 <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">zip</span>(initial_position, chains_history)
+            ]
+            <span style="font-weight: bold; font-style: italic;">position_history</span> = jax.tree_unflatten(tree_def, position_history)
+            <span style="font-weight: bold; font-style: italic;">proposed_particles</span> = jax.tree_map(
+                <span style="font-weight: bold;">lambda</span> z: jnp.reshape(z, (num_particles,) + z.shape[2:]),
+                position_history,
+            )
+
+        <span style="font-weight: bold;">else</span>:
+            <span style="font-weight: bold; font-style: italic;">proposed_particles</span> = proposed_states.position
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Resample the particles depending on their respective weights</span>
+        <span style="font-weight: bold; font-style: italic;">log_weights</span> = jax.vmap(log_weight_fn, in_axes=(0,))(proposed_particles)
+        <span style="font-weight: bold; font-style: italic;">weights</span>, <span style="font-weight: bold; font-style: italic;">log_likelihood_increment</span> = _normalize(log_weights)
+
+        <span style="font-weight: bold; font-style: italic;">state</span> = SMCState(weights, proposed_particles)
+        <span style="font-weight: bold; font-style: italic;">info</span> = SMCInfo(resampling_index, log_likelihood_increment, acceptance_rate)
+        <span style="font-weight: bold;">return</span> state, info
+
+    <span style="font-weight: bold;">return</span> kernel
+</pre>
+</div>
+
+<p>
+First separate vanilly and waste-free SMC:
+</p>
+</div>
+</div>
+
+<div id="outline-container-org00464ca" class="outline-2">
+<h2 id="org00464ca">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>

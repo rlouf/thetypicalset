@@ -1,0 +1,31 @@
+:PROPERTIES:
+:ID:       ecec9c59-d480-4e23-bb22-1fea611c0ddf
+:END:
+#+TITLE: Zero-inflated Negative Binomial
+#+CREATED: [2022-02-14 Mon 17:08]
+#+LAST_MODIFIED: [2022-02-15 Tue 10:56]
+
+The Zero-inflated [[id:273bfd3a-7e6e-4971-b422-048f930ae5b0][Negative Binomial]] (ZINB) model adresses both zero inflation and overdispersion in the data. It can be expressed as:
+
+#+begin_src latex :results raw :exports results
+\begin{equation*}
+ X_j \sim (1-\pi_j)\; \mathds{1}_{w_j=0} + \pi_j\; \operatorname{NegativeBinomial}(\mu_j, r)
+\end{equation*}
+#+end_src
+
+#+RESULTS:
+\begin{equation*}
+ X_j \sim (1-\pi_j)\; \mathds{1}_{w_j=0} + \pi_j\; \operatorname{NegativeBinomial}(\mu_j, r)
+\end{equation*}
+
+where the $w_j$ are indivicator variables such that $w_j=x_j=0$ with probability $1-\pi_j$ and $w_j=1$ with probability $\pi_j$. We typically model the $w_j$ using a logistic model.
+
+* Sample
+
+We can use the method described in [[cite:&neelon]] to sample the ZINB model with a logistic mode:
+
+1. Use the Gibbs sampler in [[cite:&polson2013]] to sample the parameter of the logistic regression model;
+2. Use the Gibbs sampler in  to sample the parameter of the negative binomial;
+3. Update $r$ using a MCMC step;
+4. Update the $w_j$ from their discrete full conditional distributions.
+

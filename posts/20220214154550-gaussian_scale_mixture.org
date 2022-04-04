@@ -1,0 +1,60 @@
+:PROPERTIES:
+:ID:       e878015f-6716-44e8-a79b-6b9fa2cbc89b
+:END:
+#+TITLE: Gaussian scale mixture
+#+CREATED: [2022-02-14 Mon 15:45]
+#+LAST_MODIFIED: [2022-02-15 Tue 10:53]
+
+The probability density function of a /Gaussian scale mixture/ random variable $X$ can be written as
+
+#+begin_src latex :results raw :exports results
+\begin{equation*}
+  \pi_{X}(x|\mu,\sigma^{2}) = \int_{0}^{\infty} \mathcal{N}\left(x|\mu, f(\lambda) \sigma^{2}\right)\,\pi_\lambda(\lambda) \mathrm{d}\lambda
+\end{equation*}
+#+end_src
+
+#+RESULTS:
+\begin{equation*}
+  \pi_{X}(x|\mu,\sigma^{2}) = \int_{0}^{\infty} \mathcal{N}\left(x|\mu, f(\lambda) \sigma^{2}\right)\,\pi_\lambda(\lambda) \mathrm{d}\lambda
+\end{equation*}
+
+where $\lambda$ is called the /mixing parameter/, and $f$ is a positive function of the mixing parameter. Different choices of $f$ and $\lambda$ lead to a wide variety of non-gaussian distributions:
+
+* Student t distribution
+
+The [[id:9f774e2f-c51c-443e-bab4-5bd2f831f862][Student t distribution]] can be seen as a gaussian scale mixture with $f(\lambda) = 1 / \lambda$ and $\lambda$ gamma-distributed:
+
+#+begin_src latex :results raw :exports results
+\begin{align*}
+  X &\sim \operatorname{Normal}(\mu, \frac{\sigma^{2}}{\lambda})\\
+  \lambda &\sim \operatorname{Gamma}(\delta/2, \delta/2)
+\end{align*}
+#+end_src
+
+#+RESULTS:
+\begin{align*}
+  X &\sim \operatorname{Normal}(\mu, \frac{\sigma^{2}}{\lambda})\\
+  \lambda &\sim \operatorname{Gamma}(\delta/2, \delta/2)
+\end{align*}
+
+is equivalent to:
+
+#+begin_src latex :results raw :exports results
+\begin{equation*}
+  X \sim \operatorname{Student}(\delta)
+\end{equation*}
+#+end_src
+
+#+RESULTS:
+\begin{equation*}
+  X \sim \operatorname{Student}(\delta)
+\end{equation*}
+
+* Logitistic distribution :noexport:
+* Laplace distribution :noexport:
+* z distributions :noexport:
+
+* References
+- [[cite:&makalic2016]]
+- [[cite:&polson2013]]
+- [[cite:&andrews1974]]

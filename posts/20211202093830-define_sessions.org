@@ -1,0 +1,96 @@
+:PROPERTIES:
+:ID:       5f60be02-f066-421a-87b5-677193755f96
+:END:
+#+title: Define user sessions in mobile applications
+#+filetags: :public:inprogress:
+#+PROPERTY: header-args:latex :results raw :exports results
+
+No one really know how to define what a /session/ in a mobile app is, and it is indeed something that is hard to define. Here is a real inter-event time distribution for the iOS and Android version of the same mobile application:
+
+[[file:images/session-length.png]]
+
+We call $T$ the random variable that represents the inter-event time. We found $\min(t) = 8 \text{ms}$ and $\max(t) = 6 \text{months}$. Worse, $\mathbb{E}[T_{android}] = 2\, \mathbb{E}[T_{iOS}]$. Is it possible to find a way to delineate sessions that gives consistant results across platforms?
+
+The key is to realize that the above distributions are the results of different processes:
+- Actions within a session. We note the inter-action time $T_{actions}$
+- Leaving the session and coming back to the application at a later time. We note the inter-session time $T_{sesssion}$
+
+It is known that the inter-event time between human actions such as responding to emails follows a Pareto distribution so we will assume that the inter-session time follows a Pareto distribution:
+
+#+begin_src latex
+\begin{equation}
+  T_{session} \sim \operatorname{Pareto}(\alpha)
+\end{equation}
+#+end_src
+
+We will assume a distribution with shorter tails yet flexible for inter-actions times:
+
+#+begin_src latex
+\begin{equation}
+ T_{action} \sim \operatorname{Gamma}(k, \theta)
+\end{equation}
+#+end_src
+
+So the inter-event time $T$ in the data is given by a mixture:
+
+#+begin_src latex
+\begin{equation}
+  P(T|k,\theta,\alpha) = \omega_{a}\, P(T_{action}|k,\theta) + \omega_{s}\, P(T_{session}|\alpha)
+\end{equation}
+#+end_src
+
+#+RESULTS:
+\begin{equation}
+  P(T|k,\theta,\alpha) = \omega_{a}\, P(T_{action}|k,\theta) + \omega_{s}\, P(T_{session}|\alpha)
+\end{equation}
+
+The implementation in PyMC3 is straightforward:
+
+#+begin_src python
+import pymc3 as pm
+import numpy as np
+
+data = [insert, your, inter, event, time, data, here]
+
+with pm.Model() as mixture_model:
+
+    # Define priors
+    BoundedNormal = pm.Bound(pm.Normal, lower=0.0)
+    k = BoundedNormal('k', mu=20, sd=np.sqrt(data.var()), testval=20)
+    theta = pm.HalfCauchy('theta', 5)
+    alpha = pm.HalfNormal('alpha', 5)
+
+
+    # Likelihood
+    gamma = pm.Gamma.dist(mu=k, sd=theta)
+    pareto = pm.Pareto.dist(alpha=alpha, m=0.1)
+    w = pm.Dirichlet('weight', a=np.array([1, 1]))
+    interval_obs = pm.Mixture('interval_obs', w=w, comp_dists=[gamma,pareto], observed=data)
+
+    # Inference
+    trace = pm.sample()
+
+#+end_src
+
+To delineate sessions we need to find a time scale $\Delta t$ such that if no actions has been performed since more than $\Delta t$ we consider the session to be over. We look for the maximum value of $\Delta t$ such that:
+
+#+begin_src latex
+\begin{equation}
+  P(T = \Delta t| inter-actions) > \epsilon\:P(T = \Delta t| inter-sessions)
+\end{equation}
+#+end_src
+
+#+RESULTS:
+\begin{equation}
+  P(T = \Delta t| inter-actions) > \epsilon\:P(T = \Delta t| inter-sessions)
+\end{equation}
+
+Where $\epsilon$ is a constant to dermine (we can probably use decision theory for that). Choosing $\epsilon=1$ we found the following posterior distribution for $\Delta t$:
+
+[[file:images/session-length-delta-t.png]]
+
+In other words, we will consider that a session is still active as long as $\Delta t < 55s$. We can now take the users' timeline of events, extract sessions using the $\Delta t$ threshold, and look at the distribution of session duration of all users. We find that for sessions > 10s the distributions for iOS and Android users match almost perfectly:
+
+[[file:images/session-length-model.png]]
+
+Of course there are details to iron out. The definition could be improved by discarding "noise" events (that lead to these very short inter-action times) but the main idea (using a mixture) is here.

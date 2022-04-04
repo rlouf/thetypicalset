@@ -1,0 +1,236 @@
+:PROPERTIES:
+:ID:       d29d7bca-c996-4370-973f-81659db2cf72
+:END:
+#+title: Refonte de la fiscalite
+#+author: Rémi Louf
+#+filetags: :private:
+
+- tags :: [[id:517fc476-4e83-4655-8ced-b71fdaf70c7c][Fiscalité]]
+
+Why it does not work.
+
+* Notes :noexport:
+
+** TODO références sur l’impôt individualisé :noexport:
+  Piketty et al. préconise un impôt ind ividuel a la fois pour favoriser l’emploi des femmes mais aussi par soucis de simplicité
+** TODO références sur crédit d’impôt constant par enfant
+  Piketty et al préconisent un crédit d’impôt constant par enfant partagé par les parents par défaut. :noexport:
+** TODO Programme d'Elizabeth Warren sur la fiscalité
+
+* Pourquoi refonte et non réformer?
+
+ - Nombres de pages du code général des impôts
+ - Evolution dans le temps du nombre d'articles
+ - Complexité de MLLang
+
+** Un impôt inégalitaire
+** Un impôt illisible et non transparent
+
+Tranches d’imposition marginales auxquelles se superposent des exceptions (prélèvements dérogatoires) rendent la chose illisible et non progressive.
+
+** TODO liste des prélèvements dérogatoires :noexport:
+
+Page 70 :landais2010
+
+* Principes directeurs
+
+Une politique fiscale bien réfléchie est partie intégrante d'un projet de société. Il est donc nécessaire de penser en amont la politique que nous souhaitons mener avant de s'atteler au travail technique et à la comptabilité. Nous proposons d'articuler le travail dans ce document autour des principes suivants:
+
+- Tout citoyen possédant des revenus est contribuable;
+- L'impôt est un outil d'émancipation;
+- L'impôt, de par son taux effectif, est progressif;
+- L'impôt est prédictible par tous, et transparent.
+
+À chaque modification de la fonction il s'agira de vérifier que nous n'avons pas violer un de nos principes. Pour certains de ces principes, comme la progressivité, il est possible de mettre en place des /tests automatiques/ qui garantissent les propriétés du code des impôts. Certains principes en revanche ne peuvent être vérifiés que de manière qualitative, et il faudra systématiquement revenir à cette liste pour vérifier que la fonction ne contredit les principes énoncés ci-dessous.
+
+Nous précisions ces principes ci-dessous en les contrastants avec le système tel qu'il existe aujourd'hui.
+
+** Chaque citoyen est contribuable
+
+Deux idées sous-jacentes:
+- Éviter l'évasion fiscale. Quelle que soit la forme des revenus, qu'ils soient du travail ou du capital, les citoyens en possédant sont redevables de l'impôt:
+- Même les revenus les plus faibles sont des contribuables.
+
+** L'impot est un outil d'émancipation
+
+** TODO ajouter courbe des revenus et quelques propriétés mathématiques importantes :noexport:
+
+Montrer que deux courbes de revenu avec la même moyenne et un taux d'imposition
+constant conduisent à deux collectes différentes.
+
+#+begin_src python
+recettes = np.sum(revenues)
+#+end_src
+
+
+** TODO budget de l’État
+** TODO intérêts de la dette
+** TODO coût de la collecte de l’impôt, en particulier l’IRPP.
+** TODO revenu national
+** TODO patrimoine national
+
+- Puisque chaque citoyen paie l'impôt, les moins aisés passent du statut /d'assistés/ à celui de /contribuable/ à taux de prélèvement équivalent.
+- L'impôt tel qu'il existe aujourd'hui n'est pas pensé pour l'émancipation de la femme. Il y a la question du quotient familial qui favorise les grands différentiels de revenu, puis les aides...
+
+** L'impôt est progressif
+
+** L'impôt est prédictible par tous, et transparent
+
+Il subsiste encore chez certains de nos concitoyens la croyance qu'une augmentation de salaire équivaudra à une baisse de revenus.
+
+* Quelques fait utiles
+
+** TODO ajouter courbe des revenus et quelques propriétés mathématiques importantes
+** TODO budget de l’État
+** TODO intérêts de la dette
+** TODO coût de la collecte de l’impôt, en particulier l’IRPP.
+** TODO revenu national
+** TODO patrimoine national
+
+* L'impôt
+** Taxe sur la valeur ajoutée (TVA)
+
+Taxe régressive : revenus les moins élevés dépensent toute leur salaires amers que les plus aisés économisent et investissent. 
+
+Est-ce que l’on peut voir l’ISF comme le pendant de la TVA pour les plus aisés ?
+
+(Zuckman & Saez p18) IR existe pour compenser la regressivite de la TVA et des tarifs douaniers
+
+*** But
+*** Revenu aujourd'hui
+** Impôt sur les Sociétés
+
+Plus gros écueil = éviter l’évasion. Résolu par monnaie propre + taxe a-la Janet Yellen.
+
+Est-il possible d’alléger la fiscalité sur les TPE? Comment? Quel seuil?
+
+** Impôt sur le revenu
+*** Impôts remplacés
+**** IRPP
+**** Prime pour l'Emploi (PPE)
+**** Contribution Sociale Généalisée
+
+*** Un impôt individualisé
+*** Fonctionnement
+
+Assiette
+
+Histoire de la CSG.
+
+Baisser l’impôt des bas salaires pour pouvoir supprimer les allocations. Contribuables et non assistés. 
+
+* TODO trouver étude sur le lien entre imposition des revenus les moins élevés et travail
+
+Suppression de toutes les bouches fiscales dans un premier temps. Réintroduction implique de relever tous les taux effectifs = boucle de rétroaction.
+
+Une CSG généralisée, en fait.
+
+Tous les revenus, y compris du capital:
+- *Travail:* L'imposition se fait à la source par l'employeur qui doit
+spécifier le taux effectif d'imposition du salarié. Comme pour l'impôt
+retenu à la source actuellement, le salarié peut opter pour la transmission
+du taux par l'administration fiscale.
+** Impôt sur les sociétés 
+
+Les plus riches le sont via la possession du capital d’entreprise. L’impôt sur les sociétés (ou les actions des entreprises publiques) est donc une taxe minimum payée par les plus riches.
+
+Années 50-60 aux US c’était la principale contribution des .1% les plus riches, et s’est progressivement érodée depuis (plus que toutes les autres formes d’impôts).
+
+
+** Impôts sur les grandes fortunes
+
+0% jusque seuil élevé, brusquement progressif ensuite. Possible en supprimant toutes les niches;
+stimuler l'économie en poussant à l'investissement dans
+l'économie. Voir travaux récents d'Emmanuel Saez repris par Elizabeth Warren.
+
+Anticiper les conséquences possibles (le mythe du millionaire qui s'enfuit).
+
+Anticiper les problèmes de liquidité pour le paiement de l'impôt, qui /de facto/ définit un plancher minimum.
+
+Nécessaire car grande prospérité du capital et stagnation des revenus. L'impôt pourrait
+d'ailleurs être conditionné à un ratio sur des données fondamentales économique? (effet pervers, manipulation de la statistique publique possible)
+
+Grandes fortunes peuvent se structurer pour avoir peu de revenus actifs du capital qui sont imposables selon le nouvel impôt sur le revenu. Revenus du capital aisément manipulables, cf Lilianne Bettencourt et sa société Clymène.
+
+Induit réallocation du capital.
+
+Toucher les .01% les plus riches. Taxe progressive 2% per annum and  10% above 1 billion?
+
+Si difficultés de paiement, peut être retardé de X années avec intérêts.
+
+auto-finance un audit régulier 
+
+40% exit tax for whoever gives up on nationality.
+
+*** TODO controversial: add example
+
+** Impôt sur les successions
+
+Pour que ce soit accepté, 0% jusqu'à un plancher. Montages comme Clymène permettent d'éviter l'imposition des revenus du capital.
+
+Peut être évité avec une wealth tax?
+
+*** TODO controversial: add example
+
+** Cotisation sociales
+
+** Taxe foncière
+
+Loyer fictif pour les propriétaires avec plafonds pour remettre les logements vacants sur le marché.
+
+Remplacée par l'ISF.
+Quid des frais notaire? Et autres frais de timbre?
+
+* Aides et dérogations
+
+** Retraites et invalidité
+** Revenu d'indépendence pour les jeunes
+** Enfants
+** Chômage
+
+* Lutte contre la fraude fiscale
+
+Repésente 100Mds d'euros par ans (cour des comptes). On pourrait y dédier 1 Md d'euros et ça serait rentable. Réaffecter une partie des ressources utilisées pour calculer l'IRPP.
+
+Comme l'IRS aux Etats-Unis, revenus étrangers doivent être déclarés sous peine de sanctions.
+
+* Preuve de fonctionnement
+
+- Taux effectif constant au pire, légèrement ascendant.
+- Taux effectif induit une baisse d'impots < 5,000 euros par mois (voir
+sociologiquement et électoralement ce qui est acceptable).
+
+** Corriger les disfonctionnements
+
+Identifier avec l'impôt actuel des situation où:
+- L'augmentation de salaire induit une baisse de niveau de vie en considérant
+les aides, etc.
+- Montrer des exemples où les personnes plus riches paient moins d'impot en taux
+effectif, et dans l'absolu.
+
+Et montrer que ce n'est plus le cas dans le systèe actuel.
+
+* Gagnants et "perdants"
+
+Important d’être transparents là dessus et expliquer *pourquoi*.
+
+* Bénéfices
+
+Au regarde de la courbe des revenus de l’INSEE et de l’ancien système il est possible de calculer avec précision le différentiel en terme de taux marginal et impôt total payé. À recettes constantes il est possible de diminuer l’imposition du plus grand nombre.
+
+
+* Sources de données 
+
+* Remarques générales sur l’extrapolation des données et les calculs de l’impôt 
+
+** Inférer les distributions réelles à partir de la statistique publique
+
+Statistique publique censée donner un échantillon représentatif de la société française, mais échantillon réduit.
+
+Multiplier par un coefficient de proportionnalité = hypothèse que la quantité est distribuée selon une loi exponentielle.
+
+*** Quelles données ?
+
+*** De quelles distributions a-t-on besoin?
+
+*** Famille de distributions 

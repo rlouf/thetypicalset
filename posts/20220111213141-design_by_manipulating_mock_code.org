@@ -1,0 +1,24 @@
+:PROPERTIES:
+:ID:       fff18475-59cb-445e-b738-069f59918aec
+:END:
+#+TITLE: Design by manipulating mock code
+#+CREATED: [2022-01-11 Tue 21:31]
+#+LAST_MODIFIED: [2022-01-11 Tue 22:03]
+
+You should build API writing mock code, and manipulate said code [[id:1eb7d036-0133-496e-97de-ae4b92793b89][until it feels natural]]. When you don't have the contraints of the backend is when you can really be creative. Start from first principle and then elaborate. I can spend *weeks* going over and over details of API. And you should because [[id:480c37d9-30c1-40e1-8813-f09926d0b066][every improvement you make to an API pays huge dividends]].
+
+Doing so you should [[id:3a864fde-3ee3-4372-9a7f-44317aac67ba][Constantly share progress on your API code]]
+
+Let us take the case of [[https://github.com/aesara-devs/aesara][aesara]] and the looping primitive, =Scan=. The basic building block of =aesara= is the Op: an object that transforms variables into other variables. While it is tempting to copy [[https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#while-loop][JAX's interface]] we still want to make the Ops salient. So without worrying a second about how things were going to be implemented I just worried about /what we would like to have/ and ended with:
+
+#+begin_src python
+import aesara
+
+loop = aesara.while_loop(cond_fn, body_fn)
+last_value, acc = loop(initial_value)
+
+scan = aesara.scan(body_fn)
+last_value, acc = scan(initial_val, sequence)
+#+end_src
+
+This should be done at the same time as [[id:39703634-2e4c-4dea-be05-20d75bf6466a][implementing what is conceptually correct]].

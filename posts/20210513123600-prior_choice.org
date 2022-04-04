@@ -1,0 +1,104 @@
+:PROPERTIES:
+:ID:       20e72445-506f-4bb1-a97c-a5b3fa24d625
+:END:
+#+title: Prior choice
+
+
+* Negative Binomial
+
+Generic priors often fail dramatically when used for the dispersion parameter of the [[id:273bfd3a-7e6e-4971-b422-048f930ae5b0][Negative Binomial Distribution]].
+
+In PyMC3 the Negative binomial distribution can be parametrized in terms of the mean $\mu$ and the dispersion parameter $\alpha$ so that
+
+#+begin_src latex
+\begin{equation}
+  \sigma^{2} = \mu + \alpha \mu^{2}
+\end{equation}
+#+end_src
+
+We typically want $\alpha$ to be small-ish, which can be problematic when $\mu$ is large. A typically prior choice would be to define $\gamma = 1 / \alpha$ and
+
+#+begin_src latex
+\begin{equation}
+  \gamma \sim \HalfCauchy(10e-2)
+\end{equation}
+#+end_src
+
+So $\gamma$ can take arbitrarily large values. We can see it by rewriting the Negative binomial as:
+
+#+begin_src latex
+\begin{align}
+  X | z &\sim \operatorname{Poisson}(\mu \, z)\\
+  z &\sim \operatorname{Gamma}(\gamma^{-1}, \gamma^{-1})
+\end{align}
+#+end_src
+
+and the standard deviation of $z$ is $\sqrt{\gamma}$. This Gamma distribution has a mean of $1$ and a variance of $\gamma$. cite:simpson2018 suggests that the prior should be put on $\sqrt{\gamma}$, which can be seen as a deviation $d(\gamma)$ so that if $d(\gamma$)$ is increased by one unit the square root of the information lost by replacing this model by the base model (Poisson, which occurs when $\Gamma$ =0) is increases by one. See cite:simpson2015 and cite:simpson2017 for more information.
+
+** Numerically
+
+Are there general numerical transformations on the computation graph that we can learn from this example?
+
+*** Model implementation in PyMC3
+
+The original model is written:
+
+#+begin_src python
+alpha = pm.HalfNormal("alpha", 10e-2)
+Y = pm.NegativeBinomial("Y", mu, alpha)
+#+end_src
+
+While the reparametrized model is written:
+
+#+begin_src python
+alpha = pm.HalfNormal("alpha", 10e-2)
+phi = pm.Gamma("phi", tt.sqrt(alpha), tt.sqrt(alpha))
+Y = pm.Poisson("Y", mu * phi)
+#+end_src
+
+Note that we introduced a new degree of liberty by expanding the Negative Binomial in its canonical form.
+
+*** The logpdf
+
+The logpdf of the negative binomial of parameters $\mu$ and $\alpha$ is implemented as
+
+#+begin_src python
+def logpdf_negativebinomial(x, mu, alpha):
+    return (binomln(x + alpha -1, x)
+            + logpow(mu, x)
+            - logpow(mu+alpha, x)
+            + logpow(alpha, alpha)
+            - logpow(mu+alpha, alpha)
+    )
+#+end_src
+
+While the Poisson is implemented as:
+
+#+begin_src python
+def logpdf_poisson(x, mu, phi):
+    return aet.log(aet.gammainc(X + 1, mu * phi))
+#+end_src
+
+And the Gamma distribution as:
+
+#+begin_src python
+def logpdf_gamma(phi, alpha):
+    return (-gmmaln(alpha)
+            + logpow(alpha, alpha)
+            - alpha * phi
+            + logpow(phi, alpha - 1)
+    )
+#+end_src
+
+So the logpdf of the re-parametrized negative binomial is given by:
+
+#+begin_src python
+def logpdf_reparam(x, mu, alpha, phi):
+    return (
+        aet.log(aet.gammainc(X + 1, mu * phi))
+        -gmmaln(alpha)
+        + logpow(alpha, alpha)
+        - alpha * phi
+        + logpow(phi, alpha - 1)
+    )
+#+end_src

@@ -1,0 +1,47 @@
+:PROPERTIES:
+:ID:       7dae4406-eb94-4496-93e1-a989cab14729
+:END:
+#+OPTIONS: prop:t
+#+title: Explore linked notes
+#+filetags: :public:
+#+LAST_MODIFIED: [2022-01-10 Mon 10:49]
+
+While navigating in a densely linked cluster of notes almost feels cozy, I bump into two major difficulties when I navigate the landscape:
+
+1. I have very different centers of interests which leads to *loosely connected, if at all, clusters of nodes*.
+2. It is cumbersome to navigate between notes that are not directly linked but treat topics that are *conceptually similar*. See the [[id:338df7ae-048d-4a93-861b-80f75c3b887e][Squared exponential kernel]] and [[id:1a08425d-1fa8-4f9f-98d0-423b0d5c0991][Ornstein-Uhlenbeck kernel]]: they are both referenced on the [[id:f2d80a0e-47f7-4531-a654-8343c72dd962][gaussian process]] page but there is no way to know they are related when visiting either of these notes.
+
+I believe these difficulties can be solved elegantly using representations of the notes' graph structure. The way we link notes to one another contains enough information to help us navigate: it can tell us which nodes are important (centrality), which nodes are related (community) and which give context (neighborhood).
+
+* Use the full graph as a map
+
+Wherever we are in the garden we should be able to pull its map, the network of notes, and be able to jump to another location should we want to.
+
+[[file:images/explore-notes-global.svg]]
+
+We use the [[https://en.wikipedia.org/wiki/PageRank][PageRank algorithm]] to determine the size of the nodes: this measure of centrality will naturally highlight summary notes (such as "[[id:f2d80a0e-47f7-4531-a654-8343c72dd962][Gaussian process]]" or "[[id:2ce0631d-f92f-4d80-9484-282b54250b4c][Chess]]") /as links to and from these notes accumulate/.
+
+Instead of using tags to infer topics we can use a /community detection algorithm/ to infer which nodes are conceptually related. For instance we can color nodes based on the community to which they belong. A decent force-based graph layout should separate the communities spatially on the page.
+
+* Show a map of local neighbours in each note
+
+The backlinks at the end of each note are useful, but we can take one step further and show the local neighborhood of the note instead:
+
+[[file:images/explore-notes-local.svg]]
+
+We learn from the /context/ of the current note by displaying the node's parents and the parent's other children.
+
+
+* Navigation through the notes
+
+We can use [[https://github.com/jethrokuan/cortex/blob/5e5fd537bed363d12fa297a4b1603ff56dbf397b/assets/js/page.js][Jethro Kuan's theme]] for hugo but the navigation is completely backwards and unintuitive. Clicking on a backlink appends a new note to the right. Instead we should probably act as if all the open notes are steps in a walk. A bit like what [[https://notes.andymatuschak.org/z6bci25mVUBNFdVWSrQNKr6u7AZ1jFzfTVbMF?stackedNotes=z6UDDkom8Aifg6mLdjT1sPtbMBweCmpyTwmJT&stackedNotes=z3SjnvsB5aR2ddsycyXofbYR7fCxo7RmKW2be&stackedNotes=z6cFzJWgj9vZpnrQsjrZ8yCNREzCTgyFeVZTb&stackedNotes=z2HUE4ABbQjUNjrNemvkTCsLa1LPDRuwh1tXC&stackedNotes=z68tVM68dEAuH4acs7HY6K76tTVzBdoBGKMZB&stackedNotes=z3RzQhmjeRxXVAAy81aUSKARwJL8dikdJG4VG&stackedNotes=z28QkpK3vRKQTacjFDfGYBhCXHqHuVWJzny9&stackedNotes=z3x7AvJgYzmgEY4kcKdSY2aYxdqWYpTyPqRs8][Andy Matuschak]] does.
+
+* More
+
+Using the graph and its /properties/ to navigate through the notes opens new possibilities. For instance we could design and display a "creativity" score that measures to what extent a note references notes on different topics.
+
+*Eventually the left (search bar) and right (ToC) menus will not be needed to navigate and will disappear.*
+
+* References :noexport:
+
+We will start from what [[https://hugocisneros.com/blog/my-org-roam-notes-workflow/][Hugo Cisneros did]] for his blog and make its integration seamless. When it comes to design and workflow for the website look at what Jethro Kuan and Andy Matuschak have done.

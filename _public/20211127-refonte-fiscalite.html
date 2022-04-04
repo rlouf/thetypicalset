@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-04 Mon 18:21 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Refonte de la fiscalite</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Rémi Louf" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Refonte de la fiscalite</h1>
+<dl class="org-dl">
+<dt>tags</dt><dd><a href="20210421080535-fiscalite.html#ID-517fc476-4e83-4655-8ced-b71fdaf70c7c">Fiscalité</a></dd>
+</dl>
+
+<p>
+Why it does not work.
+</p>
+
+<div id="outline-container-org9214e5a" class="outline-2">
+<h2 id="org9214e5a">Pourquoi refonte et non réformer?</h2>
+<div class="outline-text-2" id="text-org9214e5a">
+<ul class="org-ul">
+<li>Nombres de pages du code général des impôts</li>
+<li>Evolution dans le temps du nombre d'articles</li>
+<li>Complexité de MLLang</li>
+</ul>
+</div>
+
+<div id="outline-container-org78da2de" class="outline-3">
+<h3 id="org78da2de">Un impôt inégalitaire</h3>
+</div>
+<div id="outline-container-org7117617" class="outline-3">
+<h3 id="org7117617">Un impôt illisible et non transparent</h3>
+<div class="outline-text-3" id="text-org7117617">
+<p>
+Tranches d’imposition marginales auxquelles se superposent des exceptions (prélèvements dérogatoires) rendent la chose illisible et non progressive.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf55b53f" class="outline-2">
+<h2 id="orgf55b53f">Principes directeurs</h2>
+<div class="outline-text-2" id="text-orgf55b53f">
+<p>
+Une politique fiscale bien réfléchie est partie intégrante d'un projet de société. Il est donc nécessaire de penser en amont la politique que nous souhaitons mener avant de s'atteler au travail technique et à la comptabilité. Nous proposons d'articuler le travail dans ce document autour des principes suivants:
+</p>
+
+<ul class="org-ul">
+<li>Tout citoyen possédant des revenus est contribuable;</li>
+<li>L'impôt est un outil d'émancipation;</li>
+<li>L'impôt, de par son taux effectif, est progressif;</li>
+<li>L'impôt est prédictible par tous, et transparent.</li>
+</ul>
+
+<p>
+À chaque modification de la fonction il s'agira de vérifier que nous n'avons pas violer un de nos principes. Pour certains de ces principes, comme la progressivité, il est possible de mettre en place des <i>tests automatiques</i> qui garantissent les propriétés du code des impôts. Certains principes en revanche ne peuvent être vérifiés que de manière qualitative, et il faudra systématiquement revenir à cette liste pour vérifier que la fonction ne contredit les principes énoncés ci-dessous.
+</p>
+
+<p>
+Nous précisions ces principes ci-dessous en les contrastants avec le système tel qu'il existe aujourd'hui.
+</p>
+</div>
+
+<div id="outline-container-org554da24" class="outline-3">
+<h3 id="org554da24">Chaque citoyen est contribuable</h3>
+<div class="outline-text-3" id="text-org554da24">
+<p>
+Deux idées sous-jacentes:
+</p>
+<ul class="org-ul">
+<li>Éviter l'évasion fiscale. Quelle que soit la forme des revenus, qu'ils soient du travail ou du capital, les citoyens en possédant sont redevables de l'impôt:</li>
+<li>Même les revenus les plus faibles sont des contribuables.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgce1f3a8" class="outline-3">
+<h3 id="orgce1f3a8">L'impot est un outil d'émancipation</h3>
+</div>
+
+<div id="outline-container-org82e7f8a" class="outline-3">
+<h3 id="org82e7f8a"><span class="todo TODO">TODO</span> budget de l’État</h3>
+</div>
+<div id="outline-container-org426f31d" class="outline-3">
+<h3 id="org426f31d"><span class="todo TODO">TODO</span> intérêts de la dette</h3>
+</div>
+<div id="outline-container-org8621f40" class="outline-3">
+<h3 id="org8621f40"><span class="todo TODO">TODO</span> coût de la collecte de l’impôt, en particulier l’IRPP.</h3>
+</div>
+<div id="outline-container-org63fce5f" class="outline-3">
+<h3 id="org63fce5f"><span class="todo TODO">TODO</span> revenu national</h3>
+</div>
+<div id="outline-container-org4ab048e" class="outline-3">
+<h3 id="org4ab048e"><span class="todo TODO">TODO</span> patrimoine national</h3>
+<div class="outline-text-3" id="text-org4ab048e">
+<ul class="org-ul">
+<li>Puisque chaque citoyen paie l'impôt, les moins aisés passent du statut <i>d'assistés</i> à celui de <i>contribuable</i> à taux de prélèvement équivalent.</li>
+<li>L'impôt tel qu'il existe aujourd'hui n'est pas pensé pour l'émancipation de la femme. Il y a la question du quotient familial qui favorise les grands différentiels de revenu, puis les aides&#x2026;</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgcd78cd0" class="outline-3">
+<h3 id="orgcd78cd0">L'impôt est progressif</h3>
+</div>
+
+<div id="outline-container-org2e2a0da" class="outline-3">
+<h3 id="org2e2a0da">L'impôt est prédictible par tous, et transparent</h3>
+<div class="outline-text-3" id="text-org2e2a0da">
+<p>
+Il subsiste encore chez certains de nos concitoyens la croyance qu'une augmentation de salaire équivaudra à une baisse de revenus.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbc350bb" class="outline-2">
+<h2 id="orgbc350bb">Quelques fait utiles</h2>
+<div class="outline-text-2" id="text-orgbc350bb">
+</div>
+<div id="outline-container-org1f35fa1" class="outline-3">
+<h3 id="org1f35fa1"><span class="todo TODO">TODO</span> ajouter courbe des revenus et quelques propriétés mathématiques importantes</h3>
+</div>
+<div id="outline-container-orgaccd24d" class="outline-3">
+<h3 id="orgaccd24d"><span class="todo TODO">TODO</span> budget de l’État</h3>
+</div>
+<div id="outline-container-org8c5b75b" class="outline-3">
+<h3 id="org8c5b75b"><span class="todo TODO">TODO</span> intérêts de la dette</h3>
+</div>
+<div id="outline-container-orgc279f3a" class="outline-3">
+<h3 id="orgc279f3a"><span class="todo TODO">TODO</span> coût de la collecte de l’impôt, en particulier l’IRPP.</h3>
+</div>
+<div id="outline-container-org443bb64" class="outline-3">
+<h3 id="org443bb64"><span class="todo TODO">TODO</span> revenu national</h3>
+</div>
+<div id="outline-container-org6863424" class="outline-3">
+<h3 id="org6863424"><span class="todo TODO">TODO</span> patrimoine national</h3>
+</div>
+</div>
+
+<div id="outline-container-org73a7ee9" class="outline-2">
+<h2 id="org73a7ee9">L'impôt</h2>
+<div class="outline-text-2" id="text-org73a7ee9">
+</div>
+<div id="outline-container-org1038fb8" class="outline-3">
+<h3 id="org1038fb8">Taxe sur la valeur ajoutée (TVA)</h3>
+<div class="outline-text-3" id="text-org1038fb8">
+<p>
+Taxe régressive : revenus les moins élevés dépensent toute leur salaires amers que les plus aisés économisent et investissent. 
+</p>
+
+<p>
+Est-ce que l’on peut voir l’ISF comme le pendant de la TVA pour les plus aisés ?
+</p>
+
+<p>
+(Zuckman &amp; Saez p18) IR existe pour compenser la regressivite de la TVA et des tarifs douaniers
+</p>
+</div>
+
+<div id="outline-container-org4af3c7b" class="outline-4">
+<h4 id="org4af3c7b">But</h4>
+</div>
+<div id="outline-container-org5494692" class="outline-4">
+<h4 id="org5494692">Revenu aujourd'hui</h4>
+</div>
+</div>
+<div id="outline-container-org9adfd35" class="outline-3">
+<h3 id="org9adfd35">Impôt sur les Sociétés</h3>
+<div class="outline-text-3" id="text-org9adfd35">
+<p>
+Plus gros écueil = éviter l’évasion. Résolu par monnaie propre + taxe a-la Janet Yellen.
+</p>
+
+<p>
+Est-il possible d’alléger la fiscalité sur les TPE? Comment? Quel seuil?
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4138429" class="outline-3">
+<h3 id="org4138429">Impôt sur le revenu</h3>
+<div class="outline-text-3" id="text-org4138429">
+</div>
+<div id="outline-container-orge088955" class="outline-4">
+<h4 id="orge088955">Impôts remplacés</h4>
+<div class="outline-text-4" id="text-orge088955">
+</div>
+<ul class="org-ul">
+<li><a id="org9071c56"></a>IRPP<br /></li>
+<li><a id="org7e2cf88"></a>Prime pour l'Emploi (PPE)<br /></li>
+<li><a id="org6499318"></a>Contribution Sociale Généalisée<br /></li>
+</ul>
+</div>
+
+<div id="outline-container-orgd45141e" class="outline-4">
+<h4 id="orgd45141e">Un impôt individualisé</h4>
+</div>
+<div id="outline-container-org69d3fca" class="outline-4">
+<h4 id="org69d3fca">Fonctionnement</h4>
+<div class="outline-text-4" id="text-org69d3fca">
+<p>
+Assiette
+</p>
+
+<p>
+Histoire de la CSG.
+</p>
+
+<p>
+Baisser l’impôt des bas salaires pour pouvoir supprimer les allocations. Contribuables et non assistés. 
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7bbda4e" class="outline-2">
+<h2 id="org7bbda4e"><span class="todo TODO">TODO</span> trouver étude sur le lien entre imposition des revenus les moins élevés et travail</h2>
+<div class="outline-text-2" id="text-org7bbda4e">
+<p>
+Suppression de toutes les bouches fiscales dans un premier temps. Réintroduction implique de relever tous les taux effectifs = boucle de rétroaction.
+</p>
+
+<p>
+Une CSG généralisée, en fait.
+</p>
+
+<p>
+Tous les revenus, y compris du capital:
+</p>
+<ul class="org-ul">
+<li><b>Travail:</b> L'imposition se fait à la source par l'employeur qui doit</li>
+</ul>
+<p>
+spécifier le taux effectif d'imposition du salarié. Comme pour l'impôt
+retenu à la source actuellement, le salarié peut opter pour la transmission
+du taux par l'administration fiscale.
+</p>
+</div>
+<div id="outline-container-orgba32cd8" class="outline-3">
+<h3 id="orgba32cd8">Impôt sur les sociétés</h3>
+<div class="outline-text-3" id="text-orgba32cd8">
+<p>
+Les plus riches le sont via la possession du capital d’entreprise. L’impôt sur les sociétés (ou les actions des entreprises publiques) est donc une taxe minimum payée par les plus riches.
+</p>
+
+<p>
+Années 50-60 aux US c’était la principale contribution des .1% les plus riches, et s’est progressivement érodée depuis (plus que toutes les autres formes d’impôts).
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org2224d1d" class="outline-3">
+<h3 id="org2224d1d">Impôts sur les grandes fortunes</h3>
+<div class="outline-text-3" id="text-org2224d1d">
+<p>
+0% jusque seuil élevé, brusquement progressif ensuite. Possible en supprimant toutes les niches;
+stimuler l'économie en poussant à l'investissement dans
+l'économie. Voir travaux récents d'Emmanuel Saez repris par Elizabeth Warren.
+</p>
+
+<p>
+Anticiper les conséquences possibles (le mythe du millionaire qui s'enfuit).
+</p>
+
+<p>
+Anticiper les problèmes de liquidité pour le paiement de l'impôt, qui <i>de facto</i> définit un plancher minimum.
+</p>
+
+<p>
+Nécessaire car grande prospérité du capital et stagnation des revenus. L'impôt pourrait
+d'ailleurs être conditionné à un ratio sur des données fondamentales économique? (effet pervers, manipulation de la statistique publique possible)
+</p>
+
+<p>
+Grandes fortunes peuvent se structurer pour avoir peu de revenus actifs du capital qui sont imposables selon le nouvel impôt sur le revenu. Revenus du capital aisément manipulables, cf Lilianne Bettencourt et sa société Clymène.
+</p>
+
+<p>
+Induit réallocation du capital.
+</p>
+
+<p>
+Toucher les .01% les plus riches. Taxe progressive 2% per annum and  10% above 1 billion?
+</p>
+
+<p>
+Si difficultés de paiement, peut être retardé de X années avec intérêts.
+</p>
+
+<p>
+auto-finance un audit régulier 
+</p>
+
+<p>
+40% exit tax for whoever gives up on nationality.
+</p>
+</div>
+
+<div id="outline-container-orgf7f1b93" class="outline-4">
+<h4 id="orgf7f1b93"><span class="todo TODO">TODO</span> controversial: add example</h4>
+</div>
+</div>
+
+<div id="outline-container-org0027d02" class="outline-3">
+<h3 id="org0027d02">Impôt sur les successions</h3>
+<div class="outline-text-3" id="text-org0027d02">
+<p>
+Pour que ce soit accepté, 0% jusqu'à un plancher. Montages comme Clymène permettent d'éviter l'imposition des revenus du capital.
+</p>
+
+<p>
+Peut être évité avec une wealth tax?
+</p>
+</div>
+
+<div id="outline-container-orgc14c8cc" class="outline-4">
+<h4 id="orgc14c8cc"><span class="todo TODO">TODO</span> controversial: add example</h4>
+</div>
+</div>
+
+<div id="outline-container-orga05e021" class="outline-3">
+<h3 id="orga05e021">Cotisation sociales</h3>
+</div>
+
+<div id="outline-container-org6724f20" class="outline-3">
+<h3 id="org6724f20">Taxe foncière</h3>
+<div class="outline-text-3" id="text-org6724f20">
+<p>
+Loyer fictif pour les propriétaires avec plafonds pour remettre les logements vacants sur le marché.
+</p>
+
+<p>
+Remplacée par l'ISF.
+Quid des frais notaire? Et autres frais de timbre?
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0c8cc1f" class="outline-2">
+<h2 id="org0c8cc1f">Aides et dérogations</h2>
+<div class="outline-text-2" id="text-org0c8cc1f">
+</div>
+<div id="outline-container-org92e64c4" class="outline-3">
+<h3 id="org92e64c4">Retraites et invalidité</h3>
+</div>
+<div id="outline-container-org4be2c53" class="outline-3">
+<h3 id="org4be2c53">Revenu d'indépendence pour les jeunes</h3>
+</div>
+<div id="outline-container-org97d79a1" class="outline-3">
+<h3 id="org97d79a1">Enfants</h3>
+</div>
+<div id="outline-container-orgc372f6e" class="outline-3">
+<h3 id="orgc372f6e">Chômage</h3>
+</div>
+</div>
+
+<div id="outline-container-org6a72321" class="outline-2">
+<h2 id="org6a72321">Lutte contre la fraude fiscale</h2>
+<div class="outline-text-2" id="text-org6a72321">
+<p>
+Repésente 100Mds d'euros par ans (cour des comptes). On pourrait y dédier 1 Md d'euros et ça serait rentable. Réaffecter une partie des ressources utilisées pour calculer l'IRPP.
+</p>
+
+<p>
+Comme l'IRS aux Etats-Unis, revenus étrangers doivent être déclarés sous peine de sanctions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3da77f6" class="outline-2">
+<h2 id="org3da77f6">Preuve de fonctionnement</h2>
+<div class="outline-text-2" id="text-org3da77f6">
+<ul class="org-ul">
+<li>Taux effectif constant au pire, légèrement ascendant.</li>
+<li>Taux effectif induit une baisse d'impots &lt; 5,000 euros par mois (voir</li>
+</ul>
+<p>
+sociologiquement et électoralement ce qui est acceptable).
+</p>
+</div>
+
+<div id="outline-container-org51dfb02" class="outline-3">
+<h3 id="org51dfb02">Corriger les disfonctionnements</h3>
+<div class="outline-text-3" id="text-org51dfb02">
+<p>
+Identifier avec l'impôt actuel des situation où:
+</p>
+<ul class="org-ul">
+<li>L'augmentation de salaire induit une baisse de niveau de vie en considérant</li>
+</ul>
+<p>
+les aides, etc.
+</p>
+<ul class="org-ul">
+<li>Montrer des exemples où les personnes plus riches paient moins d'impot en taux</li>
+</ul>
+<p>
+effectif, et dans l'absolu.
+</p>
+
+<p>
+Et montrer que ce n'est plus le cas dans le systèe actuel.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0875f50" class="outline-2">
+<h2 id="org0875f50">Gagnants et "perdants"</h2>
+<div class="outline-text-2" id="text-org0875f50">
+<p>
+Important d’être transparents là dessus et expliquer <b>pourquoi</b>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1c75933" class="outline-2">
+<h2 id="org1c75933">Bénéfices</h2>
+<div class="outline-text-2" id="text-org1c75933">
+<p>
+Au regarde de la courbe des revenus de l’INSEE et de l’ancien système il est possible de calculer avec précision le différentiel en terme de taux marginal et impôt total payé. À recettes constantes il est possible de diminuer l’imposition du plus grand nombre.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org700e5cd" class="outline-2">
+<h2 id="org700e5cd">Sources de données</h2>
+</div>
+
+<div id="outline-container-org5d4c9fb" class="outline-2">
+<h2 id="org5d4c9fb">Remarques générales sur l’extrapolation des données et les calculs de l’impôt</h2>
+<div class="outline-text-2" id="text-org5d4c9fb">
+</div>
+<div id="outline-container-org745499f" class="outline-3">
+<h3 id="org745499f">Inférer les distributions réelles à partir de la statistique publique</h3>
+<div class="outline-text-3" id="text-org745499f">
+<p>
+Statistique publique censée donner un échantillon représentatif de la société française, mais échantillon réduit.
+</p>
+
+<p>
+Multiplier par un coefficient de proportionnalité = hypothèse que la quantité est distribuée selon une loi exponentielle.
+</p>
+</div>
+
+<div id="outline-container-org1c615ee" class="outline-4">
+<h4 id="org1c615ee">Quelles données ?</h4>
+</div>
+
+<div id="outline-container-org6ca1677" class="outline-4">
+<h4 id="org6ca1677">De quelles distributions a-t-on besoin?</h4>
+</div>
+
+<div id="outline-container-orga99d208" class="outline-4">
+<h4 id="orga99d208">Famille de distributions</h4>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfc5f7a8" class="outline-2">
+<h2 id="orgfc5f7a8">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>

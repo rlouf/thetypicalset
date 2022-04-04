@@ -1,0 +1,72 @@
+:PROPERTIES:
+:ID:       338df7ae-048d-4a93-861b-80f75c3b887e
+:END:
+#+title: Squared exponential kernel
+#+PROPERTY: header-args:latex :results raw :exports results
+#+filetags: :public:inprogress:
+
+The squared exponential kernel defines a stationary [[id:f2d80a0e-47f7-4531-a654-8343c72dd962][gaussian process]] and results in a /smooth prior/ over the space of functions that can be sampled from the gaussian process. In 1 dimension we write:
+
+#+begin_src latex
+\begin{align*}
+\displaystyle
+K(x, x') &= \sigma^{2}\, \exp\left(-\frac{{d}^{2}}{2 l^{2}}\right),\quad d=x'-x
+\end{align*}
+#+end_src
+
+#+RESULTS:
+\begin{align*}
+\displaystyle
+K(x, x') &= \sigma^{2}\, \exp\left(-\frac{{d}^{2}}{2 l^{2}}\right),\quad d=x'-x
+\end{align*}
+
+And in $D$ dimensions with the /covariance matrix/ $\Sigma$ between the different dimensions:
+
+#+begin_src latex
+\begin{align*}
+\displaystyle
+K(\mathbf{x}, \mathbf{x'}) &= \Sigma^{2}\, \exp\left(-\frac{1}{2} \sum_{d=1}^D \frac{{(x'_d-x_d)}^{2}}{l_d^{2}}\right)
+\end{align*}
+#+end_src
+
+#+RESULTS:
+\begin{align*}
+\displaystyle
+K(\mathbf{x}, \mathbf{x'}) &= \Sigma^{2}\, \exp\left(-\frac{1}{2} \sum_{d=1}^D \frac{{(x'_d-x_d)}^{2}}{l_d^{2}}\right)
+\end{align*}
+
+
+#+begin_src python :session :exports none
+import numpy as np
+from matplotlib import pyplot as plt
+
+def kernel(x1, x2, l2):
+    return np.exp(-0.5 * np.square(x1-x2) / l2)
+
+#+end_src
+
+#+RESULTS:
+
+The parameter $l$ is the characteristic lengthscale of the process. As one can see on the figure below, the larger the value of $l$ the "further" the kernel takes non-negligible values.
+
+#+begin_src python :session :results file :exports results
+xx, yy = np.meshgrid(np.linspace(0, 10, 100), np.linspace(0, 10, 100))
+values_1 = kernel(xx.ravel(), yy.ravel(), 1.).reshape(xx.shape)
+values_10 = kernel(xx.ravel(), yy.ravel(), 10.).reshape(xx.shape)
+
+fig, axes = plt.subplots(figsize=(12,6), ncols=2)
+axes[0].pcolormesh(xx, yy, values_1, cmap=plt.cm.RdBu_r)
+axes[0].set_title("l=1")
+axes[1].pcolormesh(xx, yy, values_10, cmap=plt.cm.RdBu_r)
+axes[1].set_title("l=10.")
+
+plt.tight_layout()
+
+fname = f"images/kernel-rbf-heatmap.png"
+plt.savefig(fname)
+fname
+#+end_src
+
+#+attr_html: :width 90%
+#+RESULTS:
+[[file:images/kernel-rbf-heatmap.png]]

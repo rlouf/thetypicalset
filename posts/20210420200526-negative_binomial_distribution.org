@@ -1,0 +1,113 @@
+:PROPERTIES:
+:ID:       273bfd3a-7e6e-4971-b422-048f930ae5b0
+:END:
+#+title: The Negative Binomial distribution
+#+created: [2021-04-20 Tue]
+#+filetags: :public:
+
+#+options: toc:nil
+#+PROPERTY: header-args:latex :results raw :exports results
+
+- tags :: [[id:accc4a58-2f96-42da-a43d-c8140996d0d3][Probability distribution]]
+
+* Canonical parametrization
+
+The negative binomial distribution is usually introduced as the probability distribution of the number $X$ of failures before the $r$ th success in a Bernoulli process with probability $p\in [0,1]$. It is expressed as:
+
+#+begin_src latex
+\begin{equation}
+P(X=x|p, r) = \binom{r+x-1}{x} (1-p)^x\, p^r
+\end{equation}
+#+end_src
+
+#+RESULTS:
+\begin{equation}
+P(X=x|p, r) = \binom{r+x-1}{x} (1-p)^x\, p^r
+\end{equation}
+
+However, the negative binomial is rarely used in this canonical context but rather to model count data where there seems to be /overdispersion/, i.e. where $\sigma > \mu$ (unlike the Poisson distribution where they're equal). In this case, it is more convenient to work directly with $\mu$ and $\sigma$.
+
+* Mean-variance parametrization
+
+We can indeed reparametrize the distribution as a function of its mean $\mu$ and variance $\sigma$:
+
+#+begin_src latex
+\begin{equation}
+r = \frac{\mu^2}{\sigma^{2}-\mu}
+\end{equation}
+#+end_src
+
+#+RESULTS:
+\begin{equation}
+r = \frac{\mu^2}{\sigma^{2}-\mu}
+\end{equation}
+
+and
+
+#+begin_src latex
+\begin{equation}
+  p = \frac{r}{r + \mu}
+\end{equation}
+#+end_src
+
+#+RESULTS:
+\begin{equation}
+  p = \frac{r}{r + \mu}
+\end{equation}
+
+Viewing $\mu$ and $\sigma$ as parameters means we abandon the combinatorial motivation of the negative binomial to view it as a model for count data. A *very important property* of this parametrization is the link between $\mu$ and the variance:
+
+#+begin_src latex
+\begin{equation}
+\sigma^{2} = \mu + \frac{1}{r} \mu^{2}
+\end{equation}
+#+end_src
+
+#+RESULTS:
+\begin{equation}
+\sigma^{2} = \mu + \frac{1}{r} \mu^{2}
+\end{equation}
+
+Most problems people have with negative binomial models come from ignoring this property. This dependence in $\mu^2$ is a rather strong constraint; when it becomes problematic we can use:
+
+- The Skellam distribution
+- The Conway-Maxwell-Poisson distribution
+- The Generalized Poisson distribution
+
+* As a Poisson-Gamma compound distribution
+
+The negative binomial distribution can also be seen as a Poisson distribution where the rate parameter follows a Gamma distribution (conjugate distribution):
+
+#+begin_src latex
+\begin{align*}
+  X &\sim \operatorname{Poisson}(\Lambda)\\
+  \Lambda &\sim \operatorname{Gamma}(\alpha, \beta)
+\end{align*}
+#+end_src
+
+#+RESULTS:
+\begin{align*}
+  X &\sim \operatorname{Poisson}(\Lambda)\\
+  \Lambda &\sim \operatorname{Gamma}(\alpha, \beta)
+\end{align*}
+
+Then we can show that the distribution of $X$ is a negative binomial with $r = \alpha$ and $p = 1 / (1 + \beta)$, so that the mean and variance follow:
+
+#+begin_src latex
+\begin{equation}
+  \sigma^{2} = \mu + \frac{1}{\alpha}\, \mu^{2}
+\end{equation}
+#+end_src
+
+#+RESULTS:
+\begin{equation}
+  \sigma^{2} = \mu + \frac{1}{\alpha}\, \mu^{2}
+\end{equation}
+
+Which is a nice, less ad-hoc interpretation of the negative binomial with the mean-variance parametrization.
+
+
+* References
+
+- [[https://www.johndcook.com/negative_binomial.pdf][John Cook's notes]]
+- [[https://docs.pymc.io/api/distributions/discrete.html#pymc3.distributions.discrete.NegativeBinomial][PyMC3's implementation documentation]]

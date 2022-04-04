@@ -1,0 +1,102 @@
+:PROPERTIES:
+:ID:       1cb5c299-7b43-4f6f-8543-f6cda97c3c50
+:END:
+#+title: Les 10% les plus riches ne gagnent que 3.5x plus que les 10% les plus pauvres
+#+filetags: :public:inprogress:
+
+Une petite statistique récurrente que l'on entend ici et là sur les plateaux de télévision dès que pointe le sujet des inégalités en France. Prenons X Babeau de l'institut Sapiens, par exemple:
+
+#+begin_quote
+La France est un des pays les plus égalitaires d'Europe, les 10% les plus riches ne gagnent que 3.5x plus que les 10% les moins riches.
+#+end_quote
+
+C'est inexact, et fallacieux. La statistique vient d'une étude de l'INSEE sur
+les revenus des ménages de 2018. Ce que l'INSEE dit est que le revenu
+corresponant au 9e décile (à droite duquel on à les 10% les plus riches) est
+égal à 3,5 fois celui correspondant au 1er décile (en-dessous duquel on trouve
+les 10% les moins riches).
+
+
+* Pourquoi est-ce fallacieux?
+
+Les déciles correspondent à une répartition de la _population_ à parts égales. En 2018, le niveau de vie correspondant au 1er décile après redistribution est de \\(97,1\\). Imaginons que la population française soit de 100 personnes. Les 3 configuration suivantes donnent la meme valeur de 97,1:
+
+-   [1, 1, 1, 1, 1, 1, 1, 1, 1, 97.1]
+-   [10, 20, 30, 40, 50, 70, 80, 90, 92, 97.1]
+-   [97.1, 97.1, 97.1, 97.1, 97.1, 97.1, 97.1, 97.1, 97.1, 97.1]
+
+Pas du tout la même réalité, n'est-ce pas? De la même manière pour le 9e décile, le niveau de vie des plus riches peut-être concentré près du décile, ou être arbitrairement grande. Vous imaginez que le chiffre de 3.5 est totalement arbitraire, et ne représente pas comme les commentateurs le disent la différence de niveau de vie entre les 10% les plus pauvres et les 10% les plus riches.
+
+
+** TODO Compute the Gini coefficient for each situation :noexport:
+
+
+* Peut-on faire mieux ?
+
+Oui ! Arrêtons-nous deux minutes pour réfléchir à la quantité que l'on veut vraiment mesurer ici. Déjà reformulons en terme de niveau de vie, puisque c'est bien ce dont les statistiques de l'INSEE parlent:
+
+#+begin_quote
+Le niveau de vie des 10% les plus riches n'est que 3.5 fois plus élevé que celui des 10% les moins riches
+#+end_quote
+
+Si nous avions le niveau de vie de chacun des ménages français individuellement, nous pourrions pour calculer pour chaque paire \\((m\_1, m\_9)\\) de ménages respectivement dans le premier et le 9e décile le rapport de niveau de vie. La moyenne nous donnerait:
+
+#+begin_quote
+Le niveau de vie des 10% les plus riches n'est en moyenne que X fois plus élevé que celui des 10% les moins riches
+#+end_quote
+
+Mais nous n'avons pas accès à ces données. Ce n'est pas grave! Nous pouvons ajuster une distribution à
+
+
+** Données de l'INSEE
+
+-   <https://www.insee.fr/fr/statistiques/2011101?geo=METRO-1#chiffre-cle-8>
+    Il y a 27,510,608 ménages en France en 2018
+
+-   <https://www.insee.fr/fr/statistiques/4659174#figure1%5Fradio1>
+    Ca c'est en 2018, mais impossible de récupérer le niveau de vie median. En revanche on peut trouver les chiffres pour 2015:
+
+    tableaux de l'économie française 2018
+
+| Décile  | Avant redistribution |
+|---------|----------------------|
+| D1      | 10860                |
+| Mediane | 20300                |
+| D9      | 37510                |
+
+#+begin_src python
+def order_statistics(num_points, quantiles, ):
+    logpdf = 0
+    logpdf += gammaln(N+1) - gammaln(N * q[0]) - gammaln(N - N * q[-1] + 1)
+    logpdf += (N * q[0] - 1) * log(U[0])
+    logpdf += (N-N*q[-1])*log(1-U[-1])
+    for val in range(1,M):
+        logpdf +=
+"""
+real orderstatistics(int N, int M, vector q, vector U){
+    real lpdf = 0;
+    lpdf += lgamma(N+1) - lgamma(N*q[1]) - lgamma(N-N*q[M]+1);
+    lpdf += (N*q[1]-1)*log(U[1]);
+    lpdf += (N-N*q[M])*log(1-U[M]);
+    for (m in 2:M){
+        lpdf += -lgamma(N*q[m]-N*q[m-1]);
+        lpdf += (N*q[m]-N*q[m-1]-1)*log(U[m]-U[m-1]);
+    }
+    return lpdf;
+"""
+#+end_src
+
+#+begin_src python
+
+import pymc3 as pm
+
+with pm.Model() as curve_fitting:
+    stat = pm.Factor((aaaaa))
+#+end_src
+
+** Pourquoi c'est faux
+
+** Méthodologie
+
+** References
+- Vidéo avec Boulo et Babeau
