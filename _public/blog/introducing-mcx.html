@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-04 Mon 12:50 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MCX or probabilistic programming via source code rewriting</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Rémi Louf" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="../style.css" />
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">MCX or probabilistic programming via source code rewriting</h1>
+<p>
+Designing a user-friendly API for a Probabilistic Programming Language (PPLs) is
+cursed by the deceiving simplicity of the mathematical representation of
+graphical models. Take a simple Beta-Binomial model:
+</p>
+
+\begin{align*}
+p &\sim \operatorname{Beta}(1, 2)\\
+b &\sim \operatorname{Binomial}(p)
+\end{align*}
+
+<p>
+Looking at these equations you are able to comprehend what they represent, and
+their consequences. But these equations are only <b>descriptive</b>, they do not allow us to
+compute anything. To manipulate these models in a useful way we need to extract
+at least two different representations of this object: one that draws samples
+form the prior joint distribution, and the log-probability density function. We
+have a one-to-many relationship between the notation and what we need from it in
+practice, and this one-to-many relationship is not trivial to implement in
+programming languages.
+</p>
+
+<p>
+Of course we can implement these two representations separately. This is simple to do
+with "elementary" distributions like the Beta, Dirichlet, Multivariate Normal,
+etc. distributions. As a matter of fact, they are often implemented as a single object that
+implements a <code>sample</code> and a <code>logpdf</code> method. So when you write:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">x</span> = Beta(1., 1.)
+</pre>
+</div>
+
+<p>
+You can draw realizations from this random variable with <code>x.sample()</code> or compute
+the log-probability of x having the value <code>a</code> as <code>x.logpdf(a)</code>. The notation
+mirrors that of <code>x ~ Beta(1., 1.)</code>.
+</p>
+
+<p>
+But it becomes more tedious with complex graphical models. You can always
+implement each model as a class, say <code>BetaBinomial</code> for the Beta-Binomial model
+above. But then you are building a model zoo, not a language in which the models
+can be expressed.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">regression</span>(X):
+  <span style="font-weight: bold; font-style: italic;">alpha</span> = Normal(0, 10)
+  <span style="font-weight: bold; font-style: italic;">beta</span> = Normal(np.zeros(5), 10)
+  <span style="font-weight: bold; font-style: italic;">sigma</span> = HalfNormal(1)
+
+  <span style="font-weight: bold; font-style: italic;">y</span> = alpha + np.dot(beta, X)
+  <span style="font-weight: bold; font-style: italic;">predictions</span> = Normal(y, sigma)
+
+  <span style="font-weight: bold;">return</span> predictions
+</pre>
+</div>
+
+<p>
+What we would like is a language that allows us to manipulate random variables,
+write models as functions of these variables. And once the model is defined, to
+be able to sample from its joint prior and posterior distributions. At the very
+least, it should give you a sampling function and a function that computes the
+log-probability for every position in the state-space. That is what
+probabilistic programming is about.
+</p>
+
+<p>
+We would like a language that allows us to combine such elementary
+distributions, just like above, into an object that gives us its logpdf and
+sampling distribution. If we can do that, we can express any model that is a
+combination of these elementary distributions, sample from its prior and
+posterior distribution. That's what probabilistic programming is about.
+</p>
+
+<p>
+But programming languages are different: one set of instructions does one thing
+and only one. I can probably write a programme like the one above that would
+give me predictive samples. But then I wouldn’t have the logpdf. There is thus a
+tension between the mathematical notations and the programming language.
+</p>
+
+<p>
+This is a problem of two languages: how do you express in a programming language
+an abstract way of defining models?
+</p>
+
+<p>
+In practice PPLs have different ways to resolve this tension: some build a
+graph, some use effect handlers (I recommend Junpeng's [talk at PyCordoba]() on
+PPLs). MCX's stance is much like Stan's: what if we created our own language,
+close to the mathematical expression, that can then be compiled in a logpdf and
+a sampling function?
+</p>
+
+<p>
+Unlike Stan, MCX is embedded in Python. We would like to benefit from Python's
+automatic differentiation, acceleration and array manipulation libraries. We
+would also like to integrate with Python's still budding machine learning
+ecosystem. MCX should thus be a superset a python: allow every operation python
+allows, but somehow accomodate random variable assignments. Having posed the
+problem in these terms there is only one solution: defining a new syntax and
+modify this syntax at runtime using Python's introspection abilities.
+</p>
+
+<p>
+You want to reason about an abstract object, the model, without having to
+interact with it at a higher level. You want to be able to "sample from its
+posterior distribution", "sample from its prior predictive distribution".
+</p>
+
+<div id="outline-container-org62ca10f" class="outline-2">
+<h2 id="org62ca10f">MCX models</h2>
+<div class="outline-text-2" id="text-org62ca10f">
+<p>
+Without further waiting, here’s how you express the beta-binomial model in MCX:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> mcx
+
+<span style="font-weight: bold; text-decoration: underline;">@mcx.model</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">beta_binomial</span>(beta=2):
+  a &lt;~ Beta(1, beta)
+  b &lt;~ Binomial(a)
+  <span style="font-weight: bold;">return</span> b
+</pre>
+</div>
+
+<p>
+The model is syntactically close to both the mathematical notation and that of a
+standard python function. Notice the <code>&lt;~</code> operator, which is not standard python
+notation. It stands for "random variable" assignment in MCX.
+</p>
+
+<p>
+MCX models are defined as <b>generative functions</b>. Like any function, MCX model
+can be parametrized by passing arguments to the model. <code>beta_binomial</code> takes
+<code>beta</code> as an argument, which can later be used to parametrize the model. It can
+also take data as arguments, such as the values of predictive features in a
+regression model. The <code>return</code> statement defines the model's output, which is a
+measured variable.
+</p>
+
+<p>
+When you write a MCX model such as the one above you
+implicitely define 2 distributions. First the joint probability distribution of
+the associated graphical model. You can sample from this distribution with the
+<code>mcx.sample_joint(beta_binomial)</code> function. You can also the log-probability for
+a set of values of is random variables with <code>mcx.log_prob(model)</code>.
+</p>
+
+<p>
+What happens when you call this function? Under the hood MCX parses the content
+of your model into an intermediate representation, which is a mix between a
+graphical model (which is the mathematical object your model describes) and an
+abstract syntax tree (to maintain control flow). Random variables are identified
+as well as their distributions and the other variables they depend on.
+</p>
+
+
+<p>
+Writing a model as a function is intuitive: most bayesian models are generative models. Given input values and parameters they return other values that can be
+observed. While MCX models also represent a distribution, in the API we treat them first as generative functions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1a39b1b" class="outline-2">
+<h2 id="org1a39b1b">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-org1a39b1b">
+<p>
+Consider the following linear regression model:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; text-decoration: underline;">@mcx.model</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">linear_regression</span>(x, lmba=1.):
+    scale &lt;~ Exponential(lmbda)
+    coef &lt;~ Normal(np.zeros(x.shape[-1]), 1)
+    <span style="font-weight: bold; font-style: italic;">y</span> = np.dot(x, coef)
+    preds &lt;~ Normal(y, scale)
+    <span style="font-weight: bold;">return</span> preds
+</pre>
+</div>
+
+<p>
+Calling the generative function should return a different value each time it is
+called with a different value of <code>rng_key</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">linear_regression(rng_key, x)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">2.3</span>
+</pre>
+</div>
+
+<p>
+Note the apparition of <code>rng_key</code> between the definition and the call here,
+necessary because of JAX's pseudo-random number generation system. It can be
+cumbersome to specify a different <code>rng_key</code> at each call so we can handle the
+splitting automatically using:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fn</span> = mcx.seed(linear_regression, rng_key)
+fn(10)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">34.5</span>
+fn(10)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">52.1</span>
+</pre>
+</div>
+
+<p>
+<code>linear_regression</code> is a regular function so we can use JAX's vmap construct to
+obtain a fixed number of samples from the prior predictive distribution.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+
+<span style="font-weight: bold; font-style: italic;">keys</span> = jax.random.split(rng_key, num_samples)
+jax.vmap(linear_regression, in_axes=(0, <span style="font-weight: bold; text-decoration: underline;">None</span>))(keys, x_data)
+</pre>
+</div>
+
+<p>
+Again, for convenience, we provide a <code>sample_predictive</code> function, which draws
+samples from the function's predictive distribution.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">mcx.sample_predictive(linear_regression, (x_data,), num_samples=1000)
+</pre>
+</div>
+
+<p>
+The generative function implicitly defines a multivariate distribution over the
+model's random variables. We include utilities to sample from this distribution.
+To sample from the prior distribution:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">sampler</span> = mcx.sample_joint(rng_key, linear_regression, (x_data,))
+</pre>
+</div>
+
+<p>
+Since forward sampling can be an efficient way to debug a model, we also
+introduce a convenient <code>forward</code> method to the model:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">linear_regression.forward(rng_key, x_data)
+</pre>
+</div>
+
+<p>
+If you have seeded the model as shown before (recommended when debugging), then
+you can call
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">linear_regression.forward(x_data)
+</pre>
+</div>
+
+<p>
+To sample from the posterior distribution we need to specify which variables
+we are conditioning the distribution on (the observed variables) and the
+kernel we use to sample from the posterior:
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">sampler</span> = mcx.sampler(
+    rng_key,
+    linear_regression,
+    (x_data,),
+    {<span style="font-style: italic;">"preds"</span>: y_data},
+    HMC(100),
+)
+sampler.run(1000)
+</pre>
+</div>
+
+<p>
+Once the model's posterior distribution has been sampled we can define a new
+generative function that is the original function evaluated at the samples from
+the posterior distribution.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">evaluated_model</span> = mcx.evaluate(linear_regression, trace)
+</pre>
+</div>
+
+<p>
+When sampling from the predictive distribution, instead of drawing a value for
+each variable from its prior distribution, we sample one position of the chains
+and compute the function's output. Apart from this we can draw samples from
+the generative distribution like we would the model:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">evaluated_model(rng_key, x_data)
+<span style="font-weight: bold; font-style: italic;">seeded</span> = mcx.seed(evaluated_model, rng_key)
+mcx.sample_predictive(rng_key, evaluate_model, (x_data,), num_samples=100)
+</pre>
+</div>
+
+<p>
+Unlike the original model, however, the evaluated program is not a distribution.
+It is a generative function for which only predictive distributions are defined.
+</p>
+</div>
+
+<div id="outline-container-org97fd405" class="outline-3">
+<h3 id="org97fd405">Go on your own</h3>
+<div class="outline-text-3" id="text-org97fd405">
+<p>
+MCX provides a convenient interface to interact with the model's predictive,
+joint prior and posterior distributions, but should you want to build something
+more sophisticated you can always access the underlying functions directly:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Get the function that computes the logprobability</span>
+log_prob(model)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Get a function that draws one sample from the joint distributon</span>
+joint_sampler(model)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Function that draws one sample from the predictive distribution</span>
+predictive_sampler(model)
+</pre>
+</div>
+
+<p>
+Which should get you covered for most of your applications. <code>log_prob</code>, in
+particular, allows to you to write your model with MCX and use another library
+(e.g. BlackJAX) to sample from the posterior distribution.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgeb30811" class="outline-2">
+<h2 id="orgeb30811">'Graph' as in Graphical model</h2>
+<div class="outline-text-2" id="text-orgeb30811">
+<p>
+The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">new_graph</span> = simplify_conjugacy(graph)
+</pre>
+</div>
+
+<p>
+Having a graph is wonderful: it means that you can symbolically manipulate your
+model. You can detect conjugacies and using conjugate distibution to optimize
+sampling, reparametrization is trivial to do, etc. Manipulating the graph is
+pretty much akin to manipulating the mathematical object.
+</p>
+
+<pre class="example" id="org1c9dd35">
+
+                                     +----&gt; logpdf
+@mcx.model                           |
+def my_model(X):   -----&gt;   Graph  -------&gt; ....
+    .....                            |
+    return y                         +----&gt; forward_sampler
+
+</pre>
+
+<p>
+All this happens in <b>pure python</b>, there is no framework involved. We do use
+NetworkX to build and manipulate graphs for convenience, but could do without.
+</p>
+
+<p>
+Currently the graph we compile is a static graph. It only contains the random
+variables and transformation. As such it can only handle a fixed number of
+random variables. This, however, is a strong
+</p>
+
+<p>
+The advantage of compiling pure python function is that it nicely decouples the
+modeling language from inference. Any inference library that accepts python
+functions (with jax constructs) could use the functions used by the DSL. So far
+the entire code only relies on functions in JAX that are present in numpy/scipy.
+So you could very well consider this as a numpy/scipy function. And if you were
+introduce JAX-specific constructs such as control flow, you could still specify
+a different compiler for each backend since the graph representation is
+framework-agnostic. Hell, you could even write, without too much effort, an
+edward2, pymc3 or pyro compiler!
+</p>
+
+<pre class="example" id="org6d4e908">
+Example with control flow and different
+</pre>
+
+<p>
+Is it crazy to do AST manipulation? It might be harder to do it right than in
+language with a full-fledged macro system such as, say, Julia or Lisp, but done
+correctly it actually gives us nice benefits: a nice API with a powerful
+intermediate representation. Corner cases can also be tested as it is possible
+to output the code of the logpdfs from the model.
+</p>
+
+<pre class="example" id="org932d955">
+Example model.source_logpdf
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orga670f95" class="outline-2">
+<h2 id="orga670f95">Inference</h2>
+<div class="outline-text-2" id="text-orga670f95">
+<p>
+I'll never repeat enough: the modeling language and the inference module are
+completely separate. But they need
+</p>
+
+<p>
+The philosophy is that inference in traditional PPLs can be divided according to
+three different levels of abstraction:
+</p>
+
+<ol class="org-ol">
+<li>The building blocks (or routines) of the algorithms: integrators, metrics, proposals, &#x2026;
+which do only one thing and do it well.</li>
+<li>Programs like the HMC algorithm are a particular assembly of these building
+blocks. They form a transition kernel.</li>
+<li>Runtimes, that tie the data, the model and the kernel together and then make
+the chains move forward following an execution plan.</li>
+</ol>
+
+<pre class="example" id="org38b7402">
+Runtime (Batch sampler)
+-------------------------------------------------
+Programs (HMC)
+-------------------------------------------------
+Routines (velocity Verlet, dynamic proposal, etc.)
+-------------------------------------------------
+</pre>
+
+<p>
+Most users will interact with the pre-defined programs (HMC or NUTS with the
+Stan warmup) and runtimes. But it is possible to create custom inference, it can
+be as simple as overriding HMC's warmup by subclassing its class, or as
+complicated as implementing your own transition kernel using the available
+blocks or blocks you have programmed.
+</p>
+
+<p>
+MCX comes with sane defaults (runtimes and pre-defined programs), but has many
+trap doors that allow you to tinker with the lower level.
+</p>
+
+<p>
+Note: the lower-level routines are being moved to blackjax.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2020-02-12 Wed 00:00</p>
+<p class="author">Author: Rémi Louf</p>
+<p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
+<p class="date">Created: 2022-04-04 Mon 12:50</p>
+</div>
+</body>
+</html>

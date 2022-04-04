@@ -1,0 +1,868 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-04 Mon 12:50 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lightning fast recommandation with Birdland</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Rémi Louf" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Lightning fast recommandation with Birdland</h1>
+
+<div id="outline-container-orgedaf631" class="outline-2">
+<h2 id="orgedaf631"><span class="todo TODO">TODO</span> Finish this damn blog post</h2>
+<div class="outline-text-2" id="text-orgedaf631">
+<p>
+This post is a long overdue post on a recommendation algorithm that I developed
+and implemented with Etienne Duschene some 4 years ago: <a href="https://github.com/rlouf/birdland">Birdland</a> (checkout the
+code on Github). Although this might be considered "old" by modern standards, I
+believe that in the days of overkill datascience there is something to be
+learned from this algorithm and how it came to existence. I will explain the
+meat of the algorithm and what you can do with it. And most importantly, how we
+got there.
+</p>
+
+<p>
+This is a long post, so get a good cup of coffee (tea) and sit comfortably.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd7ea28c" class="outline-2">
+<h2 id="orgd7ea28c">You have 2 weeks to come up with something</h2>
+<div class="outline-text-2" id="text-orgd7ea28c">
+<p>
+I was asked a little less than 2 years ago to design a music recommendation
+algorithm for the application I was working on. The application was a social
+network built around music; users had a profile where they curated artists and
+song, and could share music with their friends. In app speech, think instagram
+meets LastFM; the app did pretty well until the adventure abruptly ended, but
+that's another story.
+</p>
+
+<p>
+At the time, Spotify had <a href="https:">a full battery</a> of recommendation algorithms in
+production and it was obvious we could not compete. What we had that Spotify did
+not, however, was a social graph. We had to do social recommendation. Well, in
+fact we had promised social recommendation to a funding agency and got money to
+do it, so we REALLY had to do it.
+</p>
+
+<p>
+For the past 10 year or so, <a href="https:">implicitMF</a> had been the go-to recommendation
+method for implicit feedback contexts&#x2014;and am sure still is. In ways it worked,
+and it has amply contributed to what the world of recommendation is like today.
+If, like me, you have as Spotify account you have probably been served some of
+its results and anjoyed it (shoutout to <a href="https:">Erik Berhnarhdsson</a>, <a href="https:">Chris Johnson</a>
+and the talented people we don't hear about who created this fantastic
+product!).
+</p>
+
+<p>
+However, despite its past success, I quickly decided it was not going to cut it.
+There are two things that I try to steer away from when I work on a machine
+learning problem: complexity and conceptual smell. Unfortunately, ImplicitMF is
+both dubious theoretically speaking, and harder to implement that it seems.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org356cea6" class="outline-2">
+<h2 id="org356cea6">ImplicitMF sucks</h2>
+<div class="outline-text-2" id="text-org356cea6">
+<p>
+In the context of music recommendation, implicitMF sucks. I've said it.
+</p>
+</div>
+
+<div id="outline-container-org58c6976" class="outline-3">
+<h3 id="org58c6976">It smells conceptually</h3>
+<div class="outline-text-3" id="text-org58c6976">
+<p>
+The MF part in "implicit MF" stands for implicit matrix factorization. Roughly
+speaking, it starts with a matrix \(R\) (user x song) where \(R_{i,j}\) is the
+number of times the user \(i\) has played the song \(j\). The $R<sub>i,j</sub>$s constitue
+\textit{implicit} feedback; historically recommendation started with rated
+items. Here we don't have ratings, but data about interactions.
+</p>
+
+<p>
+The method is essentially a dimensionality reduction method. For each user \(i\)
+and song \(j\) you want to find vectors \(u_i\) and \(v_j\) of dimension \(K\) such that
+the scalar product \(u_i v_j\) is as close as \(R_{i,j}\) as possible. I don't have
+an issue with that. The problem is with how we define close: implicit MF
+basically says the 2 are close when following \(L_2\) norm is minimum:
+</p>
+
+<p>
+\[L = \sum_{i,j} \left(R_{i,j} - u_i v_j\right)^2\]
+</p>
+
+<p>
+Plus a regularization term. This can be solved approximately with [alternating
+least square](). But let's take a step back here and think about the
+signification of the \(L_2\) norm. It may seem innocent to most, but it makes a
+strong assumption about the distribution of plays.
+</p>
+
+<p>
+&gt; Implicit MF makes the implicit (!) assumption that the number of plays
+&gt; follows a normal distribution.
+</p>
+
+<p>
+Indeed, if we write this:
+</p>
+
+<p>
+\[
+r_{i,j} \sim Normal(u_i v_j)
+\]
+</p>
+
+<p>
+Then finding the \(\left\{u_i\right\}_{i=1..N}\) and \(\left\{v_j\right\}_{j=1..S}\)
+that maximize the likelihood of the data amounts to&#x2026; minimizing the \(L_2\)
+norm!
+</p>
+
+<p>
+It's bad. Think about it:
+</p>
+
+<ol class="org-ol">
+<li>The normal distribution's support is the real line; it can give negative
+number. And unless you're feeling lucky or hacky, you may get negative
+counts;</li>
+<li>If you look the \(r_{i,j}\) over all users, getting the number of plays per
+user for each song you also get a Gaussian. Trust me on this, but the
+distribution of the number of plays does not look like a Gaussian at all:
+there is no "typical" number of plays that all values lie around. Actually,
+there are many users who do not listen to most songs.</li>
+</ol>
+
+<p>
+The distribution looks more like a Poisson distirbution, actually. If this is
+the only thing that bothers you, there is a great paper on [Poisson
+factorization] that on top of using an underlying Poisson distirbution instead
+of normal.
+</p>
+
+<p>
+But as we will see, there is another problem with matrix factorization: the
+hidden engineering costs.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org063e34e" class="outline-3">
+<h3 id="org063e34e">It has hidden costs</h3>
+<div class="outline-text-3" id="text-org063e34e">
+<p>
+The result of implicit Matrix Factorization is two matrices song-vector and
+user-song; it is an embedding of songs and users in a K-dimensional space. But
+this embedding is the first part of the process. What the tutorials you read on
+the web usually don't tell you is that once your implicit MF implemented and
+connected to the database you need to:
+</p>
+
+<ul class="org-ul">
+<li>Store these vectors in a database and recompute these vectors in batch.</li>
+<li>Given a user and its past plays, recommend new songs.</li>
+</ul>
+
+<p>
+Without getting into details, you already see that what seemed to be a simple
+recommendation service actually ends up being a 3 services ordeal: a server to
+compute the vectors, a database to store these vectors, and a server to serve
+recommendations based on user data. Not that simple, is it?
+</p>
+
+<p>
+What is also omitted is that the recommendation part of the algorithm is
+complicated, way complicated than the factorization part: the N-nearest neibour
+problem.
+</p>
+
+<p>
+The idea is to find the "song" vector that are the closest to your "user"
+vector. For each user there are N such posibility. In real settings, this simply
+does not scale. There are very clever approximation method that make the
+computation scalable, but their details are much harder than implicitMF's.
+</p>
+
+<p>
+See, had you started to work on implicitMF and went as far as factorizing the
+plays matrix, you would have ended up in front of a much harder problem. I have
+seen a lot of data scientists falling into the matrix factorization trap, and
+taking their whole engineering team with them. Don't be that data scientist.
+</p>
+
+<p>
+Birdland was born in a particular context. At the time I was working as Chief
+Scientist (whatever that means) at a small Startup that built a social app
+around music. To be completely honest, the goal of this project was more to show
+off our capabilities (and spend funding we'd earned to develop it) rather than
+answering a real need. Actually, the first version of "recommendation" was
+simply to recomend to users songs they listened to in the past. This is a
+great baseline for A/B testing, by the way.
+</p>
+
+<p>
+And we had 3 weeks, and no engineering resources allocated. Needless to say, we
+had to ditch matrix factorization early on.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orga775a62" class="outline-2">
+<h2 id="orga775a62">Here comes Birdland</h2>
+<div class="outline-text-2" id="text-orga775a62">
+<p>
+So we sat down, and reformulated the problem as a question:
+</p>
+
+<blockquote>
+<p>
+Given what a person has listened to in the past, who she interacts with, what is she going to do next?
+</p>
+</blockquote>
+
+<p>
+Well that sounds pretty damn obvious, doesn't it?
+</p>
+
+<p>
+Now, this sounds a lot like a stochastic process. So we model the recommendation
+process as a stochastic process over the global set of song: given the songs
+that someone has listened to in the past, we have to find a process them to
+songs that they haven't listened to but might like.
+</p>
+
+<p>
+Building such a kernel is insanely complicated, it presupposes a model of the
+user's behavior, understand how songs are related, and playing history. The best
+thing we can do is to learn this kernel from the behavior of users themselves.
+</p>
+</div>
+
+
+<div id="outline-container-orge53e095" class="outline-3">
+<h3 id="orge53e095">A network perspective</h3>
+<div class="outline-text-3" id="text-orge53e095">
+<p>
+Although this behaviour only holds in the infinite time limit, and
+recommendations would initially be based on the local neighbourhood, this can be
+considered as <b>bad</b> recommendation.
+</p>
+
+<p>
+Can we do better?
+</p>
+
+<p>
+Yes, by switching to a network representation!
+</p>
+
+<p>
+Let us consider the network defined by \(A_{ij}\) with nodes \(\left\{1, \dots,S\right\}\) of degrees \(\left\{k_1, \dots, k_S\right\}\), the number of times
+they have each been listened to.
+</p>
+
+<p>
+When no self loops are allowed (which is the case here), the random baseline for
+such network is a network where edges are added at random under the constraints
+that degrees need to stay the same. It can be shown that his model assigns to each edge the
+probability:
+</p>
+
+<p>
+\[
+p_{ij}^{rand} = \frac{k_i k_j}{\sum_n k_n}
+\]
+</p>
+
+<p>
+On average, the number of edges in our random model is given by
+</p>
+
+<p>
+\[
+N_{ij}^{rand} = k_i k_j \frac{N}{\sum_n k_n}
+\]
+</p>
+
+<p>
+What is interesting for recommendations is the <b>deviation</b> from this random
+model. Assuming the existence of a latent parameter \(\theta_{ij}\) that
+characterizes how "special" the connection between \(i\) and \(j\) is, we can write:
+</p>
+
+<p>
+\[
+p_{ij}^{rand} = \theta_{ij} \frac{k_i k_j}{\sum_n k_n}
+\]
+</p>
+
+<p>
+And we can compute the latent "attraction" factor
+</p>
+
+<p>
+\[
+\theta_{ij} \propto \frac{N_{ij}}{k_i k_j} \left(\frac{\sum_n k_n}{N}\right)
+\]
+</p>
+
+<p>
+If \(\theta_{ij} < 1\), songs are less connected that they would have been had the
+connections been drawn randomly; they probably should not be recommended one
+after another. If \(\theta_{ij}\) &gt; 1 they are more connected than they would
+have been if people were playing things randomly. The connection between these
+two songs is probably meaningful, irrespective of the item's relative
+popularity.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org8a1f511" class="outline-3">
+<h3 id="org8a1f511">Issues with this naive approach</h3>
+<div class="outline-text-3" id="text-org8a1f511">
+<p>
+Beyond the obvious criticisms that all recommendation schemes face, we had very
+good reason to leave this method aside:
+</p>
+
+<ol class="org-ol">
+<li>Projecting the user-songs bipartite graph onto the songs leads to an
+intractable transition matrix. In typical settings we have \(10^7\) songs; ew
+would need to compute and keep track of a matrix of size \(10^{14}\) values corresponding to every possible link.</li>
+<li>The information contained in the user-song graph is partially washed out by
+the projection onto the items. Yet, it may contain interesting information</li>
+</ol>
+
+<p>
+For these reasons, we turned to a simpler&#x2014;yet surprisingly
+powerful&#x2014;approach: random walks on the bipartite graph. It doesn't get rid of
+the user-song-user information, and only requires storing \(N_{users}\;
+\overline{\ell}\) elements where \(\overline{\ell}\) is the average number of
+distinct songs listened to by a user. The tradeoff: you have to recompute everything for each recommandation.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org6bcd62d" class="outline-3">
+<h3 id="org6bcd62d">Recommendations using random walks.</h3>
+<div class="outline-text-3" id="text-org6bcd62d">
+<p>
+For those of you who are old enough to have known LastFM, you probably used the
+method I did when looking for new music to listen to. What I usually did was
+finding the profile of people who had roughly similar tastes and explore they
+history to find new things to listened to. Sometimes work, sometimes did not.
+But still, it was pretty good.
+</p>
+
+<p>
+For some of you who had friends, you probably ask for recommendations to people
+you know have similar tastes to you, not to the others.
+</p>
+
+<p>
+Both are local explorations of a bipartite graph. This is tedious work, but
+imagine if you could do that a million times faster. Wouldn't you get
+interesting results? Well, let's figure it out.
+</p>
+
+
+<p>
+If I formalize and simplify the motivating examples I get the following
+procedure:
+</p>
+
+<ol class="org-ol">
+<li>Pick a song \(i\) uniformly at random in my listen history;</li>
+<li>Find a user \(\mu\) who has listen to this song too;</li>
+<li>Pick a song \(j\) that this user has listened to uniformly at random and store
+to it.</li>
+</ol>
+
+<p>
+The process is overly simplified: all songs that I listen to are equal in my
+eyes. Some I like more and listen to heavily, some I like less. We'll see more
+about that below.
+</p>
+
+<p>
+We can write the probability \(p_{ij}\) to pick the song \(j\) starting from \(i\) and
+going through \(\mu\) under this procedure:
+</p>
+
+<p>
+\[
+p_{ij}^{\mu} = \frac{1}{N_i} \frac{1}{k_{\mu}}
+\]
+</p>
+
+<p>
+where \(N_i\) is the number of people who have listened to \(i\) and \(k_{\mu}\) the
+number of songs the user \(\mu\) has listened to. \(p_{ij}^{\mu}\) is a transition
+kernel. Indeed:
+</p>
+
+<p>
+\[
+\sum_{\mu, j} p_{ij}^{\mu} = \frac{1}{N_i} \sum_{\mu, j} \frac{1}{k_{\mu}} = 1
+\]
+</p>
+
+<p>
+The probability measure \(\pi_i = N_i / N\) defined above is invariant under this
+kernel:
+</p>
+
+<p>
+\[
+\sum_i \frac{N_i}{N} p_{ij}^{\mu} = \frac{1}{N} \sum_{i,\mu} \frac{1}{k_{\mu}} =
+\frac{N_j}{N}
+\]
+</p>
+
+<p>
+Indeed, for each song \(j\) the user \(\mu\) has interacted with, all the other
+items are included in the dum over \(i\) so that the sum over \(i\) and \(\mu\) can be
+reduced to a sum of \(j\) times 1.
+</p>
+
+<p>
+Don't be thrown off by these technical details and calculations: this algorithm
+is simpler and easier to interpret than the naive one above, let alone implicit
+matrix factorization.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org744b7e0" class="outline-3">
+<h3 id="org744b7e0">The long tail problem</h3>
+<div class="outline-text-3" id="text-org744b7e0">
+<p>
+[Explain the long-tail problem]
+</p>
+
+<p>
+An issue that remains is that we leave the popularity distribution of songs
+invariant under this transition kernel. The nice thing about this framework is
+that it can be modified very easily. Let us imagine a procedure that could
+diminish the "long-tail" problem:
+</p>
+
+
+<ol class="org-ol">
+<li>Pick a song \(i\) uniformly at random from your listening history;</li>
+<li>Pick a user \(\mu\) who has listened to this song uniformly at random;</li>
+<li>Pick a song \(j\) this user has listened to with probability inversely
+proportional to this item popularity.</li>
+</ol>
+
+<p>
+The probability to walk from \(i\) to \(j\) via \(\mu\) now reads:
+</p>
+
+<p>
+\[
+p_{ij}^\mu = \frac{\mathcal{N}_\mu}{N_i N_j}
+\]
+</p>
+
+<p>
+where
+</p>
+
+<p>
+\[
+\mathcal{N} = \frac{1}{\sum_{n=1}^{N_\mu} 1 / N_j}
+\]
+</p>
+
+<p>
+We now show that the uniform probability measure is left invariant under this
+kernel:
+</p>
+
+<p>
+\[
+\sum_i \frac{1}{N} p_{ij}^{\mu} = \frac{1}{N N_j} \sum_{\mu, j}
+\frac{\mathcak{N}_\mu}{N_i} = \frac{1/N}
+\]
+</p>
+
+<p>
+In layman speak, this means that, following this procedure, an infinitely long
+random walk would go through each song the same number of times, disrepective of
+its original popularity. **In other words, this algorithm addresses the
+long-tail problem, or at least does not make it worse. This is intersting and,
+to our knowledge, unique.**
+</p>
+
+<p>
+Now, whether this is a good thing is another debate.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0e9d5a7" class="outline-3">
+<h3 id="org0e9d5a7">Other variants</h3>
+<div class="outline-text-3" id="text-org0e9d5a7">
+</div>
+<div id="outline-container-org0676535" class="outline-4">
+<h4 id="org0676535">Social recommendation</h4>
+<div class="outline-text-4" id="text-org0676535">
+<p>
+You can customize this algorithm as you wish. In our case, the goal was to get
+a recommendation algorithm that could be used for social recommendation. Easy:
+</p>
+
+<ol class="org-ol">
+<li>Pick a song \(i\) uniformly at random from your listening history;</li>
+<li>Pick a user \(\mu\) with a probability \(\delta\) that depends on how close
+you are in the network.</li>
+<li>Pick a song \(j\) this user has listened to with probability inversely
+proportional to this item popularity.</li>
+</ol>
+
+<p>
+In the limit \(\delta = 1/N\) we recover the previous case. In the extreme limit
+\(\delta = 1/f\) where f is your number of friend, 0 otherwise we are in a
+situation where you get most of your recommendations from your friends.
+</p>
+
+<p>
+If you want to be fancy, you can say that you projected the multi-layer graph
+user-user-song onto the user-song bipartite graph. Knowing that you can do even
+fancier stuff by walking the social graph at the same time.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3139077" class="outline-4">
+<h4 id="org3139077">Not all songs are created equal</h4>
+<div class="outline-text-4" id="text-org3139077">
+<p>
+You don't listen to songs the same number of times, so it is pretty stupid to
+pick songs uniformly at random in your history. Simple, just pick it at random
+with a probability proportional to the number of times you have listened to this
+song.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga4710d6" class="outline-3">
+<h3 id="orga4710d6">Recommending items from a list of songs</h3>
+<div class="outline-text-3" id="text-orga4710d6">
+<p>
+To recommend songs to users you would perform many, many random walks starting
+from that same user. Those walks will likely start from many different songs in
+the listening history, and it is also likely that some songs will be traversed
+by several walks. How do we combine these walks to provide recommendations.
+</p>
+
+<p>
+There are several schemes you can think of:
+</p>
+
+<p>
+<b>Most visited first:</b> We count the number of times each songs has been visited
+and sort recommendations accordingly. This performs poorly in practice as you
+end up recommending popular songs.
+</p>
+
+<p>
+<b>Consensus:</b> Recommend the songs that have been listening to the largest number
+of users first. This is equivalent to the first scheme.
+</p>
+
+<p>
+<b>Trust:</b> Weigh each user by the number of times they have been visited. Weight
+each item by the weight of the user who recommend it it. Sum the item weights
+and sort them accordingly. This performs really well in practice, and what we
+ended up doing.
+</p>
+
+<p>
+<b>Relevance:</b> For each item visited, count the number of different items in my
+listening history that lead to it. Sort according to this number. This performs
+very well in practice too.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org4b86f9b" class="outline-3">
+<h3 id="org4b86f9b">Birdland in practice</h3>
+<div class="outline-text-3" id="text-org4b86f9b">
+<p>
+We implemented Birdland in Go both for speed (the algorithm had to run online),
+and because the backend was in Go.
+</p>
+</div>
+
+<div id="outline-container-orge8cde3e" class="outline-4">
+<h4 id="orge8cde3e">Recommending from walks.</h4>
+<div class="outline-text-4" id="text-orge8cde3e">
+<ol class="org-ol">
+<li>The algorithm is randomized. You have guaranteed novelty every time you
+refresh the page.</li>
+<li>You can precompute many, many things when you load the data; as a result
+inference is really fast.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2018-04-06 Fri 00:00</p>
+<p class="author">Author: Rémi Louf</p>
+<p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
+<p class="date">Created: 2022-04-04 Mon 12:50</p>
+</div>
+</body>
+</html>

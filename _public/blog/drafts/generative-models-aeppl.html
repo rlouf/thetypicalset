@@ -1,0 +1,746 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-04 Mon 12:50 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Write a generative models, aesara and aeppl will take care of the rest</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Rémi Louf" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Write a generative models, aesara and aeppl will take care of the rest</h1>
+<p>
+I am currently developping yet another probabilistic programming library in
+Python, based on source code generation. This is not a new idea, and it is
+basically how Stan works: models are written in a DSL and interpreted by the C++
+library. Most other libraries rely on a non-standard intepretation of the
+language and while they manage to bend python well-enough to build complete
+probabilistic programming libraries, there is a sense of complication that
+probably should not exist:
+</p>
+
+<ul class="org-ul">
+<li>A probabilistic language is akin to a regular language, with an additional
+construct that is the idea of a random variable. This changes the behaviour
+of the language at runtime, behaviour which can be encoded in the intepreter
+or compiler.</li>
+<li>Generative models are parametrizable functions: from data \(\left\{X\right\}\) and
+parameters \(\left(\alpha_i\right\)\) they can generate values.</li>
+<li>They are not your regular kind of functions; as in standard Machine Learning,
+they can be learned from data.</li>
+</ul>
+
+<p>
+One of the ideas of `mcx` (pronounce "mix") is to modify the python syntax only
+the slightlest to be able to express a wide range of probabilistic models. A
+`mcx` program should <b>feel</b> like regular python, with and additional construct.
+</p>
+
+<p>
+But to get things straights, here are a couple of questions:
+</p>
+
+<ul class="org-ul">
+<li>Are generative models distributions?</li>
+<li>If not, what are they?</li>
+</ul>
+
+<p>
+Let us take the simplified example of the normal distribution.
+</p>
+
+<p>
+```python
+class Normal(Distribution):
+  parameters = {'mu': constraints.real, 'sigma': constraints.positive}
+  domain = constraints.real
+</p>
+
+<p>
+def _<sub>init</sub>_<sub>(self, mu, sigma)</sub>:
+  self.mu = mu
+  self.sigma = sigma
+</p>
+
+<p>
+def sample(self, num<sub>samples</sub>: int) -&gt; float:
+  return self.mu + random.norm() * self.sigma
+</p>
+
+<p>
+  @limit<sub>to</sub><sub>domain</sub>
+  def logpdf(self, num<sub>samples</sub>: int) -&gt; float:
+    return stats.norm.logpdf(x, self.mu, self.sigma)
+```
+</p>
+
+<p>
+Things to note:
+</p>
+
+<ul class="org-ul">
+<li>A distribution ascribes a measure on the random variable's domain. The measure
+is given by `logpdf`.</li>
+<li>We can generate values at random that follow this measure using `sample`</li>
+<li>We reified the measure to a class that also holds the sampling function and
+properties such as the domain of the random variable, and the constraints
+on the parameters' values.</li>
+</ul>
+
+<p>
+So that when I write `x ~ Normal(0, 1)` what I am really writing is "x is a
+random variable and the probability of its values are given by a Normal
+distribution parametrized by a zero mean and unit variance". So, really, the `~`
+symbol means `has` and not `is`. What `x` is, is potentially any number on its
+domain. It feels rather strange that we are ascribing the domain the the
+probability density function, but hey. The distribution defines a measure that
+takes a single variable as an input. That variable that have several dimensions,
+e.g. multivariate normal.
+</p>
+
+<p>
+Now let us compare this with a simple model, a linear regression:
+</p>
+
+<p>
+```python
+def linear<sub>regression</sub>(X):
+  weights ~ Normal(0, 1)
+  sigma ~ Normal(0, 1)
+  y ~ Normal(x * weight, sigma)
+  return y
+```
+</p>
+
+<p>
+We can define a generative model as such: `linear<sub>regression</sub>` is a
+function that returns a random value of `y` everytime we pass a number `x`. I
+now have a question:
+</p>
+
+<p>
+But if `linear<sub>regression</sub>` is a function, what does it mean to write (and should
+it be valid)?
+</p>
+
+<p>
+```python
+w ~ linear<sub>regression</sub>(rng<sub>key</sub>, 10)
+```
+</p>
+
+<p>
+We can intuitively think that sampling values makes straightforward sense:
+</p>
+
+<p>
+```python
+w = linear<sub>regression</sub>(10).sample(rng<sub>key</sub>, num<sub>samples</sub>=1<sub>000</sub>)
+```
+</p>
+
+<p>
+But there is a cognitive conflict between the intepretations `linear<sub>regression</sub>(10)` is the result of a function and `linear<sub>regression</sub>(10)` is a distribution.
+</p>
+
+<p>
+So, are generative models distributions? There is a sense that they should, but
+it is not clear to me.
+</p>
+
+<p>
+Let us write the `logpdf` function:
+</p>
+
+<p>
+```python
+w = linear<sub>regression.logpdf</sub>(10, weights, sigma, y)
+```
+</p>
+
+<p>
+Defining the random variable through its forward sampling behaviour.
+</p>
+
+<p>
+Can we define other distributions like this:
+</p>
+
+<p>
+```python
+def Exponential(lmbda):
+    U ~ Uniform(0, 1)
+    t = - np.log(U) / lmbda
+    return t
+```
+</p>
+
+<p>
+The function <b>generates</b> numbers drawn from the exponential distribution. What
+is the associated logpdf?
+</p>
+
+<p>
+```
+def Exponential<sub>logpdf</sub>(lmbda, t):
+    U = np.exp(- lmbda * t)
+    return U.logpdf(np.exp(- lmbda * t))
+```
+</p>
+
+<p>
+Now another slightly more complicated distribution, the multivariate normal:
+</p>
+
+<p>
+```python
+def MvNormal(mu, sigma):
+  z ~ Normal(0, 1, size=2)
+  a = Cholesky(sigma)
+  x = mu + a * z
+  return x
+```
+</p>
+
+<p>
+All these use independent draws from the same distribution. Models are a
+generalization of this concept where random number can be generated from draws
+from different distributions. Note that the logpdfs here are functions of
+deterministic variables. This is what we are interested in.
+</p>
+
+<p>
+```
+<del>---</del>      <del>---</del>
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">z</td>
+<td class="org-left">&#x2014;&gt;</td>
+<td class="org-left">x</td>
+</tr>
+</tbody>
+</table>
+<p>
+<del>---</del>      <del>---</del>
+```
+</p>
+
+<p>
+The logpdf can be a function of any random variable or function of a random
+variable. How do we indicate this is what we care about: we retun it!
+</p>
+
+<p>
+generative definition -&gt; Distribution (sample, logpdf)
+</p>
+
+<p>
+A generative model generated as above <b>is not</b> a distribution but it implicitly
+defines a multivariate distribution through its generative process. It is a
+probability distribution augmented by a `forward`, or `call` function.
+</p>
+
+<p>
+```python
+def linear<sub>regression</sub>(X):
+  weights ~ Normal(0, 1)
+  sigma ~ Normal(0, 1)
+  y ~ Normal(x * weight, sigma)
+  return y
+```
+</p>
+
+<p>
+```python
+def linear<sub>logpdf</sub>(X, weight, sigma, y):
+  logpdf = 0
+  logpdf += Normal(0 ,1).logpdf(weight)
+  logpdf += Normal(0, 1).logpdf(sigma)
+  logpdf += Normal(X * weight, sigma).logpdf(y)
+  return logpdf
+```
+</p>
+
+<p>
+So the `LinearRegression` logpdf could be defined as:
+</p>
+
+<p>
+```python
+class LinearRegression(Distribution):
+    def _<sub>call</sub>_<sub>(self, X)</sub>:
+      weights, sigma, y = self.sample(X)
+      return y
+</p>
+
+<p>
+def sample(self, X):
+  weights = Normal(0, 1).sample()
+  sigma = Normal(0, 1).sample()
+  y = Normal(self.X * weights, sigma).sample()
+  return weights, sigma, y
+</p>
+
+<p>
+    def logpdf(self, X, weight, sigma, y):
+      logpdf = 0
+      logpdf += Normal(0 ,1).logpdf(weight)
+      logpdf += Normal(0, 1).logpdf(sigma)
+      logpdf += Normal(X * weight, sigma).logpdf(y)
+      return logpdf
+```
+</p>
+
+<p>
+So a slight modification of the distributions can make them equivalent:
+</p>
+
+<p>
+```python
+class Normal(distribution):
+  def _<sub>call</sub>_<sub>(self, mu, sigma)</sub>:
+      return self.sample(mu, sigma)
+</p>
+
+<p>
+def sample(self, mu, sigma):
+    return mu + random.norm() * sigma
+</p>
+
+<p>
+  def logpdf(self, x, mu, sigma):
+      return stats.logpdf(x, mu, sigma)
+```
+</p>
+
+<p>
+```python
+def normal(mu, sigma):
+  event<sub>shape</sub> = ()
+  batch<sub>shape</sub> = lax.broadcast<sub>shape</sub>(mu, sigma)
+  domain = constraints.real
+</p>
+
+<p>
+def sample(rng<sub>key</sub>, sample<sub>shape</sub>):
+  return mu + random.norm(rng<sub>key</sub>, sample<sub>shape</sub>) * sigma
+</p>
+
+<p>
+  @limit<sub>to</sub>(domain)
+  def logpdf(x):
+    return stats.norm(x, mu, sigma)
+```
+</p>
+
+<p>
+```python
+def linear<sub>model</sub>(X):
+    def call(rng<sub>key</sub>, sample<sub>sample</sub>):
+</p>
+
+<p>
+def sample(rng<sub>key</sub>, sample<sub>shape</sub>):
+  w = normal(0, 1)[0](rng<sub>key</sub>, sample<sub>shape</sub>)
+  s = normal(0, 1)[0](rng<sub>key</sub>, sample<sub>shape</sub>)
+  y = normal(X*w)[0](rng<sub>key</sub>)
+  return y
+</p>
+
+<p>
+    def logpdf(x, w, s, y):
+      logpdf = 0
+      logpdf += normal(0, 1)[1](w)
+      logpdf += normal(0, 1)[1](s)
+      logpdf += normal(X*w)[1](y)
+      return logpdf
+```
+</p>
+
+<p>
+So when I do
+</p>
+
+<p>
+```
+model = mcx.model(linear<sub>regression</sub>)
+model(X) gives a random sample from distribution -&gt; "call" = forward sampling
+model.sample(X, &#x2026;) gives an aribitrary number of samples from distribution
+model.logpdf(x, w, s, y) gives the logpdf
+```
+</p>
+
+<p>
+## The "return" is really only there to indicate which variables are interesting
+## during forward calls.
+</p>
+
+<p>
+before the model has been learned:
+</p>
+
+<p>
+```
+def forward(X):
+    w = normal(0, 1).sample()
+    s = normal(0, 1).sample()
+    return normal(x*w).sample()
+```
+</p>
+
+
+<p>
+Once the model has been learned:
+</p>
+
+<p>
+```
+def forward(X, trace):
+    w = empirical(trace['x']).sample()
+    s = empirical(trace['s']).sample()
+    return Normal(x*w).sample() &lt;&#x2013; important to have the "return" !!!
+```
+</p>
+
+<p>
+```python
+sampler, logpdf = model(linear<sub>regression</sub>)
+```
+</p>
+
+
+<p>
+```python
+class model():
+  def _<sub>init</sub>_<sub>(self, X)</sub>:
+    self.X = x
+    print(sample(X))
+</p>
+
+<p>
+def _<sub>call</sub>_<sub>(X)</sub>:
+  w, s, y = self.sample<sub>forward</sub>(X)
+  return y
+</p>
+
+<p>
+def sample<sub>forward</sub>():
+</p>
+
+<p>
+def sample<sub>posterior</sub>():
+</p>
+
+<p>
+  def logpdf():
+```
+</p>
+
+<p>
+```python
+Normal(0, 1)
+sample<sub>normal</sub>(0, 1)
+```
+</p>
+
+<p>
+So a generative model can be transformed into a sample generating process as
+follows:
+</p>
+
+<p>
+```python
+def linear<sub>model</sub>(X):
+    weights = Normal(0, 1)
+    sigma = Normal(0, 1)
+    y = Normal(weights*x, sigma)
+    return y
+```
+</p>
+
+<p>
+Model as distribution?
+</p>
+
+<p>
+```python
+@as<sub>distribution</sub>
+def HorseshoePrior(a):
+  return Normal(0, 1)
+</p>
+
+<p>
+def complicated<sub>model</sub>(X):
+    a @ HorseshoePrior(0)
+    x @ Normal(a)
+    return x
+```
+</p>
+
+<p>
+`Model` inherits from distribution. When asking for model logpdf -&gt; instantiates
+Model.
+</p>
+
+<p>
+Ok but how do we define a model?
+</p>
+
+<p>
+```
+model = model(complicated<sub>model</sub>)  # telling it's a model
+```
+</p>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2022-04-04 Mon 00:00</p>
+<p class="author">Author: Rémi Louf</p>
+<p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
+<p class="date">Created: 2022-04-04 Mon 12:50</p>
+</div>
+</body>
+</html>
