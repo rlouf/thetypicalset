@@ -1,6 +1,5 @@
 ;; Set the package installation directory so that packages aren't stored in the
 ;; ~/.emacs.d/elpa path.
-;; Courtesy of https://systemcrafters.net/publishing-websites-with-org-mode/building-the-site/
 (require 'package)
 (setq package-user-dir (expand-file-name "./.packages"))
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -13,8 +12,14 @@
 
 ;; Install dependencies
 (package-install 'htmlize)
+(package-install 'find-lisp)
+(package-install 'org-roam)
 
 (require 'ox-publish)
+(require 'find-lisp)
+(require 'org-roam)
+
+(setq make-backup-files nil)
 
 (defun my/sitemap-format-entry (entry style project)
     (format "%s [[file:%s][%s]]"
@@ -22,26 +27,27 @@
             entry
             (org-publish-find-title entry project)))
 
-(setq org-html-validation-link nil)
+(setq org-html-validation-link nil ;; Do not show "Validate" link
+      org-export-babel-evaluate nil) ;; Do not execute code blocks
 
 (setq org-publish-project-alist
       '(
          ;; The digital garden
          ("notes"
-          :author "Rémi Louf"
-          :email "remi@thetypicalset.com"
-          :with-email t
-          :base-directory "posts/"
+          :base-directory "posts"
           :base-extension "org"
           :publishing-directory "_public/"
-          :recursive f
-          :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />"
-          :section-numbers nil
           :publishing-function org-html-publish-to-html
-          :htmlized-source t
+          :with-broken-links f
+          :recursive f
+          :author "Rémi Louf"
+          :email "remi@thetypicalset.com"
           :with-toc nil
-          :with-date nil
-          :auto-sitemap t ;; Recent changes
+          :html-postamble nil
+          :section-numbers nil
+          :htmlized-source t
+          :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />"
+          :auto-sitemap nil ;; Recent changes
           :sitemap-title "The typical set"
           :sitemap-filename "recent.org"
           :sitemap-format-entry my/sitemap-format-entry
@@ -89,3 +95,37 @@
         :publishing-function org-publish-attachment
         )
         ("org" :components ("blog" "static" "css"))))
+
+; ---------------------------------------------------------------------
+;                          PUBLISH
+; ---------------------------------------------------------------------
+
+(defun my/publish-all()
+  (setq org-roam-directory "/home/remi/projects/thetypicalset/posts")  ; we first setup the org-roam locations
+  (setq org-roam-db-location "/home/remi/projects/thetypicalset/posts/org-roam.db")  ; we first setup the org-roam locations
+  (setq org-id-extra-files (org-roam--list-files org-roam-directory)) ; necessary to make link with IDs work
+  (call-interactively 'org-publish-all))
+
+; Add backlinks to the org files before exporting
+(add-hook 'org-export-before-processing-hook 'my/add-roam-backlinks)
+
+(defun my/add-roam-backlinks (backend)
+  "Insert backlinks at the end of org files. BACKEND."
+  (when (org-roam-node-at-point)
+    (save-excursion
+      (goto-char (point-max))
+      (insert "\n* Links to this note\n")
+      (my/collect-roam-backlinks backend))))
+
+(defun my/collect-roam-backlinks (backend)
+  (when (org-roam-node-at-point)
+    (goto-char (point-max))
+    ;; Add a new header for the references
+    (let* ((backlinks (org-roam-backlinks-get (org-roam-node-at-point))))
+      (dolist (backlink backlinks)
+        (let* ((source-node (org-roam-backlink-source-node backlink))
+               (point (org-roam-backlink-point backlink)))
+          (insert
+           (format "- [[./%s][%s]]\n"
+                   (file-name-nondirectory (org-roam-node-file source-node))
+                   (org-roam-node-title source-node))))))))

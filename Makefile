@@ -4,7 +4,7 @@ all: publish
 
 publish: publish.el
 		@echo "Building The typical set with emacs"
-		emacs --batch --load publish.el --funcall org-publish-all
+		emacs --batch --load publish.el --funcall my/publish-all
 
 clean:
 		echo "Cleaning up.."
