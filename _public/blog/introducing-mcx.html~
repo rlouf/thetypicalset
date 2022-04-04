@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-04 Mon 14:04 -->
+<!-- 2022-04-04 Mon 14:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MCX or probabilistic programming via source code rewriting</title>
@@ -355,9 +355,9 @@ interact with it at a higher level. You want to be able to "sample from its
 posterior distribution", "sample from its prior predictive distribution".
 </p>
 
-<div id="outline-container-org5a3f862" class="outline-2">
-<h2 id="org5a3f862">MCX models</h2>
-<div class="outline-text-2" id="text-org5a3f862">
+<div id="outline-container-orgfade7b9" class="outline-2">
+<h2 id="orgfade7b9">MCX models</h2>
+<div class="outline-text-2" id="text-orgfade7b9">
 <p>
 Without further waiting, here’s how you express the beta-binomial model in MCX:
 </p>
@@ -412,9 +412,9 @@ observed. While MCX models also represent a distribution, in the API we treat th
 </div>
 </div>
 
-<div id="outline-container-org8f8767d" class="outline-2">
-<h2 id="org8f8767d">Interacting with MCX models</h2>
-<div class="outline-text-2" id="text-org8f8767d">
+<div id="outline-container-orge1b93b8" class="outline-2">
+<h2 id="orge1b93b8">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-orge1b93b8">
 <p>
 Consider the following linear regression model:
 </p>
@@ -561,9 +561,9 @@ It is a generative function for which only predictive distributions are defined.
 </p>
 </div>
 
-<div id="outline-container-org418f638" class="outline-3">
-<h3 id="org418f638">Go on your own</h3>
-<div class="outline-text-3" id="text-org418f638">
+<div id="outline-container-orgb287691" class="outline-3">
+<h3 id="orgb287691">Go on your own</h3>
+<div class="outline-text-3" id="text-orgb287691">
 <p>
 MCX provides a convenient interface to interact with the model's predictive,
 joint prior and posterior distributions, but should you want to build something
@@ -589,9 +589,9 @@ particular, allows to you to write your model with MCX and use another library
 </div>
 </div>
 
-<div id="outline-container-org112c84b" class="outline-2">
-<h2 id="org112c84b">'Graph' as in Graphical model</h2>
-<div class="outline-text-2" id="text-org112c84b">
+<div id="outline-container-org273ee83" class="outline-2">
+<h2 id="org273ee83">'Graph' as in Graphical model</h2>
+<div class="outline-text-2" id="text-org273ee83">
 <p>
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 </p>
@@ -608,7 +608,7 @@ sampling, reparametrization is trivial to do, etc. Manipulating the graph is
 pretty much akin to manipulating the mathematical object.
 </p>
 
-<pre class="example" id="org1749dfe">
+<pre class="example" id="orgcd83a67">
 
                                      +----&gt; logpdf
 @mcx.model                           |
@@ -641,7 +641,7 @@ framework-agnostic. Hell, you could even write, without too much effort, an
 edward2, pymc3 or pyro compiler!
 </p>
 
-<pre class="example" id="orga52136c">
+<pre class="example" id="org13f58f6">
 Example with control flow and different
 </pre>
 
@@ -653,15 +653,15 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 </p>
 
-<pre class="example" id="orgea659ce">
+<pre class="example" id="org71c8620">
 Example model.source_logpdf
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org3a67aaa" class="outline-2">
-<h2 id="org3a67aaa">Inference</h2>
-<div class="outline-text-2" id="text-org3a67aaa">
+<div id="outline-container-orgb70ca8e" class="outline-2">
+<h2 id="orgb70ca8e">Inference</h2>
+<div class="outline-text-2" id="text-orgb70ca8e">
 <p>
 I'll never repeat enough: the modeling language and the inference module are
 completely separate. But they need
@@ -681,7 +681,7 @@ blocks. They form a transition kernel.</li>
 the chains move forward following an execution plan.</li>
 </ol>
 
-<pre class="example" id="org4b8333d">
+<pre class="example" id="orgf74b1ed">
 Runtime (Batch sampler)
 -------------------------------------------------
 Programs (HMC)
@@ -710,10 +710,9 @@ Note: the lower-level routines are being moved to blackjax.
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2020-02-12 Wed 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-04 Mon 14:04</p>
+<p class="date">Created: 2022-04-04 Mon 14:49</p>
 </div>
 </body>
 </html>

@@ -33,7 +33,6 @@
           :with-email t
           :base-directory "posts/"
           :base-extension "org"
-          :with-date t
           :publishing-directory "_public/"
           :recursive f
           :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />"
@@ -41,6 +40,7 @@
           :publishing-function org-html-publish-to-html
           :htmlized-source t
           :with-toc nil
+          :with-date nil
           :auto-sitemap t ;; Recent changes
           :sitemap-title "The typical set"
           :sitemap-filename "recent.org"
