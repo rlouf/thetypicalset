@@ -14,7 +14,9 @@
 (package-install 'htmlize)
 (package-install 'find-lisp)
 (package-install 'org-roam)
+(package-install 's)
 
+(require 's)
 (require 'ox-publish)
 (require 'find-lisp)
 (require 'org-roam)
@@ -59,14 +61,14 @@
         ("blog"
          :author "Rémi Louf"
          :email "remi@thetypicalset.com"
-          :with-email t
+         :with-email t
          :base-directory "posts/blog"
          :base-extension "org"
          :with-date t
          :publishing-directory "_public/blog"
          :recursive nil
          :publishing-function org-html-publish-to-html
-         :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" /><script data-goatcounter=\"https://thetypicalset.goatcounter.com/count\" async src=\"//gc.zgo.at/count.js\"></script>"
+         :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"../style.css\" /><script data-goatcounter=\"https://thetypicalset.goatcounter.com/count\" async src=\"//gc.zgo.at/count.js\"></script>"
          :section-numbers nil
          :htmlized-source t
          :with-toc nil
@@ -81,7 +83,7 @@
         ; All figures, javascript scipts, etc linked to posts
         ("static"
         :base-directory "posts"
-        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|svg\\|pdf\\|mp3\\|ogg\\|swf"
         :publishing-directory "_public/"
         :recursive t
         :publishing-function org-publish-attachment
@@ -96,6 +98,7 @@
         )
         ("org" :components ("blog" "static" "css"))))
 
+
 ; ---------------------------------------------------------------------
 ;                          PUBLISH
 ; ---------------------------------------------------------------------
@@ -106,7 +109,20 @@
   (setq org-id-extra-files (org-roam--list-files org-roam-directory)) ; necessary to make link with IDs work
   (call-interactively 'org-publish-all))
 
-; Add backlinks to the org files before exporting
+; EXTERIOR LINKS -------------------------------------------------
+; Exterior links need to be easily identifiable for readers. They
+; should also open in a new tab.
+; ---
+(defun my/format-external-links (text backend info)
+  (when (org-export-derived-backend-p backend 'html)
+    (when (string-match-p (regexp-quote "http") text)
+      (s-replace "<a" "<a target='_blank' rel='noopener noreferrer' class='external'" text))))
+
+(add-to-list 'org-export-filter-link-functions
+             'my/format-external-links)
+
+
+; --- BACKLINKS ------------------------------------------------------
 (add-hook 'org-export-before-processing-hook 'my/add-roam-backlinks)
 
 (defun my/add-roam-backlinks (backend)

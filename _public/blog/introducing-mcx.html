@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-05 Tue 11:44 -->
+<!-- 2022-04-05 Tue 12:28 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Probabilistic programming via source code rewriting (MCX)</title>
@@ -193,7 +193,7 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script type="text/javascript">
 // @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
 <!--/*--><![CDATA[/*><!--*/
@@ -299,11 +299,11 @@ This implementation is close enough to the mathematical representation \(x \sim 
 </p>
 
 <p>
-Representing the model as a class becomes more tedious with complex graphical models. You could implement the Beta-Binomial model above as a class, thus defining the \(\operatorname{BetaBinomial}\) distribution. In fact <a href="https://docs.pymc.io/en/latest/api/distributions/generated/pymc.BetaBinomial.html">some PPLs do</a> because the Beta-Binomial distribution is a useful abstraction, and <a href="../20220405092607-distributions_are_merely_convenient_abstractions.html#ID-2a325058-fa43-4b50-832b-c02757865643">distributions are merely convenient abstractions</a>. But if you do this for every model you encounter you are effectively building a model zoo; The goal of Probabilistic Programming is to be able combine elementary distributions to express arbitrarily complex models.
+Representing the model as a class becomes more tedious with complex graphical models. You could implement the Beta-Binomial model above as a class, thus defining the \(\operatorname{BetaBinomial}\) distribution. In fact <a target='_blank' rel='noopener noreferrer' class='external' href="https://docs.pymc.io/en/latest/api/distributions/generated/pymc.BetaBinomial.html">some PPLs do</a> because the Beta-Binomial distribution is a useful abstraction, and <a href="../20220405092607-distributions_are_merely_convenient_abstractions.html#ID-2a325058-fa43-4b50-832b-c02757865643">distributions are merely convenient abstractions</a>. But if you do this for every model you encounter you are effectively building a model zoo; The goal of Probabilistic Programming is to be able combine elementary distributions to express arbitrarily complex models.
 </p>
 
 <p>
-Existing PPLs have different ways to do this, I recommend Junpeng's <a href="https://www.youtube.com/watch?v=WHoS1ETYFrw">talk at PyData Córdoba</a> for an overview, but we will take a different approach here. When I design an API, I like to take a sufficiently (but not too) complex example and to <a href="../20220405092736-start_with_designing_the_api_you_want.html#ID-0d452ccf-03aa-47ba-b70e-06b464ed152e">start implementing the API I want</a>. The following linear regression model will do:
+Existing PPLs have different ways to do this, I recommend Junpeng's <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.youtube.com/watch?v=WHoS1ETYFrw">talk at PyData Córdoba</a> for an overview, but we will take a different approach here. When I design an API, I like to take a sufficiently (but not too) complex example and to <a href="../20220405092736-start_with_designing_the_api_you_want.html#ID-0d452ccf-03aa-47ba-b70e-06b464ed152e">start implementing the API I want</a>. The following linear regression model will do:
 </p>
 
 <div class="org-src-container">
@@ -347,9 +347,9 @@ It has random variables, random variables that are used to define othe random va
 Welcome MCX. Well, almost.
 </p>
 
-<div id="outline-container-org5499385" class="outline-2">
-<h2 id="org5499385">Defining probabilistic models with MCX</h2>
-<div class="outline-text-2" id="text-org5499385">
+<div id="outline-container-org33cd036" class="outline-2">
+<h2 id="org33cd036">Defining probabilistic models with MCX</h2>
+<div class="outline-text-2" id="text-org33cd036">
 <p>
 Here is how you express the beta-binomial model in MCX:
 </p>
@@ -388,9 +388,9 @@ observed. While MCX models also represent a distribution, in the API we treat th
 </div>
 </div>
 
-<div id="outline-container-org647f21a" class="outline-2">
-<h2 id="org647f21a">Interacting with MCX models</h2>
-<div class="outline-text-2" id="text-org647f21a">
+<div id="outline-container-org224ae1d" class="outline-2">
+<h2 id="org224ae1d">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-org224ae1d">
 <p>
 Consider the following linear regression model:
 </p>
@@ -519,9 +519,9 @@ Unlike the original model, however, the evaluated program is not a distribution.
 </p>
 </div>
 
-<div id="outline-container-org4358c41" class="outline-3">
-<h3 id="org4358c41">Go on your own</h3>
-<div class="outline-text-3" id="text-org4358c41">
+<div id="outline-container-org627dd25" class="outline-3">
+<h3 id="org627dd25">Go on your own</h3>
+<div class="outline-text-3" id="text-org627dd25">
 <p>
 MCX provides a convenient interface to interact with the model's predictive,
 joint prior and posterior distributions, but should you want to build something
@@ -546,13 +546,13 @@ particular, allows to you to write your model with MCX and use another library
 </div>
 </div>
 </div>
-<div id="outline-container-org1b88422" class="outline-2">
-<h2 id="org1b88422">How does it work? MCX's internals</h2>
-<div class="outline-text-2" id="text-org1b88422">
+<div id="outline-container-org7299565" class="outline-2">
+<h2 id="org7299565">How does it work? MCX's internals</h2>
+<div class="outline-text-2" id="text-org7299565">
 </div>
-<div id="outline-container-org8a44890" class="outline-3">
-<h3 id="org8a44890">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
-<div class="outline-text-3" id="text-org8a44890">
+<div id="outline-container-orga5836ee" class="outline-3">
+<h3 id="orga5836ee">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
+<div class="outline-text-3" id="text-orga5836ee">
 <p>
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 </p>
@@ -569,7 +569,7 @@ sampling, reparametrization is trivial to do, etc. Manipulating the graph is
 pretty much akin to manipulating the mathematical object.
 </p>
 
-<pre class="example" id="org7a0d021">
+<pre class="example" id="org8a1a8dd">
 
                                      +----&gt; logpdf
 @mcx.model                           |
@@ -602,7 +602,7 @@ framework-agnostic. Hell, you could even write, without too much effort, an
 edward2, pymc3 or pyro compiler!
 </p>
 
-<pre class="example" id="org8860a2e">
+<pre class="example" id="org79f1ff3">
 Example with control flow and different
 </pre>
 
@@ -614,15 +614,15 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 </p>
 
-<pre class="example" id="orgb1dcaba">
+<pre class="example" id="orgf67c067">
 model.source_logpdf
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org2fa509b" class="outline-3">
-<h3 id="org2fa509b">Inference</h3>
-<div class="outline-text-3" id="text-org2fa509b">
+<div id="outline-container-org5f4ca26" class="outline-3">
+<h3 id="org5f4ca26">Inference</h3>
+<div class="outline-text-3" id="text-org5f4ca26">
 <p>
 <i>The modeling language and the inference module are completely separate.</i> The modeling language compiles to a logpdf, and that is all the samplers need.
 </p>
@@ -637,7 +637,7 @@ Inference in MCX is also very modular. The idea is that inference in traditional
 <li><i>Runtimes</i>, that tie the data, the model and the kernel together and then make the chains move forward following an execution plan.</li>
 </ol>
 
-<pre class="example" id="org8dac10b">
+<pre class="example" id="orgfb9e1e0">
 Runtime (Sampling loop)
 -------------------------------------------------
 Programs (HMC)
@@ -659,7 +659,7 @@ blocks or blocks you have programmed.
 </p>
 
 <p>
-<b>Update 2022-04-05:</b> Everything related to inference has moved to <a href="https://github.com/blackjax-devs/blackjax">Blackjax</a>, a sampling library which is focused on speed and modularity.
+<b>Update 2022-04-05:</b> Everything related to inference has moved to <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/blackjax-devs/blackjax">Blackjax</a>, a sampling library which is focused on speed and modularity.
 </p>
 </div>
 </div>
@@ -679,7 +679,7 @@ In fact I am not sure everyone who uses PPLs have formalized this, which makes t
 <p class="date">Date: 2020-02-12 Wed 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-05 Tue 11:44</p>
+<p class="date">Created: 2022-04-05 Tue 12:28</p>
 </div>
 </body>
 </html>
