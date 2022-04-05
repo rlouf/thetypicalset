@@ -1,0 +1,19 @@
+name: Publish the typical set
+
+on:
+  push:
+    branches: main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: unbuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build the notes
+        run: |
+           apt-get update
+           apt-get --yes --force-yes install build-essential sqlite3 emacs
+           make clean & make publish
