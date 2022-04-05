@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-04 Mon 20:27 -->
+<!-- 2022-04-05 Tue 10:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MCX or probabilistic programming via source code rewriting</title>
+<title>Probabilistic programming via source code rewriting (MCX)</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
 <style type="text/css">
@@ -241,42 +241,34 @@
 </head>
 <body>
 <div id="content">
-<h1 class="title">MCX or probabilistic programming via source code rewriting</h1>
+<h1 class="title">Probabilistic programming via source code rewriting (MCX)</h1>
 <p>
-Designing a user-friendly API for a Probabilistic Programming Language (PPLs) is
-cursed by the deceiving simplicity of the mathematical representation of
-graphical models. Take a simple Beta-Binomial model:
+The mathematical representation of graphical model is simple. Take the Beta-Binomial model, which is typically used to model the results of \(N\) coin flips in introductory classes:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
 p &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Beta}(1, 2)<span style="font-weight: bold;">\\</span>
-b &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Binomial}(p)
+b &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Binomial}(p, N)
 <span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
 </pre>
 </div>
 
 \begin{align*}
 p &\sim \operatorname{Beta}(1, 2)\\
-b &\sim \operatorname{Binomial}(p)
+Y &\sim \operatorname{Binomial}(p)
 \end{align*}
 
 <p>
-Looking at these equations you are able to comprehend what they represent, and
-their consequences. But these equations are only <b>descriptive</b>, they do not allow us to
-compute anything. To manipulate these models in a useful way we need to extract
-at least two different representations of this object: one that draws samples
-form the prior joint distribution, and the log-probability density function. We
-have a one-to-many relationship between the notation and what we need from it in
-practice, and this one-to-many relationship is not trivial to implement in
-programming languages.
+With a little experience you can quickly comprehend what they represent, their consequences. For instance that they implicitly define a <i>predictive distribution</i> \(\operatorname{CoinFlip}(Y | N)\) and a <i>joint distribution</i> \(\operatorname{CoinFip}(Y, p, N)\)<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>. The equations are <b>declarative</b>: they describe a model, not a computation procedure. Which makes them very <b>user-friendly</b> in the sense that their representation of a model matches closely our mental representation. This is <a href="../20220111192254-an_api_is_good_when_you_do_not_think_about_it.html#ID-1eb7d036-0133-496e-97de-ae4b92793b89">what great APIs do</a>.
 </p>
 
 <p>
-Of course we can implement these two representations separately. This is simple to do
-with "elementary" distributions like the Beta, Dirichlet, Multivariate Normal,
-etc. distributions. As a matter of fact, they are often implemented as a single object that
-implements a <code>sample</code> and a <code>logpdf</code> method. So when you write:
+To build a useful Probabilistic Programming Library \(\lor\) Language (PPL) we need to build at least two functions from this object: one that draws samples form the prior joint distribution, and the log-probability density function. But the one-to-any relationship between the notation and the functions we need in practice is not something that is easy to express in most programming languages. Designing a user-friendly API for a Probabilistic Programming Language is thus cursed.
+</p>
+
+<p>
+Of course we can implement these two representations separately. This is simple to do with "elementary" distributions such as the Beta, Dirichlet, Multivariate Normal, etc. distributions. As a matter of fact, they are often implemented as a single object that implements a <code>sample</code> and a <code>logpdf</code> method. So when you write:
 </p>
 
 <div class="org-src-container">
@@ -285,16 +277,56 @@ implements a <code>sample</code> and a <code>logpdf</code> method. So when you w
 </div>
 
 <p>
-You can draw realizations from this random variable with <code>x.sample()</code> or compute
-the log-probability of x having the value <code>a</code> as <code>x.logpdf(a)</code>. The notation
-mirrors that of <code>x ~ Beta(1., 1.)</code>.
+You can draw realizations from this random variable with
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">x.sample()
+</pre>
+</div>
+
+<p>
+or compute the log-probability of <code>x</code> having the value <code>a</code> as
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">x.logprob(a)
+</pre>
+</div>
+
+<p>
+This implementation is close enough to the mathematical representation \(x \sim \operatorname{Beta}(1., 1.)\). So what is the issue exactly?
 </p>
 
 <p>
-But it becomes more tedious with complex graphical models. You can always
-implement each model as a class, say <code>BetaBinomial</code> for the Beta-Binomial model
-above. But then you are building a model zoo, not a language in which the models
-can be expressed.
+Representing the model as a class becomes more tedious with complex graphical models. You could implement the Beta-Binomial model above as a class, thus defining the \(\operatorname{BetaBinomial}\) distribution. In fact <a href="https://docs.pymc.io/en/latest/api/distributions/generated/pymc.BetaBinomial.html">some PPLs do</a> because the Beta-Binomial distribution is a useful abstraction, and <a href="../20220405092607-distributions_are_merely_convenient_abstractions.html#ID-2a325058-fa43-4b50-832b-c02757865643">distributions are merely convenient abstractions</a>. But if you do this for every model you encounter you are effectively building a model zoo; The goal of Probabilistic Programming is to be able combine elementary distributions to express arbitrarily complex models.
+</p>
+
+<p>
+Existing PPLs have different ways to do this, I recommend Junpeng's <a href="https://www.youtube.com/watch?v=WHoS1ETYFrw">talk at PyData Córdoba</a> for an overview, but we will take a different approach here. When I design an API, I like to take a sufficiently (but not too) complex example and to <a href="../20220405092736-start_with_designing_the_api_you_want.html#ID-0d452ccf-03aa-47ba-b70e-06b464ed152e">start implementing the API I want</a>. The following linear regression model will do:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
+  Y &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(<span style="font-weight: bold;">\theta</span>, <span style="font-weight: bold;">\sigma</span>)<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\theta</span> &amp;= <span style="font-weight: bold;">\alpha</span> + X^{T} <span style="font-weight: bold;">\beta</span><span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\sigma</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfNormal}(1)<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\alpha</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, 10)<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\beta</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, 10)<span style="font-weight: bold;">\\</span>
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+</pre>
+</div>
+
+\begin{align*}
+  Y &\sim \operatorname{Normal}(\theta, \sigma)\\
+  \theta &= \alpha + X^{T} \beta\\
+  \sigma &\sim \operatorname{HalfNormal}(1)\\
+  \alpha &\sim \operatorname{Normal}(0, 10)\\
+  \beta &\sim \operatorname{Normal}(0, 10)\\
+\end{align*}
+
+<p>
+It has random variables, random variables that are used to define othe random variables, and a mathematical expression. Assuming that the design matrix \(X\) is given, it would make sense to implement the model as a python function of \(X\) that returns the \(Y\) values. <a href="../20220111213141-design_by_manipulating_mock_code.html#ID-fff18475-59cb-445e-b738-069f59918aec">In pseudo code</a>:
 </p>
 
 <div class="org-src-container">
@@ -310,64 +342,16 @@ can be expressed.
 </pre>
 </div>
 
-<p>
-What we would like is a language that allows us to manipulate random variables,
-write models as functions of these variables. And once the model is defined, to
-be able to sample from its joint prior and posterior distributions. At the very
-least, it should give you a sampling function and a function that computes the
-log-probability for every position in the state-space. That is what
-probabilistic programming is about.
-</p>
 
 <p>
-We would like a language that allows us to combine such elementary
-distributions, just like above, into an object that gives us its logpdf and
-sampling distribution. If we can do that, we can express any model that is a
-combination of these elementary distributions, sample from its prior and
-posterior distribution. That's what probabilistic programming is about.
+Welcome MCX. Well, almost.
 </p>
 
+<div id="outline-container-orgd4d5358" class="outline-2">
+<h2 id="orgd4d5358">Defining probabilistic models with MCX</h2>
+<div class="outline-text-2" id="text-orgd4d5358">
 <p>
-But programming languages are different: one set of instructions does one thing
-and only one. I can probably write a programme like the one above that would
-give me predictive samples. But then I wouldn’t have the logpdf. There is thus a
-tension between the mathematical notations and the programming language.
-</p>
-
-<p>
-This is a problem of two languages: how do you express in a programming language
-an abstract way of defining models?
-</p>
-
-<p>
-In practice PPLs have different ways to resolve this tension: some build a
-graph, some use effect handlers (I recommend Junpeng's [talk at PyCordoba]() on
-PPLs). MCX's stance is much like Stan's: what if we created our own language,
-close to the mathematical expression, that can then be compiled in a logpdf and
-a sampling function?
-</p>
-
-<p>
-Unlike Stan, MCX is embedded in Python. We would like to benefit from Python's
-automatic differentiation, acceleration and array manipulation libraries. We
-would also like to integrate with Python's still budding machine learning
-ecosystem. MCX should thus be a superset a python: allow every operation python
-allows, but somehow accomodate random variable assignments. Having posed the
-problem in these terms there is only one solution: defining a new syntax and
-modify this syntax at runtime using Python's introspection abilities.
-</p>
-
-<p>
-You want to reason about an abstract object, the model, without having to
-interact with it at a higher level. You want to be able to "sample from its
-posterior distribution", "sample from its prior predictive distribution".
-</p>
-
-<div id="outline-container-org3753511" class="outline-2">
-<h2 id="org3753511">MCX models</h2>
-<div class="outline-text-2" id="text-org3753511">
-<p>
-Without further waiting, here’s how you express the beta-binomial model in MCX:
+Here is how you express the beta-binomial model in MCX:
 </p>
 
 <div class="org-src-container">
@@ -382,36 +366,20 @@ Without further waiting, here’s how you express the beta-binomial model in MCX
 </div>
 
 <p>
-The model is syntactically close to both the mathematical notation and that of a
-standard python function. Notice the <code>&lt;~</code> operator, which is not standard python
-notation. It stands for "random variable" assignment in MCX.
+Yes, this is working code. The model is syntactically close to both the mathematical notation and that of a standard python function. Notice the <code>&lt;~</code> operator, which is not standard python notation. It stands for "random variable" assignment in MCX.
 </p>
 
 <p>
-MCX models are defined as <b>generative functions</b>. Like any function, MCX model
-can be parametrized by passing arguments to the model. <code>beta_binomial</code> takes
-<code>beta</code> as an argument, which can later be used to parametrize the model. It can
-also take data as arguments, such as the values of predictive features in a
-regression model. The <code>return</code> statement defines the model's output, which is a
-measured variable.
+MCX models are defined as <b>generative functions</b>. Like any function, MCX model can be parametrized by passing arguments to the model. <code>beta_binomial</code> takes <code>beta</code> as an argument, which can later be used to parametrize the model. It can also take data as arguments, such as the values of predictive features in a regression model. The <code>return</code> statement defines the model's output, which is a measured variable.
 </p>
 
 <p>
-When you write a MCX model such as the one above you
-implicitely define 2 distributions. First the joint probability distribution of
-the associated graphical model. You can sample from this distribution with the
-<code>mcx.sample_joint(beta_binomial)</code> function. You can also the log-probability for
-a set of values of is random variables with <code>mcx.log_prob(model)</code>.
+When you write a MCX model such as the one above you implicitely define 2 distributions. First the joint probability distribution of the associated graphical model. You can sample from this distribution with the <code>mcx.sample_joint(beta_binomial)</code> function. You can also the log-probability for a set of values of is random variables with <code>mcx.log_prob(model)</code>.
 </p>
 
 <p>
-What happens when you call this function? Under the hood MCX parses the content
-of your model into an intermediate representation, which is a mix between a
-graphical model (which is the mathematical object your model describes) and an
-abstract syntax tree (to maintain control flow). Random variables are identified
-as well as their distributions and the other variables they depend on.
+When you call this function, MCX parses the content of your model into an intermediate representation, which is a mix between a graphical model (which is the mathematical object your model describes) and an abstract syntax tree (to maintain control flow). Random variables are identified as well as their distributions and the other variables they depend on.
 </p>
-
 
 <p>
 Writing a model as a function is intuitive: most bayesian models are generative models. Given input values and parameters they return other values that can be
@@ -420,9 +388,9 @@ observed. While MCX models also represent a distribution, in the API we treat th
 </div>
 </div>
 
-<div id="outline-container-orgff1cb88" class="outline-2">
-<h2 id="orgff1cb88">Interacting with MCX models</h2>
-<div class="outline-text-2" id="text-orgff1cb88">
+<div id="outline-container-org99964df" class="outline-2">
+<h2 id="org99964df">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-org99964df">
 <p>
 Consider the following linear regression model:
 </p>
@@ -439,8 +407,7 @@ Consider the following linear regression model:
 </div>
 
 <p>
-Calling the generative function should return a different value each time it is
-called with a different value of <code>rng_key</code>:
+Calling the generative function should return a different value each time it is called with a different value of <code>rng_key</code>:
 </p>
 
 <div class="org-src-container">
@@ -450,10 +417,7 @@ called with a different value of <code>rng_key</code>:
 </div>
 
 <p>
-Note the apparition of <code>rng_key</code> between the definition and the call here,
-necessary because of JAX's pseudo-random number generation system. It can be
-cumbersome to specify a different <code>rng_key</code> at each call so we can handle the
-splitting automatically using:
+Note the apparition of <code>rng_key</code> between the definition and the call here, necessary because of JAX's pseudo-random number generation system. It can be cumbersome to specify a different <code>rng_key</code> at each call so we can handle the splitting automatically using:
 </p>
 
 <div class="org-src-container">
@@ -466,8 +430,7 @@ fn(10)
 </div>
 
 <p>
-<code>linear_regression</code> is a regular function so we can use JAX's vmap construct to
-obtain a fixed number of samples from the prior predictive distribution.
+<code>linear_regression</code> is a regular function so we can use JAX's vmap construct to obtain a fixed number of samples from the prior predictive distribution.
 </p>
 
 <div class="org-src-container">
@@ -479,8 +442,7 @@ jax.vmap(linear_regression, in_axes=(0, <span style="font-weight: bold; text-dec
 </div>
 
 <p>
-Again, for convenience, we provide a <code>sample_predictive</code> function, which draws
-samples from the function's predictive distribution.
+Again, for convenience, we provide a <code>sample_predictive</code> function, which draws samples from the function's predictive distribution.
 </p>
 
 <div class="org-src-container">
@@ -489,9 +451,7 @@ samples from the function's predictive distribution.
 </div>
 
 <p>
-The generative function implicitly defines a multivariate distribution over the
-model's random variables. We include utilities to sample from this distribution.
-To sample from the prior distribution:
+The generative function implicitly defines a multivariate distribution over the model's random variables. We include utilities to sample from this distribution. To sample from the prior distribution:
 </p>
 
 <div class="org-src-container">
@@ -500,8 +460,7 @@ To sample from the prior distribution:
 </div>
 
 <p>
-Since forward sampling can be an efficient way to debug a model, we also
-introduce a convenient <code>forward</code> method to the model:
+Since forward sampling can be an efficient way to debug a model, we also introduce a convenient <code>forward</code> method to the model:
 </p>
 
 <div class="org-src-container">
@@ -510,8 +469,7 @@ introduce a convenient <code>forward</code> method to the model:
 </div>
 
 <p>
-If you have seeded the model as shown before (recommended when debugging), then
-you can call
+If you have seeded the model as shown before (recommended when debugging), then you can call
 </p>
 
 <div class="org-src-container">
@@ -520,9 +478,7 @@ you can call
 </div>
 
 <p>
-To sample from the posterior distribution we need to specify which variables
-we are conditioning the distribution on (the observed variables) and the
-kernel we use to sample from the posterior:
+To sample from the posterior distribution we need to specify which variables we are conditioning the distribution on (the observed variables) and the kernel we use to sample from the posterior:
 </p>
 
 
@@ -539,9 +495,7 @@ sampler.run(1000)
 </div>
 
 <p>
-Once the model's posterior distribution has been sampled we can define a new
-generative function that is the original function evaluated at the samples from
-the posterior distribution.
+Once the model's posterior distribution has been sampled we can define a new generative function that is the original function evaluated at the samples from the posterior distribution.
 </p>
 
 <div class="org-src-container">
@@ -550,10 +504,7 @@ the posterior distribution.
 </div>
 
 <p>
-When sampling from the predictive distribution, instead of drawing a value for
-each variable from its prior distribution, we sample one position of the chains
-and compute the function's output. Apart from this we can draw samples from
-the generative distribution like we would the model:
+When sampling from the predictive distribution, instead of drawing a value for each variable from its prior distribution, we sample one position of the chains and compute the function's output. Apart from this we can draw samples from the generative distribution like we would the model:
 </p>
 
 <div class="org-src-container">
@@ -564,14 +515,13 @@ mcx.sample_predictive(rng_key, evaluate_model, (x_data,), num_samples=100)
 </div>
 
 <p>
-Unlike the original model, however, the evaluated program is not a distribution.
-It is a generative function for which only predictive distributions are defined.
+Unlike the original model, however, the evaluated program is not a distribution. It is a generative function for which only predictive distributions are defined.
 </p>
 </div>
 
-<div id="outline-container-org6c0fc4a" class="outline-3">
-<h3 id="org6c0fc4a">Go on your own</h3>
-<div class="outline-text-3" id="text-org6c0fc4a">
+<div id="outline-container-org5c3e3d7" class="outline-3">
+<h3 id="org5c3e3d7">Go on your own</h3>
+<div class="outline-text-3" id="text-org5c3e3d7">
 <p>
 MCX provides a convenient interface to interact with the model's predictive,
 joint prior and posterior distributions, but should you want to build something
@@ -596,10 +546,13 @@ particular, allows to you to write your model with MCX and use another library
 </div>
 </div>
 </div>
-
-<div id="outline-container-orge9de83c" class="outline-2">
-<h2 id="orge9de83c">'Graph' as in Graphical model</h2>
-<div class="outline-text-2" id="text-orge9de83c">
+<div id="outline-container-org0b66472" class="outline-2">
+<h2 id="org0b66472">How does it work? MCX's internals</h2>
+<div class="outline-text-2" id="text-org0b66472">
+</div>
+<div id="outline-container-org5b613d4" class="outline-3">
+<h3 id="org5b613d4">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
+<div class="outline-text-3" id="text-org5b613d4">
 <p>
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 </p>
@@ -616,7 +569,7 @@ sampling, reparametrization is trivial to do, etc. Manipulating the graph is
 pretty much akin to manipulating the mathematical object.
 </p>
 
-<pre class="example" id="orgc4f3617">
+<pre class="example" id="org4c70bcd">
 
                                      +----&gt; logpdf
 @mcx.model                           |
@@ -649,7 +602,7 @@ framework-agnostic. Hell, you could even write, without too much effort, an
 edward2, pymc3 or pyro compiler!
 </p>
 
-<pre class="example" id="org8a0c2d1">
+<pre class="example" id="org811b805">
 Example with control flow and different
 </pre>
 
@@ -661,36 +614,31 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 </p>
 
-<pre class="example" id="org7f2fb30">
+<pre class="example" id="org7ac354c">
 Example model.source_logpdf
 </pre>
 </div>
 </div>
 
-<div id="outline-container-orgeeeca34" class="outline-2">
-<h2 id="orgeeeca34">Inference</h2>
-<div class="outline-text-2" id="text-orgeeeca34">
+<div id="outline-container-org61d8cb8" class="outline-3">
+<h3 id="org61d8cb8">Inference</h3>
+<div class="outline-text-3" id="text-org61d8cb8">
 <p>
-I'll never repeat enough: the modeling language and the inference module are
-completely separate. But they need
+<i>The modeling language and the inference module are completely separate.</i> The modeling language compiles to a logpdf, and that is all the samplers need.
 </p>
 
 <p>
-The philosophy is that inference in traditional PPLs can be divided according to
-three different levels of abstraction:
+Inference in MCX is also very modular. The idea is that inference in traditional PPLs can be broken down in three different levels:
 </p>
 
 <ol class="org-ol">
-<li>The building blocks (or routines) of the algorithms: integrators, metrics, proposals, &#x2026;
-which do only one thing and do it well.</li>
-<li>Programs like the HMC algorithm are a particular assembly of these building
-blocks. They form a transition kernel.</li>
-<li>Runtimes, that tie the data, the model and the kernel together and then make
-the chains move forward following an execution plan.</li>
+<li>The building blocks (or <i>routines</i>) of the algorithms: integrators, metrics, proposals, &#x2026; which do only one thing and do it well.</li>
+<li><i>Programs</i> like the HMC algorithm are a particular assembly of these building blocks. They form a transition kernel.</li>
+<li><i>Runtimes</i>, that tie the data, the model and the kernel together and then make the chains move forward following an execution plan.</li>
 </ol>
 
-<pre class="example" id="org0d533eb">
-Runtime (Batch sampler)
+<pre class="example" id="org985a4a6">
+Runtime (Sampling loop)
 -------------------------------------------------
 Programs (HMC)
 -------------------------------------------------
@@ -699,29 +647,40 @@ Routines (velocity Verlet, dynamic proposal, etc.)
 </pre>
 
 <p>
-Most users will interact with the pre-defined programs (HMC or NUTS with the
-Stan warmup) and runtimes. But it is possible to create custom inference, it can
-be as simple as overriding HMC's warmup by subclassing its class, or as
-complicated as implementing your own transition kernel using the available
-blocks or blocks you have programmed.
-</p>
-
-<p>
 MCX comes with sane defaults (runtimes and pre-defined programs), but has many
 trap doors that allow you to tinker with the lower level.
 </p>
 
 <p>
-Note: the lower-level routines are being moved to blackjax.
+Most users will interact with the pre-defined programs (HMC or NUTS with the
+Stan warmup) and runtimes. But it is also possible to create custom inference
+schemes in MCX, it can be as simple as overriding HMC's warmup by subclassing
+it, or as complex as implementing your own transition kernel using the available
+blocks or blocks you have programmed.
+</p>
+
+<p>
+<b>Update 2022-04-05:</b> Everything related to inference has moved to <a href="https://github.com/blackjax-devs/blackjax">Blackjax</a>, a sampling library which is focused on speed and modularity.
 </p>
 </div>
 </div>
 </div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+In fact I am not sure everyone who uses PPLs have formalized this, which makes this notation even more powerful.
+</p></div></div>
+
+
+</div>
+</div></div>
 <div id="postamble" class="status">
 <p class="date">Date: 2020-02-12 Wed 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-04 Mon 20:27</p>
+<p class="date">Created: 2022-04-05 Tue 10:21</p>
 </div>
 </body>
 </html>

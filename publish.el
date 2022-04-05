@@ -69,7 +69,7 @@
          :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"../style.css\" />"
          :section-numbers nil
          :htmlized-source t
-          :with-toc nil
+         :with-toc nil
          :auto-sitemap t
          :sitemap-title "📅 Time-stamped thoughts"
          :sitemap-filename "index.org"

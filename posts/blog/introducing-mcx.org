@@ -1,50 +1,71 @@
-#+TITLE: MCX or probabilistic programming via source code rewriting
+#+TITLE: Probabilistic programming via source code rewriting (MCX)
 #+DATE: <2020-02-12 Wed>
 #+AUTHOR: Rémi Louf
+#+OPTIONS: :eval never-export
 
-Designing a user-friendly API for a Probabilistic Programming Language (PPLs) is
-cursed by the deceiving simplicity of the mathematical representation of
-graphical models. Take a simple Beta-Binomial model:
+The mathematical representation of graphical model is simple. Take the Beta-Binomial model, which is typically used to model the results of $N$ coin flips in introductory classes:
 
 #+begin_src latex :results raw :exports results
 \begin{align*}
 p &\sim \operatorname{Beta}(1, 2)\\
-b &\sim \operatorname{Binomial}(p)
+b &\sim \operatorname{Binomial}(p, N)
 \end{align*}
 #+end_src
 
 #+RESULTS:
 \begin{align*}
 p &\sim \operatorname{Beta}(1, 2)\\
-b &\sim \operatorname{Binomial}(p)
+Y &\sim \operatorname{Binomial}(p)
 \end{align*}
 
-Looking at these equations you are able to comprehend what they represent, and
-their consequences. But these equations are only *descriptive*, they do not allow us to
-compute anything. To manipulate these models in a useful way we need to extract
-at least two different representations of this object: one that draws samples
-form the prior joint distribution, and the log-probability density function. We
-have a one-to-many relationship between the notation and what we need from it in
-practice, and this one-to-many relationship is not trivial to implement in
-programming languages.
+With a little experience you can quickly comprehend what they represent, their consequences. For instance that they implicitly define a /predictive distribution/ $\operatorname{CoinFlip}(Y | N)$ and a /joint distribution/ $\operatorname{CoinFip}(Y, p, N)$[fn:1]. The equations are *declarative*: they describe a model, not a computation procedure. Which makes them very *user-friendly* in the sense that their representation of a model matches closely our mental representation. This is [[id:1eb7d036-0133-496e-97de-ae4b92793b89][what great APIs do]].
 
-Of course we can implement these two representations separately. This is simple to do
-with "elementary" distributions like the Beta, Dirichlet, Multivariate Normal,
-etc. distributions. As a matter of fact, they are often implemented as a single object that
-implements a =sample= and a =logpdf= method. So when you write:
+To build a useful Probabilistic Programming Library $\lor$ Language (PPL) we need to build at least two functions from this object: one that draws samples form the prior joint distribution, and the log-probability density function. But the one-to-any relationship between the notation and the functions we need in practice is not something that is easy to express in most programming languages. Designing a user-friendly API for a Probabilistic Programming Language is thus cursed.
+
+Of course we can implement these two representations separately. This is simple to do with "elementary" distributions such as the Beta, Dirichlet, Multivariate Normal, etc. distributions. As a matter of fact, they are often implemented as a single object that implements a =sample= and a =logpdf= method. So when you write:
 
 #+begin_src python
 x = Beta(1., 1.)
 #+end_src
 
-You can draw realizations from this random variable with =x.sample()= or compute
-the log-probability of x having the value =a= as =x.logpdf(a)=. The notation
-mirrors that of =x ~ Beta(1., 1.)=.
+You can draw realizations from this random variable with
 
-But it becomes more tedious with complex graphical models. You can always
-implement each model as a class, say =BetaBinomial= for the Beta-Binomial model
-above. But then you are building a model zoo, not a language in which the models
-can be expressed.
+#+begin_src python
+x.sample()
+#+end_src
+
+or compute the log-probability of =x= having the value =a= as
+
+#+begin_src python
+x.logprob(a)
+#+end_src
+
+This implementation is close enough to the mathematical representation $x \sim \operatorname{Beta}(1., 1.)$. So what is the issue exactly?
+
+Representing the model as a class becomes more tedious with complex graphical models. You could implement the Beta-Binomial model above as a class, thus defining the $\operatorname{BetaBinomial}$ distribution. In fact [[https://docs.pymc.io/en/latest/api/distributions/generated/pymc.BetaBinomial.html][some PPLs do]] because the Beta-Binomial distribution is a useful abstraction, and [[id:2a325058-fa43-4b50-832b-c02757865643][distributions are merely convenient abstractions]]. But if you do this for every model you encounter you are effectively building a model zoo; The goal of Probabilistic Programming is to be able combine elementary distributions to express arbitrarily complex models.
+
+Existing PPLs have different ways to do this, I recommend Junpeng's [[https://www.youtube.com/watch?v=WHoS1ETYFrw][talk at PyData Córdoba]] for an overview, but we will take a different approach here. When I design an API, I like to take a sufficiently (but not too) complex example and to [[id:0d452ccf-03aa-47ba-b70e-06b464ed152e][start implementing the API I want]]. The following linear regression model will do:
+
+#+begin_src latex :results raw :exports results
+\begin{align*}
+  Y &\sim \operatorname{Normal}(\theta, \sigma)\\
+  \theta &= \alpha + X^{T} \beta\\
+  \sigma &\sim \operatorname{HalfNormal}(1)\\
+  \alpha &\sim \operatorname{Normal}(0, 10)\\
+  \beta &\sim \operatorname{Normal}(0, 10)\\
+\end{align*}
+#+end_src
+
+#+RESULTS:
+\begin{align*}
+  Y &\sim \operatorname{Normal}(\theta, \sigma)\\
+  \theta &= \alpha + X^{T} \beta\\
+  \sigma &\sim \operatorname{HalfNormal}(1)\\
+  \alpha &\sim \operatorname{Normal}(0, 10)\\
+  \beta &\sim \operatorname{Normal}(0, 10)\\
+\end{align*}
+
+It has random variables, random variables that are used to define othe random variables, and a mathematical expression. Assuming that the design matrix $X$ is given, it would make sense to implement the model as a python function of $X$ that returns the $Y$ values. [[id:fff18475-59cb-445e-b738-069f59918aec][In pseudo code]]:
 
 #+begin_src python
 def regression(X):
@@ -58,48 +79,12 @@ def regression(X):
   return predictions
 #+end_src
 
-What we would like is a language that allows us to manipulate random variables,
-write models as functions of these variables. And once the model is defined, to
-be able to sample from its joint prior and posterior distributions. At the very
-least, it should give you a sampling function and a function that computes the
-log-probability for every position in the state-space. That is what
-probabilistic programming is about.
 
-We would like a language that allows us to combine such elementary
-distributions, just like above, into an object that gives us its logpdf and
-sampling distribution. If we can do that, we can express any model that is a
-combination of these elementary distributions, sample from its prior and
-posterior distribution. That's what probabilistic programming is about.
+Welcome MCX. Well, almost.
 
-But programming languages are different: one set of instructions does one thing
-and only one. I can probably write a programme like the one above that would
-give me predictive samples. But then I wouldn’t have the logpdf. There is thus a
-tension between the mathematical notations and the programming language.
+* Defining probabilistic models with MCX
 
-This is a problem of two languages: how do you express in a programming language
-an abstract way of defining models?
-
-In practice PPLs have different ways to resolve this tension: some build a
-graph, some use effect handlers (I recommend Junpeng's [talk at PyCordoba]() on
-PPLs). MCX's stance is much like Stan's: what if we created our own language,
-close to the mathematical expression, that can then be compiled in a logpdf and
-a sampling function?
-
-Unlike Stan, MCX is embedded in Python. We would like to benefit from Python's
-automatic differentiation, acceleration and array manipulation libraries. We
-would also like to integrate with Python's still budding machine learning
-ecosystem. MCX should thus be a superset a python: allow every operation python
-allows, but somehow accomodate random variable assignments. Having posed the
-problem in these terms there is only one solution: defining a new syntax and
-modify this syntax at runtime using Python's introspection abilities.
-
-You want to reason about an abstract object, the model, without having to
-interact with it at a higher level. You want to be able to "sample from its
-posterior distribution", "sample from its prior predictive distribution".
-
-* MCX models
-
-Without further waiting, here’s how you express the beta-binomial model in MCX:
+Here is how you express the beta-binomial model in MCX:
 
 #+begin_src python
 import mcx
@@ -111,29 +96,13 @@ def beta_binomial(beta=2):
   return b
 #+end_src
 
-The model is syntactically close to both the mathematical notation and that of a
-standard python function. Notice the =<~= operator, which is not standard python
-notation. It stands for "random variable" assignment in MCX.
+Yes, this is working code. The model is syntactically close to both the mathematical notation and that of a standard python function. Notice the =<~= operator, which is not standard python notation. It stands for "random variable" assignment in MCX.
 
-MCX models are defined as *generative functions*. Like any function, MCX model
-can be parametrized by passing arguments to the model. =beta_binomial= takes
-=beta= as an argument, which can later be used to parametrize the model. It can
-also take data as arguments, such as the values of predictive features in a
-regression model. The =return= statement defines the model's output, which is a
-measured variable.
+MCX models are defined as *generative functions*. Like any function, MCX model can be parametrized by passing arguments to the model. =beta_binomial= takes =beta= as an argument, which can later be used to parametrize the model. It can also take data as arguments, such as the values of predictive features in a regression model. The =return= statement defines the model's output, which is a measured variable.
 
-When you write a MCX model such as the one above you
-implicitely define 2 distributions. First the joint probability distribution of
-the associated graphical model. You can sample from this distribution with the
-=mcx.sample_joint(beta_binomial)= function. You can also the log-probability for
-a set of values of is random variables with =mcx.log_prob(model)=.
+When you write a MCX model such as the one above you implicitely define 2 distributions. First the joint probability distribution of the associated graphical model. You can sample from this distribution with the =mcx.sample_joint(beta_binomial)= function. You can also the log-probability for a set of values of is random variables with =mcx.log_prob(model)=.
 
-What happens when you call this function? Under the hood MCX parses the content
-of your model into an intermediate representation, which is a mix between a
-graphical model (which is the mathematical object your model describes) and an
-abstract syntax tree (to maintain control flow). Random variables are identified
-as well as their distributions and the other variables they depend on.
-
+When you call this function, MCX parses the content of your model into an intermediate representation, which is a mix between a graphical model (which is the mathematical object your model describes) and an abstract syntax tree (to maintain control flow). Random variables are identified as well as their distributions and the other variables they depend on.
 
 Writing a model as a function is intuitive: most bayesian models are generative models. Given input values and parameters they return other values that can be
 observed. While MCX models also represent a distribution, in the API we treat them first as generative functions.
@@ -152,18 +121,14 @@ def linear_regression(x, lmba=1.):
     return preds
 #+end_src
 
-Calling the generative function should return a different value each time it is
-called with a different value of =rng_key=:
+Calling the generative function should return a different value each time it is called with a different value of =rng_key=:
 
 #+begin_src python
 linear_regression(rng_key, x)
 # 2.3
 #+end_src
 
-Note the apparition of =rng_key= between the definition and the call here,
-necessary because of JAX's pseudo-random number generation system. It can be
-cumbersome to specify a different =rng_key= at each call so we can handle the
-splitting automatically using:
+Note the apparition of =rng_key= between the definition and the call here, necessary because of JAX's pseudo-random number generation system. It can be cumbersome to specify a different =rng_key= at each call so we can handle the splitting automatically using:
 
 #+begin_src python
 fn = mcx.seed(linear_regression, rng_key)
@@ -173,8 +138,7 @@ fn(10)
 # 52.1
 #+end_src
 
-=linear_regression= is a regular function so we can use JAX's vmap construct to
-obtain a fixed number of samples from the prior predictive distribution.
+=linear_regression= is a regular function so we can use JAX's vmap construct to obtain a fixed number of samples from the prior predictive distribution.
 
 #+begin_src python
 import jax
@@ -183,38 +147,31 @@ keys = jax.random.split(rng_key, num_samples)
 jax.vmap(linear_regression, in_axes=(0, None))(keys, x_data)
 #+end_src
 
-Again, for convenience, we provide a =sample_predictive= function, which draws
-samples from the function's predictive distribution.
+Again, for convenience, we provide a =sample_predictive= function, which draws samples from the function's predictive distribution.
 
 #+begin_src python
 mcx.sample_predictive(linear_regression, (x_data,), num_samples=1000)
 #+end_src
 
-The generative function implicitly defines a multivariate distribution over the
-model's random variables. We include utilities to sample from this distribution.
-To sample from the prior distribution:
+The generative function implicitly defines a multivariate distribution over the model's random variables. We include utilities to sample from this distribution. To sample from the prior distribution:
 
 #+begin_src python
 sampler = mcx.sample_joint(rng_key, linear_regression, (x_data,))
 #+end_src
 
-Since forward sampling can be an efficient way to debug a model, we also
-introduce a convenient =forward= method to the model:
+Since forward sampling can be an efficient way to debug a model, we also introduce a convenient =forward= method to the model:
 
 #+begin_src python
 linear_regression.forward(rng_key, x_data)
 #+end_src
 
-If you have seeded the model as shown before (recommended when debugging), then
-you can call
+If you have seeded the model as shown before (recommended when debugging), then you can call
 
 #+begin_src python
 linear_regression.forward(x_data)
 #+end_src
 
-To sample from the posterior distribution we need to specify which variables
-we are conditioning the distribution on (the observed variables) and the
-kernel we use to sample from the posterior:
+To sample from the posterior distribution we need to specify which variables we are conditioning the distribution on (the observed variables) and the kernel we use to sample from the posterior:
 
 
 #+begin_src python
@@ -228,18 +185,13 @@ sampler = mcx.sampler(
 sampler.run(1000)
 #+end_src
 
-Once the model's posterior distribution has been sampled we can define a new
-generative function that is the original function evaluated at the samples from
-the posterior distribution.
+Once the model's posterior distribution has been sampled we can define a new generative function that is the original function evaluated at the samples from the posterior distribution.
 
 #+begin_src python
 evaluated_model = mcx.evaluate(linear_regression, trace)
 #+end_src
 
-When sampling from the predictive distribution, instead of drawing a value for
-each variable from its prior distribution, we sample one position of the chains
-and compute the function's output. Apart from this we can draw samples from
-the generative distribution like we would the model:
+When sampling from the predictive distribution, instead of drawing a value for each variable from its prior distribution, we sample one position of the chains and compute the function's output. Apart from this we can draw samples from the generative distribution like we would the model:
 
 #+begin_src python
 evaluated_model(rng_key, x_data)
@@ -247,8 +199,7 @@ seeded = mcx.seed(evaluated_model, rng_key)
 mcx.sample_predictive(rng_key, evaluate_model, (x_data,), num_samples=100)
 #+end_src
 
-Unlike the original model, however, the evaluated program is not a distribution.
-It is a generative function for which only predictive distributions are defined.
+Unlike the original model, however, the evaluated program is not a distribution. It is a generative function for which only predictive distributions are defined.
 
 ** Go on your own
 
@@ -268,8 +219,8 @@ predictive_sampler(model)
 Which should get you covered for most of your applications. =log_prob=, in
 particular, allows to you to write your model with MCX and use another library
 (e.g. BlackJAX) to sample from the posterior distribution.
-
-* 'Graph' as in Graphical model
+* How does it work? MCX's internals
+** Representing models with graphs (as in probabilistic /graphical/ model)
 
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 
@@ -320,40 +271,36 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 
 #+begin_example
-Example model.source_logpdf
+model.source_logpdf
 #+end_example
 
-* Inference
+** Inference
 
-I'll never repeat enough: the modeling language and the inference module are
-completely separate. But they need
+/The modeling language and the inference module are completely separate./ The modeling language compiles to a logpdf, and that is all the samplers need.
 
-The philosophy is that inference in traditional PPLs can be divided according to
-three different levels of abstraction:
+Inference in MCX is also very modular. The idea is that inference in traditional PPLs can be broken down in three different levels:
 
-1. The building blocks (or routines) of the algorithms: integrators, metrics, proposals, ...
-   which do only one thing and do it well.
-2. Programs like the HMC algorithm are a particular assembly of these building
-   blocks. They form a transition kernel.
-3. Runtimes, that tie the data, the model and the kernel together and then make
-   the chains move forward following an execution plan.
+1. The building blocks (or /routines/) of the algorithms: integrators, metrics, proposals, ... which do only one thing and do it well.
+2. /Programs/ like the HMC algorithm are a particular assembly of these building blocks. They form a transition kernel.
+3. /Runtimes/, that tie the data, the model and the kernel together and then make the chains move forward following an execution plan.
 
 #+begin_example
-Runtime (Batch sampler)
+Runtime (Sampling loop)
 -------------------------------------------------
 Programs (HMC)
 -------------------------------------------------
 Routines (velocity Verlet, dynamic proposal, etc.)
--------------------------------------------------
 #+end_example
-
-Most users will interact with the pre-defined programs (HMC or NUTS with the
-Stan warmup) and runtimes. But it is possible to create custom inference, it can
-be as simple as overriding HMC's warmup by subclassing its class, or as
-complicated as implementing your own transition kernel using the available
-blocks or blocks you have programmed.
 
 MCX comes with sane defaults (runtimes and pre-defined programs), but has many
 trap doors that allow you to tinker with the lower level.
 
-Note: the lower-level routines are being moved to blackjax.
+Most users will interact with the pre-defined programs (HMC or NUTS with the
+Stan warmup) and runtimes. But it is also possible to create custom inference
+schemes in MCX, it can be as simple as overriding HMC's warmup by subclassing
+it, or as complex as implementing your own transition kernel using the available
+blocks or blocks you have programmed.
+
+*Update 2022-04-05:* Everything related to inference has moved to [[https://github.com/blackjax-devs/blackjax][Blackjax]], a sampling library which is focused on speed and modularity.
+
+[fn:1] In fact I am not sure everyone who uses PPLs have formalized this, which makes this notation even more powerful.
