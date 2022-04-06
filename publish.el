@@ -36,7 +36,7 @@
       '(
          ;; The digital garden
          ("notes"
-          :base-directory "posts"
+          :base-directory "org"
           :base-extension "org"
           :publishing-directory "_public/"
           :publishing-function org-html-publish-to-html
@@ -62,7 +62,7 @@
          :author "Rémi Louf"
          :email "remi@thetypicalset.com"
          :with-email t
-         :base-directory "posts/blog"
+         :base-directory "org/blog"
          :base-extension "org"
          :with-date t
          :publishing-directory "_public/blog"
@@ -82,7 +82,7 @@
 
         ; All figures, javascript scipts, etc linked to posts
         ("static"
-        :base-directory "posts"
+        :base-directory "org"
         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|svg\\|pdf\\|mp3\\|ogg\\|swf"
         :publishing-directory "_public/"
         :recursive t
@@ -104,8 +104,8 @@
 ; ---------------------------------------------------------------------
 
 (defun my/publish-all()
-  (setq org-roam-directory "./posts")  ; we first setup the org-roam locations
-  (setq org-roam-db-location "./posts/org-roam.db")  ; we first setup the org-roam locations
+  (setq org-roam-directory "./org")  ; we first setup the org-roam locations
+  (setq org-roam-db-location "./org/org-roam.db")  ; we first setup the org-roam locations
   (setq org-id-extra-files (org-roam--list-files org-roam-directory)) ; necessary to make link with IDs work
   (call-interactively 'org-publish-all))
 
