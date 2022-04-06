@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 09:28 -->
+<!-- 2022-04-06 Wed 08:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>THE ENGINE - a framework for the growth of mobile applications</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -191,31 +192,8 @@
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         displayAlign: "center",
@@ -236,11 +214,10 @@
              }
 });
 </script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">THE ENGINE - a framework for the growth of mobile applications</h1>
 <p>
 A popular set of metrics against which the growth of applications can be measured is the <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.slideshare.net/dmc500hats/startup-metrics-for-pirates-long-version">pirate metrics</a> or AARRR metrics:
@@ -252,7 +229,7 @@ A popular set of metrics against which the growth of applications can be measure
 For a music streaming app it could be to play at least one song entirely. For
 a food delivery service, placing an order;</li>
 <li><b>Retention:</b> the proportion of users who are still there after 1, 7, 30 days,
-etc<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>;</li>
+etc<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>;</li>
 <li><b>Referral:</b> The proportion of users who refer the application to potential
 users;</li>
 <li><b>Revenue:</b> the proportion of users who pay for your service.</li>
@@ -262,7 +239,7 @@ users;</li>
 If you interpret the framework literally, it leads to the following diagram:
 </p>
 
-<pre class="example" id="orgd0a0fa2">
+<pre class="example" id="org1478069">
 New user --&gt; Activated User --&gt; Retained User --&gt; Referral --&gt; Paying User
 </pre>
 
@@ -280,7 +257,7 @@ application, the order of the different steps and how they relate to each
 other. For instance, you might monetize users way before you can call them retained
 or encourage them to refer other people.</li>
 
-<li>The framework is rigid, invites you to think in a linear fashion<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>, when
+<li>The framework is rigid, invites you to think in a linear fashion<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup>, when
 customer applications are all about loops. As a result it is not always clear
 what you need to optimize first in your application, where your biggest
 leverage is; improving one step of the lifecycle may actually improve every
@@ -295,9 +272,9 @@ to pull, you need to graduate from this linear representation.
 </p>
 
 
-<div id="outline-container-org8889732" class="outline-2">
-<h2 id="org8889732">The Engine</h2>
-<div class="outline-text-2" id="text-org8889732">
+<div id="outline-container-org3f96516" class="outline-2">
+<h2 id="org3f96516">The Engine</h2>
+<div class="outline-text-2" id="text-org3f96516">
 <p>
 When I worked on growth at my previous gig, I liked to focus instead on what I
 called the "engine": the set of loops that have the potential to make the growth
@@ -311,9 +288,9 @@ following, I will mostly focus on acquisition and referral.
 </p>
 </div>
 
-<div id="outline-container-orgd1a931d" class="outline-3">
-<h3 id="orgd1a931d">Free applications: the importance of viral loops</h3>
-<div class="outline-text-3" id="text-orgd1a931d">
+<div id="outline-container-org3bc8868" class="outline-3">
+<h3 id="org3bc8868">Free applications: the importance of viral loops</h3>
+<div class="outline-text-3" id="text-org3bc8868">
 <p>
 Acquisition can come from 3 channels:
 </p>
@@ -341,7 +318,7 @@ etc. Viral acquisition forms loops.
 We can redraw the AARRR diagram for our free application as follows:
 </p>
 
-<pre class="example" id="orgaf74262">
+<pre class="example" id="org219ee1c">
 External --&gt; New user --&gt; Activated user --&gt; Retained User
                 |                                |
                 |                                |
@@ -374,7 +351,7 @@ on the onboarding (this is what most users came in for) so more users could
 'work' on the viral loop. The engine roughly looked like this:
 </p>
 
-<pre class="example" id="org94bcd88">
+<pre class="example" id="org3465aab">
                 +--------------+
                 |              |
 External --&gt; New user ----Onboarding----&gt; Activated user --&gt; Retained User
@@ -398,9 +375,9 @@ leaky bucket.
 </div>
 </div>
 
-<div id="outline-container-orged10e30" class="outline-3">
-<h3 id="orged10e30">Not all loops are created equal</h3>
-<div class="outline-text-3" id="text-orged10e30">
+<div id="outline-container-org18cbe67" class="outline-3">
+<h3 id="org18cbe67">Not all loops are created equal</h3>
+<div class="outline-text-3" id="text-org18cbe67">
 <p>
 There are usually several levers you can pull to improve the engine. If I take
 the example of the watermark loop mentionned earlier, we could work on two
@@ -463,9 +440,9 @@ once your MAU hits the 100,000,000 bar.
 </div>
 
 
-<div id="outline-container-org114e5dc" class="outline-3">
-<h3 id="org114e5dc">Monetized application &amp; paid acquisition loops</h3>
-<div class="outline-text-3" id="text-org114e5dc">
+<div id="outline-container-org1861f87" class="outline-3">
+<h3 id="org1861f87">Monetized application &amp; paid acquisition loops</h3>
+<div class="outline-text-3" id="text-org1861f87">
 <p>
 Paid acquisition gets a bad rap these days: they kill startups, they don't scale,
 etc. This is true if your application does not bring any money in the bank, and
@@ -474,7 +451,7 @@ subscription plans, paid acquisition can be transformed into a growth loop as
 well. The idea is simple:
 </p>
 
-<pre class="example" id="org153a204">
+<pre class="example" id="orgfa0c192">
 Paid Acquisition ----&gt; New User ---&gt; Revenue
      |                                  |
      +----------------------------------+
@@ -492,7 +469,7 @@ combination.
 Here is what our engine looked like with paid acquisition:
 </p>
 
-<pre class="example" id="org733320d">
+<pre class="example" id="org01b40b3">
                 +-------------------------------------------- Paying User
                 |                                                |
 External --&gt; New user ----Onboarding----&gt; Activated user --&gt; Retained User
@@ -545,9 +522,9 @@ Paid acquisition is interesting if it pays back quickly, or to kickstart an orga
 
 
 
-<div id="outline-container-orge98db7d" class="outline-2">
-<h2 id="orge98db7d">Other lessons</h2>
-<div class="outline-text-2" id="text-orge98db7d">
+<div id="outline-container-orgccc8ccb" class="outline-2">
+<h2 id="orgccc8ccb">Other lessons</h2>
+<div class="outline-text-2" id="text-orgccc8ccb">
 <p>
 To finish, here are a couple of things I that learned working on growth:
 </p>
@@ -577,12 +554,12 @@ insanely valuable in early stage.</li>
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 I do not think that the framework was meant to be interpreted linearly,
 but I have seen many people do so. It's worth repeating.
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 I don't think it is a useful metrics in itself, usually there is a
 <b>reason</b> why you want user to be retained: more revenue, more referrals, more
 DAU?
@@ -595,7 +572,7 @@ DAU?
 <p class="date">Date: 2018-11-05 Mon 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-06 Wed 09:28</p>
+<p class="date">Created: 2022-04-06 Wed 08:42</p>
 </div>
 </body>
 </html>

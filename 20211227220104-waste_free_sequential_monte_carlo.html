@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 09:27 -->
+<!-- 2022-04-06 Wed 08:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Waste-free Sequential Monte Carlo</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -191,31 +192,8 @@
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         displayAlign: "center",
@@ -236,11 +214,10 @@
              }
 });
 </script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Waste-free Sequential Monte Carlo</h1>
 <dl class="org-dl">
 <dt>tags</dt><dd><a href="20220109161529-sampling.html#ID-4f97031f-68e8-49ed-b814-ae366b7886b6">Sampling</a></dd>
@@ -263,9 +240,9 @@ Waste-free SMC uses intermediate steps as new particles.
 </ul>
 
 
-<div id="outline-container-org7a8d4d4" class="outline-2">
-<h2 id="org7a8d4d4">Principle</h2>
-<div class="outline-text-2" id="text-org7a8d4d4">
+<div id="outline-container-org22211b4" class="outline-2">
+<h2 id="org22211b4">Principle</h2>
+<div class="outline-text-2" id="text-org22211b4">
 <p>
 If there are \(N\) particles, we only resample \(M = N/P\) particles. Each resampled particle is moved \(P-1\) times and each iterate is taken to form a new sample of size \(N\).
 </p>
@@ -372,9 +349,9 @@ The equivalent algorithm 1 would be:
 </div>
 
 
-<div id="outline-container-org00af45f" class="outline-2">
-<h2 id="org00af45f">Code</h2>
-<div class="outline-text-2" id="text-org00af45f">
+<div id="outline-container-org6783589" class="outline-2">
+<h2 id="org6783589">Code</h2>
+<div class="outline-text-2" id="text-org6783589">
 <p>
 Let us now refactor the original smc code:
 </p>
@@ -474,8 +451,8 @@ First separate vanilly and waste-free SMC:
 </div>
 </div>
 
-<div id="outline-container-org24fbfb6" class="outline-2">
-<h2 id="org24fbfb6">Links to this note</h2>
+<div id="outline-container-org3d40895" class="outline-2">
+<h2 id="org3d40895">Links to this note</h2>
 </div>
 </div>
 </body>

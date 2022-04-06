@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 09:27 -->
+<!-- 2022-04-06 Wed 08:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Prior choice</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -191,31 +192,8 @@
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         displayAlign: "center",
@@ -236,17 +214,16 @@
              }
 });
 </script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Prior choice</h1>
 
 
-<div id="outline-container-org4510933" class="outline-2">
-<h2 id="org4510933">Negative Binomial</h2>
-<div class="outline-text-2" id="text-org4510933">
+<div id="outline-container-orgd095fe4" class="outline-2">
+<h2 id="orgd095fe4">Negative Binomial</h2>
+<div class="outline-text-2" id="text-orgd095fe4">
 <p>
 Generic priors often fail dramatically when used for the dispersion parameter of the <a href="20210420200526-negative_binomial_distribution.html#ID-273bfd3a-7e6e-4971-b422-048f930ae5b0">Negative Binomial Distribution</a>.
 </p>
@@ -290,17 +267,17 @@ and the standard deviation of \(z\) is \(\sqrt{\gamma}\). This Gamma distributio
 </p>
 </div>
 
-<div id="outline-container-org3c40031" class="outline-3">
-<h3 id="org3c40031">Numerically</h3>
-<div class="outline-text-3" id="text-org3c40031">
+<div id="outline-container-orgfadce8f" class="outline-3">
+<h3 id="orgfadce8f">Numerically</h3>
+<div class="outline-text-3" id="text-orgfadce8f">
 <p>
 Are there general numerical transformations on the computation graph that we can learn from this example?
 </p>
 </div>
 
-<div id="outline-container-orgd7adfc3" class="outline-4">
-<h4 id="orgd7adfc3">Model implementation in PyMC3</h4>
-<div class="outline-text-4" id="text-orgd7adfc3">
+<div id="outline-container-org99145c9" class="outline-4">
+<h4 id="org99145c9">Model implementation in PyMC3</h4>
+<div class="outline-text-4" id="text-org99145c9">
 <p>
 The original model is written:
 </p>
@@ -328,9 +305,9 @@ Note that we introduced a new degree of liberty by expanding the Negative Binomi
 </div>
 </div>
 
-<div id="outline-container-org99e6b88" class="outline-4">
-<h4 id="org99e6b88">The logpdf</h4>
-<div class="outline-text-4" id="text-org99e6b88">
+<div id="outline-container-orgb4b53b4" class="outline-4">
+<h4 id="orgb4b53b4">The logpdf</h4>
+<div class="outline-text-4" id="text-orgb4b53b4">
 <p>
 The logpdf of the negative binomial of parameters \(\mu\) and \(\alpha\) is implemented as
 </p>
@@ -390,8 +367,8 @@ So the logpdf of the re-parametrized negative binomial is given by:
 </div>
 </div>
 
-<div id="outline-container-orgea3c39f" class="outline-2">
-<h2 id="orgea3c39f">Links to this note</h2>
+<div id="outline-container-orgca1f6f3" class="outline-2">
+<h2 id="orgca1f6f3">Links to this note</h2>
 </div>
 </div>
 </body>

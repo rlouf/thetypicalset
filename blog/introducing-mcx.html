@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 09:28 -->
+<!-- 2022-04-06 Wed 08:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Probabilistic programming via source code rewriting (MCX)</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -191,31 +192,8 @@
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         displayAlign: "center",
@@ -236,11 +214,10 @@
              }
 });
 </script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Probabilistic programming via source code rewriting (MCX)</h1>
 <p>
 The mathematical representation of graphical model is simple. Take the Beta-Binomial model, which is typically used to model the results of \(N\) coin flips in introductory classes:
@@ -260,7 +237,7 @@ Y &\sim \operatorname{Binomial}(p)
 \end{align*}
 
 <p>
-With a little experience you can quickly comprehend what they represent, their consequences. For instance that they implicitly define a <i>predictive distribution</i> \(\operatorname{CoinFlip}(Y | N)\) and a <i>joint distribution</i> \(\operatorname{CoinFip}(Y, p, N)\)<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>. The equations are <b>declarative</b>: they describe a model, not a computation procedure. Which makes them very <b>user-friendly</b> in the sense that their representation of a model matches closely our mental representation. This is <a href="../20220111192254-an_api_is_good_when_you_do_not_think_about_it.html#ID-1eb7d036-0133-496e-97de-ae4b92793b89">what great APIs do</a>.
+With a little experience you can quickly comprehend what they represent, their consequences. For instance that they implicitly define a <i>predictive distribution</i> \(\operatorname{CoinFlip}(Y | N)\) and a <i>joint distribution</i> \(\operatorname{CoinFip}(Y, p, N)\)<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>. The equations are <b>declarative</b>: they describe a model, not a computation procedure. Which makes them very <b>user-friendly</b> in the sense that their representation of a model matches closely our mental representation. This is <a href="../20220111192254-an_api_is_good_when_you_do_not_think_about_it.html#ID-1eb7d036-0133-496e-97de-ae4b92793b89">what great APIs do</a>.
 </p>
 
 <p>
@@ -347,9 +324,9 @@ It has random variables, random variables that are used to define othe random va
 Welcome MCX. Well, almost.
 </p>
 
-<div id="outline-container-orgfaf53c9" class="outline-2">
-<h2 id="orgfaf53c9">Defining probabilistic models with MCX</h2>
-<div class="outline-text-2" id="text-orgfaf53c9">
+<div id="outline-container-org81ac738" class="outline-2">
+<h2 id="org81ac738">Defining probabilistic models with MCX</h2>
+<div class="outline-text-2" id="text-org81ac738">
 <p>
 Here is how you express the beta-binomial model in MCX:
 </p>
@@ -388,9 +365,9 @@ observed. While MCX models also represent a distribution, in the API we treat th
 </div>
 </div>
 
-<div id="outline-container-org3e1ec06" class="outline-2">
-<h2 id="org3e1ec06">Interacting with MCX models</h2>
-<div class="outline-text-2" id="text-org3e1ec06">
+<div id="outline-container-orgdf464e8" class="outline-2">
+<h2 id="orgdf464e8">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-orgdf464e8">
 <p>
 Consider the following linear regression model:
 </p>
@@ -519,9 +496,9 @@ Unlike the original model, however, the evaluated program is not a distribution.
 </p>
 </div>
 
-<div id="outline-container-orgbacd649" class="outline-3">
-<h3 id="orgbacd649">Go on your own</h3>
-<div class="outline-text-3" id="text-orgbacd649">
+<div id="outline-container-orgb959818" class="outline-3">
+<h3 id="orgb959818">Go on your own</h3>
+<div class="outline-text-3" id="text-orgb959818">
 <p>
 MCX provides a convenient interface to interact with the model's predictive,
 joint prior and posterior distributions, but should you want to build something
@@ -546,13 +523,13 @@ particular, allows to you to write your model with MCX and use another library
 </div>
 </div>
 </div>
-<div id="outline-container-orgcbb968a" class="outline-2">
-<h2 id="orgcbb968a">How does it work? MCX's internals</h2>
-<div class="outline-text-2" id="text-orgcbb968a">
+<div id="outline-container-org27aad59" class="outline-2">
+<h2 id="org27aad59">How does it work? MCX's internals</h2>
+<div class="outline-text-2" id="text-org27aad59">
 </div>
-<div id="outline-container-orga1f54d6" class="outline-3">
-<h3 id="orga1f54d6">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
-<div class="outline-text-3" id="text-orga1f54d6">
+<div id="outline-container-org23c3664" class="outline-3">
+<h3 id="org23c3664">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
+<div class="outline-text-3" id="text-org23c3664">
 <p>
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 </p>
@@ -569,7 +546,7 @@ sampling, reparametrization is trivial to do, etc. Manipulating the graph is
 pretty much akin to manipulating the mathematical object.
 </p>
 
-<pre class="example" id="orgef9d16f">
+<pre class="example" id="orgef8dcd5">
 
                                      +----&gt; logpdf
 @mcx.model                           |
@@ -602,7 +579,7 @@ framework-agnostic. Hell, you could even write, without too much effort, an
 edward2, pymc3 or pyro compiler!
 </p>
 
-<pre class="example" id="org76077b2">
+<pre class="example" id="org69d72da">
 Example with control flow and different
 </pre>
 
@@ -614,15 +591,15 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 </p>
 
-<pre class="example" id="org8abdc8f">
+<pre class="example" id="org2a4efa4">
 model.source_logpdf
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org5c9ea88" class="outline-3">
-<h3 id="org5c9ea88">Inference</h3>
-<div class="outline-text-3" id="text-org5c9ea88">
+<div id="outline-container-orgd573b78" class="outline-3">
+<h3 id="orgd573b78">Inference</h3>
+<div class="outline-text-3" id="text-orgd573b78">
 <p>
 <i>The modeling language and the inference module are completely separate.</i> The modeling language compiles to a logpdf, and that is all the samplers need.
 </p>
@@ -637,7 +614,7 @@ Inference in MCX is also very modular. The idea is that inference in traditional
 <li><i>Runtimes</i>, that tie the data, the model and the kernel together and then make the chains move forward following an execution plan.</li>
 </ol>
 
-<pre class="example" id="orge16ff9b">
+<pre class="example" id="org4920611">
 Runtime (Sampling loop)
 -------------------------------------------------
 Programs (HMC)
@@ -668,7 +645,7 @@ blocks or blocks you have programmed.
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 In fact I am not sure everyone who uses PPLs have formalized this, which makes this notation even more powerful.
 </p></div></div>
 
@@ -679,7 +656,7 @@ In fact I am not sure everyone who uses PPLs have formalized this, which makes t
 <p class="date">Date: 2020-02-12 Wed 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-06 Wed 09:28</p>
+<p class="date">Created: 2022-04-06 Wed 08:42</p>
 </div>
 </body>
 </html>

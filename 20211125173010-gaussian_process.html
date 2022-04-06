@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 09:27 -->
+<!-- 2022-04-06 Wed 08:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gaussian process</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -191,31 +192,8 @@
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         displayAlign: "center",
@@ -236,11 +214,10 @@
              }
 });
 </script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Gaussian process</h1>
 <dl class="org-dl">
 <dt>tags</dt><dd><a href="20220105154404-probability_distribution.html#ID-accc4a58-2f96-42da-a43d-c8140996d0d3">Probability distribution</a></dd>
@@ -276,9 +253,9 @@ A very import special case of Gaussian processes is <a href="20211213085917-gaus
 </p>
 
 
-<div id="outline-container-org85b6432" class="outline-2">
-<h2 id="org85b6432">Kernels</h2>
-<div class="outline-text-2" id="text-org85b6432">
+<div id="outline-container-org8205844" class="outline-2">
+<h2 id="org8205844">Kernels</h2>
+<div class="outline-text-2" id="text-org8205844">
 <p>
 We often express the covariance function \(\Sigma(x, x')\) as a function of a <i>kernel</i> \(K(x,x')\)):
 </p>
@@ -310,18 +287,18 @@ We can combine kernels. The <a href="20211206102342-combine_kernels_by_multiplic
 </div>
 
 
-<div id="outline-container-org6ead2ba" class="outline-2">
-<h2 id="org6ead2ba">Sample</h2>
-<div class="outline-text-2" id="text-org6ead2ba">
+<div id="outline-container-orged1ed74" class="outline-2">
+<h2 id="orged1ed74">Sample</h2>
+<div class="outline-text-2" id="text-orged1ed74">
 <p>
 How to <a href="20211206204210-sample_from_a_gaussian_process_predictive_distribution.html#ID-00ed041f-9d96-4d76-833f-39d1c2e40e70">Sample from a Gaussian Process predictive distribution</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org58afc4b" class="outline-2">
-<h2 id="org58afc4b">Learn</h2>
-<div class="outline-text-2" id="text-org58afc4b">
+<div id="outline-container-orga3143f9" class="outline-2">
+<h2 id="orga3143f9">Learn</h2>
+<div class="outline-text-2" id="text-orga3143f9">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://distill.pub/2019/visual-exploration-gaussian-processes/">Visual exploration of gaussian processes</a> is a very good introduction</li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://yugeten.github.io/posts/2019/09/GP/">Gaussian Process, not quite for dummies</a> is excellent, starts from gaussians to gaussian in high dimensions to get to gaussian process. One of the best things I've read on the topic.</li>
@@ -330,9 +307,9 @@ How to <a href="20211206204210-sample_from_a_gaussian_process_predictive_distrib
 </div>
 </div>
 
-<div id="outline-container-org79e4564" class="outline-2">
-<h2 id="org79e4564">Use</h2>
-<div class="outline-text-2" id="text-org79e4564">
+<div id="outline-container-org06dee2b" class="outline-2">
+<h2 id="org06dee2b">Use</h2>
+<div class="outline-text-2" id="text-org06dee2b">
 <p>
 Here is a list of libraries implementating different flavors of Gaussian processes. The catch is that gaussian processes can quick get computation-intensive.
 </p>
@@ -345,17 +322,8 @@ Here is a list of libraries implementating different flavors of Gaussian process
 </div>
 </div>
 
-<div id="outline-container-orgb514a53" class="outline-2">
-<h2 id="orgb514a53">Links to this note</h2>
-<div class="outline-text-2" id="text-orgb514a53">
-<ul class="org-ul">
-<li><a href="./20211129201642-wiener_kernel.html">Wiener kernel</a></li>
-<li><a href="./20211129163720-squared_exponential_kernel.html">Squared exponential kernel</a></li>
-<li><a href="./20211129200726-gaussian_noise_kernel.html">Ornstein-Uhlenbeck kernel</a></li>
-<li><a href="./20211125113956-my_digital_garden.html">Navigate linked notes</a></li>
-<li><a href="./20211125113956-my_digital_garden.html">Navigate linked notes</a></li>
-</ul>
-</div>
+<div id="outline-container-orga856406" class="outline-2">
+<h2 id="orga856406">Links to this note</h2>
 </div>
 </div>
 </body>

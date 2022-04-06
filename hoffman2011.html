@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 09:27 -->
+<!-- 2022-04-06 Wed 08:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian Monte Carlo</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -191,31 +192,8 @@
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         displayAlign: "center",
@@ -236,11 +214,10 @@
              }
 });
 </script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian Monte Carlo</h1>
 <p>
 HMC requires users to specify two parameters:
@@ -249,9 +226,9 @@ HMC requires users to specify two parameters:
 <li>A step size \(\epsilon\). It is too large the simulation will be inaccurate and lead to poor acceptance rate; too small computation will be wasted.</li>
 <li>A number of integration steps \(N\). If it is too small, slow mixing; if it is too large the trajectory can loop back to the original point.</li>
 </ol>
-<div id="outline-container-orga88f8d3" class="outline-2">
-<h2 id="orga88f8d3">A metric to decide when we've integrated for "long enouh"</h2>
-<div class="outline-text-2" id="text-orga88f8d3">
+<div id="outline-container-org7560e5a" class="outline-2">
+<h2 id="org7560e5a">A metric to decide when we've integrated for "long enouh"</h2>
+<div class="outline-text-2" id="text-org7560e5a">
 <p>
 NUTS = extension of HMC that eliminates the need to specify a fixed value of \(N\). The metric used to tell us when we have simulated the dynamics for long enough is the squared distance between the initial position \(\theta\) and current position \(\tilde{\theta}\):
 </p>
@@ -281,28 +258,28 @@ where \(\tilde{r}\) is the current momentum. The idea is to run the integrator u
 </div>
 
 
-<div id="outline-container-org364071a" class="outline-2">
-<h2 id="org364071a">The NUTS algorithm</h2>
-<div class="outline-text-2" id="text-org364071a">
+<div id="outline-container-org56f3d4d" class="outline-2">
+<h2 id="org56f3d4d">The NUTS algorithm</h2>
+<div class="outline-text-2" id="text-org56f3d4d">
 <p>
 Let \(\mathcal{B}\) be the set of states that the integrator traces out during a NUTS iteration, and \(\mathcal{C}\) the subset of those states to which we can transition without violating detailed balance.
 </p>
 </div>
 
-<div id="outline-container-org93b6b41" class="outline-3">
-<h3 id="org93b6b41">Theory</h3>
+<div id="outline-container-orgc5fc1ff" class="outline-3">
+<h3 id="orgc5fc1ff">Theory</h3>
 </div>
 
-<div id="outline-container-org727b1cd" class="outline-3">
-<h3 id="org727b1cd">An algorithm that satisfies the constraints</h3>
+<div id="outline-container-org96dd640" class="outline-3">
+<h3 id="org96dd640">An algorithm that satisfies the constraints</h3>
 </div>
-<div id="outline-container-org92691fe" class="outline-3">
-<h3 id="org92691fe">A more sophisticated algoritm</h3>
+<div id="outline-container-org30385af" class="outline-3">
+<h3 id="org30385af">A more sophisticated algoritm</h3>
 </div>
 </div>
 
-<div id="outline-container-orgdd60afd" class="outline-2">
-<h2 id="orgdd60afd">Links to this note</h2>
+<div id="outline-container-org3c98067" class="outline-2">
+<h2 id="org3c98067">Links to this note</h2>
 </div>
 </div>
 </body>

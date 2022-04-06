@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 09:27 -->
+<!-- 2022-04-06 Wed 08:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Penalising model component complexity: A principled, practical approach to constructing priors</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -191,31 +192,8 @@
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         displayAlign: "center",
@@ -236,25 +214,24 @@
              }
 });
 </script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Penalising model component complexity: A principled, practical approach to constructing priors</h1>
 
-<div id="outline-container-org982c23d" class="outline-2">
-<h2 id="org982c23d">Summary</h2>
-<div class="outline-text-2" id="text-org982c23d">
+<div id="outline-container-org6e5fa19" class="outline-2">
+<h2 id="org6e5fa19">Summary</h2>
+<div class="outline-text-2" id="text-org6e5fa19">
 <p>
 The authors introduce a new methodology to design priors for models with a nested structure, i.e. for which the model component is defined to be an extension of a base model (for instance the <a href="20210420200526-negative_binomial_distribution.html#ID-273bfd3a-7e6e-4971-b422-048f930ae5b0">Negative Binomial Distribution</a> is an extension of the Poisson distribution). <i>Penalized Complexity (PC) Priors</i> are designed to penalize the complexity for deviating from the base model.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org2a7b8e1" class="outline-2">
-<h2 id="org2a7b8e1">Priors specified using a base model</h2>
-<div class="outline-text-2" id="text-org2a7b8e1">
+<div id="outline-container-orga182cba" class="outline-2">
+<h2 id="orga182cba">Priors specified using a base model</h2>
+<div class="outline-text-2" id="text-orga182cba">
 <p>
 For a model \(\phi(x|\zeta)\) with flexibility parameter \(\zeta\) the base model is the simplest model in the class and we asssume it corresponds to \(\zeta = 0\).
 </p>
@@ -267,8 +244,8 @@ For the multivariate case we can allow for correlations among components, and un
 </div>
 </div>
 
-<div id="outline-container-orga49f30a" class="outline-2">
-<h2 id="orga49f30a">Links to this note</h2>
+<div id="outline-container-org954ef65" class="outline-2">
+<h2 id="org954ef65">Links to this note</h2>
 </div>
 </div>
 </body>

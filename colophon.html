@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 09:27 -->
+<!-- 2022-04-06 Wed 08:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Building the typical set</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
-<style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -31,8 +31,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -41,21 +42,21 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -191,51 +192,28 @@
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Building the typical set</h1>
 
-<div id="orgc76dd64" class="figure">
+<div id="org5b2bd58" class="figure">
 <p><img src="img/sisyphus.gif" alt="sisyphus.gif" width="100%" />
 </p>
 </div>
 
-<div id="outline-container-org3f9c1e9" class="outline-2">
-<h2 id="org3f9c1e9"><span class="done DONE">DONE</span> Publish my org-roam notes</h2>
-<div class="outline-text-2" id="text-org3f9c1e9">
+<div id="outline-container-orga7dd053" class="outline-2">
+<h2 id="orga7dd053"><span class="done DONE">DONE</span> Publish my org-roam notes</h2>
+<div class="outline-text-2" id="text-orga7dd053">
 <p>
 This should help: <a target='_blank' rel='noopener noreferrer' class='external' href="https://gitlab.com/ngm/commonplace/-/blob/master/publish.el">https://gitlab.com/ngm/commonplace/-/blob/master/publish.el</a>
 </p>
 </div>
-<div id="outline-container-orgedf5bc8" class="outline-3">
-<h3 id="orgedf5bc8"><span class="done DONE">DONE</span> Translate the links (from ids to files)</h3>
-<div class="outline-text-3" id="text-orgedf5bc8">
+<div id="outline-container-orgf5ff891" class="outline-3">
+<h3 id="orgf5ff891"><span class="done DONE">DONE</span> Translate the links (from ids to files)</h3>
+<div class="outline-text-3" id="text-orgf5ff891">
 <div class="org-src-container">
 <pre class="src src-elisp">(<span style="font-weight: bold;">setq</span> org-id-extra-files (org-roam--list-file org-roam-directory))
 </pre>
@@ -243,45 +221,45 @@ This should help: <a target='_blank' rel='noopener noreferrer' class='external' 
 </div>
 </div>
 
-<div id="outline-container-org6b02bea" class="outline-3">
-<h3 id="org6b02bea"><span class="done DONE">DONE</span> Add backlinks</h3>
-<div class="outline-text-3" id="text-org6b02bea">
+<div id="outline-container-org9ebbc69" class="outline-3">
+<h3 id="org9ebbc69"><span class="done DONE">DONE</span> Add backlinks</h3>
+<div class="outline-text-3" id="text-org9ebbc69">
 </div>
 </div>
-<div id="outline-container-org14ecd1f" class="outline-3">
-<h3 id="org14ecd1f"><span class="done DONE">DONE</span> Add a litle icon to identify external links</h3>
-<div class="outline-text-3" id="text-org14ecd1f">
+<div id="outline-container-org4652984" class="outline-3">
+<h3 id="org4652984"><span class="done DONE">DONE</span> Add a litle icon to identify external links</h3>
+<div class="outline-text-3" id="text-org4652984">
 </div>
 </div>
-<div id="outline-container-orgd837273" class="outline-3">
-<h3 id="orgd837273"><span class="done DONE">DONE</span> Add GoatCounter</h3>
-<div class="outline-text-3" id="text-orgd837273">
+<div id="outline-container-org5939724" class="outline-3">
+<h3 id="org5939724"><span class="done DONE">DONE</span> Add GoatCounter</h3>
+<div class="outline-text-3" id="text-org5939724">
 </div>
 </div>
-<div id="outline-container-org405573c" class="outline-3">
-<h3 id="org405573c"><span class="done DONE">DONE</span> Copy and display SVGs</h3>
-<div class="outline-text-3" id="text-org405573c">
+<div id="outline-container-org687f3b7" class="outline-3">
+<h3 id="org687f3b7"><span class="done DONE">DONE</span> Copy and display SVGs</h3>
+<div class="outline-text-3" id="text-org687f3b7">
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-org2ac8708" class="outline-2">
-<h2 id="org2ac8708"><span class="todo TODO">TODO</span> Navigation</h2>
-<div class="outline-text-2" id="text-org2ac8708">
+<div id="outline-container-orgc60874d" class="outline-2">
+<h2 id="orgc60874d"><span class="todo TODO">TODO</span> Navigation</h2>
+<div class="outline-text-2" id="text-orgc60874d">
 </div>
-<div id="outline-container-org2f6b088" class="outline-3">
-<h3 id="org2f6b088"><span class="todo TODO">TODO</span> Show the full graph</h3>
-<div class="outline-text-3" id="text-org2f6b088">
+<div id="outline-container-org7d5b575" class="outline-3">
+<h3 id="org7d5b575"><span class="todo TODO">TODO</span> Show the full graph</h3>
+<div class="outline-text-3" id="text-org7d5b575">
 <p>
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://hugocisneros.com/blog/my-org-roam-notes-workflow/">Hugo Cisneros</a> vizualises the graph stored in the Org-roam db with a javascript animation.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org46edf49" class="outline-3">
-<h3 id="org46edf49"><span class="todo TODO">TODO</span> Miller Columns</h3>
-<div class="outline-text-3" id="text-org46edf49">
+<div id="outline-container-orgdb01791" class="outline-3">
+<h3 id="orgdb01791"><span class="todo TODO">TODO</span> Miller Columns</h3>
+<div class="outline-text-3" id="text-orgdb01791">
 <p>
 See <a target='_blank' rel='noopener noreferrer' class='external' href="https://notes.andymatuschak.org/About_these_notes">Andy Matuschak's notes</a> for a great implementation, Jethro Kuan and Neil Mather also use this.
 </p>
@@ -300,9 +278,9 @@ Found <a target='_blank' rel='noopener noreferrer' class='external' href="https:
 </div>
 </div>
 
-<div id="outline-container-orgad4bbb9" class="outline-3">
-<h3 id="orgad4bbb9"><span class="todo TODO">TODO</span> Show graph neighbourhood in addition to / instead of backlinks</h3>
-<div class="outline-text-3" id="text-orgad4bbb9">
+<div id="outline-container-org3207ee6" class="outline-3">
+<h3 id="org3207ee6"><span class="todo TODO">TODO</span> Show graph neighbourhood in addition to / instead of backlinks</h3>
+<div class="outline-text-3" id="text-org3207ee6">
 <p>
 The graph could be shown ont
 </p>
@@ -310,12 +288,12 @@ The graph could be shown ont
 </div>
 </div>
 
-<div id="outline-container-org2eef14c" class="outline-2">
-<h2 id="org2eef14c"><span class="todo TODO">TODO</span> Page preview when hovering on a link</h2>
+<div id="outline-container-org81ff5ee" class="outline-2">
+<h2 id="org81ff5ee"><span class="todo TODO">TODO</span> Page preview when hovering on a link</h2>
 </div>
-<div id="outline-container-org43a1c0c" class="outline-2">
-<h2 id="org43a1c0c"><span class="todo TODO">TODO</span> Build the html in github CI</h2>
-<div class="outline-text-2" id="text-org43a1c0c">
+<div id="outline-container-orge7daa31" class="outline-2">
+<h2 id="orge7daa31"><span class="todo TODO">TODO</span> Build the html in github CI</h2>
+<div class="outline-text-2" id="text-orge7daa31">
 <p>
 Build time is reasonable for now, but I expect it to increase quickly (Neil Mather talks about 50 minute long builds&#x2026;)
 </p>
