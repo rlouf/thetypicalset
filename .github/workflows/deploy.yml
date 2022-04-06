@@ -2,18 +2,31 @@ name: Publish the typical set
 
 on:
   push:
-    branches: main
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
-  build:
-    runs-on: unbuntu-latest
+  build-and-deploy:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2.3.1
+        with:
+          persist-credentials: false
 
-      - name: Build the notes
+      - name: Set up environment
         run: |
-           apt-get update
-           apt-get --yes --force-yes install build-essential sqlite3 emacs
-           make clean & make publish
+          apt-get update
+          apt-get --yes --force-yes install build-essentials sqlite3 emacs
+
+      - name: Build the html from org files
+        run: |
+          make publish
+
+      - name: Publish docs
+        uses: JamesIves/github-pages-deploy-action@3.6.2
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: public
+          CLEAN: true
