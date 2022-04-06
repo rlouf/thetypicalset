@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-05 Tue 16:14 -->
+<!-- 2022-04-06 Wed 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Explore linked notes</title>
+<title>Navigate linked notes</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Rémi Louf" />
 <style type="text/css">
@@ -219,7 +219,7 @@
 </head>
 <body>
 <div id="content">
-<h1 class="title">Explore linked notes</h1>
+<h1 class="title">Navigate linked notes</h1>
 <p>
 While navigating in a densely linked cluster of notes almost feels cozy, I bump into two major difficulties when I navigate the landscape:
 </p>
@@ -233,15 +233,15 @@ While navigating in a densely linked cluster of notes almost feels cozy, I bump 
 I believe these difficulties can be solved elegantly using representations of the notes' graph structure. The way we link notes to one another contains enough information to help us navigate: it can tell us which nodes are important (centrality), which nodes are related (community) and which give context (neighborhood).
 </p>
 
-<div id="outline-container-org88f66bc" class="outline-2">
-<h2 id="org88f66bc">Use the full graph as a map</h2>
-<div class="outline-text-2" id="text-org88f66bc">
+<div id="outline-container-org36b1233" class="outline-2">
+<h2 id="org36b1233">Use the full graph as a map</h2>
+<div class="outline-text-2" id="text-org36b1233">
 <p>
 Wherever we are in the garden we should be able to pull its map, the network of notes, and be able to jump to another location should we want to.
 </p>
 
 
-<div id="orgc37fea7" class="figure">
+<div id="orgf0a5509" class="figure">
 <p><object type="image/svg+xml" data="img/explore-notes-global.svg" class="org-svg">
 Sorry, your browser does not support SVG.</object>
 </p>
@@ -257,48 +257,57 @@ Instead of using tags to infer topics we can use a <i>community detection algori
 </div>
 </div>
 
-<div id="outline-container-orgf4dfb8a" class="outline-2">
-<h2 id="orgf4dfb8a">Show a map of local neighbours in each note</h2>
-<div class="outline-text-2" id="text-orgf4dfb8a">
+<div id="outline-container-orgdf18a6f" class="outline-2">
+<h2 id="orgdf18a6f">Show a map of local neighbours in each note</h2>
+<div class="outline-text-2" id="text-orgdf18a6f">
 <p>
 The backlinks at the end of each note are useful, but we can take one step further and show the local neighborhood of the note instead:
 </p>
 
 
-<div id="org223a96b" class="figure">
+<div id="org1de93e4" class="figure">
 <p><object type="image/svg+xml" data="img/explore-notes-local.svg" class="org-svg">
 Sorry, your browser does not support SVG.</object>
 </p>
 </div>
 
 <p>
-We learn from the <i>context</i> of the current note by displaying the node's parents and the parent's other children.
+We learn from the <i>context</i> of the current note by displaying the node's parents and the parent's other children. According to <a target='_blank' rel='noopener noreferrer' class='external' href="https://ag91.github.io/blog/2020/09/04/the-poor-org-user-spaced-repetition/">this blog post</a> and the <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.orgroam.com/manual.html#org_002droam_002dgraph">org-roam documentation</a> we can display the N-neighborhood of any node as a <code>svg</code> figure using Graphviz. For instance for the 2-neighborhood:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(org-roam-graph 1 <span style="font-style: italic;">"/org/my_note.org"</span>)
+</pre>
+</div>
+
+<p>
+See <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/org-roam/org-roam/blob/3782e88d50f83c5b9fbb4b10df71df3f37e27156/extensions/org-roam-graph.el">the implementation of org-roam-graph</a> which we may be able to modify to suit our needs.
 </p>
 </div>
 </div>
 
 
-<div id="outline-container-org2817231" class="outline-2">
-<h2 id="org2817231">Navigation through the notes</h2>
-<div class="outline-text-2" id="text-org2817231">
+<div id="outline-container-org3d4dea2" class="outline-2">
+<h2 id="org3d4dea2">Navigation through the notes</h2>
+<div class="outline-text-2" id="text-org3d4dea2">
 <p>
 We can use <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jethrokuan/cortex/blob/5e5fd537bed363d12fa297a4b1603ff56dbf397b/assets/js/page.js">Jethro Kuan's theme</a> for hugo but the navigation is completely backwards and unintuitive. Clicking on a backlink appends a new note to the right. Instead we should probably act as if all the open notes are steps in a walk. A bit like what <a target='_blank' rel='noopener noreferrer' class='external' href="https://notes.andymatuschak.org/z6bci25mVUBNFdVWSrQNKr6u7AZ1jFzfTVbMF?stackedNotes=z6UDDkom8Aifg6mLdjT1sPtbMBweCmpyTwmJT&amp;stackedNotes=z3SjnvsB5aR2ddsycyXofbYR7fCxo7RmKW2be&amp;stackedNotes=z6cFzJWgj9vZpnrQsjrZ8yCNREzCTgyFeVZTb&amp;stackedNotes=z2HUE4ABbQjUNjrNemvkTCsLa1LPDRuwh1tXC&amp;stackedNotes=z68tVM68dEAuH4acs7HY6K76tTVzBdoBGKMZB&amp;stackedNotes=z3RzQhmjeRxXVAAy81aUSKARwJL8dikdJG4VG&amp;stackedNotes=z28QkpK3vRKQTacjFDfGYBhCXHqHuVWJzny9&amp;stackedNotes=z3x7AvJgYzmgEY4kcKdSY2aYxdqWYpTyPqRs8">Andy Matuschak</a> does.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org0eba095" class="outline-2">
-<h2 id="org0eba095">More</h2>
-<div class="outline-text-2" id="text-org0eba095">
+<div id="outline-container-orga0170a5" class="outline-2">
+<h2 id="orga0170a5">More</h2>
+<div class="outline-text-2" id="text-orga0170a5">
 <p>
 Using the graph and its <i>properties</i> to navigate through the notes opens new possibilities. For instance we could design and display a "creativity" score that measures to what extent a note references notes on different topics.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgad60875" class="outline-2">
-<h2 id="orgad60875">Links to this note</h2>
-<div class="outline-text-2" id="text-orgad60875">
+<div id="outline-container-org7fa6594" class="outline-2">
+<h2 id="org7fa6594">Links to this note</h2>
+<div class="outline-text-2" id="text-org7fa6594">
 <ul class="org-ul">
 <li><a href="./20220108203624-my_online_universe.html">My online universe</a></li>
 <li><a href="./20211120141719-chess_openings.html">Chess openings</a></li>

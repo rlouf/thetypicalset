@@ -1,9 +1,9 @@
 :PROPERTIES:
 :ID:       7dae4406-eb94-4496-93e1-a989cab14729
 :END:
-#+title: Explore linked notes
+#+title: Navigate linked notes
 #+filetags: :public:
-#+LAST_MODIFIED: [2022-04-04 Mon 21:29]
+#+LAST_MODIFIED: [2022-04-06 Wed 09:26]
 
 While navigating in a densely linked cluster of notes almost feels cozy, I bump into two major difficulties when I navigate the landscape:
 
@@ -28,7 +28,13 @@ The backlinks at the end of each note are useful, but we can take one step furth
 
 [[file:img/explore-notes-local.svg]]
 
-We learn from the /context/ of the current note by displaying the node's parents and the parent's other children.
+We learn from the /context/ of the current note by displaying the node's parents and the parent's other children. According to [[https://ag91.github.io/blog/2020/09/04/the-poor-org-user-spaced-repetition/][this blog post]] and the [[https://www.orgroam.com/manual.html#org_002droam_002dgraph][org-roam documentation]] we can display the N-neighborhood of any node as a =svg= figure using Graphviz. For instance for the 2-neighborhood:
+
+#+begin_src elisp
+(org-roam-graph 1 "/org/my_note.org")
+#+end_src
+
+See [[https://github.com/org-roam/org-roam/blob/3782e88d50f83c5b9fbb4b10df71df3f37e27156/extensions/org-roam-graph.el][the implementation of org-roam-graph]] which we may be able to modify to suit our needs.
 
 
 * Navigation through the notes
