@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-06 Wed 08:49 -->
+<!-- 2022-04-06 Wed 09:44 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Les notes du bac II</title>
@@ -229,15 +229,14 @@
 </p>
 
 
-<div id="org451683e" class="figure">
-<p><img src="images/20211126_repartition_notes_coulmont.png" alt="20211126_repartition_notes_coulmont.png" />
+<div id="org59bf0ef" class="figure">
+<p><img src="img/notes-bac-ii-repartition-notes-coulmont.png" alt="notes-bac-ii-repartition-notes-coulmont.png" />
 </p>
 </div>
 
 <p>
 Cette courbe est très éloignée de la gaussienne attendue. Le but de cet exercice de modélisation est de montrer qu'il est néanmoins possible de reproduire cette courbe <i>en supposant que la distribution des moyennes avant l'intervention du jury est normale.</i>
 </p>
-
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-style: italic;">"""Load grade distribution from disk"""</span>
@@ -296,8 +295,8 @@ fname
 </div>
 
 
-<div id="org5fefeb0" class="figure">
-<p><img src="images/notes-bac-distribution-2016.svg" alt="notes-bac-distribution-2016.svg" class="org-svg" />
+<div id="orgdb50644" class="figure">
+<p><img src="img/notes-bac-distribution-2016.svg" alt="notes-bac-distribution-2016.svg" class="org-svg" />
 </p>
 </div>
 
@@ -305,13 +304,13 @@ fname
 Cette courbe-ci est aussi éloignée d'une simple loi normale, avec des pics autour des notes 8, 10, 12, 14, 16 qui correspondent respectivement à la note minimale pour aller au rattrapage, la note d'admission, les mentions AB, B et TB. Nous allons montrer ici que la courbe s'explique très bien en supposant que la distribution des moyennes est normale et en modélisant l'intervention du jury.
 </p>
 
-<div id="outline-container-orgdb554e7" class="outline-2">
-<h2 id="orgdb554e7">Modèle</h2>
-<div class="outline-text-2" id="text-orgdb554e7">
+<div id="outline-container-orgc7f33e2" class="outline-2">
+<h2 id="orgc7f33e2">Modèle</h2>
+<div class="outline-text-2" id="text-orgc7f33e2">
 </div>
-<div id="outline-container-org71c5376" class="outline-3">
-<h3 id="org71c5376">Des notes à l'histogramme</h3>
-<div class="outline-text-3" id="text-org71c5376">
+<div id="outline-container-orgbc7b3f5" class="outline-3">
+<h3 id="orgbc7b3f5">Des notes à l'histogramme</h3>
+<div class="outline-text-3" id="text-orgbc7b3f5">
 <p>
 On note \(\theta_n \in \left[0, 20\right]\) la moyenne brute du candidat \(n\), c'est-à-dire avant l'intervention du jury :
 </p>
@@ -436,18 +435,17 @@ plt.figtext(
     fontsize=6
 )
 
-<span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">"./images/bac-premiere-normal_histogram.png"</span>
+<span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">"./images/bac-premiere-normal_histogram.svg"</span>
 plt.savefig(fname, bbox_inches=<span style="font-style: italic;">"tight"</span>)
 fname
 </pre>
 </div>
 
 
-<div id="org8601377" class="figure">
-<p><img src="./images/bac-premiere-normal_histogram.png" alt="bac-premiere-normal_histogram.png" />
+<div id="org971937e" class="figure">
+<p><img src="img/bac-premiere-normal_histogram.svg" alt="bac-premiere-normal_histogram.svg" class="org-svg" />
 </p>
 </div>
-
 
 <p>
 Cette simple gaussienne n'est pas une mauvaise approximation à la courbe de départ. Reste maintenant à comprendre d'où viennent les creux et les pics dans les données.
@@ -455,9 +453,9 @@ Cette simple gaussienne n'est pas une mauvaise approximation à la courbe de dé
 </div>
 </div>
 
-<div id="outline-container-org1105fda" class="outline-3">
-<h3 id="org1105fda">Intervention du jury</h3>
-<div class="outline-text-3" id="text-org1105fda">
+<div id="outline-container-orgebd858a" class="outline-3">
+<h3 id="orgebd858a">Intervention du jury</h3>
+<div class="outline-text-3" id="text-orgebd858a">
 <p>
 On observe un évident effet d'arrondi autour des notes:
 </p>
@@ -566,8 +564,8 @@ fname
 </pre>
 </div>
 
-<div id="orgf18ad70" class="figure">
-<p><img src="./images/bac-premiere-all_histogram.png" alt="bac-premiere-all_histogram.png" />
+<div id="org5e4e201" class="figure">
+<p><img src="img/bac-premiere-all_histogram.png" alt="bac-premiere-all_histogram.png" />
 </p>
 </div>
 
@@ -577,9 +575,9 @@ Pas mal!
 </div>
 </div>
 
-<div id="outline-container-orgdaddcd8" class="outline-3">
-<h3 id="orgdaddcd8">Inférence</h3>
-<div class="outline-text-3" id="text-orgdaddcd8">
+<div id="outline-container-org2d74575" class="outline-3">
+<h3 id="org2d74575">Inférence</h3>
+<div class="outline-text-3" id="text-org2d74575">
 <p>
 Maintenant que nous avons un modèle capable de produire des données synthétiques proches des donnée observées nous pouvons passer à l'étape suivante: utiliser le modèle avec les données pour calculer la distribution postérieur des paramètres \(\mu\), \(\sigma\) et \(\mathbf{\alpha}\). À cause de la nature de l'intervention du jury il est compliqué d'écrire une fonction de vraissemblance pour ce modèle. Nous devons donc utiliser l'<a href="20211203143110-approximate_bayesian_computation.html#ID-0eefdc2c-544a-47b7-8e3b-05a3c196d2b3">Approximate Bayesian Computation</a>. Le modèle s'écrit avec PyMC:
 </p>
@@ -629,18 +627,17 @@ fname
 </div>
 
 
-<div id="orgcc8bb12" class="figure">
-<p><img src="images/notes-bac-premiere-trace.svg" alt="notes-bac-premiere-trace.svg" class="org-svg" />
+<div id="org4846c73" class="figure">
+<p><img src="img/notes-bac-premiere-trace.svg" alt="notes-bac-premiere-trace.svg" class="org-svg" />
 </p>
 </div>
 </div>
 </div>
 </div>
 
-
-<div id="outline-container-orge686831" class="outline-2">
-<h2 id="orge686831">Résultats</h2>
-<div class="outline-text-2" id="text-orge686831">
+<div id="outline-container-org29cb501" class="outline-2">
+<h2 id="org29cb501">Résultats</h2>
+<div class="outline-text-2" id="text-org29cb501">
 <p>
 Avant de se lancer dans des inteprétations vérifions que la distribution postérieure prédictive de notre modèle reproduit les données de façon satisfaisante. Chaque courbe bleue correspond à une simulation :
 </p>
@@ -685,8 +682,8 @@ fname
 </div>
 
 
-<div id="org213ba05" class="figure">
-<p><img src="images/notes-bac-premiere-posterior-predictive.svg" alt="notes-bac-premiere-posterior-predictive.svg" class="org-svg" />
+<div id="org59dc1f3" class="figure">
+<p><img src="img/notes-bac-premiere-posterior-predictive.svg" alt="notes-bac-premiere-posterior-predictive.svg" class="org-svg" />
 </p>
 </div>
 
@@ -773,8 +770,8 @@ fname
 </div>
 
 
-<div id="orga5c478e" class="figure">
-<p><img src="images/notes-baccalaureat-gaussian-posterior.svg" alt="notes-baccalaureat-gaussian-posterior.svg" class="org-svg" />
+<div id="org23243b3" class="figure">
+<p><img src="img/notes-baccalaureat-gaussian-posterior.svg" alt="notes-baccalaureat-gaussian-posterior.svg" class="org-svg" />
 </p>
 </div>
 
@@ -798,8 +795,8 @@ fname
 </div>
 
 
-<div id="org464450e" class="figure">
-<p><img src="images/notes-baccalaureat-proba-repechage.svg" alt="notes-baccalaureat-proba-repechage.svg" class="org-svg" />
+<div id="org2684df3" class="figure">
+<p><img src="img/notes-baccalaureat-proba-repechage.svg" alt="notes-baccalaureat-proba-repechage.svg" class="org-svg" />
 </p>
 </div>
 
@@ -866,11 +863,10 @@ fname
 </div>
 
 
-<div id="orgeed881b" class="figure">
-<p><img src="images/notes-baccalaureat-proba-repechage_avg.svg" alt="notes-baccalaureat-proba-repechage_avg.svg" class="org-svg" />
+<div id="org3e60ee8" class="figure">
+<p><img src="img/notes-baccalaureat-proba-repechage_avg.svg" alt="notes-baccalaureat-proba-repechage_avg.svg" class="org-svg" />
 </p>
 </div>
-
 
 <p>
 Plus précisément on peut regarder la probabilité d'intervention lorsque l'on est à un point du seuil. Avec une moyenne de :
@@ -1049,9 +1045,9 @@ Le tableau se lit comme suit: "Entre 17% et 23% des candidats ayant obtenus une 
 </div>
 
 
-<div id="outline-container-orgfa40bb2" class="outline-2">
-<h2 id="orgfa40bb2">Conclusion</h2>
-<div class="outline-text-2" id="text-orgfa40bb2">
+<div id="outline-container-org91a0f28" class="outline-2">
+<h2 id="org91a0f28">Conclusion</h2>
+<div class="outline-text-2" id="text-org91a0f28">
 <p>
 Pas besoin d'invoquer une version farfelu du théorème de la limite centrale pour justifier la forme de la courbe de départ, elle s'explique en effet très bien par l'intervention du jury sur une distribution qui suit une loi normale. Je suis finalement assez satisfait du modèle (même si quelques petites chose peuvent être améliorées, cf plus haut), et il ne serait pas difficile de le modifier pour modéliser la toute première courbe tirée de l'article de Baptiste Coulmont.
 </p>
@@ -1066,9 +1062,9 @@ Je suis statisticien, non sociologue, et je laisse donc ces chiffres à qui veut
 </div>
 </div>
 
-<div id="outline-container-org5c54069" class="outline-2">
-<h2 id="org5c54069">La suite</h2>
-<div class="outline-text-2" id="text-org5c54069">
+<div id="outline-container-org85a50cb" class="outline-2">
+<h2 id="org85a50cb">La suite</h2>
+<div class="outline-text-2" id="text-org85a50cb">
 <p>
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/knhede">Kevin Hédé</a> m'a envoyé un lien vers ces trois jeux de données:
 </p>
@@ -1088,15 +1084,15 @@ Remarques:
 </div>
 
 
-<div id="outline-container-orga53c8d8" class="outline-2">
-<h2 id="orga53c8d8"><span class="todo TODO">TODO</span> Figure out what the max grade is. 21?</h2>
+<div id="outline-container-orgcdf4208" class="outline-2">
+<h2 id="orgcdf4208"><span class="todo TODO">TODO</span> Figure out what the max grade is. 21?</h2>
 </div>
-<div id="outline-container-org970b116" class="outline-2">
-<h2 id="org970b116"><span class="todo TODO">TODO</span> Seconde session 2018, 2019, 2020</h2>
+<div id="outline-container-org547a4ee" class="outline-2">
+<h2 id="org547a4ee"><span class="todo TODO">TODO</span> Seconde session 2018, 2019, 2020</h2>
 </div>
 
-<div id="outline-container-org35fc4d9" class="outline-2">
-<h2 id="org35fc4d9">Links to this note</h2>
+<div id="outline-container-org52f416b" class="outline-2">
+<h2 id="org52f416b">Links to this note</h2>
 </div>
 </div>
 </body>
