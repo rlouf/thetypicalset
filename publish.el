@@ -104,8 +104,8 @@
 ; ---------------------------------------------------------------------
 
 (defun my/publish-all()
-  (setq org-roam-directory "/home/remi/projects/thetypicalset/posts")  ; we first setup the org-roam locations
-  (setq org-roam-db-location "/home/remi/projects/thetypicalset/posts/org-roam.db")  ; we first setup the org-roam locations
+  (setq org-roam-directory "./posts")  ; we first setup the org-roam locations
+  (setq org-roam-db-location "./posts/org-roam.db")  ; we first setup the org-roam locations
   (setq org-id-extra-files (org-roam--list-files org-roam-directory)) ; necessary to make link with IDs work
   (call-interactively 'org-publish-all))
 
