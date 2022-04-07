@@ -4,7 +4,7 @@
 * TODO Finish this damn blog post
 
 This post is a long overdue post on a recommendation algorithm that I developed
-and implemented with Etienne Duschene some 4 years ago: [[https://github.com/rlouf/birdland][Birdland]] (checkout the
+and implemented with Etienne Duschene and Nicolas Martyanoff some 4 years ago: [[https://github.com/rlouf/birdland][Birdland]] (checkout the
 code on Github). Although this might be considered "old" by modern standards, I
 believe that in the days of overkill datascience there is something to be
 learned from this algorithm and how it came to existence. I will explain the
@@ -13,7 +13,7 @@ got there.
 
 This is a long post, so get a good cup of coffee (tea) and sit comfortably.
 
-* You have 2 weeks to come up with something
+* You have to build a recommandation system
 
 I was asked a little less than 2 years ago to design a music recommendation
 algorithm for the application I was working on. The application was a social
@@ -36,7 +36,7 @@ its results and anjoyed it (shoutout to [[https:][Erik Berhnarhdsson]], [[https:
 and the talented people we don't hear about who created this fantastic
 product!).
 
-However, despite its past success, I quickly decided it was not going to cut it.
+However, despite its past success, we quickly decided it was not going to work for us.
 There are two things that I try to steer away from when I work on a machine
 learning problem: complexity and conceptual smell. Unfortunately, ImplicitMF is
 both dubious theoretically speaking, and harder to implement that it seems.
@@ -319,15 +319,13 @@ We now show that the uniform probability measure is left invariant under this
 kernel:
 
 $$
-\sum_i \frac{1}{N} p_{ij}^{\mu} = \frac{1}{N N_j} \sum_{\mu, j}
-\frac{\mathcak{N}_\mu}{N_i} = \frac{1/N}
+\sum_i \frac{1}{N} p_{ij}^{\mu} = \frac{1}{N N_j} \sum_{\mu, j} \frac{\mathcak{N}_\mu}{N_i} = \frac{1}{N}
 $$
 
 In layman speak, this means that, following this procedure, an infinitely long
 random walk would go through each song the same number of times, disrepective of
-its original popularity. **In other words, this algorithm addresses the
-long-tail problem, or at least does not make it worse. This is intersting and,
-to our knowledge, unique.**
+its original popularity. *In other words, this algorithm addresses the
+long-tail problem, or at least does not make it worse.*
 
 Now, whether this is a good thing is another debate.
 
