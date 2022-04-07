@@ -4,8 +4,42 @@
 :END:
 #+TITLE: Orbital MCMC
 #+CREATED: [2022-01-12 Wed 17:45]
-#+LAST_MODIFIED: [2022-04-06 Wed 15:35]
+#+LAST_MODIFIED: [2022-04-07 Thu 11:42]
 
 - tags :: [[id:5acc4f0f-417e-424f-95a5-1c95e7e822ff][Markov Chain Monte Carlo]]
 
-p2 - Involutive MCMC allows to learn the kernel as a neural model (Spanbauer, al. 2020)
+
+Most MCMC algorithms follow the same procedure[fn:1]:
+- Use a transformation to generate a proposal
+- Use a RMH acceptance test
+
+The design of a transfomation is constrained by the fact that it must leave the underlying measure invariant. The [[id:fc3d3ba4-905f-4bf4-aaf0-b84ccac5b248][Involutive MCMC]] framework shows that many existing algorithms can be understood as involutions embedded in stochastic transition kernels. This paper extends this work and derives kernels that do not rely on involutions.
+
+Given a deterministic map $f$ we try to buil the kernel $k$ that admits the target density as its eigenfunction. First we need to derive the acceptance test.
+
+$$
+\operatorname{orb}(x_0) = \left\{f^k(x_0), k \in \mathbb{Z} \right\}
+$$
+
+Arrive at the conclusion that $f$ must preserve the measure $q(x)p(x)$ on $\operatorname{orb}(x_0)$.
+
+* Periodic Orbital MCMC
+
+Starting from the initial state $x_0$ we would like to traverse $\operatorname{orb}(x_0)$ and accept $\{f^k(x_0), k\in\mathbb{Z}\}$ with the weights $\omega_k$ associated with them.
+
+/direction/ decides how we apply $f$ to the current state $x_0$.
+
+* Contracting Orbital MCMC
+* Using Hamiltonian dynamics
+
+Choice of deterministic function $f$:
+- /periodic Orbital MCMC:/ Leapfrog integrator
+- /contracting Orbital MCMC:/ Leapfrog integrator with a friction component.
+
+/In this case, can it be interpreted as another way (like recycled HMC) to get more samplers out of Hamiltonian trajectories? In this case aren't HMC and recycled HMC particular cases of orbital HMC?/
+
+** TODO Show accepted proposals with HMC, recycled HMC, Perpetual HMC, Orbital HMC
+
+* In practice
+
+[fn:1] [[id:3721cf12-9b6a-4c97-845f-fd285e96913a][HMC]], for instance, augments the state-space with an additional variable (the /momentum/) and then integrates the Hamiltonian equations to generate a new proposal point.
