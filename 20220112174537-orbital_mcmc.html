@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-07 Thu 08:43 -->
+<!-- 2022-04-07 Thu 09:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Orbital MCMC</title>
@@ -194,6 +194,27 @@
   .org-svg { width: 90%; }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
@@ -202,13 +223,94 @@
 <dt>tags</dt><dd><a href="20220306194751-markov_chain_monte_carlo_new.html#ID-5acc4f0f-417e-424f-95a5-1c95e7e822ff">Markov Chain Monte Carlo</a></dd>
 </dl>
 
+
 <p>
-p2 - Involutive MCMC allows to learn the kernel as a neural model (Spanbauer, al. 2020)
+Most MCMC algorithms follow the same procedure<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>:
+</p>
+<ul class="org-ul">
+<li>Use a transformation to generate a proposal</li>
+<li>Use a RMH acceptance test</li>
+</ul>
+
+<p>
+The design of a transfomation is constrained by the fact that it must leave the underlying measure invariant. The <a href="20211202111457-involutive_mcmc_a_unifying_framework.html#ID-fc3d3ba4-905f-4bf4-aaf0-b84ccac5b248">Involutive MCMC</a> framework shows that many existing algorithms can be understood as involutions embedded in stochastic transition kernels. This paper extends this work and derives kernels that do not rely on involutions.
 </p>
 
-<div id="outline-container-org47a2dde" class="outline-2">
-<h2 id="org47a2dde">Links to this note</h2>
+<p>
+Given a deterministic map \(f\) we try to buil the kernel \(k\) that admits the target density as its eigenfunction. First we need to derive the acceptance test.
+</p>
+
+<p>
+\[
+\operatorname{orb}(x_0) = \left\{f^k(x_0), k \in \mathbb{Z} \right\}
+\]
+</p>
+
+<p>
+Arrive at the conclusion that \(f\) must preserve the measure \(q(x)p(x)\) on \(\operatorname{orb}(x_0)\).
+</p>
+
+<div id="outline-container-orgdb46deb" class="outline-2">
+<h2 id="orgdb46deb">Periodic Orbital MCMC</h2>
+<div class="outline-text-2" id="text-orgdb46deb">
+<p>
+Starting from the initial state \(x_0\) we would like to traverse \(\operatorname{orb}(x_0)\) and accept \(\{f^k(x_0), k\in\mathbb{Z}\}\) with the weights \(\omega_k\) associated with them.
+</p>
+
+<p>
+<i>direction</i> decides how we apply \(f\) to the current state \(x_0\).
+</p>
 </div>
 </div>
+
+<div id="outline-container-org5ffb286" class="outline-2">
+<h2 id="org5ffb286">Contracting Orbital MCMC</h2>
+</div>
+<div id="outline-container-org043e537" class="outline-2">
+<h2 id="org043e537">Using Hamiltonian dynamics</h2>
+<div class="outline-text-2" id="text-org043e537">
+<p>
+Choice of deterministic function \(f\):
+</p>
+<ul class="org-ul">
+<li><i>periodic Orbital MCMC:</i> Leapfrog integrator</li>
+<li><i>contracting Orbital MCMC:</i> Leapfrog integrator with a friction component.</li>
+</ul>
+
+<p>
+<i>In this case, can it be interpreted as another way (like recycled HMC) to get more samplers out of Hamiltonian trajectories? In this case aren't HMC and recycled HMC particular cases of orbital HMC?</i>
+</p>
+</div>
+
+<div id="outline-container-org1ab2489" class="outline-3">
+<h3 id="org1ab2489"><span class="todo TODO">TODO</span> Show accepted proposals with HMC, recycled HMC, Perpetual HMC, Orbital HMC</h3>
+</div>
+</div>
+
+<div id="outline-container-orgd2ec25f" class="outline-2">
+<h2 id="orgd2ec25f">In practice</h2>
+<div class="outline-text-2" id="text-orgd2ec25f">
+</div>
+</div>
+
+<div id="outline-container-org22bdf7c" class="outline-2">
+<h2 id="org22bdf7c">Links to this note</h2>
+<div class="outline-text-2" id="text-org22bdf7c">
+<ul class="org-ul">
+<li><a href="./20211202111457-involutive_mcmc_a_unifying_framework.html">Involutive MCMC</a></li>
+</ul>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+<a href="20220407104801-hmc.html#ID-3721cf12-9b6a-4c97-845f-fd285e96913a">HMC</a>, for instance, augments the state-space with an additional variable (the <i>momentum</i>) and then integrates the Hamiltonian equations to generate a new proposal point.
+</p></div></div>
+
+
+</div>
+</div></div>
 </body>
 </html>
