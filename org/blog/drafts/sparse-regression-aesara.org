@@ -1,0 +1,231 @@
+#+TITLE: Sparse regression with Aesara
+
+
+#+begin_src bash :results silent :exports none
+mkvirtualenv blog-sparse-aesara && pip install aesara==2.5.3 aeppl==0.0.28
+#+end_src
+
+#+begin_src elisp :results silent :exports none
+(pyvenv-workon 'blog-sparse-aesara)
+#+end_src
+
+A few conventions, that are useful to follow:
+- =X= stands for "array X" or "value X", it represent a float, int, list, numpy array, etc.
+- =X_tt= stands for "tensor X" and represents a =TensorType=;
+- =X_rv= stands for "random variable X" and represent a =RandomVariable= (check).
+
+We will first import =aesara= and initialize our RandomStream (TODO: what does a RandomStream do?)
+
+#+begin_src python :session
+import aesara
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+#+end_src
+
+#+RESULTS:
+
+* Horseshoe prior
+
+Now we can define a simple horsehoe prior:
+
+#+begin_src latex :results raw :exports results
+\begin{align*}
+  \lambda &\sim \operatorname{HalfCauchy}(0, 1)\\
+  \tau_{j} &\sim \operatorname{HalfCauchy}(0, 1) \quad \forall i \in [1 \dots k]\\
+  \beta_{j}&\sim \operatorname{Normal}(0, \lambda \,\tau_{j}) \quad \forall i \in [1 \dots k]
+\end{align*}
+#+end_src
+
+#+RESULTS:
+\begin{align*}
+  \lambda &\sim \operatorname{HalfCauchy}(0, 1)\\
+  \tau_{j} &\sim \operatorname{HalfCauchy}(0, 1) \quad \forall i \in [1 \dots k]\\
+  \beta_{j}&\sim \operatorname{Normal}(0, \lambda \,\tau_{j}) \quad \forall i \in [1 \dots k]
+\end{align*}
+
+where $\beta$ is the regression coefficient and $k$ the number of dimensions of the problem.
+
+The horseshoe prior is easily implemented in aesara as:
+
+#+begin_src python :session
+X = np.random.random((5, 10))
+k = np.shape(X)[0]
+
+lambda_rv = srng.halfcauchy(0, 1)
+tau_rv = srng.halfcauchy(0, 1, size=k)
+beta_rv = srng.normal(0, lambda_rv * tau_rv)
+#+end_src
+
+#+RESULTS:
+
+We can already check that the horsehoe prior is giving us reasonable values by checking the /prior predictive/ distribution. We can easily draw from this distribution with =aesara=:
+
+#+begin_src python :session
+beta_rv.eval()
+#+end_src
+
+#+RESULTS:
+| -0.01845157 | 0.01955231 | 0.00578295 | -0.06913793 | 0.01796698 |
+
+Note that every time =.eval()= is called aesara returns a different value:
+
+#+begin_src python :session
+beta_rv.eval()
+#+end_src
+
+#+RESULTS:
+| -0.13155471 | 0.58111438 | 2.11742873 | -0.02413002 | -1.44338626 |
+
+** TODO What can we do with this graph?
+** TODO Why is it great compared to e.g. PyMC3?
+** Prior predictive sampling
+
+
+The graph indeed carries the random number generator state with it. We can sample more of these quickly using aesara's =scan= operator. Lets take the following example that works:
+
+#+begin_src python :session
+num_samples = at.scalar('num_tensor', dtype=np.int32)
+
+samples, updates = aesara.scan(
+    fn=lambda: beta_rv,
+    n_steps=num_samples
+)
+sampling_fn = aesara.function((num_samples,), samples, updates=updates)
+sampling_fn(10)
+#+end_src
+
+#+RESULTS:
+|    0.405859988 |     -2.41014501 |    0.176054554 |  0.0852350014 |   0.721708381 |
+|  -0.0317619045 |     0.157715046 |      37.710734 |  -0.267652471 |  -0.149229285 |
+|  0.00573360903 |     0.084061714 |   -0.219461796 | -0.0207649624 |   0.273389193 |
+|     35.9613479 |   -0.0985157085 |    -326.467685 |   -2.22400749 |    0.47244874 |
+|     3.66607334 |    0.0672511244 |    -2.69710226 |   0.168394174 |   -0.88512722 |
+|     1.01623835 |   -0.0301653169 |   -0.153511873 |  0.0457400714 |   0.217742742 |
+| -0.00583121544 |    -0.337305109 |     4.52317268 |    0.39519745 |  0.0101549592 |
+|  -0.0313173918 |     0.026885706 |   -0.375113149 |  0.0140790607 |   0.153317241 |
+|   -0.330069932 | -0.000521303722 |    0.839653386 | -0.0648112912 | -0.0099520352 |
+|   -0.296592302 |    -0.309485463 | -0.00784502499 | -0.0880720305 |   0.476919985 |
+
+And this one as well:
+
+#+begin_src python :session
+num_samples = at.scalar('num_tensor', dtype=np.int32)
+
+samples, updates = aesara.scan(
+    fn=lambda: at.random.normal(0, tau_rv * lambda_rv),
+    n_steps=num_samples
+)
+sampling_fn = aesara.function((num_samples,), samples, updates=updates)
+sampling_fn(10)
+#+end_src
+
+#+RESULTS:
+|  0.364703966 |  -7.10685506 |   1.43630544 |   -0.24586966 |   -1.22146442 |
+| 0.0103566649 |  -5.47973106 | 0.0270241747 | -0.0746477986 |   -2.12146348 |
+|  0.172892799 | -0.737105952 |  0.101925146 |  -0.053742616 |  -0.656710146 |
+|  0.115183472 |   -1.8453838 |  0.566791242 |   -20.2095485 |  -0.276319377 |
+|  0.189106255 | -0.741009332 |  0.145825722 | -0.0227399486 | -0.0701896351 |
+|   4.85519749 |  -11.8597856 |   4.06432252 |   -39.8576213 |   -2.37666075 |
+|  0.277695679 |  -7.99205832 |  0.013353842 |   -4.61061848 |  -0.133225867 |
+|   13.1047583 |  -14.4185369 |   1.50097678 |  -0.639444076 |   -11.3433922 |
+|  0.874977379 |  -7.81316119 |   2.97887462 |  -0.250407827 |  -0.174617576 |
+|  0.574659456 |  -3.62827211 |   8.63022882 |   -2.00437786 |   -2.42290588 |
+
+
+** Log-probability density function
+
+Even though we won't need it in this blog post, we expect any PPL to be able to give the the log-probability density function (logpdf) of any model it has defined. For that we will use =aeppl=.
+
+The logpdf will be a function of $\lambda$, $\boldysmbol{\tau}$ and $\beta$. We first need to define the variables that will hold their values:
+
+#+begin_src python :session
+from aeppl import joint_logprob
+
+lambda_tt = at.scalar("lambda")
+tau_tt = at.vector("tau")
+beta_tt = at.vector("beta")
+
+# TODO: Explain how the function stuff works
+logprob = joint_logprob({tau_rv: tau_tt, lambda_rv: lambda_tt, beta_rv: beta_tt})
+logprob_fn = aesara.function((lambda_tt, tau_tt, beta_tt), logprob)
+logprob_fn(1., [1, 2, 3, 4, 5], [1, 1, 1, 1, 1])
+#+end_src
+
+#+RESULTS:
+: -24.213113433295504
+
+Amazing!
+
+* Negative Binomial regression
+
+We will now come back to the original topic, performing a /negative binomial sparse regression
+
+#+begin_src latex :results raw :exports results
+\begin{align*}
+  \boldsymbol{Y}_{j} &\sim \operatorname{NegativeBinomial}(h, \boldsymbol{\theta})\\
+  \boldsymbol{\theta} &\sim \operatorname{Sigmoid}(- X^{T}\;\beta)
+\end{align*}
+#+end_src
+
+#+RESULTS:
+\begin{align*}
+  \boldsymbol{Y}_{j} &\sim \operatorname{NegativeBinomial}(h, \boldsymbol{\theta})\\
+  \boldsymbol{\theta} &\sim \operatorname{Sigmoid}(- X^{T}\;\beta)
+\end{align*}
+
+$h$ is xxxx and we will set its value for now:
+
+#+begin_src python :session
+h = at.as_tensor(100)
+
+theta_tt = at.sigmoid(-at.dot(X.T, beta_rv))
+Y_rv = srng.nbinom(h, theta_tt)
+Y_rv.eval()
+#+end_src
+
+#+RESULTS:
+| 642 | 923 | 10378 | 10590 | 469 | 196 | 931 | 6298 | 257 | 176 |
+
+* TODO New progression
+
+Show the whole model first, and show that we can actually sample from the prior of $\beta$ to perform intermediate checks. Something we cannot do otherwise.
+* TODO Sampling from the posterior
+
+Sampling with =aemcmc= is great!
+
+#+begin_src python :session
+samples = aemcmc.sample(Y_rv, variables, observations, num_samples)
+#+end_src
+
+Explain how it works.
+
+Let us now give $h$ a prior distribution.
+
+#+begin_src python :session
+samples = aemcmc.sample(Y_rv, y_tt, num_samples)
+#+end_src
+
+Of course this interfaces easily with =ArviZ=
+
+** TODO Show trace and posterior distributions with arviz
+
+* TODO Posterior predictive sampling
+
+Posterior predictive sampling is simply that the variables are no longer random variables but have a value. Here it is enough to specify the value of $\beta$.
+
+#+begin_src python :session
+post_pred_fn = aesara.function((beta_rv,), Y_rv)
+post_pred_fn([1., 1., 1., 1., 1.])
+#+end_src
+
+#+RESULTS:
+| 576 | 1664 | 3315 | 2087 | 842 | 970 | 2454 | 893 | 872 | 512 |
+
+To compute this for an array of samples, we can resort to the equivalent of JAX's =vmap=: numpy universal functions.
+
+#+begin_src python :session
+vpost_pred_fn = np.vectorize(post_pred_fn, signature="(n)->(k)")
+vpost_pred_fn(beta_samples)
+#+end_src
