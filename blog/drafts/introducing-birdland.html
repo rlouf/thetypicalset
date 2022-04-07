@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-07 Thu 06:41 -->
+<!-- 2022-04-07 Thu 08:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Lightning fast recommandation with Birdland</title>
@@ -220,12 +220,12 @@
 <div id="content" class="content">
 <h1 class="title">Lightning fast recommandation with Birdland</h1>
 
-<div id="outline-container-orga8aa226" class="outline-2">
-<h2 id="orga8aa226"><span class="todo TODO">TODO</span> Finish this damn blog post</h2>
-<div class="outline-text-2" id="text-orga8aa226">
+<div id="outline-container-org4c21454" class="outline-2">
+<h2 id="org4c21454"><span class="todo TODO">TODO</span> Finish this damn blog post</h2>
+<div class="outline-text-2" id="text-org4c21454">
 <p>
 This post is a long overdue post on a recommendation algorithm that I developed
-and implemented with Etienne Duschene some 4 years ago: <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/rlouf/birdland">Birdland</a> (checkout the
+and implemented with Etienne Duschene and Nicolas Martyanoff some 4 years ago: <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/rlouf/birdland">Birdland</a> (checkout the
 code on Github). Although this might be considered "old" by modern standards, I
 believe that in the days of overkill datascience there is something to be
 learned from this algorithm and how it came to existence. I will explain the
@@ -239,9 +239,9 @@ This is a long post, so get a good cup of coffee (tea) and sit comfortably.
 </div>
 </div>
 
-<div id="outline-container-org4329261" class="outline-2">
-<h2 id="org4329261">You have 2 weeks to come up with something</h2>
-<div class="outline-text-2" id="text-org4329261">
+<div id="outline-container-org2b99895" class="outline-2">
+<h2 id="org2b99895">You have to build a recommandation system</h2>
+<div class="outline-text-2" id="text-org2b99895">
 <p>
 I was asked a little less than 2 years ago to design a music recommendation
 algorithm for the application I was working on. The application was a social
@@ -270,7 +270,7 @@ product!).
 </p>
 
 <p>
-However, despite its past success, I quickly decided it was not going to cut it.
+However, despite its past success, we quickly decided it was not going to work for us.
 There are two things that I try to steer away from when I work on a machine
 learning problem: complexity and conceptual smell. Unfortunately, ImplicitMF is
 both dubious theoretically speaking, and harder to implement that it seems.
@@ -278,17 +278,17 @@ both dubious theoretically speaking, and harder to implement that it seems.
 </div>
 </div>
 
-<div id="outline-container-org8f6e594" class="outline-2">
-<h2 id="org8f6e594">ImplicitMF sucks</h2>
-<div class="outline-text-2" id="text-org8f6e594">
+<div id="outline-container-org880c402" class="outline-2">
+<h2 id="org880c402">ImplicitMF sucks</h2>
+<div class="outline-text-2" id="text-org880c402">
 <p>
 In the context of music recommendation, implicitMF sucks. I've said it.
 </p>
 </div>
 
-<div id="outline-container-org8361e4e" class="outline-3">
-<h3 id="org8361e4e">It smells conceptually</h3>
-<div class="outline-text-3" id="text-org8361e4e">
+<div id="outline-container-orgc8249e9" class="outline-3">
+<h3 id="orgc8249e9">It smells conceptually</h3>
+<div class="outline-text-3" id="text-orgc8249e9">
 <p>
 The MF part in "implicit MF" stands for implicit matrix factorization. Roughly
 speaking, it starts with a matrix \(R\) (user x song) where \(R_{i,j}\) is the
@@ -366,9 +366,9 @@ hidden engineering costs.
 </div>
 </div>
 
-<div id="outline-container-orgfeb296e" class="outline-3">
-<h3 id="orgfeb296e">It has hidden costs</h3>
-<div class="outline-text-3" id="text-orgfeb296e">
+<div id="outline-container-org6fc8c2e" class="outline-3">
+<h3 id="org6fc8c2e">It has hidden costs</h3>
+<div class="outline-text-3" id="text-org6fc8c2e">
 <p>
 The result of implicit Matrix Factorization is two matrices song-vector and
 user-song; it is an embedding of songs and users in a K-dimensional space. But
@@ -428,9 +428,9 @@ had to ditch matrix factorization early on.
 </div>
 
 
-<div id="outline-container-orgd6d3c4c" class="outline-2">
-<h2 id="orgd6d3c4c">Here comes Birdland</h2>
-<div class="outline-text-2" id="text-orgd6d3c4c">
+<div id="outline-container-orgdeeaf7f" class="outline-2">
+<h2 id="orgdeeaf7f">Here comes Birdland</h2>
+<div class="outline-text-2" id="text-orgdeeaf7f">
 <p>
 So we sat down, and reformulated the problem as a question:
 </p>
@@ -460,9 +460,9 @@ thing we can do is to learn this kernel from the behavior of users themselves.
 </div>
 
 
-<div id="outline-container-orgebe2b2d" class="outline-3">
-<h3 id="orgebe2b2d">A network perspective</h3>
-<div class="outline-text-3" id="text-orgebe2b2d">
+<div id="outline-container-org328204b" class="outline-3">
+<h3 id="org328204b">A network perspective</h3>
+<div class="outline-text-3" id="text-org328204b">
 <p>
 Although this behaviour only holds in the infinite time limit, and
 recommendations would initially be based on the local neighbourhood, this can be
@@ -539,9 +539,9 @@ popularity.
 </div>
 
 
-<div id="outline-container-orgf54c360" class="outline-3">
-<h3 id="orgf54c360">Issues with this naive approach</h3>
-<div class="outline-text-3" id="text-orgf54c360">
+<div id="outline-container-org887a847" class="outline-3">
+<h3 id="org887a847">Issues with this naive approach</h3>
+<div class="outline-text-3" id="text-org887a847">
 <p>
 Beyond the obvious criticisms that all recommendation schemes face, we had very
 good reason to leave this method aside:
@@ -566,9 +566,9 @@ distinct songs listened to by a user. The tradeoff: you have to recompute everyt
 </div>
 
 
-<div id="outline-container-orgf121dc4" class="outline-3">
-<h3 id="orgf121dc4">Recommendations using random walks.</h3>
-<div class="outline-text-3" id="text-orgf121dc4">
+<div id="outline-container-org2ac5228" class="outline-3">
+<h3 id="org2ac5228">Recommendations using random walks.</h3>
+<div class="outline-text-3" id="text-org2ac5228">
 <p>
 For those of you who are old enough to have known LastFM, you probably used the
 method I did when looking for new music to listen to. What I usually did was
@@ -656,9 +656,9 @@ matrix factorization.
 </div>
 </div>
 
-<div id="outline-container-orgc2ca0a0" class="outline-3">
-<h3 id="orgc2ca0a0">The long tail problem</h3>
-<div class="outline-text-3" id="text-orgc2ca0a0">
+<div id="outline-container-orgd2b3138" class="outline-3">
+<h3 id="orgd2b3138">The long tail problem</h3>
+<div class="outline-text-3" id="text-orgd2b3138">
 <p>
 [Explain the long-tail problem]
 </p>
@@ -705,17 +705,15 @@ kernel:
 
 <p>
 \[
-\sum_i \frac{1}{N} p_{ij}^{\mu} = \frac{1}{N N_j} \sum_{\mu, j}
-\frac{\mathcak{N}_\mu}{N_i} = \frac{1/N}
+\sum_i \frac{1}{N} p_{ij}^{\mu} = \frac{1}{N N_j} \sum_{\mu, j} \frac{\mathcak{N}_\mu}{N_i} = \frac{1}{N}
 \]
 </p>
 
 <p>
 In layman speak, this means that, following this procedure, an infinitely long
 random walk would go through each song the same number of times, disrepective of
-its original popularity. **In other words, this algorithm addresses the
-long-tail problem, or at least does not make it worse. This is intersting and,
-to our knowledge, unique.**
+its original popularity. <b>In other words, this algorithm addresses the
+long-tail problem, or at least does not make it worse.</b>
 </p>
 
 <p>
@@ -724,13 +722,13 @@ Now, whether this is a good thing is another debate.
 </div>
 </div>
 
-<div id="outline-container-org867dfbd" class="outline-3">
-<h3 id="org867dfbd">Other variants</h3>
-<div class="outline-text-3" id="text-org867dfbd">
+<div id="outline-container-orgbee7ccb" class="outline-3">
+<h3 id="orgbee7ccb">Other variants</h3>
+<div class="outline-text-3" id="text-orgbee7ccb">
 </div>
-<div id="outline-container-org6ce2c89" class="outline-4">
-<h4 id="org6ce2c89">Social recommendation</h4>
-<div class="outline-text-4" id="text-org6ce2c89">
+<div id="outline-container-org2245cde" class="outline-4">
+<h4 id="org2245cde">Social recommendation</h4>
+<div class="outline-text-4" id="text-org2245cde">
 <p>
 You can customize this algorithm as you wish. In our case, the goal was to get
 a recommendation algorithm that could be used for social recommendation. Easy:
@@ -758,9 +756,9 @@ fancier stuff by walking the social graph at the same time.
 </div>
 </div>
 
-<div id="outline-container-org66fc2fe" class="outline-4">
-<h4 id="org66fc2fe">Not all songs are created equal</h4>
-<div class="outline-text-4" id="text-org66fc2fe">
+<div id="outline-container-org2793733" class="outline-4">
+<h4 id="org2793733">Not all songs are created equal</h4>
+<div class="outline-text-4" id="text-org2793733">
 <p>
 You don't listen to songs the same number of times, so it is pretty stupid to
 pick songs uniformly at random in your history. Simple, just pick it at random
@@ -771,9 +769,9 @@ song.
 </div>
 </div>
 
-<div id="outline-container-org575c46c" class="outline-3">
-<h3 id="org575c46c">Recommending items from a list of songs</h3>
-<div class="outline-text-3" id="text-org575c46c">
+<div id="outline-container-orge317b86" class="outline-3">
+<h3 id="orge317b86">Recommending items from a list of songs</h3>
+<div class="outline-text-3" id="text-orge317b86">
 <p>
 To recommend songs to users you would perform many, many random walks starting
 from that same user. Those walks will likely start from many different songs in
@@ -812,18 +810,18 @@ very well in practice too.
 </div>
 
 
-<div id="outline-container-org5492470" class="outline-3">
-<h3 id="org5492470">Birdland in practice</h3>
-<div class="outline-text-3" id="text-org5492470">
+<div id="outline-container-orgfb508ba" class="outline-3">
+<h3 id="orgfb508ba">Birdland in practice</h3>
+<div class="outline-text-3" id="text-orgfb508ba">
 <p>
 We implemented Birdland in Go both for speed (the algorithm had to run online),
 and because the backend was in Go.
 </p>
 </div>
 
-<div id="outline-container-orgdd563a2" class="outline-4">
-<h4 id="orgdd563a2">Recommending from walks.</h4>
-<div class="outline-text-4" id="text-orgdd563a2">
+<div id="outline-container-orga951bd0" class="outline-4">
+<h4 id="orga951bd0">Recommending from walks.</h4>
+<div class="outline-text-4" id="text-orga951bd0">
 <ol class="org-ol">
 <li>The algorithm is randomized. You have guaranteed novelty every time you
 refresh the page.</li>

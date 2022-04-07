@@ -1,0 +1,822 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-07 Thu 08:43 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sparse regression with Aesara</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Sparse regression with Aesara</h1>
+<div class="org-src-container">
+<pre class="src src-bash">mkvirtualenv blog-sparse-aesara &amp;&amp; pip install <span style="font-weight: bold; font-style: italic;">aesara</span>==2.5.3 <span style="font-weight: bold; font-style: italic;">aeppl</span>==0.0.28
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-elisp">(pyvenv-workon 'blog-sparse-aesara)
+</pre>
+</div>
+
+<p>
+A few conventions, that are useful to follow:
+</p>
+<ul class="org-ul">
+<li><code>X</code> stands for "array X" or "value X", it represent a float, int, list, numpy array, etc.</li>
+<li><code>X_tt</code> stands for "tensor X" and represents a <code>TensorType</code>;</li>
+<li><code>X_rv</code> stands for "random variable X" and represent a <code>RandomVariable</code> (check).</li>
+</ul>
+
+<p>
+We will first import <code>aesara</code> and initialize our RandomStream (TODO: what does a RandomStream do?)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+</pre>
+</div>
+
+<div id="outline-container-orga7550d5" class="outline-2">
+<h2 id="orga7550d5">Horseshoe prior</h2>
+<div class="outline-text-2" id="text-orga7550d5">
+<p>
+Now we can define a simple horsehoe prior:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
+  <span style="font-weight: bold;">\lambda</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1)<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\tau</span>_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1) <span style="font-weight: bold;">\quad</span> <span style="font-weight: bold;">\forall</span> i <span style="font-weight: bold;">\in</span> [1 <span style="font-weight: bold;">\dots</span> k]<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\beta</span>_{j}&amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, <span style="font-weight: bold;">\lambda</span> <span style="font-weight: bold;">\,\tau</span>_{j}) <span style="font-weight: bold;">\quad</span> <span style="font-weight: bold;">\forall</span> i <span style="font-weight: bold;">\in</span> [1 <span style="font-weight: bold;">\dots</span> k]
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+</pre>
+</div>
+
+\begin{align*}
+  \lambda &\sim \operatorname{HalfCauchy}(0, 1)\\
+  \tau_{j} &\sim \operatorname{HalfCauchy}(0, 1) \quad \forall i \in [1 \dots k]\\
+  \beta_{j}&\sim \operatorname{Normal}(0, \lambda \,\tau_{j}) \quad \forall i \in [1 \dots k]
+\end{align*}
+
+<p>
+where \(\beta\) is the regression coefficient and \(k\) the number of dimensions of the problem.
+</p>
+
+<p>
+The horseshoe prior is easily implemented in aesara as:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">X</span> = np.random.random((5, 10))
+<span style="font-weight: bold; font-style: italic;">k</span> = np.shape(X)[0]
+
+<span style="font-weight: bold; font-style: italic;">lambda_rv</span> = srng.halfcauchy(0, 1)
+<span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(0, 1, size=k)
+<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.normal(0, lambda_rv * tau_rv)
+</pre>
+</div>
+
+<p>
+We can already check that the horsehoe prior is giving us reasonable values by checking the <i>prior predictive</i> distribution. We can easily draw from this distribution with <code>aesara</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">beta_rv.<span style="font-weight: bold;">eval</span>()
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">-0.01845157</td>
+<td class="org-right">0.01955231</td>
+<td class="org-right">0.00578295</td>
+<td class="org-right">-0.06913793</td>
+<td class="org-right">0.01796698</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Note that every time <code>.eval()</code> is called aesara returns a different value:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">beta_rv.<span style="font-weight: bold;">eval</span>()
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">-0.13155471</td>
+<td class="org-right">0.58111438</td>
+<td class="org-right">2.11742873</td>
+<td class="org-right">-0.02413002</td>
+<td class="org-right">-1.44338626</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div id="outline-container-org8f5f69c" class="outline-3">
+<h3 id="org8f5f69c"><span class="todo TODO">TODO</span> What can we do with this graph?</h3>
+</div>
+<div id="outline-container-org37b59e7" class="outline-3">
+<h3 id="org37b59e7"><span class="todo TODO">TODO</span> Why is it great compared to e.g. PyMC3?</h3>
+</div>
+<div id="outline-container-org974e043" class="outline-3">
+<h3 id="org974e043">Prior predictive sampling</h3>
+<div class="outline-text-3" id="text-org974e043">
+<p>
+The graph indeed carries the random number generator state with it. We can sample more of these quickly using aesara's <code>scan</code> operator. Lets take the following example that works:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">num_samples</span> = at.scalar(<span style="font-style: italic;">'num_tensor'</span>, dtype=np.int32)
+
+<span style="font-weight: bold; font-style: italic;">samples</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
+    fn=<span style="font-weight: bold;">lambda</span>: beta_rv,
+    n_steps=num_samples
+)
+<span style="font-weight: bold; font-style: italic;">sampling_fn</span> = aesara.function((num_samples,), samples, updates=updates)
+sampling_fn(10)
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0.405859988</td>
+<td class="org-right">-2.41014501</td>
+<td class="org-right">0.176054554</td>
+<td class="org-right">0.0852350014</td>
+<td class="org-right">0.721708381</td>
+</tr>
+
+<tr>
+<td class="org-right">-0.0317619045</td>
+<td class="org-right">0.157715046</td>
+<td class="org-right">37.710734</td>
+<td class="org-right">-0.267652471</td>
+<td class="org-right">-0.149229285</td>
+</tr>
+
+<tr>
+<td class="org-right">0.00573360903</td>
+<td class="org-right">0.084061714</td>
+<td class="org-right">-0.219461796</td>
+<td class="org-right">-0.0207649624</td>
+<td class="org-right">0.273389193</td>
+</tr>
+
+<tr>
+<td class="org-right">35.9613479</td>
+<td class="org-right">-0.0985157085</td>
+<td class="org-right">-326.467685</td>
+<td class="org-right">-2.22400749</td>
+<td class="org-right">0.47244874</td>
+</tr>
+
+<tr>
+<td class="org-right">3.66607334</td>
+<td class="org-right">0.0672511244</td>
+<td class="org-right">-2.69710226</td>
+<td class="org-right">0.168394174</td>
+<td class="org-right">-0.88512722</td>
+</tr>
+
+<tr>
+<td class="org-right">1.01623835</td>
+<td class="org-right">-0.0301653169</td>
+<td class="org-right">-0.153511873</td>
+<td class="org-right">0.0457400714</td>
+<td class="org-right">0.217742742</td>
+</tr>
+
+<tr>
+<td class="org-right">-0.00583121544</td>
+<td class="org-right">-0.337305109</td>
+<td class="org-right">4.52317268</td>
+<td class="org-right">0.39519745</td>
+<td class="org-right">0.0101549592</td>
+</tr>
+
+<tr>
+<td class="org-right">-0.0313173918</td>
+<td class="org-right">0.026885706</td>
+<td class="org-right">-0.375113149</td>
+<td class="org-right">0.0140790607</td>
+<td class="org-right">0.153317241</td>
+</tr>
+
+<tr>
+<td class="org-right">-0.330069932</td>
+<td class="org-right">-0.000521303722</td>
+<td class="org-right">0.839653386</td>
+<td class="org-right">-0.0648112912</td>
+<td class="org-right">-0.0099520352</td>
+</tr>
+
+<tr>
+<td class="org-right">-0.296592302</td>
+<td class="org-right">-0.309485463</td>
+<td class="org-right">-0.00784502499</td>
+<td class="org-right">-0.0880720305</td>
+<td class="org-right">0.476919985</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+And this one as well:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">num_samples</span> = at.scalar(<span style="font-style: italic;">'num_tensor'</span>, dtype=np.int32)
+
+<span style="font-weight: bold; font-style: italic;">samples</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
+    fn=<span style="font-weight: bold;">lambda</span>: at.random.normal(0, tau_rv * lambda_rv),
+    n_steps=num_samples
+)
+<span style="font-weight: bold; font-style: italic;">sampling_fn</span> = aesara.function((num_samples,), samples, updates=updates)
+sampling_fn(10)
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0.364703966</td>
+<td class="org-right">-7.10685506</td>
+<td class="org-right">1.43630544</td>
+<td class="org-right">-0.24586966</td>
+<td class="org-right">-1.22146442</td>
+</tr>
+
+<tr>
+<td class="org-right">0.0103566649</td>
+<td class="org-right">-5.47973106</td>
+<td class="org-right">0.0270241747</td>
+<td class="org-right">-0.0746477986</td>
+<td class="org-right">-2.12146348</td>
+</tr>
+
+<tr>
+<td class="org-right">0.172892799</td>
+<td class="org-right">-0.737105952</td>
+<td class="org-right">0.101925146</td>
+<td class="org-right">-0.053742616</td>
+<td class="org-right">-0.656710146</td>
+</tr>
+
+<tr>
+<td class="org-right">0.115183472</td>
+<td class="org-right">-1.8453838</td>
+<td class="org-right">0.566791242</td>
+<td class="org-right">-20.2095485</td>
+<td class="org-right">-0.276319377</td>
+</tr>
+
+<tr>
+<td class="org-right">0.189106255</td>
+<td class="org-right">-0.741009332</td>
+<td class="org-right">0.145825722</td>
+<td class="org-right">-0.0227399486</td>
+<td class="org-right">-0.0701896351</td>
+</tr>
+
+<tr>
+<td class="org-right">4.85519749</td>
+<td class="org-right">-11.8597856</td>
+<td class="org-right">4.06432252</td>
+<td class="org-right">-39.8576213</td>
+<td class="org-right">-2.37666075</td>
+</tr>
+
+<tr>
+<td class="org-right">0.277695679</td>
+<td class="org-right">-7.99205832</td>
+<td class="org-right">0.013353842</td>
+<td class="org-right">-4.61061848</td>
+<td class="org-right">-0.133225867</td>
+</tr>
+
+<tr>
+<td class="org-right">13.1047583</td>
+<td class="org-right">-14.4185369</td>
+<td class="org-right">1.50097678</td>
+<td class="org-right">-0.639444076</td>
+<td class="org-right">-11.3433922</td>
+</tr>
+
+<tr>
+<td class="org-right">0.874977379</td>
+<td class="org-right">-7.81316119</td>
+<td class="org-right">2.97887462</td>
+<td class="org-right">-0.250407827</td>
+<td class="org-right">-0.174617576</td>
+</tr>
+
+<tr>
+<td class="org-right">0.574659456</td>
+<td class="org-right">-3.62827211</td>
+<td class="org-right">8.63022882</td>
+<td class="org-right">-2.00437786</td>
+<td class="org-right">-2.42290588</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-org185728d" class="outline-3">
+<h3 id="org185728d">Log-probability density function</h3>
+<div class="outline-text-3" id="text-org185728d">
+<p>
+Even though we won't need it in this blog post, we expect any PPL to be able to give the the log-probability density function (logpdf) of any model it has defined. For that we will use <code>aeppl</code>.
+</p>
+
+<p>
+The logpdf will be a function of \(\lambda\), \(\boldysmbol{\tau}\) and \(\beta\). We first need to define the variables that will hold their values:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
+
+<span style="font-weight: bold; font-style: italic;">lambda_tt</span> = at.scalar(<span style="font-style: italic;">"lambda"</span>)
+<span style="font-weight: bold; font-style: italic;">tau_tt</span> = at.vector(<span style="font-style: italic;">"tau"</span>)
+<span style="font-weight: bold; font-style: italic;">beta_tt</span> = at.vector(<span style="font-style: italic;">"beta"</span>)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">TODO: Explain how the function stuff works</span>
+<span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({tau_rv: tau_tt, lambda_rv: lambda_tt, beta_rv: beta_tt})
+<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((lambda_tt, tau_tt, beta_tt), logprob)
+logprob_fn(1., [1, 2, 3, 4, 5], [1, 1, 1, 1, 1])
+</pre>
+</div>
+
+<pre class="example">
+-24.213113433295504
+</pre>
+
+
+<p>
+Amazing!
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org81d9aea" class="outline-2">
+<h2 id="org81d9aea">Negative Binomial regression</h2>
+<div class="outline-text-2" id="text-org81d9aea">
+<p>
+We will now come back to the original topic, performing a /negative binomial sparse regression
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
+  <span style="font-weight: bold;">\boldsymbol</span>{<span style="font-weight: bold;">Y</span>}_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{NegativeBinomial}(h, <span style="font-weight: bold;">\boldsymbol</span>{<span style="font-weight: bold;">\theta</span>})<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\boldsymbol</span>{<span style="font-weight: bold;">\theta</span>} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Sigmoid}(- X^{T}<span style="font-weight: bold;">\;\beta</span>)
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+</pre>
+</div>
+
+\begin{align*}
+  \boldsymbol{Y}_{j} &\sim \operatorname{NegativeBinomial}(h, \boldsymbol{\theta})\\
+  \boldsymbol{\theta} &\sim \operatorname{Sigmoid}(- X^{T}\;\beta)
+\end{align*}
+
+<p>
+\(h\) is xxxx and we will set its value for now:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">h</span> = at.as_tensor(100)
+
+<span style="font-weight: bold; font-style: italic;">theta_tt</span> = at.sigmoid(-at.dot(X.T, beta_rv))
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.nbinom(h, theta_tt)
+Y_rv.<span style="font-weight: bold;">eval</span>()
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">642</td>
+<td class="org-right">923</td>
+<td class="org-right">10378</td>
+<td class="org-right">10590</td>
+<td class="org-right">469</td>
+<td class="org-right">196</td>
+<td class="org-right">931</td>
+<td class="org-right">6298</td>
+<td class="org-right">257</td>
+<td class="org-right">176</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org67a081c" class="outline-2">
+<h2 id="org67a081c"><span class="todo TODO">TODO</span> New progression</h2>
+<div class="outline-text-2" id="text-org67a081c">
+<p>
+Show the whole model first, and show that we can actually sample from the prior of \(\beta\) to perform intermediate checks. Something we cannot do otherwise.
+</p>
+</div>
+</div>
+<div id="outline-container-org88d5c83" class="outline-2">
+<h2 id="org88d5c83"><span class="todo TODO">TODO</span> Sampling from the posterior</h2>
+<div class="outline-text-2" id="text-org88d5c83">
+<p>
+Sampling with <code>aemcmc</code> is great!
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">samples</span> = aemcmc.sample(Y_rv, variables, observations, num_samples)
+</pre>
+</div>
+
+<p>
+Explain how it works.
+</p>
+
+<p>
+Let us now give \(h\) a prior distribution.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">samples</span> = aemcmc.sample(Y_rv, y_tt, num_samples)
+</pre>
+</div>
+
+<p>
+Of course this interfaces easily with <code>ArviZ</code>
+</p>
+</div>
+
+<div id="outline-container-org5806d94" class="outline-3">
+<h3 id="org5806d94"><span class="todo TODO">TODO</span> Show trace and posterior distributions with arviz</h3>
+</div>
+</div>
+
+<div id="outline-container-org6aadee2" class="outline-2">
+<h2 id="org6aadee2"><span class="todo TODO">TODO</span> Posterior predictive sampling</h2>
+<div class="outline-text-2" id="text-org6aadee2">
+<p>
+Posterior predictive sampling is simply that the variables are no longer random variables but have a value. Here it is enough to specify the value of \(\beta\).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">post_pred_fn</span> = aesara.function((beta_rv,), Y_rv)
+post_pred_fn([1., 1., 1., 1., 1.])
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">576</td>
+<td class="org-right">1664</td>
+<td class="org-right">3315</td>
+<td class="org-right">2087</td>
+<td class="org-right">842</td>
+<td class="org-right">970</td>
+<td class="org-right">2454</td>
+<td class="org-right">893</td>
+<td class="org-right">872</td>
+<td class="org-right">512</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+To compute this for an array of samples, we can resort to the equivalent of JAX's <code>vmap</code>: numpy universal functions.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">vpost_pred_fn</span> = np.vectorize(post_pred_fn, signature=<span style="font-style: italic;">"(n)-&gt;(k)"</span>)
+vpost_pred_fn(beta_samples)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
