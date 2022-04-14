@@ -1,0 +1,973 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-14 Thu 09:40 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rewriting Aesara graphs</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Rewriting Aesara graphs</h1>
+<p>
+This article is a port of <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/BrandonTWillard">Brandon Willard'</a>s <a target='_blank' rel='noopener noreferrer' class='external' href="https://pymc-devs.github.io/symbolic-pymc/symbolic-pymc-tour.html">Tour of the Symbolic PyMC library</a>, which can in a sense be seen as the prequel to <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara">Aesara</a>. The text is almost a verbatim copy, but mistakes are mine.
+</p>
+
+<p>
+In this document we will be implementing a symbolic "search-and-replace" that changes aesara graphs like <code>at.dot(A, x+y)</code> to <code>at.dot(A, x) + at.dot(A, y)</code>. In other words we will demonstration how to implement the distributive property of the matrix multiplication so it can be applied to any aesara graph.
+</p>
+
+<p>
+Aesara allows one to implement rewrite rules like the distributive property&#x2014;and many other sophisticated manipulation of graphs&#x2014;by providing flexible, pure Python versions of core operations in symbolic computation. These operations are then combined and orchestrated through the relational programming DSL miniKanren.
+</p>
+
+<p>
+More specifically, we’ll introduce the basic unification and reification operations and explicitly show how they relate to graph manipulation and the modeling of high-level mathematical relations. Along the way, we’ll cover some of the necessary details behind TensorFlow graphs and how they’re modeled by meta graph objects in Symbolic PyMC.
+</p>
+
+<p>
+We start by creating a graph of our target expressions–i.e. <code>at.dot(A, x + y)</code> in Aesara. We need to do this in order to determine exactly what we’re searching for and–later–what to put in its place.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">A_tt</span> = at.matrix(<span style="font-style: italic;">"A"</span>)
+<span style="font-weight: bold; font-style: italic;">x_tt</span> = at.vector(<span style="font-style: italic;">"x"</span>)
+<span style="font-weight: bold; font-style: italic;">y_tt</span> = at.vector(<span style="font-style: italic;">"y"</span>)
+<span style="font-weight: bold; font-style: italic;">z_tt</span> = at.dot(A_tt, x_tt + y_tt)
+</pre>
+</div>
+
+<p>
+We can get a text print-out of the graph using the debug print function <code>dprint</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+
+aesara.dprint(z_tt)
+</pre>
+</div>
+
+<pre class="example">
+dot [id A] ''
+ |A [id B]
+ |Elemwise{add,no_inplace} [id C] ''
+   |x [id D]
+   |y [id E]
+</pre>
+
+
+<p>
+The output of <code>dprint</code> shows the underlying operators (<code>dot</code>, <code>add</code>) and their arguments.
+</p>
+
+<p>
+To "math/search for" combinations of Aesara operations&#x2013;or, as we just saw, graphs&#x2013; we use <b>unification</b>; to "replace" parts of the graph (well, produce a copy with replaced parts) we use <b>reificatoin</b>. Aesara provides support for these using Aesara via <b>meta objects</b> and <b>expression-tuples</b>.
+</p>
+
+<div id="outline-container-orgbdc55d1" class="outline-2">
+<h2 id="orgbdc55d1">S-expressions</h2>
+<div class="outline-text-2" id="text-orgbdc55d1">
+<p>
+We can convert an Aesara graphs into an <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/S-expression">S-expression-like</a> form using <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/etuples">etuples</a>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+<span style="font-weight: bold;">from</span> IPython.lib.pretty <span style="font-weight: bold;">import</span> pprint
+
+<span style="font-weight: bold; font-style: italic;">z_et</span> = etuplize(z_tt)
+pprint(z_et)
+</pre>
+</div>
+
+<pre class="example" id="org3198693">
+e(
+  e(aesara.tensor.math.Dot),
+  A,
+  e(
+    e(
+      aesara.tensor.elemwise.Elemwise,
+      &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+      &lt;frozendict {}&gt;),
+    x,
+    y))
+</pre>
+
+<p>
+An <code>etuple</code> is like a normal <code>tuple</code>, except that its first element is a <code>Callable</code> and the remaining elements are the <code>Callable</code>'s arguments. As above, a pretty-printed <code>etuple</code> looks like a <code>tuple</code> prefixed by an <code>e</code>.
+</p>
+
+<p>
+By working with <code>etuples</code> we can use <b>arbitrary Python functions</b> in conjunction with Aesara graphs and logic variable arguments. Basically, and <code>etuple</code> can be manipulated until all of its constituent logic variables are replaced with valid arguments to the function/operators. At that point the etuple can be evaluated.
+</p>
+
+<p>
+For instance we can create an <code>etuple</code> that uses the function <code>at.add</code> with a logic variable argument.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> var
+
+<span style="font-weight: bold; font-style: italic;">x_lv</span>, <span style="font-weight: bold; font-style: italic;">y_lv</span> = var(<span style="font-style: italic;">'x'</span>), var(<span style="font-style: italic;">'y'</span>)
+<span style="font-weight: bold; font-style: italic;">add_pattern</span> = etuple(etuplize(at.add), x_lv, y_lv)
+</pre>
+</div>
+
+<p>
+It wouldn't normally be possible to call the <code>at.add</code> function with these argument types, as demonstrated in this example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">try</span>:
+    at.add(x_lv, 1)
+<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">NotImplementedError</span> <span style="font-weight: bold;">as</span> e:
+    <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">str</span>(e))
+</pre>
+</div>
+
+<pre class="example">
+Cannot convert ~x to a tensor variable.
+</pre>
+
+
+<p>
+We'll get a similar error if we attempt to evaluate the <code>etuple</code> by accessing its <code>ExpressionTuple.evaled_obj</code> property. However, after performing a simple manipulation that replaces the logic variable with a valid input to <code>at.add</code>, we are able to evaluate the <code>etuple</code> and obtain an Aesara Tensor result, as demonstrated by the following code:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> reify
+
+<span style="font-weight: bold; font-style: italic;">new_add_pattern</span> = reify(add_pattern, {x_lv: 1., y_lv: 1.})
+pprint(new_add_pattern)
+</pre>
+</div>
+
+<pre class="example">
+e(
+  e(
+    aesara.tensor.elemwise.Elemwise,
+    &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+    &lt;frozendict {}&gt;),
+  1.0,
+  1.0)
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-python">pprint(new_add_pattern.evaled_obj)
+</pre>
+</div>
+
+<pre class="example">
+Elemwise{add,no_inplace}.0
+</pre>
+
+
+<p>
+Working with S-expressions is much like manipulating a subset of Python AST, so, when using <code>etuples</code>, one is&#x2013;in effect-<b>meta programming</b> (e.g. by automating the production and evaluation of Aesara graphs using Python code).
+</p>
+
+<p>
+As a matter of fact, <code>etuples</code> could be recast as <code>ast.Expr</code> and <code>ast.Call</code> objects that, though the use of <code>eval</code>, could achieve the same results-albeit without the more convenient tuple-like structuring.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org053045a" class="outline-2">
+<h2 id="org053045a">Operators and their parameters</h2>
+<div class="outline-text-2" id="text-org053045a">
+<p>
+In etuplized-graph-print the <code>etuple</code> form of our matrix-multuplication graph <code>z_et</code> produced Aesaa operators
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">pprint(z_et[0])
+</pre>
+</div>
+
+<pre class="example">
+e(aesara.tensor.math.Dot)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orge582616" class="outline-2">
+<h2 id="orge582616">Unification and reification</h2>
+<div class="outline-text-2" id="text-orge582616">
+<p>
+With the ability to use logic variables and Aesara graphs together, we can now "search" or "match" arbitrary graphs using <b>unification</b> and produce new graphs by replacing logic variables using <b>reification</b>.
+</p>
+
+<p>
+We start by making "patterns" or templates for the subgraphs we would like to match. Patterns, in this case, take the form of S-expressions with the desired structure and logic variables in place of "unknown" or arbitrary terms that we might like to reference elsewhere.
+</p>
+
+<p>
+<code>dot_pattern</code> represents an S-expression that evaluateds to a graph in which two terms are matrix-multiplied.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.tensor.math <span style="font-weight: bold;">import</span> Dot
+
+<span style="font-weight: bold; font-style: italic;">A_lv</span>, <span style="font-weight: bold; font-style: italic;">B_lv</span> = var(<span style="font-style: italic;">"A"</span>), var(<span style="font-style: italic;">"B"</span>)
+<span style="font-weight: bold; font-style: italic;">dot_pattern</span> = etuple(etuple(Dot), A_lv, B_lv)
+</pre>
+</div>
+
+<p>
+"Matching" a graph against this pattern is called <b>unification</b>. Unificatoin of two graphs implies unification of all sub-graphs and elements between them. When unification is successful, it returns a map of logic variables and their unified values. If there are no logic variables in the graphs it simply returns an empty map. If unification fails, it returns <code>False</code>&#x2013;at least in the implementation we use.
+</p>
+</div>
+
+<div id="outline-container-orge6603f4" class="outline-3">
+<h3 id="orge6603f4">Unification</h3>
+<div class="outline-text-3" id="text-orge6603f4">
+<p>
+We can perform unification using the function <code>unify</code>. The result is a <code>dict</code> mapping logic variables to their unified values.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify
+
+<span style="font-weight: bold; font-style: italic;">s</span> = unify(dot_pattern, z_et)
+pprint(s)
+</pre>
+</div>
+
+<pre class="example">
+{~A: A,
+ ~B: e(
+   e(
+     aesara.tensor.elemwise.Elemwise,
+     &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+     &lt;frozendict {}&gt;),
+   x,
+   y)}
+</pre>
+
+
+<p>
+The logic variable <code>A</code> has been correctly unified with <code>A_tt</code>, while the logic variable <code>B</code> has been correctly unified with the addition of <code>x_tt</code> and <code>y_tt</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0589e70" class="outline-3">
+<h3 id="org0589e70">Reification</h3>
+<div class="outline-text-3" id="text-org0589e70">
+<p>
+Using <code>reify</code> we can "fill-in"&#x2013;or replace&#x2014;the logic variables of our "pattern" with the matches obtained by <code>unify</code> that are held within the variable s, or we could specify our own substitutions based on that information.
+</p>
+
+<p>
+In the following snipped we simply exchange the <code>A_tt</code> tensor with another <code>X_tt</code> tensor and create a new graph with that value. The end result is a version of the original graph <code>z_et</code>, with the new tensor.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">X_tt</span> = at.matrix(<span style="font-style: italic;">"X"</span>)
+<span style="font-weight: bold; font-style: italic;">s</span>[A_lv] = X_tt
+
+<span style="font-weight: bold; font-style: italic;">z_et_re</span> = reify(dot_pattern, s)
+pprint(z_et_re)
+</pre>
+</div>
+
+<pre class="example" id="orgabd612f">
+e(
+  e(aesara.tensor.math.Dot),
+  X,
+  e(
+    e(
+      aesara.tensor.elemwise.Elemwise,
+      &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+      &lt;frozendict {}&gt;),
+    x,
+    y))
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org7cef8bc" class="outline-3">
+<h3 id="org7cef8bc">Finishing our implementation</h3>
+<div class="outline-text-3" id="text-org7cef8bc">
+<p>
+We can also reify an entirely different graph using the values extracted from the graph <code>z_et</code>. In this case, we create an "output" pattern graph, to complement our new "input" pattern graph <code>dot_pattern</code>.
+</p>
+
+<p>
+If we combine out dot product and addition <code>etuple</code> patterns, we can extract all the arguments needed as input to a distributed multiplication pattern.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">output_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), B_lv, y_lv))
+pprint(output_pattern)
+</pre>
+</div>
+
+<pre class="example">
+e(
+  e(
+    aesara.tensor.elemwise.Elemwise,
+    &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+    &lt;frozendict {}&gt;),
+  e(e(aesara.tensor.math.Dot), ~A, ~x),
+  e(e(aesara.tensor.math.Dot), ~B, ~y))
+</pre>
+
+
+<p>
+With logic variables <code>A_lv</code>, <code>x_lv</code> and <code>y_lv</code> mapped to their template-corresponding objects in another graph, we can reify <code>output_pattern</code>  and obtain a reified version of said graph.
+</p>
+
+<p>
+Using the previous unification results contained in <code>s</code> we only need to reify <code>output_pattern</code> with those mappings. However, since our pattern refers to logic variables <code>x_lv</code> and <code>y_lv</code> we'll need to unify these logic variables with the appropriate terms in the graph.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">s_add</span> = unify(s[B_lv], add_pattern, s)
+pprint(s_add)
+</pre>
+</div>
+
+<pre class="example" id="org5239331">
+{~A: X,
+ ~B: e(
+   e(
+     aesara.tensor.elemwise.Elemwise,
+     &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+     &lt;frozendict {}&gt;),
+   x,
+   y),
+ ~x: x,
+ ~y: y}
+</pre>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_new</span> = reify(output_pattern, s_add)
+aesara.dprint(z_new.evaled_obj)
+</pre>
+</div>
+
+<pre class="example" id="org564b575">
+Elemwise{add,no_inplace} [id A] ''
+ |dot [id B] ''
+ | |X [id C]
+ | |x [id D]
+ |InplaceDimShuffle{x} [id E] ''
+   |dot [id F] ''
+     |Elemwise{add,no_inplace} [id G] ''
+     | |x [id D]
+     | |y [id H]
+     |y [id H]
+</pre>
+
+<p>
+Using only the basics of unification and reification provided by Aesara once can extract specific elements from Aesara graphs and use them to implement mathematical identities/relations. Through clever use of multiple mathematical relations, one can&#x2013;for example&#x2013;construct graph <b>optimizatoins</b> that turn large classed of user-defined statistical models into computational tractable reformulations. Similarly, one can construct "normal forms" for models, making it possible to determine whether or not a user-defined model is suitable for a specific sampler.
+</p>
+
+<p>
+Next we will introduce another major element of Aesara that orchestrates and simplifies sequences of unifications like we used earlier, provides control-flow-like capabilities, produces fully reified results of arbitrary forms and does so within a genuinely declarative formalism that carries much of the same power of logical programming: <a target='_blank' rel='noopener noreferrer' class='external' href="http://minikanren.org/">miniKanren</a>!
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org77206f4" class="outline-2">
+<h2 id="org77206f4">Relational programming in miniKanren</h2>
+<div class="outline-text-2" id="text-org77206f4">
+<p>
+Aesara uses a Python implementation of the embedded domain-specific language miniKanren&#x2013;provided by the <code>kanren</code> package&#x2013;to orchestrate more sophisticated uses of unification and reification. For a quick intro, see <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren/blob/master/doc/basic.md">the basic introduction</a> provided by the <code>kanren</code> package. We'll cover most of the same basic material here.
+</p>
+
+<p>
+To start, miniKanren uses <b>goals</b> (in the same sense as <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Logic_programming">logic programming</a>) to assert relations, and the <code>run</code> function evaluates those goals and allows one to specify the exact amount and type of reified output desired from the <b>states</b> that satisfy the goals.
+</p>
+
+<p>
+In their most basic form, miniKanren <b>states</b> are simply the substitution maps returned by unification, which&#x2013;in the normal course of operations&#x2013;are not dealt with directly.
+</p>
+</div>
+
+<div id="outline-container-orgd94ea76" class="outline-3">
+<h3 id="orgd94ea76">The basic goals</h3>
+<div class="outline-text-3" id="text-orgd94ea76">
+<p>
+Normally, a user will only need to construct compound goals from a basic set of primitives. Arguably, the most primitive goal is the <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Equivalence_relation">equivalence relation</a> under unification denoted by <code>eq</code> in Python.
+</p>
+
+<p>
+In the following code block we ask for all successful results/reifications (signified by the <code>0</code> argument) of the logic variable <code>var('q')</code> for the goal <code>eq(var('q'), 1)</code>, i.e. unify <code>var('q')</code> with <code>1</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> run, eq
+
+<span style="font-weight: bold; font-style: italic;">q_lv</span> = var(<span style="font-style: italic;">'q'</span>)
+<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(0, q_lv, eq(q_lv, 1))
+pprint(mk_res)
+</pre>
+</div>
+
+<pre class="example">
+(1,)
+</pre>
+
+
+<p>
+Since miniKanren's <code>run</code> always returns a stream of results, we obtain a tuple containing the reified values of <code>q_lv</code> under the one possible state for which our stated goal successfully evaluates.
+</p>
+
+<p>
+The other basic primitives represent conjunction and disjunction of miniKanren goals: <code>lall</code> and <code>lany</code> respectively.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall
+
+<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(0, q_lv, lall(eq(q_lv, 1), eq(q_lv, 2)))
+pprint(mk_res)
+</pre>
+</div>
+
+<pre class="example">
+()
+</pre>
+
+
+<p>
+We just used <code>lall</code> to obtain the conjunction of two unificatoin goals. Since we requested the same logic variable be unified with <code>1</code> and <code>2</code> simultaneously, which is imposssibe, we got back an empty stream of results&#x2013;indicating failure.
+</p>
+
+<p>
+Goal disjunction, <code>lany</code>, will split a state stream accross goals, producing new distrinct states for each:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lany
+
+<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(0, q_lv, lany(eq(q_lv, 1), eq(q_lv, 2)))
+pprint(mk_res)
+</pre>
+</div>
+
+<pre class="example">
+(1, 2)
+</pre>
+
+
+<p>
+The goal disjunction result shows that the logic variable <code>q_lv</code> can be unified with either <code>1</code> or <code>2</code> under the two unification goals.
+</p>
+
+<p>
+A common pattern of disjuntion and conjunction is called <code>conde</code>, and it mirrors the Lisp function <code>cond</code>, which is effectively a type compound <code>if ... elif ... elif ...</code>. Specifically, <code>conde([x_1, ...], ..., [y_1,...])</code> is the same as <code>lany(lall(x_1,...), ..., lall(y_1, ...))</code>-i.e. a disjunction of goal conjunctions.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> conde
+
+<span style="font-weight: bold; font-style: italic;">r_lv</span> = var(<span style="font-style: italic;">"r"</span>)
+
+<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(
+    0,
+    [q_lv, r_lv],
+    conde(
+        [eq(q_lv, 1), eq(r_lv, 10)],
+        [eq(q_lv, 2), eq(r_lv, 20)]
+    )
+)
+pprint(mk_res)
+</pre>
+</div>
+
+<pre class="example">
+([1, 10], [2, 20])
+</pre>
+
+
+<p>
+We introduced another logic variable <code>r_lv</code> and requested the reified values of a list containing both logic variables. The output resembles the idea thatif <code>q_lv</code> is "equal" to <code>1</code>, then <code>r_lv</code> is "equal" to <code>10</code>, etc. Unlike normal conditionals, each clause/branch isn't exclusive, instead each is realized when the goals in a branch can be successful.
+</p>
+
+<p>
+The following code demonstrated when <code>conde</code> can behave more like a traditional statement.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">mk_res</span> = run(0, [q_lv, r_lv],
+             lall(eq(q_lv, 1),
+                  conde(
+                      [eq(q_lv, 1), eq(r_lv, 10)],
+                      [eq(q_lv, 2), eq(r_lv, 20)],
+                  )))
+pprint(mk_res)
+</pre>
+</div>
+
+<pre class="example">
+([1, 10],)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org6274bfd" class="outline-3">
+<h3 id="org6274bfd">A better implementation</h3>
+<div class="outline-text-3" id="text-org6274bfd">
+<p>
+Since miniKanren uses unification and reification, we can apply its basic goals to Aesara graphs, as we did earlier, and reproduce the entire implementation in a much more concise manner.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, output_pattern, eq(dot_pattern, z_et), eq(add_pattern, B_lv))
+pprint(mk_res)
+</pre>
+</div>
+
+<pre class="example" id="org127da19">
+(e(
+   e(
+     aesara.tensor.elemwise.Elemwise,
+     &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+     &lt;frozendict {}&gt;),
+   e(e(aesara.tensor.math.Dot), A, x),
+   e(
+     e(aesara.tensor.math.Dot),
+     e(
+       e(
+         aesara.tensor.elemwise.Elemwise,
+         &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+         &lt;frozendict {}&gt;),
+       x,
+       y),
+     y)),)
+</pre>
+
+<p>
+We obtain an etuple that we can evaluate to get the graph
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">aesara.dprint(mk_res[0].evaled_obj)
+</pre>
+</div>
+
+<pre class="example" id="org904d101">
+Elemwise{add,no_inplace} [id A] ''
+ |dot [id B] ''
+ | |A [id C]
+ | |x [id D]
+ |InplaceDimShuffle{x} [id E] ''
+   |dot [id F] ''
+     |Elemwise{add,no_inplace} [id G] ''
+     | |x [id D]
+     | |y [id H]
+     |y [id H]
+</pre>
+
+<p>
+We did not need to use the conjunction operation <code>lall</code> explicitly, because all remaining goal arguments to <code>run</code> are automatically applied in conjunction.
+</p>
+
+<p>
+Before moving on to the next section and goal construction, let us summarize everything we did in a self-contained exampe:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">from</span> aesara.tensor.math <span style="font-weight: bold;">import</span> Dot
+
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, run
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> var
+
+<span style="font-weight: bold;">from</span> IPython.lib.pretty <span style="font-weight: bold;">import</span> pprint
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Define the graph we want to "modify"</span>
+<span style="font-weight: bold; font-style: italic;">A_tt</span> = at.matrix(<span style="font-style: italic;">"A"</span>)
+<span style="font-weight: bold; font-style: italic;">x_tt</span> = at.vector(<span style="font-style: italic;">"x"</span>)
+<span style="font-weight: bold; font-style: italic;">y_tt</span> = at.vector(<span style="font-style: italic;">"y"</span>)
+<span style="font-weight: bold; font-style: italic;">z_tt</span> = at.dot(A_tt, x_tt + y_tt)
+
+<span style="font-weight: bold; font-style: italic;">z_et</span> = etuplize(z_tt)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Input patterns and logic variables</span>
+<span style="font-weight: bold; font-style: italic;">x_lv</span>, <span style="font-weight: bold; font-style: italic;">y_lv</span> = var(<span style="font-style: italic;">'x'</span>), var(<span style="font-style: italic;">'y'</span>)
+<span style="font-weight: bold; font-style: italic;">add_pattern</span> = etuple(etuplize(at.add), x_lv, y_lv)
+
+<span style="font-weight: bold; font-style: italic;">A_lv</span>, <span style="font-weight: bold; font-style: italic;">B_lv</span> = var(<span style="font-style: italic;">'A'</span>), var(<span style="font-style: italic;">'B'</span>)
+<span style="font-weight: bold; font-style: italic;">dot_pattern</span> = etuple(etuple(Dot), A_lv, B_lv)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Output pattern</span>
+<span style="font-weight: bold; font-style: italic;">output_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), B_lv, y_lv))
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Using miniKanren</span>
+<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, output_pattern, eq(dot_pattern, z_et), eq(add_pattern, B_lv))
+aesara.dprint(mk_res[0].evaled_obj)
+</pre>
+</div>
+
+<pre class="example" id="orgcd8b16f">
+Elemwise{add,no_inplace} [id A] ''
+ |dot [id B] ''
+ | |A [id C]
+ | |x [id D]
+ |InplaceDimShuffle{x} [id E] ''
+   |dot [id F] ''
+     |Elemwise{add,no_inplace} [id G] ''
+     | |x [id D]
+     | |y [id H]
+     |y [id H]
+</pre>
+
+<p>
+When combinations of miniKanren goals comprise logical units, we can wrap their construction in functions which we call <b>goal constructors</b>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org51eec2f" class="outline-3">
+<h3 id="org51eec2f">Goals Constructors</h3>
+<div class="outline-text-3" id="text-org51eec2f">
+<p>
+Using our distributive law example, we can create a goal constructor that creates our combined pattern and applies it in one go.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">distributeo</span>(in_g, out_g):
+    <span style="font-style: italic;">"""Create a oal that represents commuted matrix multiplicatoin and addition."""</span>
+    <span style="font-weight: bold; font-style: italic;">A_lv</span>, <span style="font-weight: bold; font-style: italic;">x_lv</span>, <span style="font-weight: bold; font-style: italic;">y_lv</span> = var(), var(), var()
+    <span style="font-weight: bold; font-style: italic;">dot_pattern</span> = etuple(etuple(Dot), A_lv, etuple(etuplize(at.add), x_lv, y_lv))
+    <span style="font-weight: bold; font-style: italic;">dist_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), A_lv, y_lv))
+
+    <span style="font-weight: bold;">return</span> lall(eq(in_g, dot_pattern), eq(out_g, dist_pattern))
+</pre>
+</div>
+
+<p>
+Our goal constructor represent the <b>relation</b> for distribution of matrix multiplication and addition. In this sense, it can be run <b>both</b> ways i.e. it can "expand" a multiplication by distributing it through addition, and it can "contract" it by doing the opposite.
+</p>
+
+<p>
+In the following example we "expand" the multiplication:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">q_lv</span> = var()
+<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, q_lv, distributeo(z_et, q_lv))
+<span style="font-weight: bold; font-style: italic;">z_expanded_et</span> = mk_res[0].evaled_obj
+aesara.dprint(z_expanded_et)
+</pre>
+</div>
+
+<pre class="example">
+Elemwise{add,no_inplace} [id A] ''
+ |dot [id B] ''
+ | |A [id C]
+ | |x [id D]
+ |dot [id E] ''
+   |A [id C]
+   |y [id F]
+</pre>
+
+
+<p>
+And in the following example we "contract" the previously expanded result
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">q_lv</span> = var()
+<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, q_lv, distributeo(q_lv, z_expanded_et))
+<span style="font-weight: bold; font-style: italic;">z_contracted_et</span> = mk_res[0].evaled_obj
+aesara.dprint(z_contracted_et)
+</pre>
+</div>
+
+<pre class="example">
+dot [id A] ''
+ |A [id B]
+ |Elemwise{add,no_inplace} [id C] ''
+   |x [id D]
+   |y [id E]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgf7cd149" class="outline-3">
+<h3 id="orgf7cd149">Graph-based goals</h3>
+<div class="outline-text-3" id="text-orgf7cd149">
+<p>
+In most situation the desired graphs will be subgraphs of much larger ones. Aesara introduces some miniKanren goals that apply other goals throughout graphs until a fixed-point is reached. This sequence of operations is generally necessary for graph simplification and rewriting.
+</p>
+
+<p>
+In the following example we create a new graph that contains <code>at.dot(A, x+y)</code> as a subgraph.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_graph_tt</span> = 2 * at.dot(A_tt, x_tt + y_tt) + 1.
+<span style="font-weight: bold; font-style: italic;">z_graph_et</span> = etuplize(z_graph_tt)
+pprint(z_graph_et)
+</pre>
+</div>
+
+<pre class="example" id="org63f5742">
+e(
+  e(
+    aesara.tensor.elemwise.Elemwise,
+    &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+    &lt;frozendict {}&gt;),
+  e(
+    e(
+      aesara.tensor.elemwise.Elemwise,
+      &lt;aesara.scalar.basic.Mul at 0x7fd9c9f1a560&gt;,
+      &lt;frozendict {}&gt;),
+    e(
+      e(aesara.tensor.elemwise.DimShuffle, (), ('x',), True),
+      TensorConstant{2}),
+    e(
+      e(aesara.tensor.math.Dot),
+      A,
+      e(
+        e(
+          aesara.tensor.elemwise.Elemwise,
+          &lt;aesara.scalar.basic.Add at 0x7fd9c9f1a440&gt;,
+          &lt;frozendict {}&gt;),
+        x,
+        y))),
+  e(
+    e(aesara.tensor.elemwise.DimShuffle, (), ('x',), True),
+    TensorConstant{1.0}))
+</pre>
+
+<p>
+We define <code>graph_walko</code>, a function that walks term graphs and will apply our <code>distributeo</code> goal throughout the graph until the applicable subgraph is found (and replaced)
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> etuples.core <span style="font-weight: bold;">import</span> ExpressionTuple
+<span style="font-weight: bold;">from</span> kanren.graph <span style="font-weight: bold;">import</span> walko
+<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq
+<span style="font-weight: bold;">from</span> functools <span style="font-weight: bold;">import</span> partial
+
+<span style="font-weight: bold; font-style: italic;">graph_walko</span> = partial(walko, rator_goal=eq)
+
+<span style="font-weight: bold; font-style: italic;">q_lv</span> = var()
+<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, q_lv, graph_walko(distributeo, z_graph_et, q_lv))
+aesara.dprint(mk_res[0].evaled_obj)
+</pre>
+</div>
+
+<pre class="example" id="org5df6e71">
+Elemwise{add,no_inplace} [id A] ''
+ |Elemwise{mul,no_inplace} [id B] ''
+ | |InplaceDimShuffle{x} [id C] ''
+ | | |TensorConstant{2} [id D]
+ | |Elemwise{add,no_inplace} [id E] ''
+ |   |dot [id F] ''
+ |   | |A [id G]
+ |   | |x [id H]
+ |   |dot [id I] ''
+ |     |A [id G]
+ |     |y [id J]
+ |InplaceDimShuffle{x} [id K] ''
+   |TensorConstant{1.0} [id L]
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
