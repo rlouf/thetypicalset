@@ -1,0 +1,143 @@
+#+TITLE: Identifying a horsehoe prior in an Aesara graph
+#+DATE: <2022-04-14 Thu>
+
+In this short post we will try to unify subgraphs of an [[https://github.com/aesara-devs/aesara][Aesara]] graph with a pattern that represents a horseshoe prior, a generalization of [[https://github.com/aesara-devs/aemcmc/blob/0a8cc0044f76e39f49716107cdc77b210832c44a/aemcmc/gibbs.py#L90][this unification in Aemcmc]]. Consider the following negative binomial regresssion implemented in Aesara:
+
+#+begin_src python :session :results silent :exports code
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+X_tt = at.matrix('X')
+h_tt = at.scalar('h', dtype="int32")
+
+tau_rv = srng.halfcauchy(1, size=1)
+lmbda_rv = srng.halfcauchy(1, size=10)
+beta_rv = srng.normal(0, tau_rv * lmbda_rv)
+
+eta = X_tt @ beta_rv
+p = at.sigmoid(-eta)
+Y_rv = srng.nbinom(h_tt, p)
+#+end_src
+
+We would like to be able to tell whether the model that the graph implements contains a horseshoe prior, and if so return the random variables =lmbda_rv= and =tau_rv=. Let us first define a horseshoe pattern against which we are going to try to match the model:
+
+#+begin_src python :session :results silent
+from unification import var
+from etuples import etuple, etuplize
+
+horseshoe_1_lv, horseshoe_2_lv = var('horseshoe_1'), var('horsehoe_2')
+zero_lv = var('zero')
+horseshoe_pattern = etuple(
+    etuplize(at.random.normal),
+    var(),
+    var(),
+    var(),
+    zero_lv,
+    etuple(
+        etuplize(at.mul),
+        horseshoe_1_lv,
+        horseshoe_2_lv)
+)
+#+end_src
+
+We can unify this pattern with the subgraph =beta_rv= using pythological's [[https://github.com/pythological/unification][unification]] package:
+
+#+begin_src python :session :results output :exports both
+from unification import unify
+from IPython.lib.pretty import pprint
+
+s = unify(horseshoe_pattern, etuplize(beta_rv))
+pprint(s)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+{~_554: RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F4873319040>),
+ ~_555: TensorConstant{[]},
+ ~_556: TensorConstant{11},
+ ~zero: TensorConstant{0},
+ ~horseshoe_1: e(
+   e(
+     aesara.tensor.random.basic.HalfCauchyRV,
+     'halfcauchy',
+     0,
+     (0, 0),
+     'floatX',
+     False),
+   RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F487A719200>),
+   TensorConstant{(1,) of 1},
+   TensorConstant{11},
+   TensorConstant{1},
+   TensorConstant{1.0}),
+ ~horsehoe_2: e(
+   e(
+     aesara.tensor.random.basic.HalfCauchyRV,
+     'halfcauchy',
+     0,
+     (0, 0),
+     'floatX',
+     False),
+   RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F48733193C0>),
+   TensorConstant{(1,) of 10},
+   TensorConstant{11},
+   TensorConstant{1},
+   TensorConstant{1.0})}
+#+end_example
+
+However, =unify= will only work if the pattern matches the whole graph. Indeed if we try to unify the horsehoe pattern with =Y_rv= we get:
+
+#+begin_src python :session :results output :exports both
+s = unify(horseshoe_pattern, etuplize(Y_rv))
+print(s)
+#+end_src
+
+#+RESULTS:
+: False
+
+To identify subgraphs we walk through the graph (here breadth-first) and attempt unification at each step:
+
+#+begin_src python :session :results output :exports both
+from aesara.graph.basic import walk
+from aesara.tensor.random.op import RandomVariable
+
+def expand(var):
+    if var.owner:
+        return var.owner.inputs
+    else:
+        return
+
+for node in walk([Y_rv], expand, bfs=True):
+    try:
+        if isinstance(node.owner.op, RandomVariable):
+            s = unify(horseshoe_pattern, etuplize(node))
+            if s:
+                break
+    except AttributeError:
+        continue
+#+end_src
+
+We can check that $\tau$ has been correctly identified:
+
+#+begin_src python :session :results output :exports both
+pprint(s[horseshoe_1_lv])
+#+end_src
+
+#+RESULTS:
+#+begin_example
+e(
+  e(
+    aesara.tensor.random.basic.HalfCauchyRV,
+    'halfcauchy',
+    0,
+    (0, 0),
+    'floatX',
+    False),
+  RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F487A719200>),
+  TensorConstant{(1,) of 1},
+  TensorConstant{11},
+  TensorConstant{1},
+  TensorConstant{1.0})
+#+end_example
+
+Being able to unify a pattern with a subgraph is a (small) first step towards being able to assign sampling steps to random variables in an arbitrary graph. But it is not enough; while we can assign a gibbs sampler step to =beta_rv=, =lambda_rv= and =tau_rv= in this example, =h= has been left out of the unification process. We could naturally assign a NUTS sampler step to any random variable with continuous support, so in the next post we will do exactly that.
