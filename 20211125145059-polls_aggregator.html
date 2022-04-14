@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-14 Thu 09:40 -->
+<!-- 2022-04-14 Thu 09:45 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Predict the result of French elections</title>
@@ -227,16 +227,16 @@ Sorry but this is a very rough draft written for myself.
 See <a href="20211207101052-forecasting_elections_in_multiparty_systems_a_bayesian_approach_combining_polls_and_fundamentals.html#ID-4fd036f0-8812-411d-bd25-acd1ebefb7d9">Forecasting elections in multiparty systems: a Bayesian approach combining polls and fundamentals</a>
 </p>
 
-<div id="outline-container-orgfabe9bf" class="outline-2">
-<h2 id="orgfabe9bf"><span class="todo TODO">TODO</span> Link Gaussian process to stochastic processes</h2>
+<div id="outline-container-orge05e690" class="outline-2">
+<h2 id="orge05e690"><span class="todo TODO">TODO</span> Link Gaussian process to stochastic processes</h2>
 </div>
-<div id="outline-container-org07d7fc2" class="outline-2">
-<h2 id="org07d7fc2"><span class="todo TODO">TODO</span> Make the gaussian process work with a non-diagonal covariance matrix</h2>
+<div id="outline-container-org03f3378" class="outline-2">
+<h2 id="org03f3378"><span class="todo TODO">TODO</span> Make the gaussian process work with a non-diagonal covariance matrix</h2>
 </div>
 
-<div id="outline-container-org330cd5b" class="outline-2">
-<h2 id="org330cd5b">Introduction</h2>
-<div class="outline-text-2" id="text-org330cd5b">
+<div id="outline-container-org0e9f261" class="outline-2">
+<h2 id="org0e9f261">Introduction</h2>
+<div class="outline-text-2" id="text-org0e9f261">
 <p>
 Dimensions:
 </p>
@@ -281,9 +281,9 @@ We use Gaussian processes to model the time evolution of the different parameter
 </div>
 
 
-<div id="outline-container-org6ae3591" class="outline-2">
-<h2 id="org6ae3591">Intercepts</h2>
-<div class="outline-text-2" id="text-org6ae3591">
+<div id="outline-container-org74f3265" class="outline-2">
+<h2 id="org74f3265">Intercepts</h2>
+<div class="outline-text-2" id="text-org74f3265">
 <div class="org-src-container">
 <pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
   <span style="font-weight: bold;">\sigma</span>_{\iota} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfNormal}(0.5)<span style="font-weight: bold;">\\</span>
@@ -312,9 +312,9 @@ We use Gaussian processes to model the time evolution of the different parameter
 </div>
 </div>
 
-<div id="outline-container-org50f1316" class="outline-2">
-<h2 id="org50f1316">House effect</h2>
-<div class="outline-text-2" id="text-org50f1316">
+<div id="outline-container-orgd796e9c" class="outline-2">
+<h2 id="orgd796e9c">House effect</h2>
+<div class="outline-text-2" id="text-orgd796e9c">
 <p>
 The systemic poll biais shared by every pollster for each political party:
 </p>
@@ -364,9 +364,9 @@ And the house effect per (election, party)
 </div>
 </div>
 
-<div id="outline-container-org85b88bb" class="outline-2">
-<h2 id="org85b88bb">Fundamental data</h2>
-<div class="outline-text-2" id="text-org85b88bb">
+<div id="outline-container-org1dd6213" class="outline-2">
+<h2 id="org1dd6213">Fundamental data</h2>
+<div class="outline-text-2" id="text-org1dd6213">
 <p>
 Idea that elections are simple to predict using fundamental data. Here we model the unemployment effect \(\nu_u\):
 </p>
@@ -384,22 +384,22 @@ Idea that elections are simple to predict using fundamental data. Here we model 
 </div>
 </div>
 
-<div id="outline-container-org8721ef9" class="outline-2">
-<h2 id="org8721ef9">Time evolution</h2>
-<div class="outline-text-2" id="text-org8721ef9">
+<div id="outline-container-org0bc8337" class="outline-2">
+<h2 id="org0bc8337">Time evolution</h2>
+<div class="outline-text-2" id="text-org0bc8337">
 <p>
 We model the time evolution of parties' latent popularity with 3 gaussian processes with different length scales to catch the different time scales of the process.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orga4f6c9d" class="outline-2">
-<h2 id="orga4f6c9d">Combine the factors</h2>
-<div class="outline-text-2" id="text-orga4f6c9d">
+<div id="outline-container-org5274e3b" class="outline-2">
+<h2 id="org5274e3b">Combine the factors</h2>
+<div class="outline-text-2" id="text-org5274e3b">
 </div>
-<div id="outline-container-org6d6ee6b" class="outline-3">
-<h3 id="org6d6ee6b">Poll aggregator</h3>
-<div class="outline-text-3" id="text-org6d6ee6b">
+<div id="outline-container-org6217183" class="outline-3">
+<h3 id="org6217183">Poll aggregator</h3>
+<div class="outline-text-3" id="text-org6217183">
 <div class="org-src-container">
 <pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
  <span style="font-weight: bold;">\lambda</span>_{h, t, e, p} = <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\iota</span>}_{p} + <span style="font-weight: bold;">\iota</span>_{e,p} + <span style="font-weight: bold;">\mu</span>_{t,p} + <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\mu</span>}_{t,e,p} + <span style="font-weight: bold;">\zeta</span>_{u} <span style="font-weight: bold;">\;</span> U_{t} + <span style="font-weight: bold;">\zeta</span>_{p} + <span style="font-weight: bold;">\epsilon</span>_{h,p} + <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\epsilon</span>}_{h,p,e}
@@ -444,9 +444,9 @@ The latent popularity is given by removing the house effects &amp; poll biases:
 </div>
 
 
-<div id="outline-container-org99ae253" class="outline-3">
-<h3 id="org99ae253">Fundamentals model</h3>
-<div class="outline-text-3" id="text-org99ae253">
+<div id="outline-container-orgd8e6546" class="outline-3">
+<h3 id="orgd8e6546">Fundamentals model</h3>
+<div class="outline-text-3" id="text-orgd8e6546">
 <div class="org-src-container">
 <pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
  <span style="font-weight: bold;">\tilde</span>{p}_{h, t, e, p} = <span style="font-weight: bold;">\operatorname</span>{Softmax}<span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\iota</span>}_{p} + <span style="font-weight: bold;">\iota</span>_{e,p} + <span style="font-weight: bold;">\mu</span>_{t_0,p} + <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\mu</span>}_{t_0,e,p} + <span style="font-weight: bold;">\nu</span>_{u} <span style="font-weight: bold;">\;</span> U_{t_0}<span style="font-weight: bold;">\right</span>)
@@ -462,9 +462,9 @@ The latent popularity is given by removing the house effects &amp; poll biases:
 </div>
 
 
-<div id="outline-container-org3c4f5d0" class="outline-2">
-<h2 id="org3c4f5d0">Connect to poll results and election results</h2>
-<div class="outline-text-2" id="text-org3c4f5d0">
+<div id="outline-container-orgf0d1d9f" class="outline-2">
+<h2 id="orgf0d1d9f">Connect to poll results and election results</h2>
+<div class="outline-text-2" id="text-orgf0d1d9f">
 <p>
 The concentration parametrer:
 </p>
@@ -516,8 +516,8 @@ Q: <i>What if there are several polls in one day?</i>
 </div>
 </div>
 
-<div id="outline-container-org13fa87d" class="outline-2">
-<h2 id="org13fa87d">Links to this note</h2>
+<div id="outline-container-org06d3820" class="outline-2">
+<h2 id="org06d3820">Links to this note</h2>
 </div>
 </div>
 </body>
