@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-14 Thu 13:28 -->
+<!-- 2022-04-14 Thu 13:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Identifying a horsehoe prior in an Aesara graph</title>
@@ -230,7 +230,17 @@ We would like to be able to tell whether the horshoe prior pattern is present in
 
 <span style="font-weight: bold; font-style: italic;">horseshoe_1_lv</span>, <span style="font-weight: bold; font-style: italic;">horseshoe_2_lv</span> = var(<span style="font-style: italic;">'horseshoe_1'</span>), var(<span style="font-style: italic;">'horsehoe_2'</span>)
 <span style="font-weight: bold; font-style: italic;">zero_lv</span> = var(<span style="font-style: italic;">'zero'</span>)
-<span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(etuplize(at.random.normal), var(), var(), var(), zero_lv, etuple(etuplize(at.mul), horseshoe_1_lv, horseshoe_2_lv))
+<span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(
+    etuplize(at.random.normal),
+    var(),
+    var(),
+    var(),
+    zero_lv,
+    etuple(
+        etuplize(at.mul),
+        horseshoe_1_lv,
+        horseshoe_2_lv)
+)
 </pre>
 </div>
 
@@ -306,7 +316,7 @@ Being able to unify a pattern with a subgraph is a (small) first step towards be
 <p class="date">Date: 2022-04-14 Thu 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-14 Thu 13:28</p>
+<p class="date">Created: 2022-04-14 Thu 13:34</p>
 </div>
 </body>
 </html>
