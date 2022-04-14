@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-14 Thu 13:27 -->
+<!-- 2022-04-14 Thu 13:28 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Gaussian process</title>
+<title>Identifying a horsehoe prior in an Aesara graph</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -193,147 +193,120 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
 </style>
-<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Gaussian process</h1>
-<dl class="org-dl">
-<dt>tags</dt><dd><a href="20220105154404-probability_distribution.html#ID-accc4a58-2f96-42da-a43d-c8140996d0d3">Probability distribution</a></dd>
-</dl>
-
+<h1 class="title">Identifying a horsehoe prior in an Aesara graph</h1>
 <p>
-We have the follow impractical definition:
-</p>
-
-<blockquote>
-<p>
-A Gaussian process is a collection of random variables, any finite number of which have consistent Gaussian distributions.
-</p>
-</blockquote>
-
-<p>
-It is completely defined by its mean function \(m(x)\) and covariance function \(\Sigma(x, x')\). We write:
+In this short post we will try to unify subgraphs of an <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara">Aesara</a> graph with a pattern that represents a horseshoe prior, a generalization of <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc/blob/0a8cc0044f76e39f49716107cdc77b210832c44a/aemcmc/gibbs.py#L90">this unification in Aemcmc</a>. Consider the following negative binomial regresssion implemented in Aesara:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  f(x) <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\mathcal</span>{G}<span style="font-weight: bold;">\left</span>(m(x), <span style="font-weight: bold;">\Sigma</span>(x, x')<span style="font-weight: bold;">\right</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+
+<span style="font-weight: bold; font-style: italic;">X_tt</span> = at.matrix(<span style="font-style: italic;">'X'</span>)
+<span style="font-weight: bold; font-style: italic;">h_tt</span> = at.scalar(<span style="font-style: italic;">'h'</span>, dtype=<span style="font-style: italic;">"int32"</span>)
+
+<span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(1, size=1)
+<span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
+<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.normal(0, tau_rv * lmbda_rv)
+
+<span style="font-weight: bold; font-style: italic;">eta</span> = X_tt @ beta_rv
+<span style="font-weight: bold; font-style: italic;">p</span> = at.sigmoid(-eta)
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.nbinom(h_tt, p)
 </pre>
 </div>
 
-\begin{equation}
-  f(x) \sim \mathcal{G}\left(m(x), \Sigma(x, x')\right)
-\end{equation}
-
 <p>
-A very import special case of Gaussian processes is <a href="20211213085917-gaussian_markov_processes.html#ID-fbde252d-acb4-4a84-bcd9-ee865cdec64c">Gaussian Markov processes</a>
-</p>
-
-
-<div id="outline-container-org2e6eacb" class="outline-2">
-<h2 id="org2e6eacb">Kernels</h2>
-<div class="outline-text-2" id="text-org2e6eacb">
-<p>
-We often express the covariance function \(\Sigma(x, x')\) as a function of a <i>kernel</i> \(K(x,x')\)):
+We would like to be able to tell whether the horshoe prior pattern is present in the graph, and if so return <code>lmbda_rv</code> and <code>tau_rv</code>. Let us first define the horseshoe pattern:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-<span style="font-weight: bold;">\displaystyle</span>
- <span style="font-weight: bold;">\Sigma</span>(x,x') = K(x, x') + <span style="font-weight: bold;">\;\mathbb</span>{I}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> var
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+
+<span style="font-weight: bold; font-style: italic;">horseshoe_1_lv</span>, <span style="font-weight: bold; font-style: italic;">horseshoe_2_lv</span> = var(<span style="font-style: italic;">'horseshoe_1'</span>), var(<span style="font-style: italic;">'horsehoe_2'</span>)
+<span style="font-weight: bold; font-style: italic;">zero_lv</span> = var(<span style="font-style: italic;">'zero'</span>)
+<span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(etuplize(at.random.normal), var(), var(), var(), zero_lv, etuple(etuplize(at.mul), horseshoe_1_lv, horseshoe_2_lv))
 </pre>
 </div>
 
-\begin{align*}
-\displaystyle
- \Sigma(x,x') = K(x, x') + \sigma^{2}_{y}\;\mathbb{I}
-\end{align*}
-
-<ul class="org-ul">
-<li><a href="20211129163720-squared_exponential_kernel.html#ID-338df7ae-048d-4a93-861b-80f75c3b887e">Squared exponential kernel</a></li>
-<li><a href="20211129200726-gaussian_noise_kernel.html#ID-1a08425d-1fa8-4f9f-98d0-423b0d5c0991">Ornstein-Uhlenbeck kernel</a></li>
-<li><a href="20211129201642-wiener_kernel.html#ID-dc211cf2-78b4-4269-91e8-fc88fb49def5">Wiener kernel</a></li>
-<li><a href="20211206101631-periodic_kernel.html#ID-29e2f739-8736-4189-9e36-a706fd5ec574">Periodic kernel</a></li>
-</ul>
-
 <p>
-We can combine kernels. The <a href="20211206102342-combine_kernels_by_multiplication.html#ID-16b13248-1128-4012-b8b4-44e51834bb6d">multiplication</a> of two covariance functions is a valid covariance functions, the <a href="20211206102419-combine_kernels_by_addition.html#ID-97dad3ac-e891-41ae-9a9d-3b4096fd781e">addition</a> of two correlation functions is a correlation function.
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org6836f35" class="outline-2">
-<h2 id="org6836f35">Sample</h2>
-<div class="outline-text-2" id="text-org6836f35">
-<p>
-How to <a href="20211206204210-sample_from_a_gaussian_process_predictive_distribution.html#ID-00ed041f-9d96-4d76-833f-39d1c2e40e70">Sample from a Gaussian Process predictive distribution</a>
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgfe26aa9" class="outline-2">
-<h2 id="orgfe26aa9">Learn</h2>
-<div class="outline-text-2" id="text-orgfe26aa9">
-<ul class="org-ul">
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://distill.pub/2019/visual-exploration-gaussian-processes/">Visual exploration of gaussian processes</a> is a very good introduction</li>
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://yugeten.github.io/posts/2019/09/GP/">Gaussian Process, not quite for dummies</a> is excellent, starts from gaussians to gaussian in high dimensions to get to gaussian process. One of the best things I've read on the topic.</li>
-<li>cite:rasmussen2003 is a useful reference, but more advanced</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-org9e3bc44" class="outline-2">
-<h2 id="org9e3bc44">Use</h2>
-<div class="outline-text-2" id="text-org9e3bc44">
-<p>
-Here is a list of libraries implementating different flavors of Gaussian processes. The catch is that gaussian processes can quick get computation-intensive.
+We can unify this pattern  with the subgraph <code>beta_rv</code> using pythological's <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/unification">unification</a> package:
 </p>
 
-<ul class="org-ul">
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/AaltoML/BayesNewton">BayesNewton</a> is written in JAX</li>
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://gpytorch.ai/">GPytorch</a> is built atop the Pytorch autodiff framework</li>
-<li>PyMC3 also has an <a target='_blank' rel='noopener noreferrer' class='external' href="https://docs.pymc.io/en/v3/Gaussian_Processes.html">implementation of gaussian processes</a></li>
-</ul>
-</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify
+
+<span style="font-weight: bold; font-style: italic;">s</span> = unify(horseshoe_pattern, etuplize(beta_rv))
+<span style="font-weight: bold;">print</span>(s)
+</pre>
 </div>
 
-<div id="outline-container-org8b7a20e" class="outline-2">
-<h2 id="org8b7a20e">Links to this note</h2>
-<div class="outline-text-2" id="text-org8b7a20e">
-<ul class="org-ul">
-<li><a href="./20211129163720-squared_exponential_kernel.html">Squared exponential kernel</a></li>
-<li><a href="./20211129200726-gaussian_noise_kernel.html">Ornstein-Uhlenbeck kernel</a></li>
-<li><a href="./20211129201642-wiener_kernel.html">Wiener kernel</a></li>
-<li><a href="./20211125113956-my_digital_garden.html">Navigate linked notes</a></li>
-<li><a href="./20211125113956-my_digital_garden.html">Navigate linked notes</a></li>
-</ul>
+<pre class="example">
+{~_554: RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F4873319040&gt;), ~_555: TensorConstant{[]}, ~_556: TensorConstant{11}, ~zero: TensorConstant{0}, ~horseshoe_1: ExpressionTuple((ExpressionTuple((&lt;class 'aesara.tensor.random.ba...yRV'&gt;, 'halfcauchy', 0, (0, 0), 'floatX', False)), RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;), TensorConstant{(1,) of 1}, TensorConstant{11}, TensorConstant{1}, TensorConstant{1.0})), ~horsehoe_2: ExpressionTuple((ExpressionTuple((&lt;class 'aesara.tensor.random.ba...yRV'&gt;, 'halfcauchy', 0, (0, 0), 'floatX', False)), RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F48733193C0&gt;), TensorConstant{(1,) of 10}, TensorConstant{11}, TensorConstant{1}, TensorConstant{1.0}))}
+</pre>
+
+
+<p>
+However, <code>unify</code> will only work if the pattern matches the whole graph. Indeed if we try to unify the horsehoe pattern with <code>Y_rv</code> we get:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">s</span> = unify(horseshoe_pattern, etuplize(Y_rv))
+<span style="font-weight: bold;">print</span>(s)
+</pre>
 </div>
+
+<pre class="example">
+False
+</pre>
+
+
+<p>
+To identify subgraphs we walk through the graph (here breadth-first) and attempt unification at each step:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.graph.basic <span style="font-weight: bold;">import</span> walk
+<span style="font-weight: bold;">from</span> aesara.tensor.random.op <span style="font-weight: bold;">import</span> RandomVariable
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">expand</span>(var):
+    <span style="font-weight: bold;">if</span> var.owner:
+        <span style="font-weight: bold;">return</span> var.owner.inputs
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span>
+
+<span style="font-weight: bold;">for</span> node <span style="font-weight: bold;">in</span> walk([Y_rv], expand, bfs=<span style="font-weight: bold; text-decoration: underline;">True</span>):
+    <span style="font-weight: bold;">try</span>:
+        <span style="font-weight: bold;">if</span> <span style="font-weight: bold;">isinstance</span>(node.owner.op, RandomVariable):
+            <span style="font-weight: bold; font-style: italic;">s</span> = unify(horseshoe_pattern, etuplize(node))
+            <span style="font-weight: bold;">if</span> s:
+                <span style="font-weight: bold;">break</span>
+    <span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">AttributeError</span>:
+        <span style="font-weight: bold;">continue</span>
+
+<span style="font-weight: bold;">print</span>(s[horseshoe_1_lv], s[horseshoe_1_lv], s[zero_lv])
+</pre>
 </div>
+
+<pre class="example">
+e(e(&lt;class 'aesara.tensor.random.basic.HalfCauchyRV'&gt;, halfcauchy, 0, (0, 0), floatX, False), RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;), TensorConstant{(1,) of 1}, TensorConstant{11}, TensorConstant{1}, TensorConstant{1.0}) e(e(&lt;class 'aesara.tensor.random.basic.HalfCauchyRV'&gt;, halfcauchy, 0, (0, 0), floatX, False), RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;), TensorConstant{(1,) of 1}, TensorConstant{11}, TensorConstant{1}, TensorConstant{1.0}) TensorConstant{0}
+</pre>
+
+
+<p>
+Being able to unify a pattern with a subgraph is a (small) first step towards being able to assign sampling steps to random variables in an arbitrary graph. But it is not enough; while we can assign a gibbs sampler step to <code>beta_rv</code>, <code>lambda_rv</code> and <code>tau_rv</code> in this example, <code>h</code> has been left out of the unification process. We could naturally assign a NUTS sampler step to any random variable with continuous support, so in the next post we will do exactly that.
+</p>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2022-04-14 Thu 00:00</p>
+<p class="author">Author: Rémi Louf</p>
+<p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
+<p class="date">Created: 2022-04-14 Thu 13:28</p>
 </div>
 </body>
 </html>
