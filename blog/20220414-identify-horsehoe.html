@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-14 Thu 13:47 -->
+<!-- 2022-04-14 Thu 13:50 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Identifying a horsehoe prior in an Aesara graph</title>
@@ -194,6 +194,27 @@
   .org-svg { width: 90%; }
 </style>
 <link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
@@ -250,16 +271,45 @@ We can unify this pattern with the subgraph <code>beta_rv</code> using pythologi
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify
+<span style="font-weight: bold;">from</span> IPython.lib.pretty <span style="font-weight: bold;">import</span> pprint
 
 <span style="font-weight: bold; font-style: italic;">s</span> = unify(horseshoe_pattern, etuplize(beta_rv))
-<span style="font-weight: bold;">print</span>(s)
+pprint(s)
 </pre>
 </div>
 
-<pre class="example">
-{~_554: RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F4873319040&gt;), ~_555: TensorConstant{[]}, ~_556: TensorConstant{11}, ~zero: TensorConstant{0}, ~horseshoe_1: ExpressionTuple((ExpressionTuple((&lt;class 'aesara.tensor.random.ba...yRV'&gt;, 'halfcauchy', 0, (0, 0), 'floatX', False)), RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;), TensorConstant{(1,) of 1}, TensorConstant{11}, TensorConstant{1}, TensorConstant{1.0})), ~horsehoe_2: ExpressionTuple((ExpressionTuple((&lt;class 'aesara.tensor.random.ba...yRV'&gt;, 'halfcauchy', 0, (0, 0), 'floatX', False)), RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F48733193C0&gt;), TensorConstant{(1,) of 10}, TensorConstant{11}, TensorConstant{1}, TensorConstant{1.0}))}
+<pre class="example" id="orgcfbf019">
+{~_554: RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F4873319040&gt;),
+ ~_555: TensorConstant{[]},
+ ~_556: TensorConstant{11},
+ ~zero: TensorConstant{0},
+ ~horseshoe_1: e(
+   e(
+     aesara.tensor.random.basic.HalfCauchyRV,
+     'halfcauchy',
+     0,
+     (0, 0),
+     'floatX',
+     False),
+   RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;),
+   TensorConstant{(1,) of 1},
+   TensorConstant{11},
+   TensorConstant{1},
+   TensorConstant{1.0}),
+ ~horsehoe_2: e(
+   e(
+     aesara.tensor.random.basic.HalfCauchyRV,
+     'halfcauchy',
+     0,
+     (0, 0),
+     'floatX',
+     False),
+   RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F48733193C0&gt;),
+   TensorConstant{(1,) of 10},
+   TensorConstant{11},
+   TensorConstant{1},
+   TensorConstant{1.0})}
 </pre>
-
 
 <p>
 However, <code>unify</code> will only work if the pattern matches the whole graph. Indeed if we try to unify the horsehoe pattern with <code>Y_rv</code> we get:
@@ -298,15 +348,33 @@ To identify subgraphs we walk through the graph (here breadth-first) and attempt
                 <span style="font-weight: bold;">break</span>
     <span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">AttributeError</span>:
         <span style="font-weight: bold;">continue</span>
-
-<span style="font-weight: bold;">print</span>(s[horseshoe_1_lv], s[horseshoe_1_lv], s[zero_lv])
 </pre>
 </div>
 
-<pre class="example">
-e(e(&lt;class 'aesara.tensor.random.basic.HalfCauchyRV'&gt;, halfcauchy, 0, (0, 0), floatX, False), RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;), TensorConstant{(1,) of 1}, TensorConstant{11}, TensorConstant{1}, TensorConstant{1.0}) e(e(&lt;class 'aesara.tensor.random.basic.HalfCauchyRV'&gt;, halfcauchy, 0, (0, 0), floatX, False), RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;), TensorConstant{(1,) of 1}, TensorConstant{11}, TensorConstant{1}, TensorConstant{1.0}) TensorConstant{0}
-</pre>
+<p>
+We can check that \(\tau\) has been correctly identified:
+</p>
 
+<div class="org-src-container">
+<pre class="src src-python">pprint(s[horseshoe_1_lv])
+</pre>
+</div>
+
+<pre class="example" id="org8e1e6b2">
+e(
+  e(
+    aesara.tensor.random.basic.HalfCauchyRV,
+    'halfcauchy',
+    0,
+    (0, 0),
+    'floatX',
+    False),
+  RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;),
+  TensorConstant{(1,) of 1},
+  TensorConstant{11},
+  TensorConstant{1},
+  TensorConstant{1.0})
+</pre>
 
 <p>
 Being able to unify a pattern with a subgraph is a (small) first step towards being able to assign sampling steps to random variables in an arbitrary graph. But it is not enough; while we can assign a gibbs sampler step to <code>beta_rv</code>, <code>lambda_rv</code> and <code>tau_rv</code> in this example, <code>h</code> has been left out of the unification process. We could naturally assign a NUTS sampler step to any random variable with continuous support, so in the next post we will do exactly that.
@@ -316,7 +384,7 @@ Being able to unify a pattern with a subgraph is a (small) first step towards be
 <p class="date">Date: 2022-04-14 Thu 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-14 Thu 13:47</p>
+<p class="date">Created: 2022-04-14 Thu 13:50</p>
 </div>
 </body>
 </html>
