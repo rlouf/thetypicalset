@@ -6,7 +6,7 @@
 <!-- 2022-04-14 Thu 16:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sondages</title>
+<title>Nested structures</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -193,7 +193,7 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
 </style>
-<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         displayAlign: "center",
@@ -218,86 +218,136 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Sondages</h1>
+<h1 class="title">Nested structures</h1>
 <p>
-We want to display the latest polls as well as some additional information that should help people undestand the results better. In particular:
-</p>
-<ul class="org-ul">
-<li>Voter turnout (a feature that is often asked);</li>
-<li>A reasonable estimation of the error;</li>
-<li>The probability to go to 2nd round;</li>
-</ul>
-
-
-<div id="outline-container-org3a1309f" class="outline-2">
-<h2 id="org3a1309f">Estimate the error</h2>
-<div class="outline-text-2" id="text-org3a1309f">
-<p>
-We use a Dirichlet-Multinomial model to represent the data generating process. We note \(\vec{p} = (p_1, \dots, p_N)\) the respective probabilities of voting for either of the candidates, \(\vec{\alpha} = (\alpha_1, \dots, \alpha_n)\) the corresponding concentration parameters. The number of votes observed for each candidate is given by:
+In the <a href="20220414-identify-horsehoe.html">last post</a> we showed how we can identify a horseshoe prior in an aesara model graph. In the following we will provide a few improvements to the proposed solution, and set a prior on the number of trials <code>h</code>. Remember that the horseshoe prior is mathematically defined as:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\vec</span>{p} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Dirichlet}(<span style="font-weight: bold;">\vec</span>{<span style="font-weight: bold;">\alpha</span>})
-  <span style="font-weight: bold;">\vec</span>{N} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Multinomial}(<span style="font-weight: bold;">\vec</span>{p}, N_{tot})
+  <span style="font-weight: bold;">\tau</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1)<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\lambda</span>_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1)<span style="font-weight: bold;">\quad</span> j <span style="font-weight: bold;">\in</span> <span style="font-weight: bold;">\left</span>[1,<span style="font-weight: bold;">\dots</span>, k<span style="font-weight: bold;">\right</span>]<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\beta</span>_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, <span style="font-weight: bold;">\tau</span> <span style="font-weight: bold;">\;\lambda</span>_{j})<span style="font-weight: bold;">\quad</span> j <span style="font-weight: bold;">\in</span> <span style="font-weight: bold;">\left</span>[1,<span style="font-weight: bold;">\dots</span>, k<span style="font-weight: bold;">\right</span>]<span style="font-weight: bold;">\\</span>
 <span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
 </pre>
 </div>
 
+\begin{align*}
+  \tau &\sim \operatorname{HalfCauchy}(0, 1)\\
+  \lambda_{j} &\sim \operatorname{HalfCauchy}(0, 1)\quad j \in \left[1,\dots, k\right]\\
+  \beta_{j} &\sim \operatorname{Normal}(0, \tau \;\lambda_{j})\quad j \in \left[1,\dots, k\right]\\
+\end{align*}
+
 <p>
-It turns out (surprise!) that the Dirichlet distribution is the conjugate prior of the Multinomial distirbution so that the posterior is also a Dirichlet distribution:
+However, the pattern that we used in the previous post only checks that the <i>structure</i> is correct, but not that the correct distributions with the correct parameters are used. I thus propose to improve the design by defining a <code>unify_horseshoe</code> function that returns the random variables (<code>lambda_rv</code>, <code>tau_rv</code>) when the subgraph is identified, and <code>False</code> if unification is impossible.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\vec</span>{p} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Dirichlet}(<span style="font-weight: bold;">\vec</span>{N} + <span style="font-weight: bold;">\vec</span>{<span style="font-weight: bold;">\alpha</span>})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.graph.unify <span style="font-weight: bold;">import</span> eval_if_etuple
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify, var
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">unify_horseshoe</span>(graph):
+    <span style="font-weight: bold; font-style: italic;">horseshoe_1_lv</span>, <span style="font-weight: bold; font-style: italic;">horseshoe_2_lv</span> = var(<span style="font-style: italic;">'horseshoe_1'</span>), var(<span style="font-style: italic;">'horsehoe_2'</span>)
+    <span style="font-weight: bold; font-style: italic;">zero_lv</span> = var(<span style="font-style: italic;">'zero'</span>)
+    <span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(
+        etuplize(at.random.normal),
+        var(),
+        var(),
+        var(),
+        zero_lv,
+        etuple(
+            etuplize(at.mul),
+            horseshoe_1_lv,
+            horseshoe_2_lv)
+    )
+
+    <span style="font-weight: bold; font-style: italic;">s</span> = unify(graph, horseshoe_pattern)
+    <span style="font-weight: bold;">if</span> s <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">False</span>:
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_1 was unified with a half-cauchy distributed RV</span>
+    <span style="font-weight: bold; font-style: italic;">halfcauchy_1</span> = eval_if_etuple(s[horseshoe_1_lv])
+    <span style="font-weight: bold;">if</span> halfcauchy_1.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
+        halfcauchy_1.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
+    ):
+         <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_2 was unified with a half-cauchy distributed RV</span>
+    <span style="font-weight: bold; font-style: italic;">halfcauchy_2</span> = eval_if_etuple(s[horseshoe_2_lv])
+    <span style="font-weight: bold;">if</span> halfcauchy_2.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
+        halfcauchy_2.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
+    ):
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that at least one of the RVs is a scalar</span>
+    <span style="font-weight: bold;">if</span> halfcauchy_1.<span style="font-weight: bold;">type</span>.shape == (1,):
+        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_2
+        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_1
+    <span style="font-weight: bold;">elif</span> halfcauchy_2.<span style="font-weight: bold;">type</span>.shape == (1,):
+        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_1
+        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_2
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span> false
+
+    <span style="font-weight: bold;">return</span> (lmbda_rv, tau_rv)
 </pre>
 </div>
 
 <p>
-We are interested in displaying the marginals, i.e. \(P(p_i|\vec{N})\). If we call \(\alpha_0 = \sum_i \alpha_i\) we can write
+Working again with the negative binomial regression:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  p_i <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Beta}(N_i + <span style="font-weight: bold;">\alpha</span>_i, N_{tot} - N_i + <span style="font-weight: bold;">\alpha</span>_0 -<span style="font-weight: bold;">\alpha</span>_i)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+
+<span style="font-weight: bold; font-style: italic;">X_tt</span> = at.matrix(<span style="font-style: italic;">'X'</span>)
+<span style="font-weight: bold; font-style: italic;">h_tt</span> = at.scalar(<span style="font-style: italic;">'h'</span>, dtype=<span style="font-style: italic;">"int32"</span>)
+
+<span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(1, size=1)
+<span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
+<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.normal(0, tau_rv * lmbda_rv)
+
+<span style="font-weight: bold; font-style: italic;">eta</span> = X_tt @ beta_rv
+<span style="font-weight: bold; font-style: italic;">p</span> = at.sigmoid(-eta)
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.nbinom(h_tt, p)
 </pre>
 </div>
 
 <p>
-From which the HDI can be easily computed using eg <a target='_blank' rel='noopener noreferrer' class='external' href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html">scipy</a>.
+Again we check that we can unify the subgraph <code>beta_rv</code>:
 </p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">print</span>(unify_horseshoe(beta_rv))
+</pre>
 </div>
 
-<div id="outline-container-orge5faffb" class="outline-3">
-<h3 id="orge5faffb">Choice of prior</h3>
-<div class="outline-text-3" id="text-orge5faffb">
+<pre class="example">
+(halfcauchy_rv{0, (0, 0), floatX, False}.out, halfcauchy_rv{0, (0, 0), floatX, False}.out)
+</pre>
+
+
 <p>
-Jeffrey prior is \(\alpha_i = 1/2\), <i>but</i> we do have prior information on the different candidates. We know that Arthaud and Poutou, for instance, are more likely to be between 0 and .05. We also know it is unlikely that anyone will be above .4
+But not <code>Y_rv</code>
 </p>
 
-<p>
-How do we elicit this prior?
-</p>
-</div>
-</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">print</span>(unify_horseshoe(Y_rv))
+</pre>
 </div>
 
-
-<div id="outline-container-orga0940ab" class="outline-2">
-<h2 id="orga0940ab">Estimate the probability that the candidate will go to second tour?</h2>
-<div class="outline-text-2" id="text-orga0940ab">
-<p>
-Take posterior predictive samples for the \(N_i\). Count the number of times the candidate is in the top 10. Run ~100k simulations (&lt; 1s par sondage).
-</p>
+<pre class="example">
+False
+</pre>
 </div>
-</div>
-
-<div id="outline-container-org52e4b7c" class="outline-2">
-<h2 id="org52e4b7c">Links to this note</h2>
-</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2022-04-15 Fri 00:00</p>
+<p class="author">Author: Rémi Louf</p>
+<p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
+<p class="date">Created: 2022-04-14 Thu 16:18</p>
 </div>
 </body>
 </html>
