@@ -1,24 +1,161 @@
-#+TITLE: Nested structures
+#+TITLE: Unify to build samplers
 #+DATE: <2022-04-15 Fri>
 
-In the [[file:20220414-identify-horsehoe.org][last post]] we showed how we can identify a horseshoe prior in an aesara model graph. The reason why we're trying to unify (sub)graphs with a horseshoe prior is that there are /Gibbs samplers/ that we can use to sample from the posterior distirbution of $lambda$ and $\tau$.
+In the [[file:20220414-identify-horsehoe.org][last post]] we showed how we can identify a horseshoe prior in an aesara model graph. This exercise may appear very academic at first, but we will show that it has practical applications in this and the following posts. In particular, we will show how unification of models with subgraphs will allow us to automatically build samplers for any model. Here, a Gibbs sampler.
+
+Let us consider a simpler version of the previous model that only contains the horseshoe part:
 
 #+begin_src python :session :results silent :exports code
-def step_horseshoe(lmbda, mu, beta):
-    return lmbda, mu
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+tau_rv = srng.halfcauchy(1, size=1)
+lmbda_rv = srng.halfcauchy(1, size=10)
+beta_rv = srng.normal(0, tau_rv * lmbda_rv)
 #+end_src
 
-So that:
+The following Gibbs sampler updates the values of $\tau$ and $\lambda$ knowing the value of $\beta$:
 
-#+begin_src python :session
+#+begin_src python :session :results silent :exports none
+from aesara.graph.unify import eval_if_etuple
+from etuples import etuple, etuplize
+from unification import unify, var
+
+def unify_horseshoe(graph):
+    horseshoe_1_lv, horseshoe_2_lv = var('horseshoe_1'), var('horsehoe_2')
+    zero_lv = var('zero')
+    horseshoe_pattern = etuple(
+        etuplize(at.random.normal),
+        var(),
+        var(),
+        var(),
+        zero_lv,
+        etuple(
+            etuplize(at.mul),
+            horseshoe_1_lv,
+            horseshoe_2_lv)
+    )
+
+    s = unify(graph, horseshoe_pattern)
+    if s is False:
+        return False
+
+    # Check that horseshoe_1 was unified with a half-cauchy distributed RV
+    halfcauchy_1 = eval_if_etuple(s[horseshoe_1_lv])
+    if halfcauchy_1.owner is None or not isinstance(
+        halfcauchy_1.owner.op, type(at.random.halfcauchy)
+    ):
+         return False
+
+    # Check that horseshoe_2 was unified with a half-cauchy distributed RV
+    halfcauchy_2 = eval_if_etuple(s[horseshoe_2_lv])
+    if halfcauchy_2.owner is None or not isinstance(
+        halfcauchy_2.owner.op, type(at.random.halfcauchy)
+    ):
+        return False
+    # Check that at least one of the RVs is a scalar
+    if halfcauchy_1.type.shape == (1,):
+        lmbda_rv = halfcauchy_2
+        tau_rv = halfcauchy_1
+    elif halfcauchy_2.type.shape == (1,):
+        lmbda_rv = halfcauchy_1
+        tau_rv = halfcauchy_2
+    else:
+        return false
+
+    return (lmbda_rv, tau_rv)
+#+end_src
+
+#+begin_src python :session :results silent :exports code
+from typing import Callable, Tuple
+
+from aesara.tensor.random import RandomStream
+from aesara.tensor.var import TensorVariable
+
+def step_horseshoe(srng: RandomStream) -> Callable:
+    def step(
+        lmbda: TensorVariable,
+        tau: TensorVariable,
+        beta: TensorVariable,
+    ) -> Tuple[TensorVariable, TensorVariable]:
+        lmbda_inv = 1.0 / lmbda
+        tau_inv = 1.0 / tau
+
+        upsilon_inv = srng.exponential(1 + lmbda_inv)
+        zeta_inv = srng.exponential(1 + tau_inv)
+
+        beta2 = beta * beta
+        lmbda_inv_new = srng.exponential(upsilon_inv + 0.5 * beta2 * tau_inv)
+        tau_inv_new = srng.gamma(
+            0.5 * (beta.shape[0] + 1),
+            zeta_inv + 0.5 * (beta2 * lmbda_inv_new).sum(),
+        )
+
+        return 1.0 / lmbda_inv_new, 1.0 / tau_inv_new
+
+    return step
+#+end_src
+
+It is possible to provide =step_horseshoe= (and many other samplers) in a sampler library, and rely on the users to wire models and samplers together. However this has many shortcomings:
+
+1. It is /error-prone/: it would be very simple to import a Gibbs sampler that does *not* sample from this model's posterior distribution and use it anyway;
+2. It is /not efficient/: users probably don't know that such a Gibbs sampler exist, and it is also possible that they don't care. They may thus miss opportunities to work with more efficient samplers.
+3. It makes the user code dependent on the underlying implementation of algorithms, instead of having a single interface with all samplers that does not change from release to release.
+
+Instead, we would like to provide a unified interface--a single function--to which users can pass a model, (a set of) observations and that returns a function that generates samples from the model's posterior distribution. Something akin to [[https://twiecki.io/blog/2013/08/12/bayesian-glms-1/][PyMC's "inference button"]]. In this particular case it is fairly simple, if we call =beta_vv= the observed value for =beta_rv=, we can build a sampler from a model with the following function:
+
+#+begin_src python :session :results silent :exports code
+def build_sampler(srng, beta_rv, beta_vv, num_samples):
+    lmbda_rv, tau_rv = unify_horseshoe(beta_rv)
+    step_fn = step_horseshoe(srng)
+
+    outputs, updates = aesara.scan(
+        step_fn,
+        outputs_info=(lmbda_rv, tau_rv),
+        non_sequences=(beta_vv,),
+        n_steps=num_samples,
+    )
+
+    return outputs, updates
+#+end_src
+
+Indeed, we can then compile a sampling function:
+
+#+begin_src python :session :results silent
 import aesara
 
-lambda_rv, tau_rv = unify_horseshoe(beta_rv)
-outputs, updates = aesara.scan(
-    fn=step_horseshoe,
-    outputs=(lambda_rv, tau_rv),
-    non_sequences=(beta_vv,)
-)
+beta_vv = beta_rv.clone()
+num_samples = at.iscalar("num_samples")
+outputs, updates = build_sampler(srng, beta_rv, beta_vv, num_samples)
+
+sample_fn = aesara.function((beta_vv, num_samples), outputs, updates=updates)
 #+end_src
 
-In a realistic setting, with a reasonably well developed library, our matching algorithms will succesfully unify several patterns with possibly overlapping subgraphs. In this particular example, an efficient Gibbs sampler exists for the negative binomial regression, and all random variables are compatible with samplers from the HMC family.
+And use it to generate samples from the posterior distribution of $\lambda$ and $\tau$:
+
+#+begin_src python :session :results output
+import numpy as np
+from IPython.lib.pretty import pprint
+
+beta = np.random.normal(size=10)
+pprint(sample_fn(beta, 3))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[array([[1.00687219e+00, 9.26299106e+00, 4.33395510e-01, 1.25196947e+01,
+         4.92392259e-01, 7.18673161e-01, 8.88425351e+00, 2.52007667e+00,
+         4.83004824e+00, 2.27031521e-01],
+        [1.61422319e-01, 4.58513899e-01, 6.74526308e-01, 6.25831867e+00,
+         1.04050729e-01, 4.87493244e-01, 5.40015315e+00, 5.58249893e+01,
+         6.91350331e-01, 3.00454228e-01],
+        [4.55687497e-02, 8.58124306e-02, 5.79550727e-01, 3.52126013e+01,
+         4.22261455e-01, 2.80032229e-01, 4.84278840e+00, 2.58212990e+01,
+         1.14731735e+01, 1.52661119e+01]]),
+ array([[0.8579952 ],
+        [3.06935235],
+        [3.08030401]])]
+#+end_example
+
+This example is trivial. We are only considering a very specific model and a single sampler, but you should get a feel of where things are going. In a realistic setting, with a reasonably well developed library, our matching algorithms will succesfully unify several patterns with possibly overlapping subgraphs. In this example, both $\lambda$ and $\tau$ are continuous variables, so we can sample from their posterior distribution using e.g. the NUTS sampler. We could also the use random walk Rosenbluth-Metropolis-Hastings as a step function. We thus need a data structure that allows us to efficiently store these possibilities as we walk down the graph and efficiently retrieve them to build a sampler for the whole model. More than enough material to cover for the next post.
