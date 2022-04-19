@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-15 Fri 15:12 -->
+<!-- 2022-04-19 Tue 08:41 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Nested structures</title>
@@ -304,7 +304,6 @@ Working again with the negative binomial regression:
 <span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
 
 <span style="font-weight: bold; font-style: italic;">X_tt</span> = at.matrix(<span style="font-style: italic;">'X'</span>)
-<span style="font-weight: bold; font-style: italic;">h_tt</span> = at.scalar(<span style="font-style: italic;">'h'</span>, dtype=<span style="font-style: italic;">"int32"</span>)
 
 <span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(1, size=1)
 <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
@@ -312,7 +311,10 @@ Working again with the negative binomial regression:
 
 <span style="font-weight: bold; font-style: italic;">eta</span> = X_tt @ beta_rv
 <span style="font-weight: bold; font-style: italic;">p</span> = at.sigmoid(-eta)
-<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.nbinom(h_tt, p)
+
+<span style="font-weight: bold; font-style: italic;">h_rv</span> = srng.poisson(10)
+
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.nbinom(h_rv, p)
 </pre>
 </div>
 
@@ -342,12 +344,39 @@ But not <code>Y_rv</code>
 <pre class="example">
 False
 </pre>
+
+
+<p>
+The reason why we're trying to unify (sub)graphs with a horseshoe prior is that there are <i>Gibbs samplers</i> that we can use to sample from the posterior distirbution of \(lambda\) and \(\tau\).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">step_horseshoe</span>(lmbda, mu, beta):
+    <span style="font-weight: bold;">return</span> lmbda, mu
+</pre>
+</div>
+
+<p>
+So that:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+
+<span style="font-weight: bold; font-style: italic;">lambda_rv</span>, <span style="font-weight: bold; font-style: italic;">tau_rv</span> = unify_horseshoe(beta_rv)
+<span style="font-weight: bold; font-style: italic;">outputs</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
+    fn=step_horseshoe,
+    outputs=(lambda_rv, tau_rv),
+    non_sequences=(beta_vv,)
+)
+</pre>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2022-04-15 Fri 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-15 Fri 15:12</p>
+<p class="date">Created: 2022-04-19 Tue 08:41</p>
 </div>
 </body>
 </html>
