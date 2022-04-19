@@ -79,7 +79,6 @@ import aesara.tensor as at
 srng = at.random.RandomStream(0)
 
 X_tt = at.matrix('X')
-h_tt = at.scalar('h', dtype="int32")
 
 tau_rv = srng.halfcauchy(1, size=1)
 lmbda_rv = srng.halfcauchy(1, size=10)
@@ -87,7 +86,10 @@ beta_rv = srng.normal(0, tau_rv * lmbda_rv)
 
 eta = X_tt @ beta_rv
 p = at.sigmoid(-eta)
-Y_rv = srng.nbinom(h_tt, p)
+
+h_rv = srng.poisson(10)
+
+Y_rv = srng.nbinom(h_rv, p)
 #+end_src
 
 Again we check that we can unify the subgraph =beta_rv=:
@@ -107,3 +109,23 @@ print(unify_horseshoe(Y_rv))
 
 #+RESULTS:
 : False
+
+The reason why we're trying to unify (sub)graphs with a horseshoe prior is that there are /Gibbs samplers/ that we can use to sample from the posterior distirbution of $lambda$ and $\tau$.
+
+#+begin_src python :session :results silent :exports code
+def step_horseshoe(lmbda, mu, beta):
+    return lmbda, mu
+#+end_src
+
+So that:
+
+#+begin_src python :session
+import aesara
+
+lambda_rv, tau_rv = unify_horseshoe(beta_rv)
+outputs, updates = aesara.scan(
+    fn=step_horseshoe,
+    outputs=(lambda_rv, tau_rv),
+    non_sequences=(beta_vv,)
+)
+#+end_src
