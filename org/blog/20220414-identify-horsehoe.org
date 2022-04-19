@@ -24,20 +24,13 @@ Y_rv = srng.nbinom(h_tt, p)
 
 We would like to be able to tell whether the model that the graph implements contains a horseshoe prior, and if so return the random variables =lmbda_rv= and =tau_rv=. Remember that the horseshoe prior is mathematically defined as:
 
-#+begin_src latex :results raw :exports results
+#+begin_latex
 \begin{align*}
   \tau &\sim \operatorname{HalfCauchy}(0, 1)\\
   \lambda_{j} &\sim \operatorname{HalfCauchy}(0, 1)\quad j \in \left[1,\dots, k\right]\\
   \beta_{j} &\sim \operatorname{Normal}(0, \tau \;\lambda_{j})\quad j \in \left[1,\dots, k\right]\\
 \end{align*}
-#+end_src
-
-#+RESULTS:
-\begin{align*}
-  \tau &\sim \operatorname{HalfCauchy}(0, 1)\\
-  \lambda_{j} &\sim \operatorname{HalfCauchy}(0, 1)\quad j \in \left[1,\dots, k\right]\\
-  \beta_{j} &\sim \operatorname{Normal}(0, \tau \;\lambda_{j})\quad j \in \left[1,\dots, k\right]\\
-\end{align*}
+#+end_latex
 
 Let us first define a horseshoe pattern against which we are going to try to match the model:
 
