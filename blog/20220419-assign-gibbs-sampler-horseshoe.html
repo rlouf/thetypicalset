@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-19 Tue 15:52 -->
+<!-- 2022-04-19 Tue 16:19 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Nested structures</title>
+<title>Unify to build samplers</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -218,42 +218,194 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Nested structures</h1>
+<h1 class="title">Unify to build samplers</h1>
 <p>
-In the <a href="20220414-identify-horsehoe.html">last post</a> we showed how we can identify a horseshoe prior in an aesara model graph. The reason why we're trying to unify (sub)graphs with a horseshoe prior is that there are <i>Gibbs samplers</i> that we can use to sample from the posterior distirbution of \(lambda\) and \(\tau\).
+In the <a href="20220414-identify-horsehoe.html">last post</a> we showed how we can identify a horseshoe prior in an aesara model graph. This exercise may appear very academic at first, but we will show that it has practical applications in this and the following posts. In particular, we will show how unification of models with subgraphs will allow us to automatically build samplers for any model. Here, a Gibbs sampler.
+</p>
+
+<p>
+Let us consider a simpler version of the previous model that only contains the horseshoe part:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">step_horseshoe</span>(lmbda, mu, beta):
-    <span style="font-weight: bold;">return</span> lmbda, mu
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+
+<span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(1, size=1)
+<span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
+<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.normal(0, tau_rv * lmbda_rv)
 </pre>
 </div>
 
 <p>
-So that:
+The following Gibbs sampler updates the values of \(\tau\) and \(\lambda\) knowing the value of \(\beta\):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.graph.unify <span style="font-weight: bold;">import</span> eval_if_etuple
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify, var
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">unify_horseshoe</span>(graph):
+    <span style="font-weight: bold; font-style: italic;">horseshoe_1_lv</span>, <span style="font-weight: bold; font-style: italic;">horseshoe_2_lv</span> = var(<span style="font-style: italic;">'horseshoe_1'</span>), var(<span style="font-style: italic;">'horsehoe_2'</span>)
+    <span style="font-weight: bold; font-style: italic;">zero_lv</span> = var(<span style="font-style: italic;">'zero'</span>)
+    <span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(
+        etuplize(at.random.normal),
+        var(),
+        var(),
+        var(),
+        zero_lv,
+        etuple(
+            etuplize(at.mul),
+            horseshoe_1_lv,
+            horseshoe_2_lv)
+    )
+
+    <span style="font-weight: bold; font-style: italic;">s</span> = unify(graph, horseshoe_pattern)
+    <span style="font-weight: bold;">if</span> s <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">False</span>:
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_1 was unified with a half-cauchy distributed RV</span>
+    <span style="font-weight: bold; font-style: italic;">halfcauchy_1</span> = eval_if_etuple(s[horseshoe_1_lv])
+    <span style="font-weight: bold;">if</span> halfcauchy_1.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
+        halfcauchy_1.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
+    ):
+         <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_2 was unified with a half-cauchy distributed RV</span>
+    <span style="font-weight: bold; font-style: italic;">halfcauchy_2</span> = eval_if_etuple(s[horseshoe_2_lv])
+    <span style="font-weight: bold;">if</span> halfcauchy_2.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
+        halfcauchy_2.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
+    ):
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that at least one of the RVs is a scalar</span>
+    <span style="font-weight: bold;">if</span> halfcauchy_1.<span style="font-weight: bold;">type</span>.shape == (1,):
+        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_2
+        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_1
+    <span style="font-weight: bold;">elif</span> halfcauchy_2.<span style="font-weight: bold;">type</span>.shape == (1,):
+        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_1
+        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_2
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span> false
+
+    <span style="font-weight: bold;">return</span> (lmbda_rv, tau_rv)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> typing <span style="font-weight: bold;">import</span> Callable, Tuple
+
+<span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
+<span style="font-weight: bold;">from</span> aesara.tensor.var <span style="font-weight: bold;">import</span> TensorVariable
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">step_horseshoe</span>(srng: RandomStream) -&gt; Callable:
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">step</span>(
+        lmbda: TensorVariable,
+        tau: TensorVariable,
+        beta: TensorVariable,
+    ) -&gt; Tuple[TensorVariable, TensorVariable]:
+        <span style="font-weight: bold; font-style: italic;">lmbda_inv</span> = 1.0 / lmbda
+        <span style="font-weight: bold; font-style: italic;">tau_inv</span> = 1.0 / tau
+
+        <span style="font-weight: bold; font-style: italic;">upsilon_inv</span> = srng.exponential(1 + lmbda_inv)
+        <span style="font-weight: bold; font-style: italic;">zeta_inv</span> = srng.exponential(1 + tau_inv)
+
+        <span style="font-weight: bold; font-style: italic;">beta2</span> = beta * beta
+        <span style="font-weight: bold; font-style: italic;">lmbda_inv_new</span> = srng.exponential(upsilon_inv + 0.5 * beta2 * tau_inv)
+        <span style="font-weight: bold; font-style: italic;">tau_inv_new</span> = srng.gamma(
+            0.5 * (beta.shape[0] + 1),
+            zeta_inv + 0.5 * (beta2 * lmbda_inv_new).<span style="font-weight: bold;">sum</span>(),
+        )
+
+        <span style="font-weight: bold;">return</span> 1.0 / lmbda_inv_new, 1.0 / tau_inv_new
+
+    <span style="font-weight: bold;">return</span> step
+</pre>
+</div>
+
+<p>
+It is possible to provide <code>step_horseshoe</code> (and many other samplers) in a sampler library, and rely on the users to wire models and samplers together. However this has many shortcomings:
+</p>
+
+<ol class="org-ol">
+<li>It is <i>error-prone</i>: it would be very simple to import a Gibbs sampler that does <b>not</b> sample from this model's posterior distribution and use it anyway;</li>
+<li>It is <i>not efficient</i>: users probably don't know that such a Gibbs sampler exist, and it is also possible that they don't care. They may thus miss opportunities to work with more efficient samplers.</li>
+<li>It makes the user code dependent on the underlying implementation of algorithms, instead of having a single interface with all samplers that does not change from release to release.</li>
+</ol>
+
+<p>
+Instead, we would like to provide a unified interface&#x2013;a single function&#x2013;to which users can pass a model, (a set of) observations and that returns a function that generates samples from the model's posterior distribution. Something akin to <a target='_blank' rel='noopener noreferrer' class='external' href="https://twiecki.io/blog/2013/08/12/bayesian-glms-1/">PyMC's "inference button"</a>. In this particular case it is fairly simple, if we call <code>beta_vv</code> the observed value for <code>beta_rv</code>, we can build a sampler from a model with the following function:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">build_sampler</span>(srng, beta_rv, beta_vv, num_samples):
+    <span style="font-weight: bold; font-style: italic;">lmbda_rv</span>, <span style="font-weight: bold; font-style: italic;">tau_rv</span> = unify_horseshoe(beta_rv)
+    <span style="font-weight: bold; font-style: italic;">step_fn</span> = step_horseshoe(srng)
+
+    <span style="font-weight: bold; font-style: italic;">outputs</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
+        step_fn,
+        outputs_info=(lmbda_rv, tau_rv),
+        non_sequences=(beta_vv,),
+        n_steps=num_samples,
+    )
+
+    <span style="font-weight: bold;">return</span> outputs, updates
+</pre>
+</div>
+
+<p>
+Indeed, we can then compile a sampling function:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 
-<span style="font-weight: bold; font-style: italic;">lambda_rv</span>, <span style="font-weight: bold; font-style: italic;">tau_rv</span> = unify_horseshoe(beta_rv)
-<span style="font-weight: bold; font-style: italic;">outputs</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
-    fn=step_horseshoe,
-    outputs=(lambda_rv, tau_rv),
-    non_sequences=(beta_vv,)
-)
+<span style="font-weight: bold; font-style: italic;">beta_vv</span> = beta_rv.clone()
+<span style="font-weight: bold; font-style: italic;">num_samples</span> = at.iscalar(<span style="font-style: italic;">"num_samples"</span>)
+<span style="font-weight: bold; font-style: italic;">outputs</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = build_sampler(srng, beta_rv, beta_vv, num_samples)
+
+<span style="font-weight: bold; font-style: italic;">sample_fn</span> = aesara.function((beta_vv, num_samples), outputs, updates=updates)
 </pre>
 </div>
 
 <p>
-In a realistic setting, with a reasonably well developed library, our matching algorithms will succesfully unify several patterns with possibly overlapping subgraphs. In this particular example, an efficient Gibbs sampler exists for the negative binomial regression, and all random variables are compatible with samplers from the HMC family.
+And use it to generate samples from the posterior distribution of \(\lambda\) and \(\tau\):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<span style="font-weight: bold;">from</span> IPython.lib.pretty <span style="font-weight: bold;">import</span> pprint
+
+<span style="font-weight: bold; font-style: italic;">beta</span> = np.random.normal(size=10)
+pprint(sample_fn(beta, 3))
+</pre>
+</div>
+
+<pre class="example" id="org48529cf">
+[array([[1.00687219e+00, 9.26299106e+00, 4.33395510e-01, 1.25196947e+01,
+         4.92392259e-01, 7.18673161e-01, 8.88425351e+00, 2.52007667e+00,
+         4.83004824e+00, 2.27031521e-01],
+        [1.61422319e-01, 4.58513899e-01, 6.74526308e-01, 6.25831867e+00,
+         1.04050729e-01, 4.87493244e-01, 5.40015315e+00, 5.58249893e+01,
+         6.91350331e-01, 3.00454228e-01],
+        [4.55687497e-02, 8.58124306e-02, 5.79550727e-01, 3.52126013e+01,
+         4.22261455e-01, 2.80032229e-01, 4.84278840e+00, 2.58212990e+01,
+         1.14731735e+01, 1.52661119e+01]]),
+ array([[0.8579952 ],
+        [3.06935235],
+        [3.08030401]])]
+</pre>
+
+<p>
+This example is trivial. We are only considering a very specific model and a single sampler, but you should get a feel of where things are going. In a realistic setting, with a reasonably well developed library, our matching algorithms will succesfully unify several patterns with possibly overlapping subgraphs. In this example, both \(\lambda\) and \(\tau\) are continuous variables, so we can sample from their posterior distribution using e.g. the NUTS sampler. We could also the use random walk Rosenbluth-Metropolis-Hastings as a step function. We thus need a data structure that allows us to efficiently store these possibilities as we walk down the graph and efficiently retrieve them to build a sampler for the whole model. More than enough material to cover for the next post.
 </p>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2022-04-15 Fri 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-19 Tue 15:52</p>
+<p class="date">Created: 2022-04-19 Tue 16:19</p>
 </div>
 </body>
 </html>
