@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-19 Tue 12:00 -->
+<!-- 2022-04-19 Tue 13:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Nested structures</title>
@@ -220,134 +220,7 @@
 <div id="content" class="content">
 <h1 class="title">Nested structures</h1>
 <p>
-In the <a href="20220414-identify-horsehoe.html">last post</a> we showed how we can identify a horseshoe prior in an aesara model graph. In the following we will provide a few improvements to the proposed solution, and set a prior on the number of trials <code>h</code>. Remember that the horseshoe prior is mathematically defined as:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\tau</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\lambda</span>_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1)<span style="font-weight: bold;">\quad</span> j <span style="font-weight: bold;">\in</span> <span style="font-weight: bold;">\left</span>[1,<span style="font-weight: bold;">\dots</span>, k<span style="font-weight: bold;">\right</span>]<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\beta</span>_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, <span style="font-weight: bold;">\tau</span> <span style="font-weight: bold;">\;\lambda</span>_{j})<span style="font-weight: bold;">\quad</span> j <span style="font-weight: bold;">\in</span> <span style="font-weight: bold;">\left</span>[1,<span style="font-weight: bold;">\dots</span>, k<span style="font-weight: bold;">\right</span>]<span style="font-weight: bold;">\\</span>
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
-
-\begin{align*}
-  \tau &\sim \operatorname{HalfCauchy}(0, 1)\\
-  \lambda_{j} &\sim \operatorname{HalfCauchy}(0, 1)\quad j \in \left[1,\dots, k\right]\\
-  \beta_{j} &\sim \operatorname{Normal}(0, \tau \;\lambda_{j})\quad j \in \left[1,\dots, k\right]\\
-\end{align*}
-
-<p>
-However, the pattern that we used in the previous post only checks that the <i>structure</i> is correct, but not that the correct distributions with the correct parameters are used. I thus propose to improve the design by defining a <code>unify_horseshoe</code> function that returns the random variables (<code>lambda_rv</code>, <code>tau_rv</code>) when the subgraph is identified, and <code>False</code> if unification is impossible.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.graph.unify <span style="font-weight: bold;">import</span> eval_if_etuple
-<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
-<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify, var
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">unify_horseshoe</span>(graph):
-    <span style="font-weight: bold; font-style: italic;">horseshoe_1_lv</span>, <span style="font-weight: bold; font-style: italic;">horseshoe_2_lv</span> = var(<span style="font-style: italic;">'horseshoe_1'</span>), var(<span style="font-style: italic;">'horsehoe_2'</span>)
-    <span style="font-weight: bold; font-style: italic;">zero_lv</span> = var(<span style="font-style: italic;">'zero'</span>)
-    <span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(
-        etuplize(at.random.normal),
-        var(),
-        var(),
-        var(),
-        zero_lv,
-        etuple(
-            etuplize(at.mul),
-            horseshoe_1_lv,
-            horseshoe_2_lv)
-    )
-
-    <span style="font-weight: bold; font-style: italic;">s</span> = unify(graph, horseshoe_pattern)
-    <span style="font-weight: bold;">if</span> s <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">False</span>:
-        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
-
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_1 was unified with a half-cauchy distributed RV</span>
-    <span style="font-weight: bold; font-style: italic;">halfcauchy_1</span> = eval_if_etuple(s[horseshoe_1_lv])
-    <span style="font-weight: bold;">if</span> halfcauchy_1.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
-        halfcauchy_1.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
-    ):
-         <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
-
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_2 was unified with a half-cauchy distributed RV</span>
-    <span style="font-weight: bold; font-style: italic;">halfcauchy_2</span> = eval_if_etuple(s[horseshoe_2_lv])
-    <span style="font-weight: bold;">if</span> halfcauchy_2.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
-        halfcauchy_2.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
-    ):
-        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
-
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that at least one of the RVs is a scalar</span>
-    <span style="font-weight: bold;">if</span> halfcauchy_1.<span style="font-weight: bold;">type</span>.shape == (1,):
-        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_2
-        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_1
-    <span style="font-weight: bold;">elif</span> halfcauchy_2.<span style="font-weight: bold;">type</span>.shape == (1,):
-        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_1
-        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_2
-    <span style="font-weight: bold;">else</span>:
-        <span style="font-weight: bold;">return</span> false
-
-    <span style="font-weight: bold;">return</span> (lmbda_rv, tau_rv)
-</pre>
-</div>
-
-<p>
-Working again with the negative binomial regression:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-
-<span style="font-weight: bold; font-style: italic;">X_tt</span> = at.matrix(<span style="font-style: italic;">'X'</span>)
-
-<span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(1, size=1)
-<span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
-<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.normal(0, tau_rv * lmbda_rv)
-
-<span style="font-weight: bold; font-style: italic;">eta</span> = X_tt @ beta_rv
-<span style="font-weight: bold; font-style: italic;">p</span> = at.sigmoid(-eta)
-
-<span style="font-weight: bold; font-style: italic;">h_rv</span> = srng.poisson(10)
-
-<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.nbinom(h_rv, p)
-</pre>
-</div>
-
-<p>
-Again we check that we can unify the subgraph <code>beta_rv</code>:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">print</span>(unify_horseshoe(beta_rv))
-</pre>
-</div>
-
-<pre class="example">
-(halfcauchy_rv{0, (0, 0), floatX, False}.out, halfcauchy_rv{0, (0, 0), floatX, False}.out)
-</pre>
-
-
-<p>
-But not <code>Y_rv</code>
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">print</span>(unify_horseshoe(Y_rv))
-</pre>
-</div>
-
-<pre class="example">
-False
-</pre>
-
-
-<p>
-The reason why we're trying to unify (sub)graphs with a horseshoe prior is that there are <i>Gibbs samplers</i> that we can use to sample from the posterior distirbution of \(lambda\) and \(\tau\).
+In the <a href="20220414-identify-horsehoe.html">last post</a> we showed how we can identify a horseshoe prior in an aesara model graph. The reason why we're trying to unify (sub)graphs with a horseshoe prior is that there are <i>Gibbs samplers</i> that we can use to sample from the posterior distirbution of \(lambda\) and \(\tau\).
 </p>
 
 <div class="org-src-container">
@@ -371,12 +244,16 @@ So that:
 )
 </pre>
 </div>
+
+<p>
+In a realistic setting, with a reasonably well developed library, our matching algorithms will succesfully unify several patterns with possibly overlapping subgraphs. In this particular example, an efficient Gibbs sampler exists for the negative binomial regression, and all random variables are compatible with samplers from the HMC family.
+</p>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2022-04-15 Fri 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-19 Tue 12:00</p>
+<p class="date">Created: 2022-04-19 Tue 13:43</p>
 </div>
 </body>
 </html>

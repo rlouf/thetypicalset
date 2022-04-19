@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-19 Tue 12:00 -->
+<!-- 2022-04-19 Tue 13:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Find horsehoe priors in an Aesara graph</title>
@@ -241,8 +241,30 @@ In this short post we will try to unify subgraphs of an <a target='_blank' rel='
 </pre>
 </div>
 
+<div id="outline-container-orgfd81c5b" class="outline-2">
+<h2 id="orgfd81c5b">Unification on the graphical structure</h2>
+<div class="outline-text-2" id="text-orgfd81c5b">
 <p>
-We would like to be able to tell whether the model that the graph implements contains a horseshoe prior, and if so return the random variables <code>lmbda_rv</code> and <code>tau_rv</code>. Let us first define a horseshoe pattern against which we are going to try to match the model:
+We would like to be able to tell whether the model that the graph implements contains a horseshoe prior, and if so return the random variables <code>lmbda_rv</code> and <code>tau_rv</code>. Remember that the horseshoe prior is mathematically defined as:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
+  <span style="font-weight: bold;">\tau</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1)<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\lambda</span>_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1)<span style="font-weight: bold;">\quad</span> j <span style="font-weight: bold;">\in</span> <span style="font-weight: bold;">\left</span>[1,<span style="font-weight: bold;">\dots</span>, k<span style="font-weight: bold;">\right</span>]<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\beta</span>_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, <span style="font-weight: bold;">\tau</span> <span style="font-weight: bold;">\;\lambda</span>_{j})<span style="font-weight: bold;">\quad</span> j <span style="font-weight: bold;">\in</span> <span style="font-weight: bold;">\left</span>[1,<span style="font-weight: bold;">\dots</span>, k<span style="font-weight: bold;">\right</span>]<span style="font-weight: bold;">\\</span>
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+</pre>
+</div>
+
+\begin{align*}
+  \tau &\sim \operatorname{HalfCauchy}(0, 1)\\
+  \lambda_{j} &\sim \operatorname{HalfCauchy}(0, 1)\quad j \in \left[1,\dots, k\right]\\
+  \beta_{j} &\sim \operatorname{Normal}(0, \tau \;\lambda_{j})\quad j \in \left[1,\dots, k\right]\\
+\end{align*}
+
+<p>
+Let us first define a horseshoe pattern against which we are going to try to match the model:
 </p>
 
 <div class="org-src-container">
@@ -278,10 +300,10 @@ pprint(s)
 </pre>
 </div>
 
-<pre class="example" id="orga79dc0e">
-{~_554: RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F4873319040&gt;),
- ~_555: TensorConstant{[]},
- ~_556: TensorConstant{11},
+<pre class="example" id="org83f92f2">
+{~_32: RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FCCBFFD8740&gt;),
+ ~_33: TensorConstant{[]},
+ ~_34: TensorConstant{11},
  ~zero: TensorConstant{0},
  ~horseshoe_1: e(
    e(
@@ -291,7 +313,7 @@ pprint(s)
      (0, 0),
      'floatX',
      False),
-   RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;),
+   RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FCCBFFD8F20&gt;),
    TensorConstant{(1,) of 1},
    TensorConstant{11},
    TensorConstant{1},
@@ -304,20 +326,103 @@ pprint(s)
      (0, 0),
      'floatX',
      False),
-   RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F48733193C0&gt;),
+   RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FCCBFFCB820&gt;),
    TensorConstant{(1,) of 10},
    TensorConstant{11},
    TensorConstant{1},
    TensorConstant{1.0})}
 </pre>
+</div>
+</div>
+
+
+<div id="outline-container-org21ceaac" class="outline-2">
+<h2 id="org21ceaac">Model unification</h2>
+<div class="outline-text-2" id="text-org21ceaac">
+<p>
+The pattern we used in the previous section only checks that the <i>structure</i> is correct, but not that the correct distributions with the correct parameters are used. However, we can only identify an aesara graph with the mathematical model if structure <i>and</i> distributions match (or if the pattern represents the normal form of the model under a set of rewrite rules, but we'll keep things simple for now).
+</p>
 
 <p>
-However, <code>unify</code> will only work if the pattern matches the whole graph. Indeed if we try to unify the horsehoe pattern with <code>Y_rv</code> we get:
+Let us thus improve the design by defining a <code>unify_horseshoe</code> function that not only checks the basic graphical structure but also the shapes and distributions. This function behaves similarly to <code>unify</code>; it returns the random variables (<code>lambda_rv</code>, <code>tau_rv</code>) when the subgraph is identified, and <code>False</code> if unification is impossible.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">s</span> = unify(horseshoe_pattern, etuplize(Y_rv))
-<span style="font-weight: bold;">print</span>(s)
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.graph.unify <span style="font-weight: bold;">import</span> eval_if_etuple
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify, var
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">unify_horseshoe</span>(graph):
+    <span style="font-weight: bold; font-style: italic;">horseshoe_1_lv</span>, <span style="font-weight: bold; font-style: italic;">horseshoe_2_lv</span> = var(<span style="font-style: italic;">'horseshoe_1'</span>), var(<span style="font-style: italic;">'horsehoe_2'</span>)
+    <span style="font-weight: bold; font-style: italic;">zero_lv</span> = var(<span style="font-style: italic;">'zero'</span>)
+    <span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(
+        etuplize(at.random.normal),
+        var(),
+        var(),
+        var(),
+        zero_lv,
+        etuple(
+            etuplize(at.mul),
+            horseshoe_1_lv,
+            horseshoe_2_lv)
+    )
+
+    <span style="font-weight: bold; font-style: italic;">s</span> = unify(graph, horseshoe_pattern)
+    <span style="font-weight: bold;">if</span> s <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">False</span>:
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_1 was unified with a half-cauchy distributed RV</span>
+    <span style="font-weight: bold; font-style: italic;">halfcauchy_1</span> = eval_if_etuple(s[horseshoe_1_lv])
+    <span style="font-weight: bold;">if</span> halfcauchy_1.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
+        halfcauchy_1.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
+    ):
+         <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_2 was unified with a half-cauchy distributed RV</span>
+    <span style="font-weight: bold; font-style: italic;">halfcauchy_2</span> = eval_if_etuple(s[horseshoe_2_lv])
+    <span style="font-weight: bold;">if</span> halfcauchy_2.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
+        halfcauchy_2.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
+    ):
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that at least one of the RVs is a scalar</span>
+    <span style="font-weight: bold;">if</span> halfcauchy_1.<span style="font-weight: bold;">type</span>.shape == (1,):
+        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_2
+        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_1
+    <span style="font-weight: bold;">elif</span> halfcauchy_2.<span style="font-weight: bold;">type</span>.shape == (1,):
+        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_1
+        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_2
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span> false
+
+    <span style="font-weight: bold;">return</span> (lmbda_rv, tau_rv)
+</pre>
+</div>
+
+<p>
+Again we check that we can unify the subgraph <code>beta_rv</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">print</span>(unify_horseshoe(beta_rv))
+</pre>
+</div>
+
+<pre class="example">
+(halfcauchy_rv{0, (0, 0), floatX, False}.out, halfcauchy_rv{0, (0, 0), floatX, False}.out)
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-orgbf78ff4" class="outline-2">
+<h2 id="orgbf78ff4">Walk the graph</h2>
+<div class="outline-text-2" id="text-orgbf78ff4">
+<p>
+<code>unify_horseshoe</code> will only work if the pattern matches the whole graph. Indeed if we try to unify the horsehoe pattern with <code>Y_rv</code> we get:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">print</span>(unify_horseshoe(Y_rv))
 </pre>
 </div>
 
@@ -343,7 +448,7 @@ To identify subgraphs we walk through the graph (here breadth-first) and attempt
 <span style="font-weight: bold;">for</span> node <span style="font-weight: bold;">in</span> walk([Y_rv], expand, bfs=<span style="font-weight: bold; text-decoration: underline;">True</span>):
     <span style="font-weight: bold;">try</span>:
         <span style="font-weight: bold;">if</span> <span style="font-weight: bold;">isinstance</span>(node.owner.op, RandomVariable):
-            <span style="font-weight: bold; font-style: italic;">s</span> = unify(horseshoe_pattern, etuplize(node))
+            <span style="font-weight: bold; font-style: italic;">s</span> = unify_horseshoe(node)
             <span style="font-weight: bold;">if</span> s:
                 <span style="font-weight: bold;">break</span>
     <span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">AttributeError</span>:
@@ -356,35 +461,27 @@ We can check that \(\tau\) has been correctly identified:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python">pprint(s[horseshoe_1_lv])
+<pre class="src src-python">pprint(s)
 </pre>
 </div>
 
-<pre class="example" id="orgfc748d4">
-e(
-  e(
-    aesara.tensor.random.basic.HalfCauchyRV,
-    'halfcauchy',
-    0,
-    (0, 0),
-    'floatX',
-    False),
-  RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F487A719200&gt;),
-  TensorConstant{(1,) of 1},
-  TensorConstant{11},
-  TensorConstant{1},
-  TensorConstant{1.0})
+<pre class="example">
+(halfcauchy_rv{0, (0, 0), floatX, False}.out,
+ halfcauchy_rv{0, (0, 0), floatX, False}.out)
 </pre>
 
+
 <p>
-Being able to unify a pattern with a subgraph is a (small) first step towards being able to assign sampling steps to random variables in an arbitrary graph. But it is not enough; while we can assign a gibbs sampler step to <code>beta_rv</code>, <code>lambda_rv</code> and <code>tau_rv</code> in this example, <code>h</code> has been left out of the unification process. We could naturally assign a NUTS sampler step to any random variable with continuous support, so in the next post we will do exactly that.
+Being able to unify a pattern with a subgraph is a (small) first step towards being able to assign sampling steps to random variables in an arbitrary graph. In the following post we will show how we can automatically build a Gibbs sampler for (sub)graphs that represent a horseshoe prior.
 </p>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2022-04-14 Thu 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-04-19 Tue 12:00</p>
+<p class="date">Created: 2022-04-19 Tue 13:43</p>
 </div>
 </body>
 </html>
