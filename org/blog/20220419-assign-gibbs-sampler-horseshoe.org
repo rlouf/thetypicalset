@@ -1,0 +1,24 @@
+#+TITLE: Nested structures
+#+DATE: <2022-04-15 Fri>
+
+In the [[file:20220414-identify-horsehoe.org][last post]] we showed how we can identify a horseshoe prior in an aesara model graph. The reason why we're trying to unify (sub)graphs with a horseshoe prior is that there are /Gibbs samplers/ that we can use to sample from the posterior distirbution of $lambda$ and $\tau$.
+
+#+begin_src python :session :results silent :exports code
+def step_horseshoe(lmbda, mu, beta):
+    return lmbda, mu
+#+end_src
+
+So that:
+
+#+begin_src python :session
+import aesara
+
+lambda_rv, tau_rv = unify_horseshoe(beta_rv)
+outputs, updates = aesara.scan(
+    fn=step_horseshoe,
+    outputs=(lambda_rv, tau_rv),
+    non_sequences=(beta_vv,)
+)
+#+end_src
+
+In a realistic setting, with a reasonably well developed library, our matching algorithms will succesfully unify several patterns with possibly overlapping subgraphs. In this particular example, an efficient Gibbs sampler exists for the negative binomial regression, and all random variables are compatible with samplers from the HMC family.
