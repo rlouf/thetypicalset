@@ -1,13 +1,11 @@
 #+TITLE: Rewriting Aesara graphs
 #+DATE: <2022-04-14 Thu>
 
-This article is a port of [[https://twitter.com/BrandonTWillard][Brandon Willard']]s [[https://pymc-devs.github.io/symbolic-pymc/symbolic-pymc-tour.html][Tour of the Symbolic PyMC library]]. The text is almost a verbatim copy, but mistakes are mine.
+This article is a port of [[https://twitter.com/BrandonTWillard][Brandon Willard']]s [[https://pymc-devs.github.io/symbolic-pymc/symbolic-pymc-tour.html][Tour of the Symbolic PyMC library]], and is a simplified version of the [[https://aesara.readthedocs.io/en/latest/extending/graph_rewriting.html#unification-and-reification][example in Aesara's documentation]]. The text is almost a verbatim copy of the original, but mistakes are obviously mine.
 
-In this document we will be implementing a symbolic "search-and-replace" that changes aesara graphs like =at.dot(A, x+y)= to =at.dot(A, x) + at.dot(A, y)=. In other words we will demonstration how to implement the distributive property of the matrix multiplication so it can be applied to any aesara graph.
+In this document we will be implementing a symbolic "search-and-replace" that changes aesara graphs like =at.dot(A, x+y)= to =at.dot(A, x) + at.dot(A, y)=. In other words we will demonstrate how to implement the distributive property of the matrix multiplication so it can be applied to any aesara graph. Aesara allows one to implement rewrite rules like the distributive property---and many other sophisticated manipulation of graphs---by providing flexible, pure Python versions of core operations in symbolic computation. These operations are then combined and orchestrated through the relational programming DSL [[http://minikanren.org/][miniKanren]].
 
-Aesara allows one to implement rewrite rules like the distributive property---and many other sophisticated manipulation of graphs---by providing flexible, pure Python versions of core operations in symbolic computation. These operations are then combined and orchestrated through the relational programming DSL miniKanren.
-
-More specifically, we’ll introduce the basic unification and reification operations and explicitly show how they relate to graph manipulation and the modeling of high-level mathematical relations. Along the way, we’ll cover some of the necessary details behind TensorFlow graphs and how they’re modeled by meta graph objects in Symbolic PyMC.
+More specifically, we’ll introduce the basic unification and reification operations and explicitly show how they relate to graph manipulation and the modeling of high-level mathematical relations. Along the way, we’ll cover some of the necessary details behind Aesara graphs.
 
 We start by creating a graph of our target expressions–i.e. =at.dot(A, x + y)= in Aesara. We need to do this in order to determine exactly what we’re searching for and–later–what to put in its place.
 
@@ -37,7 +35,7 @@ aesara.dprint(z_tt)
 
 The output of =dprint= shows the underlying operators (=dot=, =add=) and their arguments.
 
-To "math/search for" combinations of Aesara operations--or, as we just saw, graphs-- we use *unification*; to "replace" parts of the graph (well, produce a copy with replaced parts) we use *reificatoin*. Aesara provides support for these using Aesara via *meta objects* and *expression-tuples*.
+To "math/search for" combinations of Aesara operations--or, as we just saw, graphs--we use *unification*; to "replace" parts of the graph (well, produce a copy with replaced parts) we use *reificatoin*. Aesara provides support for these via *expression-tuples*.
 
 * S-expressions
 
@@ -90,7 +88,7 @@ except NotImplementedError as e:
 #+RESULTS:
 : Cannot convert ~x to a tensor variable.
 
-We'll get a similar error if we attempt to evaluate the =etuple= by accessing its =ExpressionTuple.evaled_obj= property. However, after performing a simple manipulation that replaces the logic variable with a valid input to =at.add=, we are able to evaluate the =etuple= and obtain an Aesara Tensor result, as demonstrated by the following code:
+We'll get a similar error if we attempt to evaluate the =etuple= by accessing its =ExpressionTuple.evaled_obj= property. However, after performing a simple manipulation that replaces the logic variable with a valid input to =at.add= (reificatoin), we are able to evaluate the =etuple= and obtain an Aesara Tensor result, as demonstrated by the following code:
 
 #+begin_src python :session :results output :exports both
 from unification import reify
@@ -115,9 +113,7 @@ pprint(new_add_pattern.evaled_obj)
 #+RESULTS:
 : Elemwise{add,no_inplace}.0
 
-Working with S-expressions is much like manipulating a subset of Python AST, so, when using =etuples=, one is--in effect-*meta programming* (e.g. by automating the production and evaluation of Aesara graphs using Python code).
-
-As a matter of fact, =etuples= could be recast as =ast.Expr= and =ast.Call= objects that, though the use of =eval=, could achieve the same results-albeit without the more convenient tuple-like structuring.
+Working with S-expressions is much like manipulating a subset of Python AST, so, when using =etuples=, one is--in effect-*meta programming* (e.g. by automating the production and evaluation of Aesara graphs using Python code). As a matter of fact, =etuples= could be recast as =ast.Expr= and =ast.Call= objects that, though the use of =eval=, could achieve the same results-albeit without the more convenient tuple-like structuring.
 
 * Operators and their parameters
 
@@ -202,9 +198,7 @@ e(
 
 ** Finishing our implementation
 
-We can also reify an entirely different graph using the values extracted from the graph =z_et=. In this case, we create an "output" pattern graph, to complement our new "input" pattern graph =dot_pattern=.
-
-If we combine out dot product and addition =etuple= patterns, we can extract all the arguments needed as input to a distributed multiplication pattern.
+We can also reify an entirely different graph using the values extracted from the graph =z_et=. In this case, we create an "output" pattern graph, to complement our new "input" pattern graph =dot_pattern=. If we combine our dot product and addition =etuple= patterns, we can extract all the arguments needed as input to a distributed multiplication pattern.
 
 #+begin_src python :session :results output :exports both
 output_pattern = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), B_lv, y_lv))
@@ -262,7 +256,7 @@ Elemwise{add,no_inplace} [id A] ''
      |y [id H]
 #+end_example
 
-Using only the basics of unification and reification provided by Aesara once can extract specific elements from Aesara graphs and use them to implement mathematical identities/relations. Through clever use of multiple mathematical relations, one can--for example--construct graph *optimizatoins* that turn large classed of user-defined statistical models into computational tractable reformulations. Similarly, one can construct "normal forms" for models, making it possible to determine whether or not a user-defined model is suitable for a specific sampler.
+Using only the basics of unification and reification provided by Aesara one can extract specific elements from Aesara graphs and use them to implement mathematical identities/relations. Through clever use of multiple mathematical relations, one can--for example--construct graph *optimizations* that turn large classes of user-defined statistical models into computational tractable reformulations. Similarly, one can construct "normal forms" for models, making it possible to determine whether or not a user-defined model is suitable for a specific sampler.
 
 Next we will introduce another major element of Aesara that orchestrates and simplifies sequences of unifications like we used earlier, provides control-flow-like capabilities, produces fully reified results of arbitrary forms and does so within a genuinely declarative formalism that carries much of the same power of logical programming: [[http://minikanren.org/][miniKanren]]!
 
