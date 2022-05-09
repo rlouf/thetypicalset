@@ -13,6 +13,7 @@
 ;; Install dependencies
 (package-install 'htmlize)
 (package-install 'find-lisp)
+(package-install 'org)
 (package-install 'org-roam)
 (package-install 's)
 
