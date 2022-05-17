@@ -1,0 +1,35 @@
+:PROPERTIES:
+:ID:       00cdf6ad-f3cc-4e9a-a084-c6dcf5681d9c
+:END:
+#+TITLE: Step size for stable Hamiltonian trajectories
+#+CREATED: [2022-05-17 Tue 08:50]
+#+LAST_MODIFIED: [2022-05-17 Tue 09:17]
+
+- tags :: [[id:dce96ffd-7673-4596-a6e7-2e7dd7299f76][Hamiltonian Monte Carlo]]
+
+Let us consider the following Hamiltonian (corresponds to sampling from a univariate Gaussian with standard deviation $\sigma$):
+
+\begin{equation*}
+ H(q, p) = q^2\,/\,2\sigma + p^2\,/\,2
+\end{equation*}
+
+A leapfrog step with step size $\epsilon$ is a linear mapping between $\left(q(t), p(t)\right)$ and $\left(q(t+\epsilon), p(t+\epsilon)\right)$ with the following transition matrix:
+
+\begin{pmatrix}
+1-\epsilon^2\,/\, 2\sigma^2 & \epsilon\\
+-\epsilon/\sigma^2+\epsilon^3/4\sigma^4 & 1-\epsilon^2/2\sigma^2
+\end{pmatrix}
+
+
+Whether this leads to a stable trajectory or diverges depends on the magnitude of thge eigenvalues:
+
+\begin{equation*}
+\left(1 - \epsilon^2/2\sigma^2) \pm (\epsilon/\sigma) \sqrt{\epsilon^2/4\sigma^2-1}
+\end{equation*}
+
+When $\epsilon/\sigma > 2$ these eigenvalues are real and one will have absolute value greated than one. Trajectories computed with $\epsilon < 2\sigma$ are thus stable. For multi-dimensional problems, the stability will be determined by the width of the distribution in the most constrained region. Stability for general quadratic hamiltonian $K(p) = p^T M^{-1} p$
+
+
+* References
+
+- Neal Radford, MCMC using Hamiltonian dynamics (p 22)
