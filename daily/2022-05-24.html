@@ -6,7 +6,7 @@
 <!-- 2022-05-24 Tue 16:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Dirichlet distribution</title>
+<title>2022-05-24</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -194,61 +194,45 @@
   .org-svg { }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">The Dirichlet distribution</h1>
-<dl class="org-dl">
-<dt>tags</dt><dd><a href="20220105154404-probability_distribution.html#ID-accc4a58-2f96-42da-a43d-c8140996d0d3">Probability distribution</a></dd>
-</dl>
+<h1 class="title">2022-05-24</h1>
 
+<div id="outline-container-org5c236d8" class="outline-2">
+<h2 id="org5c236d8">API for variational inference in `blackjax`</h2>
+<div class="outline-text-2" id="text-org5c236d8">
 <p>
-<i>Is it to proportions what Multinomial is to number in categories?</i>
+Can <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">variational inference</a> (VI) be represented with a kernel? MCMC algorithms are represented as such, for instance for SGLD:
 </p>
 
-<div id="outline-container-orgba74559" class="outline-2">
-<h2 id="orgba74559">Interpretation</h2>
-<div class="outline-text-2" id="text-orgba74559">
-<p>
-Let us consider an urn with \(K\) different colors. There are \(\alpha_1\) balls of the first colors, &#x2026;, \(\alpha_K\) balls of the $K$th color. We draw \(N\) balls from this urn using the following protocol:
-</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> blackjax
 
-<ol class="org-ol">
-<li>Pick one ball</li>
-<li>Return the ball to the urn</li>
-<li>Add another ball of the same color to the urn</li>
-</ol>
+<span style="font-weight: bold; font-style: italic;">sgld</span> = blackjax.sgld(grad_fn, schedule_fn)
+<span style="font-weight: bold; font-style: italic;">state</span> = sgld.init(init_position, data_batch)
+<span style="font-weight: bold; font-style: italic;">new_state</span> = sgld.step(rng_key, state, data_batch)
 
-<p>
-When \(N\) is very large, the proportions of balls of different colors are distributed according to \(\operatorname{Dirichlet}(\mathbf{\alpha})\).
-</p>
-</div>
+</pre>
 </div>
 
+<p>
+However, VI is not a stepping process like MCMC is. It <i>creates a distribution object</i> via optimization and then draws samples from that object.
+</p>
 
-<div id="outline-container-org3b94f1a" class="outline-2">
-<h2 id="org3b94f1a">Links to this note</h2>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> blackjax
+
+<span style="font-weight: bold; font-style: italic;">pathfinder</span> = blackjax.pathfinder(logprob_fn)
+<span style="font-weight: bold; font-style: italic;">approximation</span> = pathfinder.approximate(initial_points, num_steps)
+<span style="font-weight: bold; font-style: italic;">samples</span> = pathfinder.sample(approximation, num_samples)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb017e94" class="outline-2">
+<h2 id="orgb017e94">Links to this note</h2>
 </div>
 </div>
 </body>
