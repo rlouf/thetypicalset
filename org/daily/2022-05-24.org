@@ -1,0 +1,27 @@
+:PROPERTIES:
+:ID:       382d781f-bd44-48ff-b2b2-efb88bffbbbe
+:END:
+#+title: 2022-05-24
+
+* API for variational inference in `blackjax`
+
+Can [[https://en.wikipedia.org/wiki/Variational_Bayesian_methods][variational inference]] (VI) be represented with a kernel? MCMC algorithms are represented as such, for instance for SGLD:
+
+  #+begin_src python
+import blackjax
+
+sgld = blackjax.sgld(grad_fn, schedule_fn)
+state = sgld.init(init_position, data_batch)
+new_state = sgld.step(rng_key, state, data_batch)
+
+  #+end_src
+
+ However, VI is not a stepping process like MCMC is. It /creates a distribution object/ via optimization and then draws samples from that object.
+
+ #+begin_src python
+import blackjax
+
+pathfinder = blackjax.pathfinder(logprob_fn)
+approximation = pathfinder.approximate(initial_points, num_steps)
+samples = pathfinder.sample(approximation, num_samples)
+ #+end_src
