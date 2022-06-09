@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-09 Thu 09:28 -->
+<!-- 2022-06-09 Thu 16:28 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Solve sudokus with kanren</title>
@@ -199,98 +199,178 @@
 <div id="content" class="content">
 <h1 class="title">Solve sudokus with kanren</h1>
 <p>
-I am reminded today of Peter Norvig's <a target='_blank' rel='noopener noreferrer' class='external' href="http://norvig.com/sudoku.html">blog post</a> on solving every sudoku puzzle using constraint propagation and search.
+I am reminded today of Peter Norvig's <a target='_blank' rel='noopener noreferrer' class='external' href="http://norvig.com/sudoku.html">blog post</a> on solving every sudoku puzzle using constraint propagation and search. In this essay we will revisit the problem using the python implementation of <a target='_blank' rel='noopener noreferrer' class='external' href="http://minikanren.org/">miniKanren</a>, <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren/">kanren</a>, a domain-specific language for logic programming.
 </p>
 
 <p>
-This should be realtively easy to implement in python using <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren">kanren</a>, since kanren does the heavy lifting for both these things.
+Peter's solution is <i>imperative</i>: we implement a series of procedures that will give us the missing values in a Sudoku puzzle. The <i>nature</i> of the Sudoku, the rules, are hidden in this code. Here we will instead implement the rules of the Sudoku, i.e. the <i>relations</i> that the units must respect and kanren will find the grids that respect these rules (given some hints) for us.
 </p>
 
 <p>
-We store the sudoku grid as a 81-element list. Since constraints are defines on rows, columns and squares we need to be able to extract those squares.
+In plain english, a sudoku puzzle is a 9x9 grids such that:
+</p>
+<ul class="org-ul">
+<li>The rows are a permutation of the digits from 1 to 9;</li>
+<li>The columns are a permutation of the digits from 1 to 9;</li>
+<li>The squares are a permutation of the digits from 1 to 9;</li>
+</ul>
+
+<p>
+Let us illustrate on a simple example:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall, permuteo
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> run, permuteo, var
 
+<span style="font-weight: bold; font-style: italic;">NUMBERS</span> = <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">range</span>(1, 10))
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">rows</span>(grid):
-    <span style="font-style: italic;">"""Return a grid's rows."""</span>
-    <span style="font-weight: bold; font-style: italic;">column_idx</span> = [[i + 9*j <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)]
-    <span style="font-weight: bold;">return</span> [[grid[i] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> column] <span style="font-weight: bold;">for</span> column <span style="font-weight: bold;">in</span> columns_idx]
-
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">columns</span>(grid):
-    <span style="font-style: italic;">"""Return a grid's rows."""</span>
-    <span style="font-weight: bold; font-style: italic;">row_idx</span> = [[9*i+ j <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)]
-    <span style="font-weight: bold;">return</span> [[grid[i] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> row] <span style="font-weight: bold;">for</span> row <span style="font-weight: bold;">in</span> row_idx]
-
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">squares</span>(grid):
-    <span style="font-style: italic;">"""Return a grid's squares."""</span>
-    <span style="font-weight: bold; font-style: italic;">square_idx</span> = [[9*i + j <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> a <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> b] <span style="font-weight: bold;">for</span> a <span style="font-weight: bold;">in</span> ((0, 1, 2), (3, 4, 5), (6, 7, 8)) <span style="font-weight: bold;">for</span> b <span style="font-weight: bold;">in</span> ((0, 1, 2), (3, 4, 5), (6, 7, 8))]
-    <span style="font-weight: bold;">return</span> [[grid[i] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> square] <span style="font-weight: bold;">for</span> square <span style="font-weight: bold;">in</span> square_idx]
-
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">sudokuo</span>(grid_expr):
-    <span style="font-style: italic;">"""Express a goal that represents the relation between all sudoku grids.</span>
-
-<span style="font-style: italic;">    A sudoku puzzle is said to be solved if every column, every row and every</span>
-<span style="font-style: italic;">    square is a permutation of the digits from 1 to 9.</span>
-<span style="font-style: italic;">    """</span>
-    <span style="font-weight: bold; font-style: italic;">rows_permuteo</span> = [permuteo(row, numbers) <span style="font-weight: bold;">for</span> row <span style="font-weight: bold;">in</span> rows(grid_expr)]
-    <span style="font-weight: bold; font-style: italic;">columns_permuteo</span> = [permuteo(column, numbers) <span style="font-weight: bold;">for</span> column <span style="font-weight: bold;">in</span> columns(grid_expr)]
-    <span style="font-weight: bold; font-style: italic;">squares_permuteo</span> = [permuteo(square, numbers) <span style="font-weight: bold;">for</span> square <span style="font-weight: bold;">in</span> squares(grid_expr)]
-
-    <span style="font-weight: bold;">return</span> lall(*row_constraints, *column_constraints, *square_constraints)
+<span style="font-weight: bold; font-style: italic;">row</span> = (0, 0, 0, 1, 4, 0, 0, 9, 8)
+<span style="font-weight: bold; font-style: italic;">row_expr</span> = <span style="font-weight: bold;">tuple</span>(r <span style="font-weight: bold;">if</span> r &gt; 0 <span style="font-weight: bold;">else</span> var() <span style="font-weight: bold;">for</span> r <span style="font-weight: bold;">in</span> row)
+<span style="font-weight: bold; font-style: italic;">res</span> = run(2, row_expr, permuteo(row_expr, NUMBERS))
 </pre>
 </div>
 
+<pre class="example">
+((2, 3, 5, 1, 4, 6, 7, 9, 8), (2, 3, 5, 1, 4, 7, 6, 9, 8))
+</pre>
+
+
+<p>
+We store the sudoku grid as a 81-element list. Since constraints are defines on rows, columns and squares we need to be able to extract those squares:
+</p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> permuteo, var, lall
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">get_rows</span>(grid):
+    <span style="font-style: italic;">"""Return a grid's rows."""</span>
+    <span style="font-weight: bold; font-style: italic;">columns_idx</span> = [[9 * i + j <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)]
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">tuple</span>(grid[i] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> column) <span style="font-weight: bold;">for</span> column <span style="font-weight: bold;">in</span> columns_idx)
 
-<span style="font-weight: bold; font-style: italic;">numbers</span> = (1, 2, 3, 4, 5, 6, 7, 8, 9)
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">solve_sudoku</span>(grid):
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">get_columns</span>(grid):
+    <span style="font-style: italic;">"""Return a grid's columns."""</span>
+    <span style="font-weight: bold; font-style: italic;">rows_idx</span> = [[i + 9 * j <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)]
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">tuple</span>(grid[i] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> row) <span style="font-weight: bold;">for</span> row <span style="font-weight: bold;">in</span> rows_idx)
 
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">get_squares</span>(grid):
+    <span style="font-style: italic;">"""Return a grid's squares."""</span>
+    <span style="font-weight: bold; font-style: italic;">squares_idx</span> = [
+        [9 * i + j <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> a <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> b]
+        <span style="font-weight: bold;">for</span> a <span style="font-weight: bold;">in</span> ((0, 1, 2), (3, 4, 5), (6, 7, 8))
+        <span style="font-weight: bold;">for</span> b <span style="font-weight: bold;">in</span> ((0, 1, 2), (3, 4, 5), (6, 7, 8))
+    ]
+    <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">tuple</span>(grid[i] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> square) <span style="font-weight: bold;">for</span> square <span style="font-weight: bold;">in</span> squares_idx)
+</pre>
+</div>
+
+<p>
+We can now define the sudoku goal as the conjonction of permutation rule.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> permuteo, <span style="font-weight: bold;">vars</span>, lall, run
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">sudoku</span>(grid):
+    <span style="font-style: italic;">"""Define the Sudoku grid as a set on constraints on the rows, columns and squares.</span>
+
+<span style="font-style: italic;">    Parameter</span>
+<span style="font-style: italic;">    ---------</span>
+<span style="font-style: italic;">    grid</span>
+<span style="font-style: italic;">        A list that contains hints and logic variables ("unknown values").</span>
+
+<span style="font-style: italic;">    """</span>
+    <span style="font-weight: bold; font-style: italic;">rows</span> = get_rows(grid)
+    <span style="font-weight: bold; font-style: italic;">columns</span> = get_columns(grid)
+    <span style="font-weight: bold; font-style: italic;">squares</span> = get_squares(grid)
+    <span style="font-weight: bold;">return</span> lall(
+        lall(*(permuteo(r, NUMBERS) <span style="font-weight: bold;">for</span> r <span style="font-weight: bold;">in</span> rows)),
+        lall(*(permuteo(c, NUMBERS) <span style="font-weight: bold;">for</span> c <span style="font-weight: bold;">in</span> columns)),
+        lall(*(permuteo(s, NUMBERS) <span style="font-weight: bold;">for</span> s <span style="font-weight: bold;">in</span> squares))
+    )
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">solve_sudoku</span>(grid):
     <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Flatten the grid</span>
     <span style="font-weight: bold; font-style: italic;">grid_flat</span> = [<span style="font-weight: bold;">int</span>(elem) <span style="font-weight: bold;">for</span> row <span style="font-weight: bold;">in</span> grid <span style="font-weight: bold;">for</span> elem <span style="font-weight: bold;">in</span> row.split(<span style="font-style: italic;">" "</span>)]
     <span style="font-weight: bold;">assert</span> <span style="font-weight: bold;">len</span>(grid_flat) == 81
     <span style="font-weight: bold;">assert</span> <span style="font-weight: bold;">max</span>(grid_flat) == 9
 
-    <span style="font-weight: bold; font-style: italic;">grid_expr</span> = [x <span style="font-weight: bold;">if</span> x &gt; 0 <span style="font-weight: bold;">else</span> var() <span style="font-weight: bold;">for</span> row <span style="font-weight: bold;">in</span> grid_flat <span style="font-weight: bold;">for</span> x <span style="font-weight: bold;">in</span> row ]
+    <span style="font-weight: bold; font-style: italic;">grid_expr</span> = <span style="font-weight: bold;">tuple</span>(val <span style="font-weight: bold;">if</span> val &gt; 0 <span style="font-weight: bold;">else</span> var()  <span style="font-weight: bold;">for</span> val <span style="font-weight: bold;">in</span> grid_flat)
+    <span style="font-weight: bold; font-style: italic;">res</span> = run(1, grid_expr, sudoku(grid_expr))
 
-    <span style="font-weight: bold; font-style: italic;">res</span> = run(1, grid_expr, sudokuo)
-    <span style="font-weight: bold;">try</span>:
-        <span style="font-weight: bold; font-style: italic;">res</span> = res[0]
-        <span style="font-weight: bold; font-style: italic;">grid_solved</span> = [[res[9*i+j] <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)] <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9)]
-        <span style="font-weight: bold;">return</span> grid_solved
-    <span style="font-weight: bold;">except</span>:
-        <span style="font-weight: bold;">raise</span> <span style="font-weight: bold; text-decoration: underline;">ValueError</span>(<span style="font-style: italic;">"Could not solve this sudoku grid"</span>)
+    <span style="font-weight: bold;">return</span> res[0]
+
+
+<span style="font-weight: bold; font-style: italic;">easy_puzzle</span> = (
+    <span style="font-style: italic;">"0 0 3 0 2 0 6 0 0"</span>,
+    <span style="font-style: italic;">"9 0 0 3 0 5 0 0 1"</span>,
+    <span style="font-style: italic;">"0 0 1 8 0 6 4 0 0"</span>,
+    <span style="font-style: italic;">"0 0 8 1 0 2 9 0 0"</span>,
+    <span style="font-style: italic;">"7 0 0 0 0 0 0 0 8"</span>,
+    <span style="font-style: italic;">"0 0 6 7 0 8 2 0 0"</span>,
+    <span style="font-style: italic;">"0 0 2 6 0 9 5 0 0"</span>,
+    <span style="font-style: italic;">"8 0 0 2 0 3 0 0 9"</span>,
+    <span style="font-style: italic;">"0 0 5 0 1 0 3 0 0"</span>,
+)
+<span style="font-weight: bold; font-style: italic;">slow_puzzle</span> = (
+    <span style="font-style: italic;">"0 0 0 2 6 0 7 0 1"</span>,
+    <span style="font-style: italic;">"6 8 0 0 7 0 0 9 0"</span>,
+    <span style="font-style: italic;">"1 9 0 0 0 4 5 0 0"</span>,
+    <span style="font-style: italic;">"8 2 0 1 0 0 0 4 0"</span>,
+    <span style="font-style: italic;">"0 0 4 6 0 2 9 0 0"</span>,
+    <span style="font-style: italic;">"0 5 0 0 0 3 0 2 8"</span>,
+    <span style="font-style: italic;">"0 0 9 3 0 0 0 7 4"</span>,
+    <span style="font-style: italic;">"0 4 0 0 5 0 0 3 6"</span>,
+    <span style="font-style: italic;">"7 0 3 0 1 8 0 0 0"</span>
+)
+<span style="font-weight: bold; font-style: italic;">ridiculously_easy_puzzle</span> = (
+    <span style="font-style: italic;">"5 0 4 6 7 8 9 1 2"</span>,
+    <span style="font-style: italic;">"6 0 2 1 0 5 3 4 8"</span>,
+    <span style="font-style: italic;">"1 9 8 3 4 2 5 6 7"</span>,
+    <span style="font-style: italic;">"8 5 9 7 0 1 4 2 3"</span>,
+    <span style="font-style: italic;">"4 0 6 8 5 3 7 9 0"</span>,
+    <span style="font-style: italic;">"7 1 3 9 2 4 8 5 6"</span>,
+    <span style="font-style: italic;">"9 6 1 5 3 7 2 8 4"</span>,
+    <span style="font-style: italic;">"2 8 7 4 1 9 6 3 5"</span>,
+    <span style="font-style: italic;">"3 0 5 2 0 6 0 7 9"</span>,
+)
+<span style="font-weight: bold; font-style: italic;">result</span> = solve_sudoku(ridiculously_easy_puzzle)
+<span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9):
+    <span style="font-weight: bold;">print</span>(result[9*i: 9*i+9])
+
 </pre>
 </div>
 
+<div class="org-src-container">
+<pre class="src src-python">
+</pre>
+</div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">test</span> = [
-     <span style="font-style: italic;">"0 0 0 2 6 0 7 0 1"</span>,
-     <span style="font-style: italic;">"6 8 0 0 7 0 0 9 0"</span>,
-     <span style="font-style: italic;">"1 9 0 0 0 4 5 0 0"</span>,
-     <span style="font-style: italic;">"8 2 0 1 0 0 0 4 0"</span>,
-     <span style="font-style: italic;">"0 0 4 6 0 2 9 0 0"</span>,
-     <span style="font-style: italic;">"0 5 0 0 0 3 0 2 8"</span>,
-     <span style="font-style: italic;">"0 0 9 3 0 0 0 7 4"</span>,
-     <span style="font-style: italic;">"0 4 0 0 5 0 0 3 6"</span>,
-     <span style="font-style: italic;">"7 0 3 0 1 8 0 0 0"</span>
-]
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">expandLine</span>(line):
+    <span style="font-weight: bold;">return</span> line[0]+line[5:9].join([line[1:5]*(base-1)]*base)+line[9:13]
+<span style="font-weight: bold; font-style: italic;">line0</span>  = expandLine(<span style="font-style: italic;">"&#9556;&#9552;&#9552;&#9552;&#9572;&#9552;&#9552;&#9552;&#9574;&#9552;&#9552;&#9552;&#9559;"</span>)
+<span style="font-weight: bold; font-style: italic;">line1</span>  = expandLine(<span style="font-style: italic;">"&#9553; . &#9474; . &#9553; . &#9553;"</span>)
+<span style="font-weight: bold; font-style: italic;">line2</span>  = expandLine(<span style="font-style: italic;">"&#9567;&#9472;&#9472;&#9472;&#9532;&#9472;&#9472;&#9472;&#9579;&#9472;&#9472;&#9472;&#9570;"</span>)
+<span style="font-weight: bold; font-style: italic;">line3</span>  = expandLine(<span style="font-style: italic;">"&#9568;&#9552;&#9552;&#9552;&#9578;&#9552;&#9552;&#9552;&#9580;&#9552;&#9552;&#9552;&#9571;"</span>)
+<span style="font-weight: bold; font-style: italic;">line4</span>  = expandLine(<span style="font-style: italic;">"&#9562;&#9552;&#9552;&#9552;&#9575;&#9552;&#9552;&#9552;&#9577;&#9552;&#9552;&#9552;&#9565;"</span>)
+
+<span style="font-weight: bold; font-style: italic;">symbol</span> = <span style="font-style: italic;">" 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"</span>
+<span style="font-weight: bold; font-style: italic;">nums</span>   = [ [<span style="font-style: italic;">""</span>]+[symbol[n] <span style="font-weight: bold;">for</span> n <span style="font-weight: bold;">in</span> row] <span style="font-weight: bold;">for</span> row <span style="font-weight: bold;">in</span> board ]
+<span style="font-weight: bold;">print</span>(line0)
+<span style="font-weight: bold;">for</span> r <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(1,side+1):
+    <span style="font-weight: bold;">print</span>( <span style="font-style: italic;">""</span>.join(n+s <span style="font-weight: bold;">for</span> n,s <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">zip</span>(nums[r-1],line1.split(<span style="font-style: italic;">"."</span>))) )
+    <span style="font-weight: bold;">print</span>([line2,line3,line4][(r%side==0)+(r%base==0)])
 </pre>
 </div>
 </div>
 <div id="postamble" class="status">
+<p class="date">Date: 2022-06-09 Thu 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-06-09 Thu 09:28</p>
+<p class="date">Created: 2022-06-09 Thu 16:28</p>
 </div>
 </body>
 </html>

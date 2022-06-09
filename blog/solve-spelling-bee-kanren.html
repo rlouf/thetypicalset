@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-09 Thu 16:27 -->
+<!-- 2022-06-09 Thu 16:28 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Complexity is an issue for societies</title>
+<title>Solve the Spelling Bee with kanren</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -193,23 +193,45 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
-<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Complexity is an issue for societies</h1>
+<h1 class="title">Solve the Spelling Bee with kanren</h1>
 <p>
-"Enough rope to shoot yourself in the foot" as the book on C++ was titled. In many ways C++ is the computer software embodiement of unnecessary complexity: it does not perform better than C, it is more complex than higher-level languages and is complex enough that a <i>sublanguage was discored within C++</i>.
+The constraints are:
+</p>
+<ol class="org-ol">
+<li>Only 7 letters are allowed to write words of arbitrary lengths;</li>
+<li>One letter is compulsory</li>
+</ol>
+
+<p>
+We can find <a target='_blank' rel='noopener noreferrer' class='external' href="https://raw.githubusercontent.com/dwyl/english-words/master/words.txt">lists of english words online</a>. The file linked before is only 4Mb.
 </p>
 
-<div id="outline-container-orge346fbb" class="outline-2">
-<h2 id="orge346fbb">Links to this note</h2>
-<div class="outline-text-2" id="text-orge346fbb">
-<ul class="org-ul">
-<li><a href="./20220111193751-democracy_is_what_reduces_entropy.html">Democracy is what reduces entropy</a></li>
-</ul>
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> membero, fact, Relation
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Populate a dictionary (start with short words)</span>
+<span style="font-weight: bold; font-style: italic;">dictionary</span> = Relation(<span style="font-style: italic;">"dictionary"</span>)
+<span style="font-weight: bold;">for</span> word <span style="font-weight: bold;">in</span> dictionary:
+    fact(dictionary, word)
+
+<span style="font-weight: bold; font-style: italic;">word</span> = var()
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">spellingbeeo</span>(word):
+    <span style="font-weight: bold; font-style: italic;">letter_constraints</span> = [membero(letter, letters) <span style="font-weight: bold;">for</span> letter <span style="font-weight: bold;">in</span> word]
+    <span style="font-weight: bold; font-style: italic;">compulsory_letter_constraint</span> = membero(compulsory_letter, word)
+    <span style="font-weight: bold; font-style: italic;">dictionary_constraint</span> = dictionary(word)
+    <span style="font-weight: bold;">return</span> lall(dictionary_constraint, compulsory_letter_constraint, *letter_constraints)
+</pre>
 </div>
 </div>
+<div id="postamble" class="status">
+<p class="author">Author: Rémi Louf</p>
+<p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
+<p class="date">Created: 2022-06-09 Thu 16:28</p>
 </div>
 </body>
 </html>
