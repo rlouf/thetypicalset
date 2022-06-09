@@ -1,0 +1,24 @@
+#+TITLE: Solve the Spelling Bee with kanren
+
+The constraints are:
+1. Only 7 letters are allowed to write words of arbitrary lengths;
+1. One letter is compulsory
+
+We can find [[https://raw.githubusercontent.com/dwyl/english-words/master/words.txt][lists of english words online]]. The file linked before is only 4Mb.
+
+ #+begin_src python
+from kanren import membero, fact, Relation
+
+# Populate a dictionary (start with short words)
+dictionary = Relation("dictionary")
+for word in dictionary:
+    fact(dictionary, word)
+
+word = var()
+
+def spellingbeeo(word):
+    letter_constraints = [membero(letter, letters) for letter in word]
+    compulsory_letter_constraint = membero(compulsory_letter, word)
+    dictionary_constraint = dictionary(word)
+    return lall(dictionary_constraint, compulsory_letter_constraint, *letter_constraints)
+ #+end_src

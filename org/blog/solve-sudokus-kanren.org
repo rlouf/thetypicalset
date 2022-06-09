@@ -1,81 +1,152 @@
 #+TITLE: Solve sudokus with kanren
+#+DATE: <2022-06-09 Thu>
 
-I am reminded today of Peter Norvig's [[http://norvig.com/sudoku.html][blog post]] on solving every sudoku puzzle using constraint propagation and search.
+I am reminded today of Peter Norvig's [[http://norvig.com/sudoku.html][blog post]] on solving every sudoku puzzle using constraint propagation and search. In this essay we will revisit the problem using the python implementation of [[http://minikanren.org/][miniKanren]], [[https://github.com/pythological/kanren/][kanren]], a domain-specific language for logic programming.
 
-This should be realtively easy to implement in python using [[https://github.com/pythological/kanren][kanren]], since kanren does the heavy lifting for both these things.
+Peter's solution is /imperative/: we implement a series of procedures that will give us the missing values in a Sudoku puzzle. The /nature/ of the Sudoku, the rules, are hidden in this code. Here we will instead implement the rules of the Sudoku, i.e. the /relations/ that the units must respect and kanren will find the grids that respect these rules (given some hints) for us.
 
-We store the sudoku grid as a 81-element list. Since constraints are defines on rows, columns and squares we need to be able to extract those squares.
+In plain english, a sudoku puzzle is a 9x9 grids such that:
+- The rows are a permutation of the digits from 1 to 9;
+- The columns are a permutation of the digits from 1 to 9;
+- The squares are a permutation of the digits from 1 to 9;
 
-#+begin_src python :session :results silent
-from kanren import lall, permuteo
+Let us illustrate on a simple example:
 
+#+begin_src python :session :results output
+from kanren import run, permuteo, var
 
-def rows(grid):
-    """Return a grid's rows."""
-    column_idx = [[i + 9*j for j in range(9)] for i in range(9)]
-    return [[grid[i] for i in column] for column in columns_idx]
+NUMBERS = tuple(range(1, 10))
 
-
-def columns(grid):
-    """Return a grid's rows."""
-    row_idx = [[9*i+ j for j in range(9)] for i in range(9)]
-    return [[grid[i] for i in row] for row in row_idx]
-
-
-def squares(grid):
-    """Return a grid's squares."""
-    square_idx = [[9*i + j for i in a for j in b] for a in ((0, 1, 2), (3, 4, 5), (6, 7, 8)) for b in ((0, 1, 2), (3, 4, 5), (6, 7, 8))]
-    return [[grid[i] for i in square] for square in square_idx]
-
-
-def sudokuo(grid_expr):
-    """Express a goal that represents the relation between all sudoku grids.
-
-    A sudoku puzzle is said to be solved if every column, every row and every
-    square is a permutation of the digits from 1 to 9.
-    """
-    rows_permuteo = [permuteo(row, numbers) for row in rows(grid_expr)]
-    columns_permuteo = [permuteo(column, numbers) for column in columns(grid_expr)]
-    squares_permuteo = [permuteo(square, numbers) for square in squares(grid_expr)]
-
-    return lall(*row_constraints, *column_constraints, *square_constraints)
+row = (0, 0, 0, 1, 4, 0, 0, 9, 8)
+row_expr = tuple(r if r > 0 else var() for r in row)
+res = run(2, row_expr, permuteo(row_expr, NUMBERS))
 #+end_src
 
+#+RESULTS:
+: ((2, 3, 5, 1, 4, 6, 7, 9, 8), (2, 3, 5, 1, 4, 7, 6, 9, 8))
+
+We store the sudoku grid as a 81-element list. Since constraints are defines on rows, columns and squares we need to be able to extract those squares:
 
 #+begin_src python :session :results silent
-from kanren import permuteo, var, lall
+def get_rows(grid):
+    """Return a grid's rows."""
+    columns_idx = [[9 * i + j for j in range(9)] for i in range(9)]
+    return tuple(tuple(grid[i] for i in column) for column in columns_idx)
 
-numbers = (1, 2, 3, 4, 5, 6, 7, 8, 9)
 
+def get_columns(grid):
+    """Return a grid's columns."""
+    rows_idx = [[i + 9 * j for j in range(9)] for i in range(9)]
+    return tuple(tuple(grid[i] for i in row) for row in rows_idx)
+
+
+def get_squares(grid):
+    """Return a grid's squares."""
+    squares_idx = [
+        [9 * i + j for i in a for j in b]
+        for a in ((0, 1, 2), (3, 4, 5), (6, 7, 8))
+        for b in ((0, 1, 2), (3, 4, 5), (6, 7, 8))
+    ]
+    return tuple(tuple(grid[i] for i in square) for square in squares_idx)
+#+end_src
+
+We can now define the sudoku goal as the conjonction of permutation rule.
+
+#+begin_src python :session :resuls
+from kanren import permuteo, vars, lall, run
+
+def sudoku(grid):
+    """Define the Sudoku grid as a set on constraints on the rows, columns and squares.
+
+    Parameter
+    ---------
+    grid
+        A list that contains hints and logic variables ("unknown values").
+
+    """
+    rows = get_rows(grid)
+    columns = get_columns(grid)
+    squares = get_squares(grid)
+    return lall(
+        lall(*(permuteo(r, NUMBERS) for r in rows)),
+        lall(*(permuteo(c, NUMBERS) for c in columns)),
+        lall(*(permuteo(s, NUMBERS) for s in squares))
+    )
+#+end_src
+
+#+begin_src python :session :resuls
 def solve_sudoku(grid):
-
     # Flatten the grid
     grid_flat = [int(elem) for row in grid for elem in row.split(" ")]
     assert len(grid_flat) == 81
     assert max(grid_flat) == 9
 
-    grid_expr = [x if x > 0 else var() for row in grid_flat for x in row ]
+    grid_expr = tuple(val if val > 0 else var()  for val in grid_flat)
+    res = run(1, grid_expr, sudoku(grid_expr))
 
-    res = run(1, grid_expr, sudokuo)
-    try:
-        res = res[0]
-        grid_solved = [[res[9*i+j] for j in range(9)] for i in range(9)]
-        return grid_solved
-    except:
-        raise ValueError("Could not solve this sudoku grid")
+    return res[0]
+
+
+easy_puzzle = (
+    "0 0 3 0 2 0 6 0 0",
+    "9 0 0 3 0 5 0 0 1",
+    "0 0 1 8 0 6 4 0 0",
+    "0 0 8 1 0 2 9 0 0",
+    "7 0 0 0 0 0 0 0 8",
+    "0 0 6 7 0 8 2 0 0",
+    "0 0 2 6 0 9 5 0 0",
+    "8 0 0 2 0 3 0 0 9",
+    "0 0 5 0 1 0 3 0 0",
+)
+slow_puzzle = (
+    "0 0 0 2 6 0 7 0 1",
+    "6 8 0 0 7 0 0 9 0",
+    "1 9 0 0 0 4 5 0 0",
+    "8 2 0 1 0 0 0 4 0",
+    "0 0 4 6 0 2 9 0 0",
+    "0 5 0 0 0 3 0 2 8",
+    "0 0 9 3 0 0 0 7 4",
+    "0 4 0 0 5 0 0 3 6",
+    "7 0 3 0 1 8 0 0 0"
+)
+ridiculously_easy_puzzle = (
+    "5 0 4 6 7 8 9 1 2",
+    "6 0 2 1 0 5 3 4 8",
+    "1 9 8 3 4 2 5 6 7",
+    "8 5 9 7 0 1 4 2 3",
+    "4 0 6 8 5 3 7 9 0",
+    "7 1 3 9 2 4 8 5 6",
+    "9 6 1 5 3 7 2 8 4",
+    "2 8 7 4 1 9 6 3 5",
+    "3 0 5 2 0 6 0 7 9",
+)
+result = solve_sudoku(ridiculously_easy_puzzle)
+for i in range(9):
+    print(result[9*i: 9*i+9])
+
 #+end_src
+
+#+RESULTS:
 
 
 #+begin_src python :session
-test = [
-     "0 0 0 2 6 0 7 0 1",
-     "6 8 0 0 7 0 0 9 0",
-     "1 9 0 0 0 4 5 0 0",
-     "8 2 0 1 0 0 0 4 0",
-     "0 0 4 6 0 2 9 0 0",
-     "0 5 0 0 0 3 0 2 8",
-     "0 0 9 3 0 0 0 7 4",
-     "0 4 0 0 5 0 0 3 6",
-     "7 0 3 0 1 8 0 0 0"
-]
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session
+def expandLine(line):
+    return line[0]+line[5:9].join([line[1:5]*(base-1)]*base)+line[9:13]
+line0  = expandLine("╔═══╤═══╦═══╗")
+line1  = expandLine("║ . │ . ║ . ║")
+line2  = expandLine("╟───┼───╫───╢")
+line3  = expandLine("╠═══╪═══╬═══╣")
+line4  = expandLine("╚═══╧═══╩═══╝")
+
+symbol = " 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+nums   = [ [""]+[symbol[n] for n in row] for row in board ]
+print(line0)
+for r in range(1,side+1):
+    print( "".join(n+s for n,s in zip(nums[r-1],line1.split("."))) )
+    print([line2,line3,line4][(r%side==0)+(r%base==0)])
 #+end_src
