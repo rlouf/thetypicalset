@@ -1,0 +1,81 @@
+#+TITLE: Solve sudokus with kanren
+
+I am reminded today of Peter Norvig's [[http://norvig.com/sudoku.html][blog post]] on solving every sudoku puzzle using constraint propagation and search.
+
+This should be realtively easy to implement in python using [[https://github.com/pythological/kanren][kanren]], since kanren does the heavy lifting for both these things.
+
+We store the sudoku grid as a 81-element list. Since constraints are defines on rows, columns and squares we need to be able to extract those squares.
+
+#+begin_src python :session :results silent
+from kanren import lall, permuteo
+
+
+def rows(grid):
+    """Return a grid's rows."""
+    column_idx = [[i + 9*j for j in range(9)] for i in range(9)]
+    return [[grid[i] for i in column] for column in columns_idx]
+
+
+def columns(grid):
+    """Return a grid's rows."""
+    row_idx = [[9*i+ j for j in range(9)] for i in range(9)]
+    return [[grid[i] for i in row] for row in row_idx]
+
+
+def squares(grid):
+    """Return a grid's squares."""
+    square_idx = [[9*i + j for i in a for j in b] for a in ((0, 1, 2), (3, 4, 5), (6, 7, 8)) for b in ((0, 1, 2), (3, 4, 5), (6, 7, 8))]
+    return [[grid[i] for i in square] for square in square_idx]
+
+
+def sudokuo(grid_expr):
+    """Express a goal that represents the relation between all sudoku grids.
+
+    A sudoku puzzle is said to be solved if every column, every row and every
+    square is a permutation of the digits from 1 to 9.
+    """
+    rows_permuteo = [permuteo(row, numbers) for row in rows(grid_expr)]
+    columns_permuteo = [permuteo(column, numbers) for column in columns(grid_expr)]
+    squares_permuteo = [permuteo(square, numbers) for square in squares(grid_expr)]
+
+    return lall(*row_constraints, *column_constraints, *square_constraints)
+#+end_src
+
+
+#+begin_src python :session :results silent
+from kanren import permuteo, var, lall
+
+numbers = (1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+def solve_sudoku(grid):
+
+    # Flatten the grid
+    grid_flat = [int(elem) for row in grid for elem in row.split(" ")]
+    assert len(grid_flat) == 81
+    assert max(grid_flat) == 9
+
+    grid_expr = [x if x > 0 else var() for row in grid_flat for x in row ]
+
+    res = run(1, grid_expr, sudokuo)
+    try:
+        res = res[0]
+        grid_solved = [[res[9*i+j] for j in range(9)] for i in range(9)]
+        return grid_solved
+    except:
+        raise ValueError("Could not solve this sudoku grid")
+#+end_src
+
+
+#+begin_src python :session
+test = [
+     "0 0 0 2 6 0 7 0 1",
+     "6 8 0 0 7 0 0 9 0",
+     "1 9 0 0 0 4 5 0 0",
+     "8 2 0 1 0 0 0 4 0",
+     "0 0 4 6 0 2 9 0 0",
+     "0 5 0 0 0 3 0 2 8",
+     "0 0 9 3 0 0 0 7 4",
+     "0 4 0 0 5 0 0 3 6",
+     "7 0 3 0 1 8 0 0 0"
+]
+#+end_src
