@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-09 Thu 16:28 -->
+<!-- 2022-06-10 Fri 16:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Solve sudokus with kanren</title>
@@ -215,8 +215,11 @@ In plain english, a sudoku puzzle is a 9x9 grids such that:
 <li>The squares are a permutation of the digits from 1 to 9;</li>
 </ul>
 
+<div id="outline-container-orgc19e068" class="outline-2">
+<h2 id="orgc19e068">Solving sudoku vectors</h2>
+<div class="outline-text-2" id="text-orgc19e068">
 <p>
-Let us illustrate on a simple example:
+Luckily <code>kanren</code> provides the <code>permuteo</code> function which when applied to two arguments produces a goal that states that these two arguments must be a permutation of one another. Let us illustrate on a simple example, a one-dimensional version of the sudoku if you wish. We will provide <code>karen</code> with a tuple of hints, and asks in returns the tuples which are permutations of the digits from 1 to 9 given the hints.
 </p>
 
 <div class="org-src-container">
@@ -226,7 +229,8 @@ Let us illustrate on a simple example:
 
 <span style="font-weight: bold; font-style: italic;">row</span> = (0, 0, 0, 1, 4, 0, 0, 9, 8)
 <span style="font-weight: bold; font-style: italic;">row_expr</span> = <span style="font-weight: bold;">tuple</span>(r <span style="font-weight: bold;">if</span> r &gt; 0 <span style="font-weight: bold;">else</span> var() <span style="font-weight: bold;">for</span> r <span style="font-weight: bold;">in</span> row)
-<span style="font-weight: bold; font-style: italic;">res</span> = run(2, row_expr, permuteo(row_expr, NUMBERS))
+<span style="font-weight: bold; font-style: italic;">res</span> = run(2, row_expr, permuteo(row_expr, NUMBERS)) <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">we ask for two results satisfying the constraints</span>
+<span style="font-weight: bold;">print</span>(res)
 </pre>
 </div>
 
@@ -236,7 +240,16 @@ Let us illustrate on a simple example:
 
 
 <p>
-We store the sudoku grid as a 81-element list. Since constraints are defines on rows, columns and squares we need to be able to extract those squares:
+Once we have described the constraints that must be followed, <code>kanren</code> does all the heavy lifting and finds the values that respect these constraints. We will come back to how <code>kanren</code> does that later, but for now let us take it as granted as solve sudokus!
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8cde084" class="outline-2">
+<h2 id="org8cde084">Solving sudoku grids</h2>
+<div class="outline-text-2" id="text-org8cde084">
+<p>
+We store the sudoku grid as a 81-element list. Since constraints are defined on rows, columns and squares we need to be able to extract those units from a grid:
 </p>
 
 <div class="org-src-container">
@@ -264,7 +277,7 @@ We store the sudoku grid as a 81-element list. Since constraints are defines on 
 </div>
 
 <p>
-We can now define the sudoku goal as the conjonction of permutation rule.
+We can now define the sudoku goal as the conjonction of permutation rule:
 </p>
 
 <div class="org-src-container">
@@ -287,8 +300,13 @@ We can now define the sudoku goal as the conjonction of permutation rule.
         lall(*(permuteo(c, NUMBERS) <span style="font-weight: bold;">for</span> c <span style="font-weight: bold;">in</span> columns)),
         lall(*(permuteo(s, NUMBERS) <span style="font-weight: bold;">for</span> s <span style="font-weight: bold;">in</span> squares))
     )
+
 </pre>
 </div>
+
+<p>
+And now theoretically solve any sudoku:
+</p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">solve_sudoku</span>(grid):
@@ -301,32 +319,16 @@ We can now define the sudoku goal as the conjonction of permutation rule.
     <span style="font-weight: bold; font-style: italic;">res</span> = run(1, grid_expr, sudoku(grid_expr))
 
     <span style="font-weight: bold;">return</span> res[0]
+</pre>
+</div>
 
+<p>
+So far so good. <code>kanren</code> does all the heavy lifting for us, so our solution is more expressive than Peter's. Let us make sure that to solve a trivially easy problems where only a few values are missing:
+</p>
 
-<span style="font-weight: bold; font-style: italic;">easy_puzzle</span> = (
-    <span style="font-style: italic;">"0 0 3 0 2 0 6 0 0"</span>,
-    <span style="font-style: italic;">"9 0 0 3 0 5 0 0 1"</span>,
-    <span style="font-style: italic;">"0 0 1 8 0 6 4 0 0"</span>,
-    <span style="font-style: italic;">"0 0 8 1 0 2 9 0 0"</span>,
-    <span style="font-style: italic;">"7 0 0 0 0 0 0 0 8"</span>,
-    <span style="font-style: italic;">"0 0 6 7 0 8 2 0 0"</span>,
-    <span style="font-style: italic;">"0 0 2 6 0 9 5 0 0"</span>,
-    <span style="font-style: italic;">"8 0 0 2 0 3 0 0 9"</span>,
-    <span style="font-style: italic;">"0 0 5 0 1 0 3 0 0"</span>,
-)
-<span style="font-weight: bold; font-style: italic;">slow_puzzle</span> = (
-    <span style="font-style: italic;">"0 0 0 2 6 0 7 0 1"</span>,
-    <span style="font-style: italic;">"6 8 0 0 7 0 0 9 0"</span>,
-    <span style="font-style: italic;">"1 9 0 0 0 4 5 0 0"</span>,
-    <span style="font-style: italic;">"8 2 0 1 0 0 0 4 0"</span>,
-    <span style="font-style: italic;">"0 0 4 6 0 2 9 0 0"</span>,
-    <span style="font-style: italic;">"0 5 0 0 0 3 0 2 8"</span>,
-    <span style="font-style: italic;">"0 0 9 3 0 0 0 7 4"</span>,
-    <span style="font-style: italic;">"0 4 0 0 5 0 0 3 6"</span>,
-    <span style="font-style: italic;">"7 0 3 0 1 8 0 0 0"</span>
-)
-<span style="font-weight: bold; font-style: italic;">ridiculously_easy_puzzle</span> = (
-    <span style="font-style: italic;">"5 0 4 6 7 8 9 1 2"</span>,
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">ridiculously_easy_puzzle</span> = (
+    <span style="font-style: italic;">"5 0 4 6 7 8 0 1 2"</span>,
     <span style="font-style: italic;">"6 0 2 1 0 5 3 4 8"</span>,
     <span style="font-style: italic;">"1 9 8 3 4 2 5 6 7"</span>,
     <span style="font-style: italic;">"8 5 9 7 0 1 4 2 3"</span>,
@@ -339,38 +341,63 @@ We can now define the sudoku goal as the conjonction of permutation rule.
 <span style="font-weight: bold; font-style: italic;">result</span> = solve_sudoku(ridiculously_easy_puzzle)
 <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9):
     <span style="font-weight: bold;">print</span>(result[9*i: 9*i+9])
-
 </pre>
 </div>
 
+<pre class="example">
+(5, 3, 4, 6, 7, 8, 9, 1, 2)
+(6, 7, 2, 1, 9, 5, 3, 4, 8)
+(1, 9, 8, 3, 4, 2, 5, 6, 7)
+(8, 5, 9, 7, 6, 1, 4, 2, 3)
+(4, 2, 6, 8, 5, 3, 7, 9, 1)
+(7, 1, 3, 9, 2, 4, 8, 5, 6)
+(9, 6, 1, 5, 3, 7, 2, 8, 4)
+(2, 8, 7, 4, 1, 9, 6, 3, 5)
+(3, 4, 5, 2, 8, 6, 1, 7, 9)
+</pre>
+
+
+
+<p>
+But the computation hangs on the following (supposedly easy) problem:
+</p>
+
 <div class="org-src-container">
-<pre class="src src-python">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">easy_puzzle</span> = (
+    <span style="font-style: italic;">"0 0 3 0 2 0 6 0 0"</span>,
+    <span style="font-style: italic;">"9 0 0 3 0 5 0 0 1"</span>,
+    <span style="font-style: italic;">"0 0 1 8 0 6 4 0 0"</span>,
+    <span style="font-style: italic;">"0 0 8 1 0 2 9 0 0"</span>,
+    <span style="font-style: italic;">"7 0 0 0 0 0 0 0 8"</span>,
+    <span style="font-style: italic;">"0 0 6 7 0 8 2 0 0"</span>,
+    <span style="font-style: italic;">"0 0 2 6 0 9 5 0 0"</span>,
+    <span style="font-style: italic;">"8 0 0 2 0 3 0 0 9"</span>,
+    <span style="font-style: italic;">"0 0 5 0 1 0 3 0 0"</span>,
+)
+<span style="font-weight: bold; font-style: italic;">result</span> = solve_sudoku(ridiculously_easy_puzzle)
+<span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(9):
+    <span style="font-weight: bold;">print</span>(result[9*i: 9*i+9])
 </pre>
 </div>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">expandLine</span>(line):
-    <span style="font-weight: bold;">return</span> line[0]+line[5:9].join([line[1:5]*(base-1)]*base)+line[9:13]
-<span style="font-weight: bold; font-style: italic;">line0</span>  = expandLine(<span style="font-style: italic;">"&#9556;&#9552;&#9552;&#9552;&#9572;&#9552;&#9552;&#9552;&#9574;&#9552;&#9552;&#9552;&#9559;"</span>)
-<span style="font-weight: bold; font-style: italic;">line1</span>  = expandLine(<span style="font-style: italic;">"&#9553; . &#9474; . &#9553; . &#9553;"</span>)
-<span style="font-weight: bold; font-style: italic;">line2</span>  = expandLine(<span style="font-style: italic;">"&#9567;&#9472;&#9472;&#9472;&#9532;&#9472;&#9472;&#9472;&#9579;&#9472;&#9472;&#9472;&#9570;"</span>)
-<span style="font-weight: bold; font-style: italic;">line3</span>  = expandLine(<span style="font-style: italic;">"&#9568;&#9552;&#9552;&#9552;&#9578;&#9552;&#9552;&#9552;&#9580;&#9552;&#9552;&#9552;&#9571;"</span>)
-<span style="font-weight: bold; font-style: italic;">line4</span>  = expandLine(<span style="font-style: italic;">"&#9562;&#9552;&#9552;&#9552;&#9575;&#9552;&#9552;&#9552;&#9577;&#9552;&#9552;&#9552;&#9565;"</span>)
+<p>
+To understand why Peter's solution is orders of magnitude faster than kanren's search we need to understand how they differ.
+</p>
+</div>
+</div>
 
-<span style="font-weight: bold; font-style: italic;">symbol</span> = <span style="font-style: italic;">" 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"</span>
-<span style="font-weight: bold; font-style: italic;">nums</span>   = [ [<span style="font-style: italic;">""</span>]+[symbol[n] <span style="font-weight: bold;">for</span> n <span style="font-weight: bold;">in</span> row] <span style="font-weight: bold;">for</span> row <span style="font-weight: bold;">in</span> board ]
-<span style="font-weight: bold;">print</span>(line0)
-<span style="font-weight: bold;">for</span> r <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(1,side+1):
-    <span style="font-weight: bold;">print</span>( <span style="font-style: italic;">""</span>.join(n+s <span style="font-weight: bold;">for</span> n,s <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">zip</span>(nums[r-1],line1.split(<span style="font-style: italic;">"."</span>))) )
-    <span style="font-weight: bold;">print</span>([line2,line3,line4][(r%side==0)+(r%base==0)])
-</pre>
+<div id="outline-container-orgb1d55a3" class="outline-2">
+<h2 id="orgb1d55a3">How Peter's solution works</h2>
+</div>
+<div id="outline-container-orge91af30" class="outline-2">
+<h2 id="orge91af30">How kanren's search works</h2>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2022-06-09 Thu 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-06-09 Thu 16:28</p>
+<p class="date">Created: 2022-06-10 Fri 16:21</p>
 </div>
 </body>
 </html>
