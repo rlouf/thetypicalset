@@ -10,7 +10,9 @@ In plain english, a sudoku puzzle is a 9x9 grids such that:
 - The columns are a permutation of the digits from 1 to 9;
 - The squares are a permutation of the digits from 1 to 9;
 
-Let us illustrate on a simple example:
+* Solving sudoku vectors
+
+Luckily =kanren= provides the =permuteo= function which when applied to two arguments produces a goal that states that these two arguments must be a permutation of one another. Let us illustrate on a simple example, a one-dimensional version of the sudoku if you wish. We will provide =karen= with a tuple of hints, and asks in returns the tuples which are permutations of the digits from 1 to 9 given the hints.
 
 #+begin_src python :session :results output
 from kanren import run, permuteo, var
@@ -19,13 +21,18 @@ NUMBERS = tuple(range(1, 10))
 
 row = (0, 0, 0, 1, 4, 0, 0, 9, 8)
 row_expr = tuple(r if r > 0 else var() for r in row)
-res = run(2, row_expr, permuteo(row_expr, NUMBERS))
+res = run(2, row_expr, permuteo(row_expr, NUMBERS)) # we ask for two results satisfying the constraints
+print(res)
 #+end_src
 
 #+RESULTS:
 : ((2, 3, 5, 1, 4, 6, 7, 9, 8), (2, 3, 5, 1, 4, 7, 6, 9, 8))
 
-We store the sudoku grid as a 81-element list. Since constraints are defines on rows, columns and squares we need to be able to extract those squares:
+Once we have described the constraints that must be followed, =kanren= does all the heavy lifting and finds the values that respect these constraints. We will come back to how =kanren= does that later, but for now let us take it as granted as solve sudokus!
+
+* Solving sudoku grids
+
+We store the sudoku grid as a 81-element list. Since constraints are defined on rows, columns and squares we need to be able to extract those units from a grid:
 
 #+begin_src python :session :results silent
 def get_rows(grid):
@@ -50,7 +57,7 @@ def get_squares(grid):
     return tuple(tuple(grid[i] for i in square) for square in squares_idx)
 #+end_src
 
-We can now define the sudoku goal as the conjonction of permutation rule.
+We can now define the sudoku goal as the conjonction of permutation rule:
 
 #+begin_src python :session :resuls
 from kanren import permuteo, vars, lall, run
@@ -72,7 +79,10 @@ def sudoku(grid):
         lall(*(permuteo(c, NUMBERS) for c in columns)),
         lall(*(permuteo(s, NUMBERS) for s in squares))
     )
+
 #+end_src
+
+And now theoretically solve any sudoku:
 
 #+begin_src python :session :resuls
 def solve_sudoku(grid):
@@ -85,32 +95,13 @@ def solve_sudoku(grid):
     res = run(1, grid_expr, sudoku(grid_expr))
 
     return res[0]
+#+end_src
 
+So far so good. =kanren= does all the heavy lifting for us, so our solution is more expressive than Peter's. Let us make sure that to solve a trivially easy problems where only a few values are missing:
 
-easy_puzzle = (
-    "0 0 3 0 2 0 6 0 0",
-    "9 0 0 3 0 5 0 0 1",
-    "0 0 1 8 0 6 4 0 0",
-    "0 0 8 1 0 2 9 0 0",
-    "7 0 0 0 0 0 0 0 8",
-    "0 0 6 7 0 8 2 0 0",
-    "0 0 2 6 0 9 5 0 0",
-    "8 0 0 2 0 3 0 0 9",
-    "0 0 5 0 1 0 3 0 0",
-)
-slow_puzzle = (
-    "0 0 0 2 6 0 7 0 1",
-    "6 8 0 0 7 0 0 9 0",
-    "1 9 0 0 0 4 5 0 0",
-    "8 2 0 1 0 0 0 4 0",
-    "0 0 4 6 0 2 9 0 0",
-    "0 5 0 0 0 3 0 2 8",
-    "0 0 9 3 0 0 0 7 4",
-    "0 4 0 0 5 0 0 3 6",
-    "7 0 3 0 1 8 0 0 0"
-)
+#+begin_src python :session :results output
 ridiculously_easy_puzzle = (
-    "5 0 4 6 7 8 9 1 2",
+    "5 0 4 6 7 8 0 1 2",
     "6 0 2 1 0 5 3 4 8",
     "1 9 8 3 4 2 5 6 7",
     "8 5 9 7 0 1 4 2 3",
@@ -123,30 +114,40 @@ ridiculously_easy_puzzle = (
 result = solve_sudoku(ridiculously_easy_puzzle)
 for i in range(9):
     print(result[9*i: 9*i+9])
-
 #+end_src
 
 #+RESULTS:
+: (5, 3, 4, 6, 7, 8, 9, 1, 2)
+: (6, 7, 2, 1, 9, 5, 3, 4, 8)
+: (1, 9, 8, 3, 4, 2, 5, 6, 7)
+: (8, 5, 9, 7, 6, 1, 4, 2, 3)
+: (4, 2, 6, 8, 5, 3, 7, 9, 1)
+: (7, 1, 3, 9, 2, 4, 8, 5, 6)
+: (9, 6, 1, 5, 3, 7, 2, 8, 4)
+: (2, 8, 7, 4, 1, 9, 6, 3, 5)
+: (3, 4, 5, 2, 8, 6, 1, 7, 9)
 
+
+But the computation hangs on the following (supposedly easy) problem:
 
 #+begin_src python :session
+easy_puzzle = (
+    "0 0 3 0 2 0 6 0 0",
+    "9 0 0 3 0 5 0 0 1",
+    "0 0 1 8 0 6 4 0 0",
+    "0 0 8 1 0 2 9 0 0",
+    "7 0 0 0 0 0 0 0 8",
+    "0 0 6 7 0 8 2 0 0",
+    "0 0 2 6 0 9 5 0 0",
+    "8 0 0 2 0 3 0 0 9",
+    "0 0 5 0 1 0 3 0 0",
+)
+result = solve_sudoku(easy_puzzle)
+for i in range(9):
+    print(result[9*i: 9*i+9])
 #+end_src
 
-#+RESULTS:
+To understand why Peter's solution is orders of magnitude faster than kanren's search we need to understand how they differ.
 
-#+begin_src python :session
-def expandLine(line):
-    return line[0]+line[5:9].join([line[1:5]*(base-1)]*base)+line[9:13]
-line0  = expandLine("╔═══╤═══╦═══╗")
-line1  = expandLine("║ . │ . ║ . ║")
-line2  = expandLine("╟───┼───╫───╢")
-line3  = expandLine("╠═══╪═══╬═══╣")
-line4  = expandLine("╚═══╧═══╩═══╝")
-
-symbol = " 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-nums   = [ [""]+[symbol[n] for n in row] for row in board ]
-print(line0)
-for r in range(1,side+1):
-    print( "".join(n+s for n,s in zip(nums[r-1],line1.split("."))) )
-    print([line2,line3,line4][(r%side==0)+(r%base==0)])
-#+end_src
+* How Peter's solution works
+* How kanren's search works
