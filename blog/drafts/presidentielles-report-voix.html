@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-13 Mon 10:55 -->
+<!-- 2022-06-13 Mon 10:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sample functions from a Gaussian Process</title>
+<title>Estimer le report des voix aux présidentielles</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,18 +197,66 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Sample functions from a Gaussian Process</h1>
+<h1 class="title">Estimer le report des voix aux présidentielles</h1>
 <p>
-See this blog post that shows and <a target='_blank' rel='noopener noreferrer' class='external' href="https://sml-group.cc/blog/2020-gp-sampling/">efficient approximation</a>.
+Cet article fait suite au <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb">travail de Laurent Perrinet</a> sur les reports de voix entre le premier et le deuxième tour des élections présidentielles en 2022. La démarche de ce travail est intéressante (et autant que je sache originale) : elle consiste à prendre les résultats des élections au niveau des bureaux de vote aux deux tours, et essayer d'estimer une matrice de transition i.e. la probabilité que quelqu'un ayant voté pour X (par exemple Fabien Roussel) vote pour Y (par exemple Marine Le Pen) au second tour.
 </p>
 
-<div id="outline-container-org7093470" class="outline-2">
-<h2 id="org7093470">Links to this note</h2>
-<div class="outline-text-2" id="text-org7093470">
-<ul class="org-ul">
-<li><a href="./20211125173010-gaussian_process.html">Gaussian process</a></li>
-</ul>
+<p>
+Le modèle utilisé est déterministe. Il est implémenté avec PyTorch:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> torch
+<span style="font-weight: bold;">from</span> torch.utils.data <span style="font-weight: bold;">import</span> TensorDataset, DataLoader, random_split
+<span style="font-weight: bold;">import</span> torch.nn.functional <span style="font-weight: bold;">as</span> F
+
+torch.set_default_tensor_type(<span style="font-style: italic;">"torch.FloatTensor"</span>)
+
+<span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">TransfertVoix</span>(torch.nn.Module):
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__init__</span>(<span style="font-weight: bold;">self</span>, N_1er, N_2eme):<span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">, device=None):</span>
+        <span style="font-weight: bold;">super</span>(TransfertVoix, <span style="font-weight: bold;">self</span>).__init__()
+        <span style="font-weight: bold;">self</span>.lin = torch.nn.Linear(N_2eme, N_1er, bias=<span style="font-weight: bold; text-decoration: underline;">False</span>)
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">forward</span>(<span style="font-weight: bold;">self</span>, p_1):
+        <span style="font-weight: bold; font-style: italic;">M</span> = torch.softmax(<span style="font-weight: bold;">self</span>.lin.weight, axis=1)
+        <span style="font-weight: bold; font-style: italic;">p_2_pred</span> = torch.matmul(p_1, M)
+        <span style="font-weight: bold;">return</span> p_2_pred
+</pre>
 </div>
+
+<p>
+A première lecture des résultats et au vu du modèle ci-dessus plusieurs pistes d'amélioration me viennent en tête:
+</p>
+<ol class="org-ol">
+<li>L'auteur montre les corrélations entre le vote Mélenchon au premier tour, et celui de Macron au second tour. Les distributions marginales sont très étalées. Je m'attend à une variabilité encore plus grande pour les candidats avec un score moindre. Cette variabilité peut avoir un effet non-négligeable sur les résultats; je suis par exemple surpris des forts reports vers Le Pen calculés pour Arthaud, Poutou et Roussel. Ce n'est pas à exclure, certes, mais je pense que l'on bénéficierait d'une approche bayésienne et bénéficier d'une marge d'erreur sur ces résultats;</li>
+<li>L'hypothèse d'un report uniforme sur tout le territoire me parait également osée. On devrait envisager un modèle hiérarchique;</li>
+<li>Les sondages de sortie d'urne peuvent servir pour définir le prior (hyperprior dans le cas d'un modèle hiérarchique).</li>
+</ol>
+
+
+<div id="outline-container-orgc65b801" class="outline-2">
+<h2 id="orgc65b801">Les données</h2>
+<div class="outline-text-2" id="text-orgc65b801">
+<p>
+On se placera ici à l'échelle de la circonscription législative. Le découpage à l'échelle du bureau de vote est intéressant, mais le but implicite de cette étude est de donner une idée des reports de voix pour le second tour des législatives 2022.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbae8a83" class="outline-2">
+<h2 id="orgbae8a83">Modèle simple: une matrice de transition pour toute la France</h2>
+</div>
+
+
+<div id="outline-container-org964a3a1" class="outline-2">
+<h2 id="org964a3a1"><span class="todo TODO">TODO</span> Rappeler les résultats des deux tours</h2>
+</div>
+<div id="outline-container-orgbb05ceb" class="outline-2">
+<h2 id="orgbb05ceb"><span class="todo TODO">TODO</span> Montrer les courbes Vote X premier tour vs vote Y second tour (and show distributions)</h2>
+</div>
+<div id="outline-container-org02e37e6" class="outline-2">
+<h2 id="org02e37e6">TODO</h2>
 </div>
 </div>
 </body>
