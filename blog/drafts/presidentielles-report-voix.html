@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-13 Mon 10:54 -->
+<!-- 2022-06-13 Mon 16:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Estimer le report des voix aux présidentielles</title>
@@ -234,29 +234,305 @@ A première lecture des résultats et au vu du modèle ci-dessus plusieurs piste
 <li>Les sondages de sortie d'urne peuvent servir pour définir le prior (hyperprior dans le cas d'un modèle hiérarchique).</li>
 </ol>
 
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> os
+<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<span style="font-weight: bold;">import</span> pandas <span style="font-weight: bold;">as</span> pd
+</pre>
+</div>
 
-<div id="outline-container-orgc65b801" class="outline-2">
-<h2 id="orgc65b801">Les données</h2>
-<div class="outline-text-2" id="text-orgc65b801">
+<div id="outline-container-org959c367" class="outline-2">
+<h2 id="org959c367">Les données</h2>
+<div class="outline-text-2" id="text-org959c367">
 <p>
-On se placera ici à l'échelle de la circonscription législative. Le découpage à l'échelle du bureau de vote est intéressant, mais le but implicite de cette étude est de donner une idée des reports de voix pour le second tour des législatives 2022.
+On se placera ici à l'échelle de la circonscription législative. Le découpage à l'échelle du bureau de vote est intéressant, mais le but implicite de cette étude est de donner une idée des reports de voix pour le second tour des législatives 2022. J'utilise ici le code de <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb">Laurent Perrinet</a> en le modifiant (les erreurs éventuelles sont de mon fait).
+</p>
+</div>
+
+<div id="outline-container-orgeee9d3f" class="outline-3">
+<h3 id="orgeee9d3f">Premier tour</h3>
+<div class="outline-text-3" id="text-orgeee9d3f">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">'/tmp/T1.xlsx'</span>
+
+<span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> os.path.isfile(fname):
+    <span style="font-weight: bold; font-style: italic;">url</span> = <span style="font-style: italic;">"https://www.data.gouv.fr/fr/datasets/r/1a35594a-99f2-4257-87e0-ec2f55039276"</span>
+    <span style="font-weight: bold;">import</span> urllib.request
+    urllib.request.urlretrieve(url, fname)
+
+<span style="font-weight: bold; font-style: italic;">T1</span> = pd.read_excel(fname)
+</pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-python">T1.tail()
+</pre>
+</div>
+
+<pre class="example">
+    Code du département           Libellé du département  Code de la circonscription Libellé de la circonscription Etat saisie  Inscrits  Abstentions  % Abs/Ins  Votants  % Vot/Ins  Blancs  % Blancs/Ins  % Blancs/Vot  Nuls  ...  Unnamed: 89  Unnamed: 90  Unnamed: 91  Unnamed: 92  Unnamed: 93  Unnamed: 94 Unnamed: 95 Unnamed: 96 Unnamed: 97    Unnamed: 98  Unnamed: 99  Unnamed: 100  Unnamed: 101 Unnamed: 102
+572                  ZZ  Français établis hors de France                           7          7ème circonscription     Complet    122158        69559      56.94    52599      43.06     247          0.20          0.47   208  ...           11            M       POUTOU     Philippe          349         0.29        0.67          12           M  DUPONT-AIGNAN      Nicolas           639          0.52         1.23
+573                  ZZ  Français établis hors de France                           8          8ème circonscription     Complet    130065       106455      81.85    23610      18.15     150          0.12          0.64   109  ...           11            M       POUTOU     Philippe          133         0.10        0.57          12           M  DUPONT-AIGNAN      Nicolas           300          0.23         1.28
+574                  ZZ  Français établis hors de France                           9          9ème circonscription     Complet    121122        81344      67.16    39778      32.84     298          0.25          0.75   178  ...           11            M       POUTOU     Philippe          135         0.11        0.34          12           M  DUPONT-AIGNAN      Nicolas           381          0.31         0.97
+575                  ZZ  Français établis hors de France                          10         10ème circonscription     Complet    103910        63575      61.18    40335      38.82     365          0.35          0.90   191  ...           11            M       POUTOU     Philippe          163         0.16        0.41          12           M  DUPONT-AIGNAN      Nicolas           530          0.51         1.33
+576                  ZZ  Français établis hors de France                          11         11ème circonscription     Complet     98784        60615      61.36    38169      38.64     309          0.31          0.81   172  ...           11            M       POUTOU     Philippe          197         0.20        0.52          12           M  DUPONT-AIGNAN      Nicolas           595          0.60         1.58
+
+[5 rows x 103 columns]
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">df_1</span> = T1[[<span style="font-style: italic;">'Nuls'</span>, <span style="font-style: italic;">'Blancs'</span>, <span style="font-style: italic;">'Abstentions'</span>]].copy()
+<span style="font-weight: bold; font-style: italic;">T1</span>[<span style="font-style: italic;">'Code de la circonscription'</span>] = T1[<span style="font-style: italic;">'Code de la circonscription'</span>].<span style="font-weight: bold;">apply</span>(<span style="font-weight: bold;">str</span>)
+<span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">df_1['circonscription'] = T1['Code du d&#233;partement'] + T1['Code de la circonscription']</span>
+df_1.head()
+</pre>
+</div>
+
+<pre class="example">
+   Nuls  Blancs  Abstentions
+0   393    1154        18592
+1   352    1367        19917
+2   290     851        20440
+3   474    1299        19826
+4   394     970        18766
+</pre>
+
+
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">col_start</span> = 21
+<span style="font-weight: bold; font-style: italic;">col_par_cdt</span> = 7
+<span style="font-weight: bold; font-style: italic;">candidats</span> = T1.iloc[0][col_start::col_par_cdt]
+
+<span style="font-weight: bold;">for</span> i_candidat, candidat <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(candidats):
+    <span style="font-weight: bold; font-style: italic;">i_col</span> = col_start + i_candidat*col_par_cdt + 2
+    <span style="font-weight: bold;">print</span>(<span style="font-style: italic;">'# colonne'</span>, i_col, <span style="font-style: italic;">' r&#233;sultats='</span>, T1.iloc[:, i_col].values)
+    <span style="font-weight: bold; font-style: italic;">df_1</span>[candidat] = T1.iloc[:, i_col].values
+</pre>
+</div>
+
+
+<p>
+Let's check the results by plotting the distribution of votes:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> matplotlib.pyplot <span style="font-weight: bold;">as</span> plt
+
+<span style="font-weight: bold; font-style: italic;">fig</span>, <span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplots(figsize=(13, 5))
+<span style="font-weight: bold; font-style: italic;">k</span> = df_1.<span style="font-weight: bold;">sum</span>()/df_1.<span style="font-weight: bold;">sum</span>().<span style="font-weight: bold;">sum</span>()
+<span style="font-weight: bold; font-style: italic;">ax</span> = k.plot.bar(ax=ax)
+ax.set_xlabel(<span style="font-style: italic;">'Choix 1er tour'</span>)
+ax.set_ylabel(<span style="font-style: italic;">'Pourcentage'</span>);
+plt.savefig(filename, bbox_inches=<span style="font-style: italic;">"tight"</span>)
+filename
+</pre>
+</div>
+
+
+
+<div id="org545a9ba" class="figure">
+<p><img src="file:///tmp/babel-Xpsl3Y/figurec0y50O.png" alt="figurec0y50O.png" />
 </p>
 </div>
 </div>
+</div>
 
-<div id="outline-container-orgbae8a83" class="outline-2">
-<h2 id="orgbae8a83">Modèle simple: une matrice de transition pour toute la France</h2>
+<div id="outline-container-org3467b07" class="outline-3">
+<h3 id="org3467b07">Deuxième tour</h3>
+<div class="outline-text-3" id="text-org3467b07">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">'/tmp/T2.xlsx'</span>
+
+<span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> os.path.isfile(fname):
+    <span style="font-weight: bold; font-style: italic;">url</span> = <span style="font-style: italic;">"https://www.data.gouv.fr/fr/datasets/r/5eacdbc7-b1a2-440c-8eef-09c8bfb87609"</span>
+    <span style="font-weight: bold;">import</span> urllib.request
+    urllib.request.urlretrieve(url, fname)
+
+<span style="font-weight: bold; font-style: italic;">T2</span> = pd.read_excel(fname)
+</pre>
 </div>
 
 
-<div id="outline-container-org964a3a1" class="outline-2">
-<h2 id="org964a3a1"><span class="todo TODO">TODO</span> Rappeler les résultats des deux tours</h2>
+<div class="org-src-container">
+<pre class="src src-python">T2.tail()
+</pre>
 </div>
-<div id="outline-container-orgbb05ceb" class="outline-2">
-<h2 id="orgbb05ceb"><span class="todo TODO">TODO</span> Montrer les courbes Vote X premier tour vs vote Y second tour (and show distributions)</h2>
+
+<pre class="example">
+    Code du département           Libellé du département  Code de la circonscription Libellé de la circonscription Etat saisie  Inscrits  Abstentions  % Abs/Ins  Votants  % Vot/Ins  Blancs  % Blancs/Ins  % Blancs/Vot  Nuls  % Nuls/Ins  % Nuls/Vot  ...  % Exp/Ins  % Exp/Vot  N°Panneau  Sexe     Nom    Prénom   Voix  % Voix/Ins  % Voix/Exp  Unnamed: 26  Unnamed: 27 Unnamed: 28 Unnamed: 29 Unnamed: 30  Unnamed: 31  Unnamed: 32
+572                  ZZ  Français établis hors de France                           7          7ème circonscription     Complet    122145        62433      51.11    59712      48.89    1257          1.03          2.11   299        0.24        0.50  ...      47.61      97.39          1     M  MACRON  Emmanuel  53169       43.53       91.42            2            F      LE PEN      Marine        4987         4.08         8.58
+573                  ZZ  Français établis hors de France                           8          8ème circonscription     Complet    130068       105245      80.92    24823      19.08     775          0.60          3.12   188        0.14        0.76  ...      18.34      96.12          1     M  MACRON  Emmanuel  20515       15.77       85.98            2            F      LE PEN      Marine        3345         2.57        14.02
+574                  ZZ  Français établis hors de France                           9          9ème circonscription     Complet    121013        81608      67.44    39405      32.56    1497          1.24          3.80   342        0.28        0.87  ...      31.04      95.33          1     M  MACRON  Emmanuel  32578       26.92       86.72            2            F      LE PEN      Marine        4988         4.12        13.28
+575                  ZZ  Français établis hors de France                          10         10ème circonscription     Complet    104829        63530      60.60    41299      39.40    1326          1.26          3.21   325        0.31        0.79  ...      37.82      96.00          1     M  MACRON  Emmanuel  31563       30.11       79.61            2            F      LE PEN      Marine        8085         7.71        20.39
+576                  ZZ  Français établis hors de France                          11         11ème circonscription     Complet     98707        58675      59.44    40032      40.56    1358          1.38          3.39   291        0.29        0.73  ...      38.89      95.88          1     M  MACRON  Emmanuel  31137       31.54       81.12            2            F      LE PEN      Marine        7246         7.34        18.88
+
+[5 rows x 33 columns]
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">df_2</span> = T2[[<span style="font-style: italic;">'Nuls'</span>, <span style="font-style: italic;">'Blancs'</span>, <span style="font-style: italic;">'Abstentions'</span>]].copy()
+<span style="font-weight: bold; font-style: italic;">T2</span>[<span style="font-style: italic;">'Code de la circonscription'</span>] = T2[<span style="font-style: italic;">'Code de la circonscription'</span>].<span style="font-weight: bold;">apply</span>(<span style="font-weight: bold;">str</span>)
+<span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">df_1['circonscription'] = T1['Code du d&#233;partement'] + T1['Code de la circonscription']</span>
+df_2.head()
+</pre>
 </div>
-<div id="outline-container-org02e37e6" class="outline-2">
-<h2 id="org02e37e6">TODO</h2>
+
+<pre class="example">
+   Nuls  Blancs  Abstentions
+0  1229    4020        20298
+1  1189    4430        23236
+2   880    3478        23138
+3  1324    4082        21870
+4  1253    3792        21026
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">col_start</span> = 21
+<span style="font-weight: bold; font-style: italic;">col_par_cdt</span> = 7
+<span style="font-weight: bold; font-style: italic;">candidats</span> = T2.iloc[0][col_start::col_par_cdt]
+
+<span style="font-weight: bold;">for</span> i_candidat, candidat <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(candidats):
+    <span style="font-weight: bold; font-style: italic;">i_col</span> = col_start + i_candidat*col_par_cdt + 2
+    <span style="font-weight: bold;">print</span>(<span style="font-style: italic;">'# colonne'</span>, i_col, <span style="font-style: italic;">' r&#233;sultats='</span>, T2.iloc[:, i_col].values)
+    <span style="font-weight: bold; font-style: italic;">df_2</span>[candidat] = T2.iloc[:, i_col].values
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fig</span>, <span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplots(figsize=(13, 5))
+<span style="font-weight: bold; font-style: italic;">k</span> = df_2.<span style="font-weight: bold;">sum</span>()/df_2.<span style="font-weight: bold;">sum</span>().<span style="font-weight: bold;">sum</span>()
+<span style="font-weight: bold; font-style: italic;">ax</span> = k.plot.bar(ax=ax)
+ax.set_xlabel(<span style="font-style: italic;">'Candidat'</span>)
+ax.set_ylabel(<span style="font-style: italic;">'pourcentage'</span>);
+plt.savefig(filename, bbox_inches=<span style="font-style: italic;">"tight"</span>)
+filename
+</pre>
+</div>
+
+
+<div id="orge50c555" class="figure">
+<p><img src="file:///tmp/babel-Xpsl3Y/figureNSSmsy.png" alt="figureNSSmsy.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1fc0259" class="outline-3">
+<h3 id="org1fc0259">Second order</h3>
+<div class="outline-text-3" id="text-org1fc0259">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
+
+<span style="font-weight: bold; font-style: italic;">CDT_1</span> = <span style="font-style: italic;">"M&#201;LENCHON"</span>
+<span style="font-weight: bold; font-style: italic;">CDT_2</span> = <span style="font-style: italic;">"LE PEN"</span>
+
+<span style="font-weight: bold; font-style: italic;">df_12</span> = pd.DataFrame()
+<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_1[CDT_1].copy()
+<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_2[CDT_2].copy()
+
+<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_12[CDT_1]/df_1.<span style="font-weight: bold;">sum</span>(axis=1)
+<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="font-weight: bold;">sum</span>(axis=1)
+
+<span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure()
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind=<span style="font-style: italic;">'hist'</span>, height=8);
+plt.savefig(filename)
+filename
+</pre>
+</div>
+
+<p>
+<a href=""></a>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgb926b42" class="outline-2">
+<h2 id="orgb926b42">Modèle simple: une matrice de transition pour toute la France</h2>
+<div class="outline-text-2" id="text-orgb926b42">
+<p>
+On implémente le modèle en utilisant la librairie <code>aesara</code>. D'abord le modèle avec full mixing:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
+<span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
+<span style="font-weight: bold;">from</span> aeppl.transforms <span style="font-weight: bold;">import</span> TransformValuesOpt, SimplexTransform
+
+<span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values
+<span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values
+<span style="font-weight: bold; font-style: italic;">n_candidats_1</span> = premier.shape[1]
+<span style="font-weight: bold; font-style: italic;">n_candidats_2</span> = second.shape[1]
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = RandomStream(0)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Oberved variables</span>
+<span style="font-weight: bold; font-style: italic;">R1_vv</span> = at.matrix(<span style="font-style: italic;">"R1"</span>, <span style="font-style: italic;">"int64"</span>)
+<span style="font-weight: bold; font-style: italic;">p1_at</span> = at.nnet.basic.softmax(R1_vv, axis=1)
+
+<span style="font-weight: bold; font-style: italic;">M_rv</span> = srng.dirichlet(at.ones((n_candidats_1, n_candidats_2)))
+<span style="font-weight: bold; font-style: italic;">M_rv.name</span> = <span style="font-style: italic;">"M"</span>
+<span style="font-weight: bold; font-style: italic;">M_vv</span> = at.matrix(<span style="font-style: italic;">"M"</span>)
+
+<span style="font-weight: bold; font-style: italic;">p2_at</span> = at.dot(p1_at, M_rv)
+<span style="font-weight: bold; font-style: italic;">R2_rv</span> = srng.multinomial(at.<span style="font-weight: bold;">sum</span>(second, axis=1), p2_at)
+<span style="font-weight: bold; font-style: italic;">R2_vv</span> = at.matrix(<span style="font-style: italic;">"R2"</span>, <span style="font-style: italic;">"int64"</span>)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">We apply the simplex transform to Dirichlet random variables</span>
+<span style="font-weight: bold; font-style: italic;">transforms_op</span> = TransformValuesOpt(
+     {M_vv: SimplexTransform()}
+)
+<span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob(
+    {R2_rv: R2_vv, M_rv: M_vv},
+    extra_rewrites=transforms_op
+)
+<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((M_vv, R1_vv, R2_vv), logprob)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">M</span> = M_rv.<span style="font-weight: bold;">eval</span>()
+<span style="font-weight: bold;">print</span>(logprob_fn(M, premier, second))
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> pymc3 <span style="font-weight: bold;">as</span> pm
+
+<span style="font-weight: bold;">with</span> pm.Model() <span style="font-weight: bold;">as</span> single_matrix:
+
+    <span style="font-weight: bold; font-style: italic;">p1</span> = pm.Dirichlet(<span style="font-style: italic;">"p1"</span>, np.ones(n_candidats_1))
+    <span style="font-weight: bold; font-style: italic;">N_c1</span> = pm.Multinomial(<span style="font-style: italic;">"N1"</span>, premier[1,:].<span style="font-weight: bold;">sum</span>(), p1, observed=premier[1,:])
+    <span style="font-weight: bold; font-style: italic;">p2</span> = pm.Dirichlet(f<span style="font-style: italic;">"p2"</span>, np.ones(n_candidats_2))
+    <span style="font-weight: bold; font-style: italic;">N</span> = pm.Multinomial(f<span style="font-style: italic;">"N2"</span>, second[1,:].<span style="font-weight: bold;">sum</span>(), p2, observed=second[1,:])
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">with</span> single_matrix:
+    <span style="font-weight: bold; font-style: italic;">trace</span> = pm.sample()
+</pre>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-org1de79ae" class="outline-2">
+<h2 id="org1de79ae"><span class="todo TODO">TODO</span> Rappeler les résultats des deux tours</h2>
+</div>
+<div id="outline-container-org69c7e68" class="outline-2">
+<h2 id="org69c7e68"><span class="todo TODO">TODO</span> Montrer les courbes Vote X premier tour vs vote Y second tour (and show distributions)</h2>
+</div>
+<div id="outline-container-org0eefe04" class="outline-2">
+<h2 id="org0eefe04">TODO</h2>
 </div>
 </div>
 </body>
