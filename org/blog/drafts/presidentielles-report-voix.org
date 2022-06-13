@@ -1,0 +1,41 @@
+#+TITLE: Estimer le report des voix aux présidentielles
+#+DATE: <2022-06-13 Mon>
+
+Cet article fait suite au [[https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb][travail de Laurent Perrinet]] sur les reports de voix entre le premier et le deuxième tour des élections présidentielles en 2022. La démarche de ce travail est intéressante (et autant que je sache originale) : elle consiste à prendre les résultats des élections au niveau des bureaux de vote aux deux tours, et essayer d'estimer une matrice de transition i.e. la probabilité que quelqu'un ayant voté pour X (par exemple Fabien Roussel) vote pour Y (par exemple Marine Le Pen) au second tour.
+
+Le modèle utilisé est déterministe. Il est implémenté avec PyTorch:
+
+#+begin_src python
+import torch
+from torch.utils.data import TensorDataset, DataLoader, random_split
+import torch.nn.functional as F
+
+torch.set_default_tensor_type("torch.FloatTensor")
+
+class TransfertVoix(torch.nn.Module):
+    def __init__(self, N_1er, N_2eme):#, device=None):
+        super(TransfertVoix, self).__init__()
+        self.lin = torch.nn.Linear(N_2eme, N_1er, bias=False)
+
+    def forward(self, p_1):
+        M = torch.softmax(self.lin.weight, axis=1)
+        p_2_pred = torch.matmul(p_1, M)
+        return p_2_pred
+#+end_src
+
+A première lecture des résultats et au vu du modèle ci-dessus plusieurs pistes d'amélioration me viennent en tête:
+1. L'auteur montre les corrélations entre le vote Mélenchon au premier tour, et celui de Macron au second tour. Les distributions marginales sont très étalées. Je m'attend à une variabilité encore plus grande pour les candidats avec un score moindre. Cette variabilité peut avoir un effet non-négligeable sur les résultats; je suis par exemple surpris des forts reports vers Le Pen calculés pour Arthaud, Poutou et Roussel. Ce n'est pas à exclure, certes, mais je pense que l'on bénéficierait d'une approche bayésienne et bénéficier d'une marge d'erreur sur ces résultats;
+2. L'hypothèse d'un report uniforme sur tout le territoire me parait également osée. On devrait envisager un modèle hiérarchique;
+3. Les sondages de sortie d'urne peuvent servir pour définir le prior (hyperprior dans le cas d'un modèle hiérarchique).
+
+
+* Les données
+
+On se placera ici à l'échelle de la circonscription législative. Le découpage à l'échelle du bureau de vote est intéressant, mais le but implicite de cette étude est de donner une idée des reports de voix pour le second tour des législatives 2022.
+
+* Modèle simple: une matrice de transition pour toute la France
+
+
+* TODO Rappeler les résultats des deux tours
+* TODO Montrer les courbes Vote X premier tour vs vote Y second tour (and show distributions)
+* TODO
