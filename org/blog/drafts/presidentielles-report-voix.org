@@ -71,18 +71,20 @@ T1.tail()
 
 #+begin_src python :session
 df_1 = T1[['Nuls', 'Blancs', 'Abstentions']].copy()
+df_1["Non exprimés"] =  df_1['Nuls'] + df_1['Blancs'] + df_1['Abstentions']
+df_1 = df_1[["Non exprimés"]].copy()
 T1['Code de la circonscription'] = T1['Code de la circonscription'].apply(str)
 #df_1['circonscription'] = T1['Code du département'] + T1['Code de la circonscription']
 df_1.head()
 #+end_src
 
 #+RESULTS:
-:    Nuls  Blancs  Abstentions
-: 0   393    1154        18592
-: 1   352    1367        19917
-: 2   290     851        20440
-: 3   474    1299        19826
-: 4   394     970        18766
+:    Non exprimés
+: 0         20139
+: 1         21636
+: 2         21581
+: 3         21599
+: 4         20130
 
 
 #+begin_src python :session :results silent
@@ -113,7 +115,7 @@ filename
 
 
 #+RESULTS:
-[[file:/tmp/babel-XyHH31/figureFeRI5l.png]]
+[[file:/tmp/babel-XyHH31/figureFbqdwF.png]]
 
 ** Deuxième tour
 
@@ -145,18 +147,20 @@ T2.tail()
 
 #+begin_src python :session
 df_2 = T2[['Nuls', 'Blancs', 'Abstentions']].copy()
+df_2["Non exprimés"] =  df_2['Nuls'] + df_2['Blancs'] + df_2['Abstentions']
+df_2 = df_2[["Non exprimés"]].copy()
 T2['Code de la circonscription'] = T2['Code de la circonscription'].apply(str)
 #df_1['circonscription'] = T1['Code du département'] + T1['Code de la circonscription']
 df_2.head()
 #+end_src
 
 #+RESULTS:
-:    Nuls  Blancs  Abstentions
-: 0  1229    4020        20298
-: 1  1189    4430        23236
-: 2   880    3478        23138
-: 3  1324    4082        21870
-: 4  1253    3792        21026
+:    Non exprimés
+: 0         25547
+: 1         28855
+: 2         27496
+: 3         27276
+: 4         26071
 
 #+begin_src python :session :results silent
 col_start = 21
@@ -180,7 +184,7 @@ filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-XyHH31/figureS6GJB1.png]]
+[[file:/tmp/babel-XyHH31/figuremqqV6A.png]]
 
 ** Second order
 
@@ -209,66 +213,56 @@ filename
 
 * Simple modèle écologique
 
-** Full mixing
 
-On implémente le modèle en utilisant la librairie =aesara=. D'abord le modèle avec full mixing. Il n'a pas vraiment de sens ici, mais c'est le plus simple à implémenter.
 
-#+begin_src python :session
-import aesara
+#+begin_src python :session :results silent
+second = df_2[1:].values[:577, :]
+premier = df_1[1:].values[:577:]
+n_premier = premier.shape[1]
+n_second = second.shape[1]
+n_circos = premier.shape[0]
+#+end_src
+
+The model we implement is taken from [[https://gking.harvard.edu/files/em.pdf][this paper.]] We will be using =aesara= for modelling and =blackjax= for sampling.
+
+** Simplified version (full mixing of the transition matrix)
+
+#+begin_src python :session :results silent
 import aesara.tensor as at
 from aesara.tensor.random import RandomStream
-from aeppl import joint_logprob
-from aeppl.transforms import TransformValuesOpt, SimplexTransform
-
-second = df_2[1:].values
-premier = df_1[1:].values
-n_candidats_1 = premier.shape[1]
-n_candidats_2 = second.shape[1]
 
 srng = RandomStream(0)
 
-# Model
-p1_rv = srng.dirichlet(at.ones(n_candidats_1))
-R1_rv = srng.multinomial(at.sum(premier, axis=1), p1_rv)
-
-M_rv = srng.dirichlet(at.ones((n_candidats_1, n_candidats_2)))
-
-p2_rv = srng.dirichlet(at.dot(p1_rv, M_rv))
-R2_rv = srng.multinomial(at.sum(second, axis=1), p2_rv)
+p1_at = at.as_tensor(premier / premier.sum(axis=1).reshape((premier.shape[0], 1)))
+beta_rv = srng.dirichlet(at.ones((n_premier, n_second)))
+p2_at = at.dot(p1_at, beta_rv)
+p2_at_norm = p2_at / p2_at.sum(axis=1).reshape((p2_at.shape[0], 1))
+R2_rv = srng.multinomial(at.sum(second, axis=1), p2_at_norm)
 #+end_src
 
-Construisons maintenant la fonction qui associe à des valeurs de paramètre le logarithme de la densité de probabilité associée au modèle.
-
 #+begin_src python :session :results silent
-p1_vv = p1_rv.clone()
-p2_vv = p2_rv.clone()
-R1_vv = R1_rv.clone()
 R2_vv = R2_rv.clone()
-M_vv = M_rv.clone()
+beta_vv = beta_rv.clone()
 
 transforms_op = TransformValuesOpt(
-     {p1_vv: SimplexTransform(), M_vv: SimplexTransform(), p2_vv: SimplexTransform()}
+     {beta_vv: SimplexTransform()}
 )
 logprob = joint_logprob(
-    {p1_rv: p1_vv, p2_rv: p2_vv, R1_rv: R1_vv, R2_rv: R2_vv, M_rv: M_vv},
+    {R2_rv: R2_vv, beta_rv: beta_vv},
     extra_rewrites=transforms_op
 )
 
 # Compile the logprob function
-logprob_fn = aesara.function((p1_vv, M_vv, p2_vv, R1_vv, R2_vv), logprob)
+logprob_fn = aesara.function((beta_vv, R2_vv), logprob)
 #+end_src
 
 #+begin_src python :session :results output
-M = np.ones((n_candidats_1, n_candidats_2-1))
-p1 = np.ones(n_candidats_1 - 1)
-p2 = np.ones(n_candidats_2 -1)
-print(logprob_fn(p1, M, p2, premier, second))
+beta = SimplexTransform().forward(beta_rv).eval()
+print(logprob_fn(beta, second))
 #+end_src
 
 #+RESULTS:
-: -116199944.47430898
-
-Compilons la fonction en utilisant le lieur aesara vers JAX, ce qui nous permettra
+: -6529676.145333376
 
 #+begin_src python :session
 from aesara.link.jax.dispatch import jax_funcify
@@ -288,7 +282,7 @@ def jax_funcify_Assert(op, **kwargs):
 
     return assert_fn
 
-fgraph = FunctionGraph(inputs=(p1_vv, M_vv, p2_vv, R1_vv, R2_vv), outputs=(logprob,))
+fgraph = FunctionGraph(inputs=(beta_vv, R2_vv), outputs=(logprob,))
 mode.JAX.optimizer.optimize(fgraph)
 jax_fn = jax_funcify(fgraph)
 #+end_src
@@ -296,77 +290,119 @@ jax_fn = jax_funcify(fgraph)
 #+RESULTS:
 
 #+begin_src python :session :results output
-M = np.ones((n_candidats_1, n_candidats_2-1))
-p1 = np.ones(n_candidats_1 - 1)
-p2 = np.ones(n_candidats_2 -1)
-print(jax_fn(p1, M, p2, premier, second)[0])
+M = SimplexTransform().forward(beta_rv).eval()
+print(jax_fn(M, second)[0])
 #+end_src
 
 #+RESULTS:
-: -116199944.47430903
-
-We can now use BlackAJX to sample from the posterior distribution. Let us first get some initial values and specialize the logpdf:
+: -2310109.667225258
 
 #+begin_src python :session
-def logpdf(x):
-    p1, M, p2 = x
-    return jax_fn(p1, M, p2, premier, second)[0]
-
-initial_p1 = SimplexTransform().forward(p1_rv).eval()
-initial_p2 = SimplexTransform().forward(p2_rv).eval()
-initial_M = SimplexTransform().forward(M_rv).eval()
+def logpdf(beta):
+    return jax_fn(beta, second)[0]
 #+end_src
 
 #+RESULTS:
 
-#+begin_src python :session
-logpdf((initial_p1, initial_M, initial_p2))
-#+end_src
-
-#+RESULTS:
-: -111797255.93148363
-
-#+begin_src python
+#+begin_src python :session :results silent
+import jax
 import blackjax
+
+
+def inference_loop(rng_key, kernel, initial_state, num_samples):
+    """Sequantially draws samples given the kernel of choice."""
+
+    def one_step(state, rng_key):
+        state, _ = kernel(rng_key, state)
+        return state, state
+
+    keys = jax.random.split(rng_key, num_samples)
+    _, states = jax.lax.scan(one_step, initial_state, keys)
+
+    return states
+
+
+rng = jax.random.PRNGKey(0)
+adapt = blackjax.window_adaptation(blackjax.nuts, logpdf, 5000, initial_step_size=1., target_acceptance_rate=0.8)
+state, kernel, _ = adapt.run(rng, M)
+samples = inference_loop(rng, kernel, state, 1000)
 #+end_src
 
-*** TODO Figure out what to do in the Simplex space
+#+begin_src python :session
+trans_at = at.matrix()
+untrans_at = SimplexTransform().backward(trans_at)
 
-This is the implementation of =SimplexTransform=.
-
-#+begin_src python
-class SimplexTransform(RVTransform):
-    name = "simplex"
-
-    def forward(self, value, *inputs):
-        log_value = at.log(value)
-        shift = at.sum(log_value, -1, keepdims=True) / value.shape[-1]
-        return log_value[..., :-1] - shift
-
-    def backward(self, value, *inputs):
-        value = at.concatenate([value, -at.sum(value, -1, keepdims=True)], axis=-1)
-        exp_value_max = at.exp(value - at.max(value, -1, keepdims=True))
-        return exp_value_max / at.sum(exp_value_max, -1, keepdims=True)
-
-    def log_jac_det(self, value, *inputs):
-        N = value.shape[-1] + 1
-        sum_value = at.sum(value, -1, keepdims=True)
-        value_sum_expanded = value + sum_value
-        value_sum_expanded = at.concatenate(
-            [value_sum_expanded, at.zeros(sum_value.shape)], -1
-        )
-        logsumexp_value_expanded = at.logsumexp(value_sum_expanded, -1, keepdims=True)
-        res = at.log(N) + (N * sum_value) - (N * logsumexp_value_expanded)
-        return at.sum(res, -1)
+fgraph = FunctionGraph(inputs=(trans_at,), outputs=(untrans_at,))
+mode.JAX.optimizer.optimize(fgraph)
+untransform_fn = jax_funcify(fgraph)
 #+end_src
 
-** Modèle hiérarchique
+#+RESULTS:
 
-Dans la version hiérarchique du modèle:
-1. Chaque circonscription a ses vecteurs p1 et p2, et matrice M de transition qui lui sont propres.
-2. L'information sur les transitions est partagée en donnant un prior commun au paramètre de dispersion de la distribution des matrices de transition.
+#+begin_src python :session
+a = jax.vmap(untransform_fn, in_axes=(0))(samples.position)[0]
+jnp.mean(a, axis=0)
+#+end_src
+
+#+RESULTS:
+|    0.878626471 |   0.0258810833 |   0.0954924455 |
+| 0.000209201952 | 0.000168469037 |    0.999622329 |
+|    0.353824482 | 0.000729045323 |    0.645446473 |
+|  1.2244228e-05 |    0.999982977 | 4.77903114e-06 |
+|    0.456462577 | 9.27429875e-05 |     0.54344468 |
+| 4.27213225e-06 | 3.18251401e-06 |    0.999992545 |
+|     0.33424463 |    0.165758764 |    0.499996606 |
+|    0.412980267 |    0.567320655 |   0.0196990781 |
+| 0.000562883648 |    0.999314846 | 0.000122270683 |
+| 4.31412781e-05 |    0.999941751 | 1.51075448e-05 |
+|   0.0369685485 |    0.962937403 | 9.40488833e-05 |
+|  0.00194860404 |  0.00149510445 |    0.996556292 |
+| 8.78636249e-05 |  6.5779301e-05 |    0.999846357 |
+
+#+begin_src python :session
+jnp.std(a, axis=0)
+#+end_src
+
+#+RESULTS:
+| 0.000504224632 | 0.000430851732 | 0.000425736141 |
+| 0.000201331771 | 0.000160899138 | 0.000260155704 |
+|  0.00817992169 |  0.00073537618 |  0.00816306802 |
+| 1.15421329e-05 | 1.23829438e-05 | 4.71130902e-06 |
+|  0.00379258354 | 9.79363258e-05 |  0.00379762501 |
+| 4.20493956e-06 | 3.23946734e-06 | 5.49460847e-06 |
+|  0.00377245123 |  0.00370949123 |  0.00260962516 |
+|  0.00104838995 | 0.000931723461 |  0.00089042298 |
+| 0.000537686972 | 0.000551108567 | 0.000118409269 |
+| 4.25035248e-05 | 4.46105123e-05 |  1.5382807e-05 |
+|  0.00490026012 |  0.00489873334 | 9.61223634e-05 |
+|  0.00196953449 |  0.00149442043 |  0.00243452455 |
+| 8.44661563e-05 | 6.58645259e-05 | 0.000104433532 |
+
+** Version hiérarchique
+
+Dans la version hiérarchique du modèle chaque circonscription a sa propre matrice de trasnssition
 
 Elle est assez simple à implémenter avec =aesara=.
+
+#+begin_src python :session :results silent
+import aesara.tensor as at
+from aesara.tensor.random import RandomStream
+
+srng = RandomStream(0)
+
+p1_at = at.as_tensor(premier / premier.sum(axis=1).reshape((premier.shape[0], 1)))
+
+# Hyperprior
+lambda_at = at.as_tensor(2.)
+delta_rv = srng.exponential(at.ones((n_premier, n_second)) / lambda_at)
+
+# We have one transition matrix per circonscription
+beta_rv = srng.dirichlet(at.stack([delta_rv for _ in range(n_examples)]))
+
+p2_at = at.dot(p1_at, beta_rv)
+p2_at_norm = p2_at# / p2_at.sum(axis=-1).reshape((n_examples, p2_at.shape[2], 1))
+R2_rv = srng.multinomial(at.sum(second, axis=1), p2_at_norm)
+#+end_src
 
 * TODO Rappeler les résultats des deux tours
 * TODO Remontrer les courbes X vs Y
