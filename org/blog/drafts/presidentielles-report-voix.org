@@ -191,7 +191,7 @@ filename
 #+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
 import seaborn as sns
 
-CDT_1 = "MÉLENCHON"
+CDT_1 = "ARTHAUD"
 CDT_2 = "LE PEN"
 
 df_12 = pd.DataFrame()
@@ -208,8 +208,52 @@ filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-XyHH31/figureMfdkeO.png]]
+[[file:/tmp/babel-XyHH31/figurepOF83v.png]]
 
+
+#+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
+import seaborn as sns
+
+CDT_1 = "ARTHAUD"
+CDT_2 = "Non exprimés"
+
+df_12 = pd.DataFrame()
+df_12[CDT_1] = df_1[CDT_1].copy()
+df_12[CDT_2] = df_2[CDT_2].copy()
+
+df_12[CDT_1] = df_12[CDT_1]/df_1.sum(axis=1)
+df_12[CDT_2] = df_12[CDT_2]/df_2.sum(axis=1)
+
+fig = plt.figure()
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind='hist', height=8);
+plt.savefig(filename)
+filename
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-XyHH31/figuree61a2v.png]]
+
+#+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
+import seaborn as sns
+
+CDT_1 = "POUTOU"
+CDT_2 = "LE PEN"
+
+df_12 = pd.DataFrame()
+df_12[CDT_1] = df_1[CDT_1].copy()
+df_12[CDT_2] = df_2[CDT_2].copy()
+
+df_12[CDT_1] = df_12[CDT_1]/df_1.sum(axis=1)
+df_12[CDT_2] = df_12[CDT_2]/df_2.sum(axis=1)
+
+fig = plt.figure()
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind='hist', height=8);
+plt.savefig(filename)
+filename
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-XyHH31/figurer9WIUm.png]]
 
 * Simple modèle écologique
 
@@ -237,7 +281,7 @@ p1_at = at.as_tensor(premier / premier.sum(axis=1).reshape((premier.shape[0], 1)
 beta_rv = srng.dirichlet(at.ones((n_premier, n_second)))
 p2_at = at.dot(p1_at, beta_rv)
 p2_at_norm = p2_at / p2_at.sum(axis=1).reshape((p2_at.shape[0], 1))
-R2_rv = srng.multinomial(at.sum(second, axis=1), p2_at_norm)
+R2_rv = srng.multinomial(at.sum(second, axis=1), p2_at)
 #+end_src
 
 #+begin_src python :session :results silent
@@ -262,7 +306,6 @@ print(logprob_fn(beta, second))
 #+end_src
 
 #+RESULTS:
-: -6529676.145333376
 
 #+begin_src python :session
 from aesara.link.jax.dispatch import jax_funcify
@@ -295,7 +338,7 @@ print(jax_fn(M, second)[0])
 #+end_src
 
 #+RESULTS:
-: -2310109.667225258
+: -2310109.6672252584
 
 #+begin_src python :session
 def logpdf(beta):
@@ -323,7 +366,7 @@ def inference_loop(rng_key, kernel, initial_state, num_samples):
 
 
 rng = jax.random.PRNGKey(0)
-adapt = blackjax.window_adaptation(blackjax.nuts, logpdf, 5000, initial_step_size=1., target_acceptance_rate=0.8)
+adapt = blackjax.window_adaptation(blackjax.nuts, logpdf, 3000, initial_step_size=1., target_acceptance_rate=0.8)
 state, kernel, _ = adapt.run(rng, M)
 samples = inference_loop(rng, kernel, state, 1000)
 #+end_src
@@ -345,44 +388,57 @@ jnp.mean(a, axis=0)
 #+end_src
 
 #+RESULTS:
-|    0.878626471 |   0.0258810833 |   0.0954924455 |
-| 0.000209201952 | 0.000168469037 |    0.999622329 |
-|    0.353824482 | 0.000729045323 |    0.645446473 |
-|  1.2244228e-05 |    0.999982977 | 4.77903114e-06 |
-|    0.456462577 | 9.27429875e-05 |     0.54344468 |
-| 4.27213225e-06 | 3.18251401e-06 |    0.999992545 |
-|     0.33424463 |    0.165758764 |    0.499996606 |
-|    0.412980267 |    0.567320655 |   0.0196990781 |
-| 0.000562883648 |    0.999314846 | 0.000122270683 |
-| 4.31412781e-05 |    0.999941751 | 1.51075448e-05 |
-|   0.0369685485 |    0.962937403 | 9.40488833e-05 |
-|  0.00194860404 |  0.00149510445 |    0.996556292 |
-| 8.78636249e-05 |  6.5779301e-05 |    0.999846357 |
+|    0.878604297 |   0.0258612203 |   0.0955344828 |
+| 0.000223786225 |  0.00017233535 |    0.999603878 |
+|    0.353812974 | 0.000762828276 |    0.645424198 |
+| 1.23942505e-05 |    0.999982994 |  4.6121251e-06 |
+|    0.456609718 | 9.08177981e-05 |    0.543299464 |
+|   4.226596e-06 | 3.34375375e-06 |     0.99999243 |
+|    0.334170929 |    0.165825645 |    0.500003427 |
+|    0.413016729 |    0.567315435 |   0.0196678352 |
+| 0.000552152712 |     0.99932251 | 0.000125337773 |
+| 4.11361658e-05 |    0.999943891 | 1.49731413e-05 |
+|   0.0369822017 |    0.962924784 | 9.30145364e-05 |
+|  0.00201357423 |   0.0014996482 |    0.996486778 |
+| 9.11804856e-05 | 6.04221729e-05 |    0.999848397 |
 
 #+begin_src python :session
 jnp.std(a, axis=0)
 #+end_src
 
 #+RESULTS:
-| 0.000504224632 | 0.000430851732 | 0.000425736141 |
-| 0.000201331771 | 0.000160899138 | 0.000260155704 |
-|  0.00817992169 |  0.00073537618 |  0.00816306802 |
-| 1.15421329e-05 | 1.23829438e-05 | 4.71130902e-06 |
-|  0.00379258354 | 9.79363258e-05 |  0.00379762501 |
-| 4.20493956e-06 | 3.23946734e-06 | 5.49460847e-06 |
-|  0.00377245123 |  0.00370949123 |  0.00260962516 |
-|  0.00104838995 | 0.000931723461 |  0.00089042298 |
-| 0.000537686972 | 0.000551108567 | 0.000118409269 |
-| 4.25035248e-05 | 4.46105123e-05 |  1.5382807e-05 |
-|  0.00490026012 |  0.00489873334 | 9.61223634e-05 |
-|  0.00196953449 |  0.00149442043 |  0.00243452455 |
-| 8.44661563e-05 | 6.58645259e-05 | 0.000104433532 |
+| 0.000512569718 | 0.000422569878 | 0.000411759099 |
+| 0.000227764635 | 0.000163277737 | 0.000285016154 |
+|  0.00835850634 |  0.00073835611 |  0.00834943886 |
+| 1.17570106e-05 | 1.25917198e-05 | 4.70890492e-06 |
+|  0.00365140492 | 8.73912586e-05 |  0.00365640129 |
+| 4.43859768e-06 | 3.56362398e-06 | 5.91070475e-06 |
+|  0.00381819399 |  0.00359687914 |  0.00259848234 |
+|   0.0010802287 |  0.00095616888 | 0.000884318653 |
+|  0.00056388714 | 0.000574331051 | 0.000130463264 |
+| 3.99026341e-05 | 4.14860574e-05 | 1.49185181e-05 |
+|  0.00503139143 |  0.00502770986 | 9.19645282e-05 |
+|   0.0019754635 |  0.00158481525 |  0.00251857998 |
+| 8.87382366e-05 |  6.1380908e-05 | 0.000105200007 |
 
-** Version hiérarchique
+On vérifie que le modèle, aussi surprenant que cela soit, est k
 
-Dans la version hiérarchique du modèle chaque circonscription a sa propre matrice de trasnssition
+#+begin_src python :session
+a[:, 1, 2][:100]
+#+end_src
 
-Elle est assez simple à implémenter avec =aesara=.
+#+RESULTS:
+| 0.99962791 | 0.99991623 | 0.99966305 | 0.99946064 | 0.99938046 | 0.99937188 | 0.99980659 | 0.999792 | 0.99923505 | 0.99953717 | 0.99951034 | 0.99959796 | 0.99957745 | 0.99986323 | 0.99975899 | 0.9996055 | 0.99928098 | 0.99986385 | 0.99988614 | 0.99984921 | 0.99942679 | 0.99886797 | 0.99980025 | 0.9995409 | 0.99961997 | 0.99944473 | 0.99943799 | 0.99949746 | 0.99953126 | 0.99979873 | 0.99968739 | 0.99986479 | 0.99959014 | 0.99985252 | 0.99920973 | 0.99971285 | 0.99979184 | 0.99950867 | 0.99925911 | 0.99948833 | 0.99949589 | 0.9996224 | 0.99961641 | 0.99974562 | 0.99960092 | 0.99979708 | 0.99991249 | 0.99940249 | 0.99975145 | 0.99934725 | 0.99997605 | 0.99810388 | 0.99983037 | 0.99966022 | 0.99944754 | 0.99954732 | 0.99942889 | 0.99945266 | 0.99898081 | 0.99995676 | 0.9999735 | 0.99997122 | 0.99996205 | 0.99800344 | 0.99998724 | 0.99987909 | 0.99979481 | 0.99981912 | 0.9998331 | 0.99980382 | 0.99970231 | 0.99978394 | 0.99973909 | 0.99961615 | 0.99966534 | 0.99957562 | 0.99971179 | 0.99955648 | 0.99947529 | 0.99900012 | 0.99977318 | 0.99986157 | 0.99981946 | 0.99949235 | 0.99975582 | 0.99978152 | 0.99940828 | 0.99943139 | 0.99903068 | 0.99912911 | 0.99981919 | 0.99974803 | 0.99903316 | 0.99971128 | 0.99949675 | 0.9996083 | 0.99977729 | 0.99960927 | 0.99948289 | 0.99941847 |
+
+** Hyperprior on dirichlet
+
+#+begin_src python :session :results silent
+second = df_2[1:].values[:100,:]
+premier = df_1[1:].values[:100,:]
+n_premier = premier.shape[1]
+n_second = second.shape[1]
+n_circos = premier.shape[0]
+#+end_src
 
 #+begin_src python :session :results silent
 import aesara.tensor as at
@@ -391,19 +447,159 @@ from aesara.tensor.random import RandomStream
 srng = RandomStream(0)
 
 p1_at = at.as_tensor(premier / premier.sum(axis=1).reshape((premier.shape[0], 1)))
-
-# Hyperprior
-lambda_at = at.as_tensor(2.)
-delta_rv = srng.exponential(at.ones((n_premier, n_second)) / lambda_at)
-
-# We have one transition matrix per circonscription
-beta_rv = srng.dirichlet(at.stack([delta_rv for _ in range(n_examples)]))
-
+delta_rv = srng.exponential(at.ones((n_premier, n_second)) * 10.)
+beta_rv = srng.dirichlet(delta_rv)
 p2_at = at.dot(p1_at, beta_rv)
-p2_at_norm = p2_at# / p2_at.sum(axis=-1).reshape((n_examples, p2_at.shape[2], 1))
-R2_rv = srng.multinomial(at.sum(second, axis=1), p2_at_norm)
+p2_at_norm = p2_at / p2_at.sum(axis=1).reshape((p2_at.shape[0], 1))
+R2_rv = srng.multinomial(at.sum(second, axis=1), p2_at)
 #+end_src
 
-* TODO Rappeler les résultats des deux tours
-* TODO Remontrer les courbes X vs Y
-* TODO Modèle full mixing pour tous les paramètres
+#+begin_src python :session :results silent
+from aeppl.transforms import TransformValuesOpt, LogTransform, SimplexTransform
+
+
+R2_vv = R2_rv.clone()
+beta_vv = beta_rv.clone()
+delta_vv = delta_rv.clone()
+
+transforms_op = TransformValuesOpt(
+     {beta_vv: SimplexTransform(), delta_vv: LogTransform()}
+)
+logprob = joint_logprob(
+    {R2_rv: R2_vv, beta_rv: beta_vv, delta_rv: delta_vv},
+    extra_rewrites=transforms_op
+)
+
+# Compile the logprob function
+logprob_fn = aesara.function((beta_vv, delta_vv, R2_vv), logprob)
+#+end_src
+
+#+begin_src python :session :results output
+beta = SimplexTransform().forward(beta_rv).eval()
+delta = LogTransform().forward(delta_rv).eval()
+print(logprob_fn(beta, delta, second))
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session
+from aesara.link.jax.dispatch import jax_funcify
+from aesara.graph.fg import FunctionGraph
+from aeppl.opt import logprob_rewrites_db
+from aesara.compile import mode
+from aesara.raise_op import CheckAndRaise
+
+@jax_funcify.register(CheckAndRaise)
+def jax_funcify_Assert(op, **kwargs):
+    # Jax does not allow assert whose values aren't known during JIT compilation
+    # within it's JIT-ed code. Hence we need to make a simple pass through
+    # version of the Assert Op.
+    # https://github.com/google/jax/issues/2273#issuecomment-589098722
+    def assert_fn(value, *inps):
+        return value
+
+    return assert_fn
+
+fgraph = FunctionGraph(inputs=(beta_vv, delta_vv, R2_vv), outputs=(logprob,))
+mode.JAX.optimizer.optimize(fgraph)
+jax_fn = jax_funcify(fgraph)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session :results output
+M = SimplexTransform().forward(beta_rv).eval()
+d = LogTransform().forward(delta_rv).eval()
+print(jax_fn(M, d, second)[0])
+#+end_src
+
+#+RESULTS:
+: -325017.85796774126
+
+#+begin_src python :session
+def logpdf(x):
+    beta, delta = x
+    return jax_fn(beta, delta, second)[0]
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session :results silent
+import jax
+import blackjax
+
+
+def inference_loop(rng_key, kernel, initial_state, num_samples):
+    """Sequantially draws samples given the kernel of choice."""
+
+    def one_step(state, rng_key):
+        state, _ = kernel(rng_key, state)
+        return state, state
+
+    keys = jax.random.split(rng_key, num_samples)
+    _, states = jax.lax.scan(one_step, initial_state, keys)
+
+    return states
+
+
+rng = jax.random.PRNGKey(0)
+adapt = blackjax.window_adaptation(blackjax.nuts, logpdf, 3000, initial_step_size=1., target_acceptance_rate=0.8)
+state, kernel, _ = adapt.run(rng, (M, d))
+samples = inference_loop(rng, kernel, state, 1000)
+#+end_src
+
+#+begin_src python :session
+trans_at = at.matrix()
+untrans_at = LogTransform().backward(trans_at)
+
+fgraph = FunctionGraph(inputs=(trans_at,), outputs=(untrans_at,))
+mode.JAX.optimizer.optimize(fgraph)
+untransform_fn = jax_funcify(fgraph)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session
+a = jax.vmap(untransform_fn, in_axes=(0))(samples.position[1])[0]
+jnp.mean(a, axis=0)
+#+end_src
+
+#+RESULTS:
+| 29.60603574 |  2.34199847 |  2.98394168 |
+|  0.44175271 |  0.31861708 | 18.08521358 |
+|  14.2330665 |   0.4175809 | 16.53486333 |
+|  0.14939946 | 13.42957026 |  0.16539151 |
+| 10.85680003 |  0.13078875 | 11.67389942 |
+|   0.0426811 |  0.14017083 | 11.50171714 |
+|  3.61469926 |  0.94584796 | 23.13918023 |
+|   8.4651884 | 14.49454873 |  0.18589097 |
+| 18.55727688 |  4.93651698 |  0.21684371 |
+|  0.19961832 | 11.31421649 |  0.11511398 |
+|  2.14471167 |  17.3388221 |   0.3826252 |
+|  1.08048987 |   0.3547419 | 18.32616482 |
+|  0.34198671 |  0.24493664 | 15.64597391 |
+
+#+begin_src python :session
+jnp.std(a, axis=0)
+#+end_src
+
+#+RESULTS:
+| 2.22044605e-16 | 1.38777878e-17 | 3.33066907e-16 |
+| 7.77156117e-16 | 2.77555756e-17 | 2.77555756e-17 |
+| 6.31088724e-30 | 5.55111512e-17 | 1.11022302e-16 |
+| 1.05879118e-22 | 6.66133815e-16 | 1.11022302e-16 |
+| 5.95570041e-23 | 2.11758237e-22 | 5.55111512e-16 |
+| 1.48230766e-21 | 9.99200722e-16 | 9.71445147e-17 |
+| 5.55111512e-16 | 5.22024357e-53 | 1.04083409e-17 |
+|  4.7433845e-20 |            0.0 | 1.11022302e-16 |
+|            0.0 | 2.22044605e-16 | 4.06575815e-20 |
+| 3.33066907e-16 |            0.0 | 3.33066907e-16 |
+|            0.0 | 7.57306469e-29 |            0.0 |
+|  6.6174449e-24 | 3.33066907e-16 | 8.47032947e-22 |
+| 6.24500451e-17 | 5.55111512e-16 |            0.0 |
+
+Les résultats sont de toute évidence faux: il suffit de comparer les graphes avec les statistiques de second ordre plus haut et les valeurs que l'on obtient pour les priors des distributions des lignes de la matrice de transition. Pour comprendre ce qui se passe il va falloir retourner au tableau, et notamment regarder les /prior predictive distributions/ pour les matrices de transition et voir si elles permettent de retrouver les courbes X au premier tour vs Y au second tour. Trois hypothèses:
+
+- La paramétrisation du modèle est mauvaise;
+- L'impact des variations de la logprob correspondants aux petit candidats est tellement faible que le modèle est surtout déterminé par la valeur a priori. On peut alors soit prendre un sondage pour les valeurs a priori, soit les "fabriquer".
+- Le modèle hiérarchique est nécessaire. Un moyen de voir si cela va changer quelque chose est de fitter ce modèle sur une seule circonscription.
