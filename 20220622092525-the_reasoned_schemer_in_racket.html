@@ -6,7 +6,7 @@
 <!-- 2022-06-24 Fri 15:36 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Publish your notes instantly</title>
+<title>The Reasoned Schemer in Racket</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,49 +197,31 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Publish your notes instantly</h1>
+<h1 class="title">The Reasoned Schemer in Racket</h1>
 <p>
-There should be as little friction as possible between the act of writing and the act of publishing. Publishing almost instantly is paramout for several reasons:
+I have decided to learn Racket with Relational Programming as an excuse. To run <i>The Reasoned Schemer</i>'s examples you need to use an implementation of <i>minikanren</i> in Racket. There is a <i>minikanren</i> package available in raco, but it departs from the book's syntax too much for my taste. I prefer to install the canonical implementation in the following way:
 </p>
 
-<ul class="org-ul">
-<li>You cannot hide clutter on a web browser;</li>
-<li>Publishing gives you a broader perspective. Being able to navigate through one's notes in a browser gives a perspective that you cannot get in a text editor. This is not just about finding typos or adding a few links, but about breaking down notes, merging some ideas, and sometimes gettings new ideas. It helps you <a href="20211201165647-how_to_take_notes.html#ID-d4b6bab5-96f2-417f-902d-c78e7b7d1dca">write better notes</a>.</li>
-<li>Publishing is rewarding. It helps create a habit: the more you publish the more you will want to write.</li>
-</ul>
-
-<p>
-These are rewards you reap whenever you get something out there. But self-contained notes do not need any extra work, they can be published as is. <a href="20220111220202-progress_is_better_measured_in_small_chunks.html#ID-b035cb34-015c-4be2-a822-85b59a92c020">Progress is better measured in small chunks</a>, and published notes are proofs of your thinking evolving 
-</p>
-
-<div id="outline-container-org60489eb" class="outline-2">
-<h2 id="org60489eb">My current setup</h2>
-<div class="outline-text-2" id="text-org60489eb">
-<p>
-There are currently too many steps between my fingers typing and you seeing this on the internet:
-</p>
-
-<ul class="org-ul">
-<li>Save the org file</li>
-<li>Go to the directory where the files for the website are located</li>
-<li><code>make build</code> to re-build the modified pages</li>
-<li><code>git add &amp;&amp; git commit</code>  to add the new files to the repo</li>
-<li><code>git push</code> (and the site is automatically built and publish)</li>
-</ul>
-
-<p>
-I need to reduce the number of keystrokes. <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/org-roam/org-roam-ui">org-roam-ui</a> is graphical frontend that can be used locally to visualize one's notes. You are made conscious of the clutter, get a broader perspective, <i>but</i> publishing online is more rewarding.
-</p>
-</div>
+<div class="org-src-container">
+<pre class="src src-bash">raco pkg install github://github.com/miniKanren/Racket-miniKanren/master
+</pre>
 </div>
 
-<div id="outline-container-org1b284f1" class="outline-2">
-<h2 id="org1b284f1">Links to this note</h2>
-<div class="outline-text-2" id="text-org1b284f1">
-<ul class="org-ul">
-<li><a href="./20211201165647-how_to_take_notes.html">How to take notes</a></li>
-</ul>
+<p>
+Which you can then use by calling
+</p>
+
+<div class="org-src-container">
+<pre class="src src-racket">(require "Racket-miniKanren/miniKanren/mk")
+</pre>
 </div>
+
+<p>
+in the header.
+</p>
+
+<div id="outline-container-org73ccf50" class="outline-2">
+<h2 id="org73ccf50">Links to this note</h2>
 </div>
 </div>
 </body>
