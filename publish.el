@@ -74,7 +74,7 @@
          :htmlized-source t
          :with-toc nil
          :auto-sitemap t
-         :sitemap-title "Through the hourglass ⌛"
+         :sitemap-title "Timestamped thoughts ⌛"
          :sitemap-filename "index.org"
          :sitemap-format-entry my/sitemap-format-entry
          :sitemap-sort-files anti-chronologically
