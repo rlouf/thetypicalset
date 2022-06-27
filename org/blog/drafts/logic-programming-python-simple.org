@@ -1,0 +1,115 @@
+#+TITLE: Logic Programming in Python
+
+[[https://github.com/MNoorFawi/logic-programming-in-python][this website]] has a few examples that use =kanren='s ancestors, =logpy=. Issue raised according to which examples did not run, so I'm translating them here.
+
+#+begin_src python :session :results output
+from kanren import run, var
+from kanren.facts import facts, Relation
+
+food_type = Relation()
+flavor = Relation()
+
+facts(food_type, ("gouda", "cheese"), # facts
+                 ("ritz", "cracker"),
+                 ("steak", "meat"),
+                 ("sausage", "meat"),
+                 ("limonade", "juice"),
+                 ("cookie", "dessert"))
+
+facts(flavor, ("sweet", "dessert"),
+              ("savory", "meat"),
+              ("savory", "cheese"),
+              ("sweet", "juice"))
+
+food_flavor, food_v, flavor_v = var(), var(), var() # define the variables to use in the search
+
+# We're looking for the food and flavor st
+res = run(0, food_flavor, food_type(food_flavor, food_v), flavor("sweet", food_v))
+
+print(res)
+#+end_src
+
+#+RESULTS:
+: ('limonade', 'cookie')
+
+#+begin_src python :session :results output
+from kanren import conde
+
+
+def food_flavor(x, y):
+    z = var()
+    return conde((food_type(x, z), flavor(y, z)))
+
+what = var()
+print(run(0, what, food_flavor(what, "sweet")))
+print(run(0, what, food_flavor(what, "savory")))
+#+end_src
+
+#+RESULTS:
+: ('limonade', 'cookie')
+: ('steak', 'gouda', 'sausage')
+
+#+begin_src python :session :results output
+likes = Relation()
+facts(likes,
+      ("Noor", "sausage"),
+      ("Melissa", "pasta"),
+      ("Dmitry", "cookie"),
+      ("Nikita", "sausage"),
+      ("Assel", "limonade")
+)
+
+def friend(x, y):
+    z = var()
+    return conde((likes(x, z), likes(y, z)))
+
+who = var()
+name = "Noor"
+output = run(0, who, friend(who, name))
+print([x for x in output if x != name])
+#+end_src
+
+#+RESULTS:
+: ['Nikita']
+
+#+begin_src python :session :results output
+from kanren import lall
+
+
+def dish_to_like(person, what):
+    liked = var()
+    foodtype = var()
+    foodflavor = var()
+    return lall(
+        likes(person, liked),
+        food_type(liked, foodtype),
+        flavor(foodflavor, foodtype),
+        food_flavor(what, foodflavor)
+    )
+
+what = var()
+dish = run(0, what, dish_to_like("Noor", what))
+print("since Noor has liked Sausage, he would like:", dish)
+#+end_src
+
+#+RESULTS:
+: since Noor has liked Sausage, he would like: ('steak', 'gouda', 'sausage')
+
+* The Zebra riddle
+
+
+#+begin_src python
+from kanren import eq, vars
+
+houses = var()
+five_houses = eq(vars(5), houses)
+
+# Each house has the following characteristics:
+# - Nationality of occupant
+# - Drink type
+# - Animal
+# - Cigarettes
+# - Color of the house
+# - It has an order
+
+#+end_src
