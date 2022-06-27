@@ -1,0 +1,293 @@
+#+TITLE: Solve the Zebra riddle with miniKanren
+
+[[https://github.com/MNoorFawi/logic-programming-in-python][this website]] has a few examples that use =kanren='s ancestors, =logpy=. Issue raised according to which examples did not run, so I'm translating them here.
+
+#+begin_src python :session :results silent
+from kanren import var
+from dataclasses import dataclass
+from unification import unifiable
+
+@unifiable
+@dataclass
+class House():
+    nationality: str = var()
+    drink: str = var()
+    animal: str = var()
+    cigarettes: str = var()
+    color: str = var()
+#+end_src
+
+We can write a simple goal:
+
+#+begin_src python :session :results output
+from kanren import eq, run, var
+
+def coloro(house, color):
+    second = House(var(), var(), var(), var(), color)
+    return eq(house, second)
+
+color = var()
+house = House("English", "water", "animal", "Chesterfields", "red")
+print(run(0, color, coloro(house, color)))
+#+end_src
+
+#+RESULTS:
+: ('red',)
+
+Now let us go down the riddle; each line will correspond to one goal / statement.
+
+#+begin_quote
+1. There are five houses.
+#+end_quote
+
+We represent each house by a logic variable in a tuple of line 5. This tuple is /ordered/, the first element of the tuple being the leftmost house, and the last element the rightmost house.
+
+#+begin_src python :session :results silent
+from kanren import vars
+
+houses = vars(5)
+#+end_src
+
+
+#+begin_quote
+2. The Englishman lives in the red house
+#+end_quote
+
+#+begin_src python :session :results silent
+from kanren import membero
+
+two = membero(House("Englishman", color="red"), houses)
+#+end_src
+
+
+#+begin_quote
+3. The Spaniard owns the dog
+#+end_quote
+
+#+begin_src python :session :results silent
+three = membero(House("Spaniard", animal="dog"), houses)
+#+end_src
+
+
+#+begin_quote
+4. Coffe is drunk in the green house
+#+end_quote
+
+#+begin_src python :session :results silent
+four = membero(House(drink="coffee", animal="dog"), houses)
+#+end_src
+
+
+#+begin_quote
+5. The Ukrainian drinks tea
+#+end_quote
+
+#+begin_src python :session :results silent
+five = membero(House("Ukrainian", drink="tea"), houses)
+#+end_src
+
+
+#+begin_quote
+6. The green house is immediately to the right of the ivory house.
+#+end_quote
+
+#+begin_src python :session :results silent
+def righto(right, left, houses):
+    """Express that `right` is on the right of `left` among all the houses."""
+    neighbors = tuple(zip(houses[:-1], houses[1:]))
+    return membero((left, right), neighbors)
+
+six = righto(House(color="green"), House(color="ivory"), houses)
+#+end_src
+
+
+#+begin_quote
+7. The Old Gold smoker owns snails
+#+end_quote
+
+#+begin_src python :session :results silent
+seven = membero(House(animal="snails", cigarettes="Old Gold"), houses)
+#+end_src
+
+
+#+begin_quote
+8. Kools are smoked in the yellow house
+#+end_quote
+
+#+begin_src python :session :results silent
+eight = membero(House(color="yellow", cigarettes="Kools"), houses)
+#+end_src
+
+
+#+begin_quote
+9. Milk is drunk in the middle house
+#+end_quote
+
+#+begin_src python :session :results silent
+from kanren import eq
+
+nine = eq(House(drink="milk"), houses[2])
+#+end_src
+
+
+#+begin_quote
+10. The Norwegian lives in the first house
+#+end_quote
+
+#+begin_src python :session :results silent
+ten = eq(House("Norwegian"), houses[0])
+#+end_src
+
+
+#+begin_quote
+11. The man who smokes Chesterfields lives in the house next to the man with the fox
+#+end_quote
+
+#+begin_src python :session :results silent
+from kanren import conde
+
+def nexto(a, b, houses):
+    """Express that `a` and `b` are next to each other."""
+    return conde((righto(a, b, houses), righto(b, a, houses)))
+
+eleven = nexto(House(cigarettes="Chesterfields"), House(animal="fox"), houses)
+#+end_src
+
+
+#+begin_quote
+12. Kools are smoked in the house next to the house where the horse is kept
+#+end_quote
+
+#+begin_src python :session :results silent
+twelve = nexto(House(cigarettes="Kools"), House(animal="horse"), houses)
+#+end_src
+
+
+#+begin_quote
+13. The Lucky Strike smoker drinks orange juice
+#+end_quote
+
+#+begin_src python :session :results silent
+thirteen = membero(House(drink="orange juice", cigarettes="Parliaments"), houses)
+#+end_src
+
+
+#+begin_quote
+14. The Japanese smokes Parliaments
+#+end_quote
+
+#+begin_src python :session :results silent
+fourteen = membero(House("Japanese", cigarettes="Parliaments"), houses)
+#+end_src
+
+
+#+begin_quote
+15. The Norwegian lives next to the blue house
+#+end_quote
+
+#+begin_src python :session :results silent
+fifteen = nexto(House("Norwegian"), House(color="blue"), houses)
+#+end_src
+
+
+#+begin_quote
+- Someone drinks water
+- Someone owns a zebra
+#+end_quote
+
+#+begin_src python :session :results silent
+sixteen = membero(House(drink="water"), houses)
+seventeen = membero(House(animal="zebra"), houses)
+#+end_src
+
+#+begin_src python :session :results output
+from kanren import lall, run
+
+goal = lall(
+    two,
+    three,
+    four,
+    five,
+    six,
+    seven,
+    eight,
+    nine,
+    ten,
+    eleven,
+    twelve,
+    thirteen,
+    fourteen,
+    fifteen,
+    sixteen,
+    seventeen
+)
+results = run(0, houses, goal)
+print(results)
+#+end_src
+
+#+RESULTS:
+: ()
+
+* Summary
+
+#+begin_src python :results output
+from dataclasses import dataclass
+
+from kanren import eq, conde, lall, membero, vars, var, run
+
+from unification import unifiable
+
+
+@unifiable
+@dataclass
+class House():
+    nationality: str = var()
+    drink: str = var()
+    animal: str = var()
+    cigarettes: str = var()
+    color: str = var()
+
+
+def righto(right, left, houses):
+    """Express that `right` is on the right of `left` among all the houses."""
+    neighbors = tuple(zip(houses[:-1], houses[1:]))
+    return membero((left, right), neighbors)
+
+def nexto(a, b, houses):
+    """Express that `a` and `b` are next to each other."""
+    return conde([righto(a, b, houses)], [righto(b, a, houses)])
+
+# Check that "righto" and "nexto" work
+test = ("a", "b", "c", "d")
+left = var()
+right = "c"
+print(run(0, left, nexto(right, left, test)))
+
+# And now for the riddle
+houses = vars(5)
+goals = lall(
+    membero(House("Englishman", color="red"), houses),
+    membero(House("Spaniard", animal="dog"), houses),
+    membero(House(drink="coffee", color="green"), houses),
+    membero(House("Ukrainian", drink="tea"), houses),
+    righto(House(color="green"), House(color="ivory"), houses),
+    membero(House(animal="snails", cigarettes="Old Gold"), houses),
+    membero(House(color="yellow", cigarettes="Kools"), houses),
+    eq(House(drink="milk"), houses[2]),
+    eq(House("Norwegian"), houses[0]),
+    nexto(House(cigarettes="Chesterfields"), House(animal="fox"), houses),
+    nexto(House(cigarettes="Kools"), House(animal="horse"), houses),
+    membero(House(drink="orange juice", cigarettes="Lucky Strike"), houses),
+    membero(House("Japanese", cigarettes="Parliaments"), houses),
+    nexto(House("Norwegian"), House(color="blue"), houses),
+    membero(House(drink="water"), houses),
+    membero(House(animal="zebra"), houses),
+)
+
+results = run(0, houses, goals)
+print(results)
+#+end_src
+
+#+RESULTS:
+: ('b', 'd')
+: ()
