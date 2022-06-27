@@ -6,7 +6,7 @@
 <!-- 2022-06-27 Mon 15:57 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Negative Binomial distribution</title>
+<title>Logic Programming in Python</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -194,179 +194,137 @@
   .org-svg { }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">The Negative Binomial distribution</h1>
-<dl class="org-dl">
-<dt>tags</dt><dd><a href="20220105154404-probability_distribution.html#ID-accc4a58-2f96-42da-a43d-c8140996d0d3">Probability distribution</a></dd>
-</dl>
-
-<div id="outline-container-org4f8151d" class="outline-2">
-<h2 id="org4f8151d">Canonical parametrization</h2>
-<div class="outline-text-2" id="text-org4f8151d">
+<h1 class="title">Logic Programming in Python</h1>
 <p>
-The negative binomial distribution is usually introduced as the probability distribution of the number \(X\) of failures before the \(r\) th success in a Bernoulli process with probability \(p\in [0,1]\). It is expressed as:
+<a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/MNoorFawi/logic-programming-in-python">this website</a> has a few examples that use <code>kanren</code>'s ancestors, <code>logpy</code>. Issue raised according to which examples did not run, so I'm translating them here.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-P(X=x|p, r) = <span style="font-weight: bold;">\binom</span>{r+x-1}{x} (1-p)^x<span style="font-weight: bold;">\,</span> p^r
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> run, var
+<span style="font-weight: bold;">from</span> kanren.facts <span style="font-weight: bold;">import</span> facts, Relation
+
+<span style="font-weight: bold; font-style: italic;">food_type</span> = Relation()
+<span style="font-weight: bold; font-style: italic;">flavor</span> = Relation()
+
+facts(food_type, (<span style="font-style: italic;">"gouda"</span>, <span style="font-style: italic;">"cheese"</span>), <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">facts</span>
+                 (<span style="font-style: italic;">"ritz"</span>, <span style="font-style: italic;">"cracker"</span>),
+                 (<span style="font-style: italic;">"steak"</span>, <span style="font-style: italic;">"meat"</span>),
+                 (<span style="font-style: italic;">"sausage"</span>, <span style="font-style: italic;">"meat"</span>),
+                 (<span style="font-style: italic;">"limonade"</span>, <span style="font-style: italic;">"juice"</span>),
+                 (<span style="font-style: italic;">"cookie"</span>, <span style="font-style: italic;">"dessert"</span>))
+
+facts(flavor, (<span style="font-style: italic;">"sweet"</span>, <span style="font-style: italic;">"dessert"</span>),
+              (<span style="font-style: italic;">"savory"</span>, <span style="font-style: italic;">"meat"</span>),
+              (<span style="font-style: italic;">"savory"</span>, <span style="font-style: italic;">"cheese"</span>),
+              (<span style="font-style: italic;">"sweet"</span>, <span style="font-style: italic;">"juice"</span>))
+
+<span style="font-weight: bold; font-style: italic;">food_flavor</span>, <span style="font-weight: bold; font-style: italic;">food_v</span>, <span style="font-weight: bold; font-style: italic;">flavor_v</span> = var(), var(), var() <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">define the variables to use in the search</span>
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">We're looking for the food and flavor st</span>
+<span style="font-weight: bold; font-style: italic;">res</span> = run(0, food_flavor, food_type(food_flavor, food_v), flavor(<span style="font-style: italic;">"sweet"</span>, food_v))
+
+<span style="font-weight: bold;">print</span>(res)
 </pre>
 </div>
 
-\begin{equation}
-P(X=x|p, r) = \binom{r+x-1}{x} (1-p)^x\, p^r
-\end{equation}
+<pre class="example">
+('limonade', 'cookie')
+</pre>
 
-<p>
-However, the negative binomial is rarely used in this canonical context but rather to model count data where there seems to be <i>overdispersion</i>, i.e. where \(\sigma > \mu\) (unlike the Poisson distribution where they're equal). In this case, it is more convenient to work directly with \(\mu\) and \(\sigma\).
-</p>
-</div>
-</div>
-
-<div id="outline-container-org638a12e" class="outline-2">
-<h2 id="org638a12e">Mean-variance parametrization</h2>
-<div class="outline-text-2" id="text-org638a12e">
-<p>
-We can indeed reparametrize the distribution as a function of its mean \(\mu\) and variance \(\sigma\):
-</p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-r = <span style="font-weight: bold;">\frac</span>{<span style="font-weight: bold;">\mu</span>^2}{<span style="font-weight: bold;">\sigma</span>^{2}-<span style="font-weight: bold;">\mu</span>}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> conde
+
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">food_flavor</span>(x, y):
+    <span style="font-weight: bold; font-style: italic;">z</span> = var()
+    <span style="font-weight: bold;">return</span> conde((food_type(x, z), flavor(y, z)))
+
+<span style="font-weight: bold; font-style: italic;">what</span> = var()
+<span style="font-weight: bold;">print</span>(run(0, what, food_flavor(what, <span style="font-style: italic;">"sweet"</span>)))
+<span style="font-weight: bold;">print</span>(run(0, what, food_flavor(what, <span style="font-style: italic;">"savory"</span>)))
 </pre>
 </div>
 
-\begin{equation}
-r = \frac{\mu^2}{\sigma^{2}-\mu}
-\end{equation}
+<pre class="example">
+('limonade', 'cookie')
+('steak', 'gouda', 'sausage')
+</pre>
 
-<p>
-and
-</p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  p = <span style="font-weight: bold;">\frac</span>{r}{r + <span style="font-weight: bold;">\mu</span>}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">likes</span> = Relation()
+facts(likes,
+      (<span style="font-style: italic;">"Noor"</span>, <span style="font-style: italic;">"sausage"</span>),
+      (<span style="font-style: italic;">"Melissa"</span>, <span style="font-style: italic;">"pasta"</span>),
+      (<span style="font-style: italic;">"Dmitry"</span>, <span style="font-style: italic;">"cookie"</span>),
+      (<span style="font-style: italic;">"Nikita"</span>, <span style="font-style: italic;">"sausage"</span>),
+      (<span style="font-style: italic;">"Assel"</span>, <span style="font-style: italic;">"limonade"</span>)
+)
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">friend</span>(x, y):
+    <span style="font-weight: bold; font-style: italic;">z</span> = var()
+    <span style="font-weight: bold;">return</span> conde((likes(x, z), likes(y, z)))
+
+<span style="font-weight: bold; font-style: italic;">who</span> = var()
+<span style="font-weight: bold; font-style: italic;">name</span> = <span style="font-style: italic;">"Noor"</span>
+<span style="font-weight: bold; font-style: italic;">output</span> = run(0, who, friend(who, name))
+<span style="font-weight: bold;">print</span>([x <span style="font-weight: bold;">for</span> x <span style="font-weight: bold;">in</span> output <span style="font-weight: bold;">if</span> x != name])
 </pre>
 </div>
 
-\begin{equation}
-  p = \frac{r}{r + \mu}
-\end{equation}
+<pre class="example">
+['Nikita']
+</pre>
 
-<p>
-Viewing \(\mu\) and \(\sigma\) as parameters means we abandon the combinatorial motivation of the negative binomial to view it as a model for count data. A <b>very important property</b> of this parametrization is the link between \(\mu\) and the variance:
-</p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-<span style="font-weight: bold;">\sigma</span>^{2} = <span style="font-weight: bold;">\mu</span> + <span style="font-weight: bold;">\frac</span>{1}{r} <span style="font-weight: bold;">\mu</span>^{2}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall
+
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">dish_to_like</span>(person, what):
+    <span style="font-weight: bold; font-style: italic;">liked</span> = var()
+    <span style="font-weight: bold; font-style: italic;">foodtype</span> = var()
+    <span style="font-weight: bold; font-style: italic;">foodflavor</span> = var()
+    <span style="font-weight: bold;">return</span> lall(
+        likes(person, liked),
+        food_type(liked, foodtype),
+        flavor(foodflavor, foodtype),
+        food_flavor(what, foodflavor)
+    )
+
+<span style="font-weight: bold; font-style: italic;">what</span> = var()
+<span style="font-weight: bold; font-style: italic;">dish</span> = run(0, what, dish_to_like(<span style="font-style: italic;">"Noor"</span>, what))
+<span style="font-weight: bold;">print</span>(<span style="font-style: italic;">"since Noor has liked Sausage, he would like:"</span>, dish)
 </pre>
 </div>
 
-\begin{equation}
-\sigma^{2} = \mu + \frac{1}{r} \mu^{2}
-\end{equation}
+<pre class="example">
+since Noor has liked Sausage, he would like: ('steak', 'gouda', 'sausage')
+</pre>
 
-<p>
-Most problems people have with negative binomial models come from ignoring this property. This dependence in \(\mu^2\) is a rather strong constraint; when it becomes problematic we can use:
-</p>
-
-<ul class="org-ul">
-<li>The Skellam distribution</li>
-<li>The Conway-Maxwell-Poisson distribution</li>
-<li>The Generalized Poisson distribution</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-org478548d" class="outline-2">
-<h2 id="org478548d">As a Poisson-Gamma compound distribution</h2>
-<div class="outline-text-2" id="text-org478548d">
-<p>
-The negative binomial distribution can also be seen as a Poisson distribution where the rate parameter follows a Gamma distribution (conjugate distribution):
-</p>
-
+<div id="outline-container-org9d85f24" class="outline-2">
+<h2 id="org9d85f24">The Zebra riddle</h2>
+<div class="outline-text-2" id="text-org9d85f24">
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  X &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Poisson}(<span style="font-weight: bold;">\Lambda</span>)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\Lambda</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Gamma}(<span style="font-weight: bold;">\alpha</span>, <span style="font-weight: bold;">\beta</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, <span style="font-weight: bold;">vars</span>
+
+<span style="font-weight: bold; font-style: italic;">houses</span> = var()
+<span style="font-weight: bold; font-style: italic;">five_houses</span> = eq(<span style="font-weight: bold;">vars</span>(5), houses)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Each house has the following characteristics:</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Nationality of occupant</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Drink type</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Animal</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Cigarettes</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Color of the house</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- It has an order</span>
+
 </pre>
 </div>
-
-\begin{align*}
-  X &\sim \operatorname{Poisson}(\Lambda)\\
-  \Lambda &\sim \operatorname{Gamma}(\alpha, \beta)
-\end{align*}
-
-<p>
-Then we can show that the distribution of \(X\) is a negative binomial with \(r = \alpha\) and \(p = 1 / (1 + \beta)\), so that the mean and variance follow:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  <span style="font-weight: bold;">\sigma</span>^{2} = <span style="font-weight: bold;">\mu</span> + <span style="font-weight: bold;">\frac</span>{1}{<span style="font-weight: bold;">\alpha</span>}<span style="font-weight: bold;">\,</span> <span style="font-weight: bold;">\mu</span>^{2}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
-\begin{equation}
-  \sigma^{2} = \mu + \frac{1}{\alpha}\, \mu^{2}
-\end{equation}
-
-<p>
-Which is a nice, less ad-hoc interpretation of the negative binomial with the mean-variance parametrization.
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org461e69c" class="outline-2">
-<h2 id="org461e69c">References</h2>
-<div class="outline-text-2" id="text-org461e69c">
-<ul class="org-ul">
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.johndcook.com/negative_binomial.pdf">John Cook's notes</a></li>
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://docs.pymc.io/api/distributions/discrete.html#pymc3.distributions.discrete.NegativeBinomial">PyMC3's implementation documentation</a></li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-org9a0b078" class="outline-2">
-<h2 id="org9a0b078">Links to this note</h2>
-<div class="outline-text-2" id="text-org9a0b078">
-<ul class="org-ul">
-<li><a href="./20220214170817-zero_inflated_negative_binomial.html">Zero-inflated Negative Binomial</a></li>
-<li><a href="./simpsonPenalisingModelComponent2015.html">Penalising model component complexity: A principled, practical approach to constructing priors</a></li>
-<li><a href="./20210513123600-prior_choice.html">Prior choice</a></li>
-</ul>
 </div>
 </div>
 </div>
