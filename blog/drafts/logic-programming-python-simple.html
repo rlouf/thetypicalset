@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-27 Mon 15:57 -->
+<!-- 2022-06-27 Mon 20:02 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Logic Programming in Python</title>
+<title>Solve the Zebra riddle with miniKanren</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,134 +197,363 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Logic Programming in Python</h1>
+<h1 class="title">Solve the Zebra riddle with miniKanren</h1>
 <p>
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/MNoorFawi/logic-programming-in-python">this website</a> has a few examples that use <code>kanren</code>'s ancestors, <code>logpy</code>. Issue raised according to which examples did not run, so I'm translating them here.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> run, var
-<span style="font-weight: bold;">from</span> kanren.facts <span style="font-weight: bold;">import</span> facts, Relation
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> var
+<span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unifiable
 
-<span style="font-weight: bold; font-style: italic;">food_type</span> = Relation()
-<span style="font-weight: bold; font-style: italic;">flavor</span> = Relation()
+<span style="font-weight: bold; text-decoration: underline;">@unifiable</span>
+<span style="font-weight: bold; text-decoration: underline;">@dataclass</span>
+<span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">House</span>():
+    nationality: <span style="font-weight: bold;">str</span> = var()
+    drink: <span style="font-weight: bold;">str</span> = var()
+    animal: <span style="font-weight: bold;">str</span> = var()
+    cigarettes: <span style="font-weight: bold;">str</span> = var()
+    color: <span style="font-weight: bold;">str</span> = var()
+</pre>
+</div>
 
-facts(food_type, (<span style="font-style: italic;">"gouda"</span>, <span style="font-style: italic;">"cheese"</span>), <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">facts</span>
-                 (<span style="font-style: italic;">"ritz"</span>, <span style="font-style: italic;">"cracker"</span>),
-                 (<span style="font-style: italic;">"steak"</span>, <span style="font-style: italic;">"meat"</span>),
-                 (<span style="font-style: italic;">"sausage"</span>, <span style="font-style: italic;">"meat"</span>),
-                 (<span style="font-style: italic;">"limonade"</span>, <span style="font-style: italic;">"juice"</span>),
-                 (<span style="font-style: italic;">"cookie"</span>, <span style="font-style: italic;">"dessert"</span>))
+<p>
+We can write a simple goal:
+</p>
 
-facts(flavor, (<span style="font-style: italic;">"sweet"</span>, <span style="font-style: italic;">"dessert"</span>),
-              (<span style="font-style: italic;">"savory"</span>, <span style="font-style: italic;">"meat"</span>),
-              (<span style="font-style: italic;">"savory"</span>, <span style="font-style: italic;">"cheese"</span>),
-              (<span style="font-style: italic;">"sweet"</span>, <span style="font-style: italic;">"juice"</span>))
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, run, var
 
-<span style="font-weight: bold; font-style: italic;">food_flavor</span>, <span style="font-weight: bold; font-style: italic;">food_v</span>, <span style="font-weight: bold; font-style: italic;">flavor_v</span> = var(), var(), var() <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">define the variables to use in the search</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">coloro</span>(house, color):
+    <span style="font-weight: bold; font-style: italic;">second</span> = House(var(), var(), var(), var(), color)
+    <span style="font-weight: bold;">return</span> eq(house, second)
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">We're looking for the food and flavor st</span>
-<span style="font-weight: bold; font-style: italic;">res</span> = run(0, food_flavor, food_type(food_flavor, food_v), flavor(<span style="font-style: italic;">"sweet"</span>, food_v))
-
-<span style="font-weight: bold;">print</span>(res)
+<span style="font-weight: bold; font-style: italic;">color</span> = var()
+<span style="font-weight: bold; font-style: italic;">house</span> = House(<span style="font-style: italic;">"English"</span>, <span style="font-style: italic;">"water"</span>, <span style="font-style: italic;">"animal"</span>, <span style="font-style: italic;">"Chesterfields"</span>, <span style="font-style: italic;">"red"</span>)
+<span style="font-weight: bold;">print</span>(run(0, color, coloro(house, color)))
 </pre>
 </div>
 
 <pre class="example">
-('limonade', 'cookie')
+('red',)
 </pre>
 
+
+<p>
+Now let us go down the riddle; each line will correspond to one goal / statement.
+</p>
+
+<blockquote>
+<ol class="org-ol">
+<li>There are five houses.</li>
+</ol>
+</blockquote>
+
+<p>
+We represent each house by a logic variable in a tuple of line 5. This tuple is <i>ordered</i>, the first element of the tuple being the leftmost house, and the last element the rightmost house.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> <span style="font-weight: bold;">vars</span>
+
+<span style="font-weight: bold; font-style: italic;">houses</span> = <span style="font-weight: bold;">vars</span>(5)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The Englishman lives in the red house</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> membero
+
+<span style="font-weight: bold; font-style: italic;">two</span> = membero(House(<span style="font-style: italic;">"Englishman"</span>, color=<span style="font-style: italic;">"red"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The Spaniard owns the dog</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">three</span> = membero(House(<span style="font-style: italic;">"Spaniard"</span>, animal=<span style="font-style: italic;">"dog"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>Coffe is drunk in the green house</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">four</span> = membero(House(drink=<span style="font-style: italic;">"coffee"</span>, animal=<span style="font-style: italic;">"dog"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The Ukrainian drinks tea</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">five</span> = membero(House(<span style="font-style: italic;">"Ukrainian"</span>, drink=<span style="font-style: italic;">"tea"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The green house is immediately to the right of the ivory house.</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">righto</span>(right, left, houses):
+    <span style="font-style: italic;">"""Express that `right` is on the right of `left` among all the houses."""</span>
+    <span style="font-weight: bold; font-style: italic;">neighbors</span> = <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">zip</span>(houses[:-1], houses[1:]))
+    <span style="font-weight: bold;">return</span> membero((left, right), neighbors)
+
+<span style="font-weight: bold; font-style: italic;">six</span> = righto(House(color=<span style="font-style: italic;">"green"</span>), House(color=<span style="font-style: italic;">"ivory"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The Old Gold smoker owns snails</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">seven</span> = membero(House(animal=<span style="font-style: italic;">"snails"</span>, cigarettes=<span style="font-style: italic;">"Old Gold"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>Kools are smoked in the yellow house</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">eight</span> = membero(House(color=<span style="font-style: italic;">"yellow"</span>, cigarettes=<span style="font-style: italic;">"Kools"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>Milk is drunk in the middle house</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq
+
+<span style="font-weight: bold; font-style: italic;">nine</span> = eq(House(drink=<span style="font-style: italic;">"milk"</span>), houses[2])
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The Norwegian lives in the first house</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">ten</span> = eq(House(<span style="font-style: italic;">"Norwegian"</span>), houses[0])
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The man who smokes Chesterfields lives in the house next to the man with the fox</li>
+</ol>
+</blockquote>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> conde
 
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">nexto</span>(a, b, houses):
+    <span style="font-style: italic;">"""Express that `a` and `b` are next to each other."""</span>
+    <span style="font-weight: bold;">return</span> conde((righto(a, b, houses), righto(b, a, houses)))
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">food_flavor</span>(x, y):
-    <span style="font-weight: bold; font-style: italic;">z</span> = var()
-    <span style="font-weight: bold;">return</span> conde((food_type(x, z), flavor(y, z)))
+<span style="font-weight: bold; font-style: italic;">eleven</span> = nexto(House(cigarettes=<span style="font-style: italic;">"Chesterfields"</span>), House(animal=<span style="font-style: italic;">"fox"</span>), houses)
+</pre>
+</div>
 
-<span style="font-weight: bold; font-style: italic;">what</span> = var()
-<span style="font-weight: bold;">print</span>(run(0, what, food_flavor(what, <span style="font-style: italic;">"sweet"</span>)))
-<span style="font-weight: bold;">print</span>(run(0, what, food_flavor(what, <span style="font-style: italic;">"savory"</span>)))
+
+<blockquote>
+<ol class="org-ol">
+<li>Kools are smoked in the house next to the house where the horse is kept</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">twelve</span> = nexto(House(cigarettes=<span style="font-style: italic;">"Kools"</span>), House(animal=<span style="font-style: italic;">"horse"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The Lucky Strike smoker drinks orange juice</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">thirteen</span> = membero(House(drink=<span style="font-style: italic;">"orange juice"</span>, cigarettes=<span style="font-style: italic;">"Parliaments"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The Japanese smokes Parliaments</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fourteen</span> = membero(House(<span style="font-style: italic;">"Japanese"</span>, cigarettes=<span style="font-style: italic;">"Parliaments"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ol class="org-ol">
+<li>The Norwegian lives next to the blue house</li>
+</ol>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fifteen</span> = nexto(House(<span style="font-style: italic;">"Norwegian"</span>), House(color=<span style="font-style: italic;">"blue"</span>), houses)
+</pre>
+</div>
+
+
+<blockquote>
+<ul class="org-ul">
+<li>Someone drinks water</li>
+<li>Someone owns a zebra</li>
+</ul>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">sixteen</span> = membero(House(drink=<span style="font-style: italic;">"water"</span>), houses)
+<span style="font-weight: bold; font-style: italic;">seventeen</span> = membero(House(animal=<span style="font-style: italic;">"zebra"</span>), houses)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall, run
+
+<span style="font-weight: bold; font-style: italic;">goal</span> = lall(
+    two,
+    three,
+    four,
+    five,
+    six,
+    seven,
+    eight,
+    nine,
+    ten,
+    eleven,
+    twelve,
+    thirteen,
+    fourteen,
+    fifteen,
+    sixteen,
+    seventeen
+)
+<span style="font-weight: bold; font-style: italic;">results</span> = run(0, houses, goal)
+<span style="font-weight: bold;">print</span>(results)
 </pre>
 </div>
 
 <pre class="example">
-('limonade', 'cookie')
-('steak', 'gouda', 'sausage')
+()
 </pre>
 
-
+<div id="outline-container-orgf40f076" class="outline-2">
+<h2 id="orgf40f076">Summary</h2>
+<div class="outline-text-2" id="text-orgf40f076">
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">likes</span> = Relation()
-facts(likes,
-      (<span style="font-style: italic;">"Noor"</span>, <span style="font-style: italic;">"sausage"</span>),
-      (<span style="font-style: italic;">"Melissa"</span>, <span style="font-style: italic;">"pasta"</span>),
-      (<span style="font-style: italic;">"Dmitry"</span>, <span style="font-style: italic;">"cookie"</span>),
-      (<span style="font-style: italic;">"Nikita"</span>, <span style="font-style: italic;">"sausage"</span>),
-      (<span style="font-style: italic;">"Assel"</span>, <span style="font-style: italic;">"limonade"</span>)
+<pre class="src src-python"><span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass
+
+<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, conde, lall, membero, <span style="font-weight: bold;">vars</span>, var, run
+
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unifiable
+
+
+<span style="font-weight: bold; text-decoration: underline;">@unifiable</span>
+<span style="font-weight: bold; text-decoration: underline;">@dataclass</span>
+<span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">House</span>():
+    nationality: <span style="font-weight: bold;">str</span> = var()
+    drink: <span style="font-weight: bold;">str</span> = var()
+    animal: <span style="font-weight: bold;">str</span> = var()
+    cigarettes: <span style="font-weight: bold;">str</span> = var()
+    color: <span style="font-weight: bold;">str</span> = var()
+
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">righto</span>(right, left, houses):
+    <span style="font-style: italic;">"""Express that `right` is on the right of `left` among all the houses."""</span>
+    <span style="font-weight: bold; font-style: italic;">neighbors</span> = <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">zip</span>(houses[:-1], houses[1:]))
+    <span style="font-weight: bold;">return</span> membero((left, right), neighbors)
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">nexto</span>(a, b, houses):
+    <span style="font-style: italic;">"""Express that `a` and `b` are next to each other."""</span>
+    <span style="font-weight: bold;">return</span> conde([righto(a, b, houses)], [righto(b, a, houses)])
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that "righto" and "nexto" work</span>
+<span style="font-weight: bold; font-style: italic;">test</span> = (<span style="font-style: italic;">"a"</span>, <span style="font-style: italic;">"b"</span>, <span style="font-style: italic;">"c"</span>, <span style="font-style: italic;">"d"</span>)
+<span style="font-weight: bold; font-style: italic;">left</span> = var()
+<span style="font-weight: bold; font-style: italic;">right</span> = <span style="font-style: italic;">"c"</span>
+<span style="font-weight: bold;">print</span>(run(0, left, nexto(right, left, test)))
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">And now for the riddle</span>
+<span style="font-weight: bold; font-style: italic;">houses</span> = <span style="font-weight: bold;">vars</span>(5)
+<span style="font-weight: bold; font-style: italic;">goals</span> = lall(
+    membero(House(<span style="font-style: italic;">"Englishman"</span>, color=<span style="font-style: italic;">"red"</span>), houses),
+    membero(House(<span style="font-style: italic;">"Spaniard"</span>, animal=<span style="font-style: italic;">"dog"</span>), houses),
+    membero(House(drink=<span style="font-style: italic;">"coffee"</span>, color=<span style="font-style: italic;">"green"</span>), houses),
+    membero(House(<span style="font-style: italic;">"Ukrainian"</span>, drink=<span style="font-style: italic;">"tea"</span>), houses),
+    righto(House(color=<span style="font-style: italic;">"green"</span>), House(color=<span style="font-style: italic;">"ivory"</span>), houses),
+    membero(House(animal=<span style="font-style: italic;">"snails"</span>, cigarettes=<span style="font-style: italic;">"Old Gold"</span>), houses),
+    membero(House(color=<span style="font-style: italic;">"yellow"</span>, cigarettes=<span style="font-style: italic;">"Kools"</span>), houses),
+    eq(House(drink=<span style="font-style: italic;">"milk"</span>), houses[2]),
+    eq(House(<span style="font-style: italic;">"Norwegian"</span>), houses[0]),
+    nexto(House(cigarettes=<span style="font-style: italic;">"Chesterfields"</span>), House(animal=<span style="font-style: italic;">"fox"</span>), houses),
+    nexto(House(cigarettes=<span style="font-style: italic;">"Kools"</span>), House(animal=<span style="font-style: italic;">"horse"</span>), houses),
+    membero(House(drink=<span style="font-style: italic;">"orange juice"</span>, cigarettes=<span style="font-style: italic;">"Lucky Strike"</span>), houses),
+    membero(House(<span style="font-style: italic;">"Japanese"</span>, cigarettes=<span style="font-style: italic;">"Parliaments"</span>), houses),
+    nexto(House(<span style="font-style: italic;">"Norwegian"</span>), House(color=<span style="font-style: italic;">"blue"</span>), houses),
+    membero(House(drink=<span style="font-style: italic;">"water"</span>), houses),
+    membero(House(animal=<span style="font-style: italic;">"zebra"</span>), houses),
 )
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">friend</span>(x, y):
-    <span style="font-weight: bold; font-style: italic;">z</span> = var()
-    <span style="font-weight: bold;">return</span> conde((likes(x, z), likes(y, z)))
-
-<span style="font-weight: bold; font-style: italic;">who</span> = var()
-<span style="font-weight: bold; font-style: italic;">name</span> = <span style="font-style: italic;">"Noor"</span>
-<span style="font-weight: bold; font-style: italic;">output</span> = run(0, who, friend(who, name))
-<span style="font-weight: bold;">print</span>([x <span style="font-weight: bold;">for</span> x <span style="font-weight: bold;">in</span> output <span style="font-weight: bold;">if</span> x != name])
+<span style="font-weight: bold; font-style: italic;">results</span> = run(0, houses, goals)
+<span style="font-weight: bold;">print</span>(results)
 </pre>
 </div>
 
 <pre class="example">
-['Nikita']
+('b', 'd')
+()
 </pre>
-
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall
-
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">dish_to_like</span>(person, what):
-    <span style="font-weight: bold; font-style: italic;">liked</span> = var()
-    <span style="font-weight: bold; font-style: italic;">foodtype</span> = var()
-    <span style="font-weight: bold; font-style: italic;">foodflavor</span> = var()
-    <span style="font-weight: bold;">return</span> lall(
-        likes(person, liked),
-        food_type(liked, foodtype),
-        flavor(foodflavor, foodtype),
-        food_flavor(what, foodflavor)
-    )
-
-<span style="font-weight: bold; font-style: italic;">what</span> = var()
-<span style="font-weight: bold; font-style: italic;">dish</span> = run(0, what, dish_to_like(<span style="font-style: italic;">"Noor"</span>, what))
-<span style="font-weight: bold;">print</span>(<span style="font-style: italic;">"since Noor has liked Sausage, he would like:"</span>, dish)
-</pre>
-</div>
-
-<pre class="example">
-since Noor has liked Sausage, he would like: ('steak', 'gouda', 'sausage')
-</pre>
-
-<div id="outline-container-org9d85f24" class="outline-2">
-<h2 id="org9d85f24">The Zebra riddle</h2>
-<div class="outline-text-2" id="text-org9d85f24">
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, <span style="font-weight: bold;">vars</span>
-
-<span style="font-weight: bold; font-style: italic;">houses</span> = var()
-<span style="font-weight: bold; font-style: italic;">five_houses</span> = eq(<span style="font-weight: bold;">vars</span>(5), houses)
-
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Each house has the following characteristics:</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Nationality of occupant</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Drink type</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Animal</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Cigarettes</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- Color of the house</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- It has an order</span>
-
-</pre>
-</div>
 </div>
 </div>
 </div>
