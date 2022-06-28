@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-27 Mon 20:04 -->
+<!-- 2022-06-28 Tue 08:36 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Solve the Zebra riddle with miniKanren</title>
+<title>Solve the Zebra puzzle with miniKanren</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -193,320 +193,167 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
-<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Solve the Zebra riddle with miniKanren</h1>
+<h1 class="title">Solve the Zebra puzzle with miniKanren</h1>
 <p>
-<a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/MNoorFawi/logic-programming-in-python">this website</a> has a few examples that use <code>kanren</code>'s ancestors, <code>logpy</code>. Issue raised according to which examples did not run, so I'm translating them here.
+The <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Zebra_Puzzle">Zebra Puzzle</a>, originally published in <i>Life International</i> in 1962, is a must-have example for logic programming languages. <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/MNoorFawi/logic-programming-in-python">This repository</a> proposes a solution <code>logpy</code>, <code>kanren</code>'s ancestor, but <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren/issues/51">does not seem to be working</a> with <code>kanren</code>. In this blog post I will propose a <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren">kanren</a> solution, and show how we can make the solution much more readable than other languages' using dataclasses.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> var
-<span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass
-<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unifiable
-
-<span style="font-weight: bold; text-decoration: underline;">@unifiable</span>
-<span style="font-weight: bold; text-decoration: underline;">@dataclass</span>
-<span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">House</span>():
-    nationality: <span style="font-weight: bold;">str</span> = var()
-    drink: <span style="font-weight: bold;">str</span> = var()
-    animal: <span style="font-weight: bold;">str</span> = var()
-    cigarettes: <span style="font-weight: bold;">str</span> = var()
-    color: <span style="font-weight: bold;">str</span> = var()
-</pre>
-</div>
-
 <p>
-We can write a simple goal:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, run, var
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">coloro</span>(house, color):
-    <span style="font-weight: bold; font-style: italic;">second</span> = House(var(), var(), var(), var(), color)
-    <span style="font-weight: bold;">return</span> eq(house, second)
-
-<span style="font-weight: bold; font-style: italic;">color</span> = var()
-<span style="font-weight: bold; font-style: italic;">house</span> = House(<span style="font-style: italic;">"English"</span>, <span style="font-style: italic;">"water"</span>, <span style="font-style: italic;">"animal"</span>, <span style="font-style: italic;">"Chesterfields"</span>, <span style="font-style: italic;">"red"</span>)
-<span style="font-weight: bold;">print</span>(run(0, color, coloro(house, color)))
-</pre>
-</div>
-
-<pre class="example">
-('red',)
-</pre>
-
-
-<p>
-Now let us go down the riddle; each line will correspond to one goal / statement.
+I reproduce the puzzle here so you can easily refer to it:
 </p>
 
 <blockquote>
 <ol class="org-ol">
 <li>There are five houses.</li>
+<li>The Englishman lives in the red house.</li>
+<li>The Spaniard owns the dog.</li>
+<li>Coffee is drunk in the green house.</li>
+<li>The Ukrainian drinks tea.</li>
+<li>The green house is immediately to the right of the ivory house.</li>
+<li>The Old Gold smoker owns snails.</li>
+<li>Kools are smoked in the yellow house.</li>
+<li>Milk is drunk in the middle house.</li>
+<li>The Norwegian lives in the first house.</li>
+<li>The man who smokes Chesterfields lives in the house next to the man with the fox.</li>
+<li>Kools are smoked in the house next to the house where the horse is kept.</li>
+<li>The Lucky Strike smoker drinks orange juice.</li>
+<li>The Japanese smokes Parliaments.</li>
+<li>The Norwegian lives next to the blue house.</li>
 </ol>
-</blockquote>
 
 <p>
-We represent each house by a logic variable in a tuple of line 5. This tuple is <i>ordered</i>, the first element of the tuple being the leftmost house, and the last element the rightmost house.
+Now, who drinks water? Who owns the zebra?
+</p>
+
+<p>
+In the interest of clarity, it must be added that each of the five houses is painted a different color, and their inhabitants are of different national extractions, own different pets, drink different beverages and smoke different brands of American cigarets [sic]. One other thing: in statement 6, right means your right.
+</p>
+</blockquote>
+
+<div id="outline-container-orgdcb73ae" class="outline-2">
+<h2 id="orgdcb73ae">Implementation</h2>
+<div class="outline-text-2" id="text-orgdcb73ae">
+</div>
+<div id="outline-container-orgaa2e34b" class="outline-3">
+<h3 id="orgaa2e34b">Houses and what's inside them</h3>
+<div class="outline-text-3" id="text-orgaa2e34b">
+<p>
+The first line states that there are 5 houses. We will represent each house with a <i>logic variable</i> <code>Var</code>; the houses are stored in a tuple where the first element represents the leftmost house and the last element the rightmost house. Each house has 4 characteristics: its color, the nationality of the inhabitant, the kind of drink they're having, the kind of animal they own, and the brand of cigarettes they smoke. Given the structure of the problem, dataclasses where fields default to a new <code>Var</code> seems particularly adapted. We can use <code>unification</code>'s <code>@unifiable</code> decorator to make the dataclass "unifiable" so we can use it with <code>kanren</code>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> <span style="font-weight: bold;">vars</span>
+<pre class="src src-python"><span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass, field
+<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> var, <span style="font-weight: bold;">vars</span>
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unifiable
+
+
+<span style="font-weight: bold; text-decoration: underline;">@unifiable</span>
+<span style="font-weight: bold; text-decoration: underline;">@dataclass</span>
+<span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">House</span>():
+    nationality: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+    drink: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+    animal: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+    cigarettes: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+    color: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+
 
 <span style="font-weight: bold; font-style: italic;">houses</span> = <span style="font-weight: bold;">vars</span>(5)
 </pre>
 </div>
 
-
-<blockquote>
-<ol class="org-ol">
-<li>The Englishman lives in the red house</li>
-</ol>
-</blockquote>
+<p>
+The second statement translates to the following miniKanren goal:
+</p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> membero
 
-<span style="font-weight: bold; font-style: italic;">two</span> = membero(House(<span style="font-style: italic;">"Englishman"</span>, color=<span style="font-style: italic;">"red"</span>), houses)
+membero(House(<span style="font-style: italic;">"Englishman"</span>, color=<span style="font-style: italic;">"red"</span>), houses)
 </pre>
 </div>
 
-
-<blockquote>
-<ol class="org-ol">
-<li>The Spaniard owns the dog</li>
-</ol>
-</blockquote>
+<p>
+Or, in plain english, "The house that is red and where the Englishman lives is one of the houses". Statements 2, 3, 4, 7, 13, 14 can be translated similarly. Don't forget to speficy that there's a house where someone drinks water and one where someone owns a zebra!
+</p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">three</span> = membero(House(<span style="font-style: italic;">"Spaniard"</span>, animal=<span style="font-style: italic;">"dog"</span>), houses)
+<pre class="src src-python">membero(House(drink=<span style="font-style: italic;">"water"</span>), houses)
+membero(House(animal=<span style="font-style: italic;">"zebra"</span>), houses)
 </pre>
 </div>
-
-
-<blockquote>
-<ol class="org-ol">
-<li>Coffe is drunk in the green house</li>
-</ol>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">four</span> = membero(House(drink=<span style="font-style: italic;">"coffee"</span>, animal=<span style="font-style: italic;">"dog"</span>), houses)
-</pre>
+</div>
 </div>
 
-
-<blockquote>
-<ol class="org-ol">
-<li>The Ukrainian drinks tea</li>
-</ol>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">five</span> = membero(House(<span style="font-style: italic;">"Ukrainian"</span>, drink=<span style="font-style: italic;">"tea"</span>), houses)
-</pre>
-</div>
-
-
-<blockquote>
-<ol class="org-ol">
-<li>The green house is immediately to the right of the ivory house.</li>
-</ol>
-</blockquote>
+<div id="outline-container-org64a2ccc" class="outline-3">
+<h3 id="org64a2ccc">Houses' location</h3>
+<div class="outline-text-3" id="text-org64a2ccc">
+<p>
+Some of the statements are about the houses' <i>location</i>. In particular, statement 6 is aboout a house that is located to the right of another one. We thus need to define a <i>goal</i> that expresses that a house is to the right of another:
+</p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">righto</span>(right, left, houses):
     <span style="font-style: italic;">"""Express that `right` is on the right of `left` among all the houses."""</span>
     <span style="font-weight: bold; font-style: italic;">neighbors</span> = <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">zip</span>(houses[:-1], houses[1:]))
     <span style="font-weight: bold;">return</span> membero((left, right), neighbors)
-
-<span style="font-weight: bold; font-style: italic;">six</span> = righto(House(color=<span style="font-style: italic;">"green"</span>), House(color=<span style="font-style: italic;">"ivory"</span>), houses)
 </pre>
 </div>
 
-
-<blockquote>
-<ol class="org-ol">
-<li>The Old Gold smoker owns snails</li>
-</ol>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">seven</span> = membero(House(animal=<span style="font-style: italic;">"snails"</span>, cigarettes=<span style="font-style: italic;">"Old Gold"</span>), houses)
-</pre>
-</div>
-
-
-<blockquote>
-<ol class="org-ol">
-<li>Kools are smoked in the yellow house</li>
-</ol>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">eight</span> = membero(House(color=<span style="font-style: italic;">"yellow"</span>, cigarettes=<span style="font-style: italic;">"Kools"</span>), houses)
-</pre>
-</div>
-
-
-<blockquote>
-<ol class="org-ol">
-<li>Milk is drunk in the middle house</li>
-</ol>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq
-
-<span style="font-weight: bold; font-style: italic;">nine</span> = eq(House(drink=<span style="font-style: italic;">"milk"</span>), houses[2])
-</pre>
-</div>
-
-
-<blockquote>
-<ol class="org-ol">
-<li>The Norwegian lives in the first house</li>
-</ol>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">ten</span> = eq(House(<span style="font-style: italic;">"Norwegian"</span>), houses[0])
-</pre>
-</div>
-
-
-<blockquote>
-<ol class="org-ol">
-<li>The man who smokes Chesterfields lives in the house next to the man with the fox</li>
-</ol>
-</blockquote>
+<p>
+Statements 11, 12, 15 are about houses that are located <i>next</i> to each other. The corresponding goal is easily expressed using the previously-defined <code>righto</code>:
+</p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> conde
 
 <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">nexto</span>(a, b, houses):
     <span style="font-style: italic;">"""Express that `a` and `b` are next to each other."""</span>
-    <span style="font-weight: bold;">return</span> conde((righto(a, b, houses), righto(b, a, houses)))
-
-<span style="font-weight: bold; font-style: italic;">eleven</span> = nexto(House(cigarettes=<span style="font-style: italic;">"Chesterfields"</span>), House(animal=<span style="font-style: italic;">"fox"</span>), houses)
+    <span style="font-weight: bold;">return</span> conde([righto(a, b, houses)], [righto(b, a, houses)])
 </pre>
 </div>
 
-
-<blockquote>
-<ol class="org-ol">
-<li>Kools are smoked in the house next to the house where the horse is kept</li>
-</ol>
-</blockquote>
+<p>
+Statement 10 is about the <i>first</i> house, and statement 9 is about the <i>middle</i> house. Remember that our <code>houses</code> tuple is ordered to these are easily expressed as:
+</p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">twelve</span> = nexto(House(cigarettes=<span style="font-style: italic;">"Kools"</span>), House(animal=<span style="font-style: italic;">"horse"</span>), houses)
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq
+
+eq(House(drink=<span style="font-style: italic;">"milk"</span>), houses[2])
+eq(House(<span style="font-style: italic;">"Norwegian"</span>), houses[0])
 </pre>
 </div>
-
-
-<blockquote>
-<ol class="org-ol">
-<li>The Lucky Strike smoker drinks orange juice</li>
-</ol>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">thirteen</span> = membero(House(drink=<span style="font-style: italic;">"orange juice"</span>, cigarettes=<span style="font-style: italic;">"Parliaments"</span>), houses)
-</pre>
+</div>
+</div>
 </div>
 
-
-<blockquote>
-<ol class="org-ol">
-<li>The Japanese smokes Parliaments</li>
-</ol>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fourteen</span> = membero(House(<span style="font-style: italic;">"Japanese"</span>, cigarettes=<span style="font-style: italic;">"Parliaments"</span>), houses)
-</pre>
-</div>
-
-
-<blockquote>
-<ol class="org-ol">
-<li>The Norwegian lives next to the blue house</li>
-</ol>
-</blockquote>
+<div id="outline-container-org603185d" class="outline-2">
+<h2 id="org603185d">The solution</h2>
+<div class="outline-text-2" id="text-org603185d">
+<p>
+Now that we have defined the concepts and objects we need, we can write the full solution:
+</p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fifteen</span> = nexto(House(<span style="font-style: italic;">"Norwegian"</span>), House(color=<span style="font-style: italic;">"blue"</span>), houses)
-</pre>
-</div>
+<pre class="src src-python"><span style="font-weight: bold;">from</span> typing <span style="font-weight: bold;">import</span> Union
+<span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass, field
 
-
-<blockquote>
-<ul class="org-ul">
-<li>Someone drinks water</li>
-<li>Someone owns a zebra</li>
-</ul>
-</blockquote>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">sixteen</span> = membero(House(drink=<span style="font-style: italic;">"water"</span>), houses)
-<span style="font-weight: bold; font-style: italic;">seventeen</span> = membero(House(animal=<span style="font-style: italic;">"zebra"</span>), houses)
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall, run
-
-<span style="font-weight: bold; font-style: italic;">goal</span> = lall(
-    two,
-    three,
-    four,
-    five,
-    six,
-    seven,
-    eight,
-    nine,
-    ten,
-    eleven,
-    twelve,
-    thirteen,
-    fourteen,
-    fifteen,
-    sixteen,
-    seventeen
-)
-<span style="font-weight: bold; font-style: italic;">results</span> = run(0, houses, goal)
-<span style="font-weight: bold;">print</span>(results)
-</pre>
-</div>
-
-<pre class="example">
-()
-</pre>
-
-<div id="outline-container-org131855e" class="outline-2">
-<h2 id="org131855e">Summary</h2>
-<div class="outline-text-2" id="text-org131855e">
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass
-
-<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, conde, lall, membero, <span style="font-weight: bold;">vars</span>, var, run
-
-<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unifiable
+<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, conde, lall, membero, run
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unifiable, var, <span style="font-weight: bold;">vars</span>, Var
 
 
 <span style="font-weight: bold; text-decoration: underline;">@unifiable</span>
 <span style="font-weight: bold; text-decoration: underline;">@dataclass</span>
 <span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">House</span>():
-    nationality: <span style="font-weight: bold;">str</span> = var()
-    drink: <span style="font-weight: bold;">str</span> = var()
-    animal: <span style="font-weight: bold;">str</span> = var()
-    cigarettes: <span style="font-weight: bold;">str</span> = var()
-    color: <span style="font-weight: bold;">str</span> = var()
+    nationality: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+    drink: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+    animal: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+    cigarettes: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+    color: <span style="font-weight: bold;">str</span> = field(default_factory=var)
 
 
 <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">righto</span>(right, left, houses):
@@ -518,11 +365,6 @@ We represent each house by a logic variable in a tuple of line 5. This tuple is 
     <span style="font-style: italic;">"""Express that `a` and `b` are next to each other."""</span>
     <span style="font-weight: bold;">return</span> conde([righto(a, b, houses)], [righto(b, a, houses)])
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that "righto" and "nexto" work</span>
-<span style="font-weight: bold; font-style: italic;">test</span> = (<span style="font-style: italic;">"a"</span>, <span style="font-style: italic;">"b"</span>, <span style="font-style: italic;">"c"</span>, <span style="font-style: italic;">"d"</span>)
-<span style="font-weight: bold; font-style: italic;">left</span> = var()
-<span style="font-weight: bold; font-style: italic;">right</span> = <span style="font-style: italic;">"c"</span>
-<span style="font-weight: bold;">print</span>(run(0, left, nexto(right, left, test)))
 
 <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">And now for the riddle</span>
 <span style="font-weight: bold; font-style: italic;">houses</span> = <span style="font-weight: bold;">vars</span>(5)
@@ -545,17 +387,41 @@ We represent each house by a logic variable in a tuple of line 5. This tuple is 
     membero(House(animal=<span style="font-style: italic;">"zebra"</span>), houses),
 )
 
+
 <span style="font-weight: bold; font-style: italic;">results</span> = run(0, houses, goals)
 <span style="font-weight: bold;">print</span>(results)
 </pre>
 </div>
 
 <pre class="example">
-('b', 'd')
-()
+([House(nationality='Norwegian', drink='water', animal='fox', cigarettes='Kools', color='yellow'), House(nationality='Ukrainian', drink='tea', animal='horse', cigarettes='Chesterfields', color='blue'), House(nationality='Englishman', drink='milk', animal='snails', cigarettes='Old Gold', color='red'), House(nationality='Spaniard', drink='orange juice', animal='dog', cigarettes='Lucky Strike', color='ivory'), House(nationality='Japanese', drink='coffee', animal='zebra', cigarettes='Parliaments', color='green')],)
 </pre>
+
+
+<p>
+The Norwegian drinks water and the Japanese owns the zebra!
+</p>
 </div>
 </div>
+
+<div id="outline-container-orgd91cebe" class="outline-2">
+<h2 id="orgd91cebe">Conclusion</h2>
+<div class="outline-text-2" id="text-orgd91cebe">
+<p>
+miniKanren's python implementation, <code>kanren</code>, allowed us to provide a very intuitive an easy-to-read solution to the Zebra puzzle. Being able to use python's data structures for relational programming goes a long way making miniKanren user friendly, and I hope this convinced you like it did convince me!
+</p>
+
+<p>
+In a next post we will see how you can make your own objects "unifiable" and thus use relational programming with an existing codebase. This is already what <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/blob/main/aesara/graph/unify.py">is happening in aesara</a>, where Ops and Variables have been made unifiable so we can do some <a href="file:///home/runner/projects/thetypicalset/org/blog/20220414-identify-horsehoe.html">pattern matching on Aesara graphs</a>.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2022-06-28 Tue 00:00</p>
+<p class="author">Author: Rémi Louf</p>
+<p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
+<p class="date">Created: 2022-06-28 Tue 08:36</p>
 </div>
 </body>
 </html>
