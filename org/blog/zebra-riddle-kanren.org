@@ -1,0 +1,169 @@
+#+TITLE: Solve the Zebra puzzle with miniKanren
+#+DATE: <2022-06-28 Tue>
+#+PROPERTY: header-args :results output
+
+
+The [[https://en.wikipedia.org/wiki/Zebra_Puzzle][Zebra Puzzle]], originally published in /Life International/ in 1962, is a must-have example for logic programming languages. [[https://github.com/MNoorFawi/logic-programming-in-python][This repository]] proposes a solution =logpy=, =kanren='s ancestor, but [[https://github.com/pythological/kanren/issues/51][does not seem to be working]] with =kanren=. In this blog post I will propose a [[https://github.com/pythological/kanren][kanren]] solution, and show how we can make the solution much more readable than other languages' using dataclasses.
+
+I reproduce the puzzle here so you can easily refer to it:
+
+#+begin_quote
+1. There are five houses.
+2. The Englishman lives in the red house.
+3. The Spaniard owns the dog.
+4. Coffee is drunk in the green house.
+5. The Ukrainian drinks tea.
+6. The green house is immediately to the right of the ivory house.
+7. The Old Gold smoker owns snails.
+8. Kools are smoked in the yellow house.
+9. Milk is drunk in the middle house.
+10. The Norwegian lives in the first house.
+11. The man who smokes Chesterfields lives in the house next to the man with the fox.
+12. Kools are smoked in the house next to the house where the horse is kept.
+13. The Lucky Strike smoker drinks orange juice.
+14. The Japanese smokes Parliaments.
+15. The Norwegian lives next to the blue house.
+
+Now, who drinks water? Who owns the zebra?
+
+In the interest of clarity, it must be added that each of the five houses is painted a different color, and their inhabitants are of different national extractions, own different pets, drink different beverages and smoke different brands of American cigarets [sic]. One other thing: in statement 6, right means your right.
+#+end_quote
+
+* Implementation
+
+** Houses and what's inside them
+
+The first line states that there are 5 houses. We will represent each house with a /logic variable/ =Var=; the houses are stored in a tuple where the first element represents the leftmost house and the last element the rightmost house. Each house has 4 characteristics: its color, the nationality of the inhabitant, the kind of drink they're having, the kind of animal they own, and the brand of cigarettes they smoke. Given the structure of the problem, dataclasses where fields default to a new =Var= seems particularly adapted. We can use =unification='s =@unifiable= decorator to make the dataclass "unifiable" so we can use it with =kanren=:
+
+#+begin_src python :session :results silent
+from dataclasses import dataclass, field
+from kanren import var, vars
+from unification import unifiable
+
+
+@unifiable
+@dataclass
+class House():
+    nationality: str = field(default_factory=var)
+    drink: str = field(default_factory=var)
+    animal: str = field(default_factory=var)
+    cigarettes: str = field(default_factory=var)
+    color: str = field(default_factory=var)
+
+
+houses = vars(5)
+#+end_src
+
+The second statement translates to the following miniKanren goal:
+
+#+begin_src python :session :results silent
+from kanren import membero
+
+membero(House("Englishman", color="red"), houses)
+#+end_src
+
+Or, in plain english, "The house that is red and where the Englishman lives is one of the houses". Statements 2, 3, 4, 7, 13, 14 can be translated similarly. Don't forget to speficy that there's a house where someone drinks water and one where someone owns a zebra!
+
+#+begin_src python :session :results silent
+membero(House(drink="water"), houses)
+membero(House(animal="zebra"), houses)
+#+end_src
+
+** Houses' location
+
+Some of the statements are about the houses' /location/. In particular, statement 6 is aboout a house that is located to the right of another one. We thus need to define a /goal/ that expresses that a house is to the right of another:
+
+#+begin_src python :session :results silent
+def righto(right, left, houses):
+    """Express that `right` is on the right of `left` among all the houses."""
+    neighbors = tuple(zip(houses[:-1], houses[1:]))
+    return membero((left, right), neighbors)
+#+end_src
+
+Statements 11, 12, 15 are about houses that are located /next/ to each other. The corresponding goal is easily expressed using the previously-defined =righto=:
+
+#+begin_src python :session :results silent
+from kanren import conde
+
+def nexto(a, b, houses):
+    """Express that `a` and `b` are next to each other."""
+    return conde([righto(a, b, houses)], [righto(b, a, houses)])
+#+end_src
+
+Statement 10 is about the /first/ house, and statement 9 is about the /middle/ house. Remember that our =houses= tuple is ordered to these are easily expressed as:
+
+#+begin_src python :session :results silent
+from kanren import eq
+
+eq(House(drink="milk"), houses[2])
+eq(House("Norwegian"), houses[0])
+#+end_src
+
+* The solution
+
+Now that we have defined the concepts and objects we need, we can write the full solution:
+
+#+begin_src python :results output
+from typing import Union
+from dataclasses import dataclass, field
+
+from kanren import eq, conde, lall, membero, run
+from unification import unifiable, var, vars, Var
+
+
+@unifiable
+@dataclass
+class House():
+    nationality: str = field(default_factory=var)
+    drink: str = field(default_factory=var)
+    animal: str = field(default_factory=var)
+    cigarettes: str = field(default_factory=var)
+    color: str = field(default_factory=var)
+
+
+def righto(right, left, houses):
+    """Express that `right` is on the right of `left` among all the houses."""
+    neighbors = tuple(zip(houses[:-1], houses[1:]))
+    return membero((left, right), neighbors)
+
+def nexto(a, b, houses):
+    """Express that `a` and `b` are next to each other."""
+    return conde([righto(a, b, houses)], [righto(b, a, houses)])
+
+
+# And now for the riddle
+houses = vars(5)
+goals = lall(
+    membero(House("Englishman", color="red"), houses),
+    membero(House("Spaniard", animal="dog"), houses),
+    membero(House(drink="coffee", color="green"), houses),
+    membero(House("Ukrainian", drink="tea"), houses),
+    righto(House(color="green"), House(color="ivory"), houses),
+    membero(House(animal="snails", cigarettes="Old Gold"), houses),
+    membero(House(color="yellow", cigarettes="Kools"), houses),
+    eq(House(drink="milk"), houses[2]),
+    eq(House("Norwegian"), houses[0]),
+    nexto(House(cigarettes="Chesterfields"), House(animal="fox"), houses),
+    nexto(House(cigarettes="Kools"), House(animal="horse"), houses),
+    membero(House(drink="orange juice", cigarettes="Lucky Strike"), houses),
+    membero(House("Japanese", cigarettes="Parliaments"), houses),
+    nexto(House("Norwegian"), House(color="blue"), houses),
+    membero(House(drink="water"), houses),
+    membero(House(animal="zebra"), houses),
+)
+
+
+results = run(0, houses, goals)
+print(results)
+#+end_src
+
+#+RESULTS:
+: ([House(nationality='Norwegian', drink='water', animal='fox', cigarettes='Kools', color='yellow'), House(nationality='Ukrainian', drink='tea', animal='horse', cigarettes='Chesterfields', color='blue'), House(nationality='Englishman', drink='milk', animal='snails', cigarettes='Old Gold', color='red'), House(nationality='Spaniard', drink='orange juice', animal='dog', cigarettes='Lucky Strike', color='ivory'), House(nationality='Japanese', drink='coffee', animal='zebra', cigarettes='Parliaments', color='green')],)
+
+The Norwegian drinks water and the Japanese owns the zebra!
+
+* Conclusion
+
+miniKanren's python implementation, =kanren=, allowed us to provide a very intuitive an easy-to-read solution to the Zebra puzzle. Being able to use python's data structures for relational programming goes a long way making miniKanren user friendly, and I hope this convinced you like it did convince me!
+
+In a next post we will see how you can make your own objects "unifiable" and thus use relational programming with an existing codebase. This is already what [[https://github.com/aesara-devs/aesara/blob/main/aesara/graph/unify.py][is happening in aesara]], where Ops and Variables have been made unifiable so we can do some [[file:~/projects/thetypicalset/org/blog/20220414-identify-horsehoe.org][pattern matching on Aesara graphs]].
