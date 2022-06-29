@@ -114,11 +114,11 @@ from unification import unifiable, var, vars, Var
 @unifiable
 @dataclass
 class House():
-    nationality: str = field(default_factory=var)
-    drink: str = field(default_factory=var)
-    animal: str = field(default_factory=var)
-    cigarettes: str = field(default_factory=var)
-    color: str = field(default_factory=var)
+    nationality: Union[str, Var] = field(default_factory=var)
+    drink: Union[str, Var] = field(default_factory=var)
+    animal: Union[str, Var] = field(default_factory=var)
+    cigarettes: Union[str, Var] = field(default_factory=var)
+    color: Union[str, Var] = field(default_factory=var)
 
 
 def righto(right, left, houses):
