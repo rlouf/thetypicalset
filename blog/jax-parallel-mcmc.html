@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-28 Tue 08:36 -->
+<!-- 2022-06-29 Wed 04:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Massively parallel MCMC with JAX</title>
@@ -199,9 +199,9 @@
 <div id="content" class="content">
 <h1 class="title">Massively parallel MCMC with JAX</h1>
 
-<div id="outline-container-org25d970f" class="outline-2">
-<h2 id="org25d970f">TL;DR</h2>
-<div class="outline-text-2" id="text-org25d970f">
+<div id="outline-container-org95dfa35" class="outline-2">
+<h2 id="org95dfa35">TL;DR</h2>
+<div class="outline-text-2" id="text-org95dfa35">
 <p>
 <i>Edit on 2020/10/01:</i> As pointed out by <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/SingularMattrix">Matthew Johnson</a> and <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/eigenhector">Hector Yee</a>, the
 results reported in a previous version of this post were artificially biaised in
@@ -232,9 +232,9 @@ want to avoid pre-allocating too much memory.
 </div>
 </div>
 
-<div id="outline-container-org30f04af" class="outline-2">
-<h2 id="org30f04af">Vectorized MCMC</h2>
-<div class="outline-text-2" id="text-org30f04af">
+<div id="outline-container-orgcf98c77" class="outline-2">
+<h2 id="orgcf98c77">Vectorized MCMC</h2>
+<div class="outline-text-2" id="text-orgcf98c77">
 <p>
 Colin Carroll recently wrote an interesting <a target='_blank' rel='noopener noreferrer' class='external' href="https://colindcarroll.com/2019/08/18/very-parallel-mcmc-sampling/">blog post</a> that
 uses Numpy and a vectorized version of the random walk metropolis algorithm
@@ -285,9 +285,9 @@ comparing:
 </div>
 
 
-<div id="outline-container-org1b0746f" class="outline-2">
-<h2 id="org1b0746f">Notes about benchmarking</h2>
-<div class="outline-text-2" id="text-org1b0746f">
+<div id="outline-container-orgbbbfeba" class="outline-2">
+<h2 id="orgbbbfeba">Notes about benchmarking</h2>
+<div class="outline-text-2" id="text-orgbbbfeba">
 <p>
 Before giving the results, a few words of caution:
 </p>
@@ -312,9 +312,9 @@ frameworks.</li>
 </div>
 </div>
 
-<div id="outline-container-org9425308" class="outline-2">
-<h2 id="org9425308">Setup and results</h2>
-<div class="outline-text-2" id="text-org9425308">
+<div id="outline-container-org9ac46f9" class="outline-2">
+<h2 id="org9ac46f9">Setup and results</h2>
+<div class="outline-text-2" id="text-org9ac46f9">
 <p>
 I am sampling an arbitrary Gaussian mixture with 4 components. Using Numpy:
 </p>
@@ -337,9 +337,9 @@ I am sampling an arbitrary Gaussian mixture with 4 components. Using Numpy:
 </div>
 </div>
 
-<div id="outline-container-org7eb90a6" class="outline-3">
-<h3 id="org7eb90a6">Numpy</h3>
-<div class="outline-text-3" id="text-org7eb90a6">
+<div id="outline-container-org68af9fb" class="outline-3">
+<h3 id="org68af9fb">Numpy</h3>
+<div class="outline-text-3" id="text-org68af9fb">
 <p>
 Colin Carroll's <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/ColCarroll/minimc">MiniMC</a> has the simplest and most readable implementations of
 Random Walk Metropolis and Hamiltonian Monte Carlo I have seen. My Numpy
@@ -373,9 +373,9 @@ implementation is an iteration upon his:
 </div>
 </div>
 
-<div id="outline-container-org72bfb09" class="outline-3">
-<h3 id="org72bfb09">JAX</h3>
-<div class="outline-text-3" id="text-org72bfb09">
+<div id="outline-container-org344b5f6" class="outline-3">
+<h3 id="org344b5f6">JAX</h3>
+<div class="outline-text-3" id="text-org344b5f6">
 <p>
 Let us unpack the JAX implementation. The kernel is very similar to Numpy's:
 </p>
@@ -475,9 +475,9 @@ heavy lifting: <code>rw_metropolis_kernel</code>.</li>
 </div>
 
 
-<div id="outline-container-org9819488" class="outline-3">
-<h3 id="org9819488">Tensorflow Probability</h3>
-<div class="outline-text-3" id="text-org9819488">
+<div id="outline-container-org03d8e93" class="outline-3">
+<h3 id="org03d8e93">Tensorflow Probability</h3>
+<div class="outline-text-3" id="text-org03d8e93">
 <p>
 For TFP we use the Random Walk Metropolis algorithm implemented in the library:
 </p>
@@ -513,9 +513,9 @@ tf.xla.experimental.<span style="font-weight: bold;">compile</span>(run_mcm)
 </div>
 </div>
 
-<div id="outline-container-org041f771" class="outline-3">
-<h3 id="org041f771">Results</h3>
-<div class="outline-text-3" id="text-org041f771">
+<div id="outline-container-org8d1db1d" class="outline-3">
+<h3 id="org8d1db1d">Results</h3>
+<div class="outline-text-3" id="text-org8d1db1d">
 <p>
 We have two degrees of freedom: the number of samples and the number of
 chains. While the first relies on raw number crunching power, the second also
@@ -537,15 +537,15 @@ hypothetical situation, just to show the improvement brought by compilation.</li
 </ol>
 </div>
 
-<div id="outline-container-org9f9f3af" class="outline-4">
-<h4 id="org9f9f3af">Draw an increasing number of samples with 1,000 chains</h4>
-<div class="outline-text-4" id="text-org9f9f3af">
+<div id="outline-container-org84be54f" class="outline-4">
+<h4 id="org84be54f">Draw an increasing number of samples with 1,000 chains</h4>
+<div class="outline-text-4" id="text-org84be54f">
 <p>
 We fix the number of chains and make the number of samples vary.
 </p>
 
 
-<div id="org4911f6d" class="figure">
+<div id="org1bd514c" class="figure">
 <p><img src="img/jax-parallel-mcmc-samples.png" alt="jax-parallel-mcmc-samples.png" width="100%" />
 </p>
 </div>
@@ -582,15 +582,15 @@ you reach 10 iterations. For all practical purposes, JAX wins.
 </div>
 
 
-<div id="outline-container-orgfa1742b" class="outline-4">
-<h4 id="orgfa1742b">Draw 1,000 samples with an increasing number of chains</h4>
-<div class="outline-text-4" id="text-orgfa1742b">
+<div id="outline-container-org94d69a5" class="outline-4">
+<h4 id="org94d69a5">Draw 1,000 samples with an increasing number of chains</h4>
+<div class="outline-text-4" id="text-org94d69a5">
 <p>
 Here we fix the number of samples and make the number of chains vary.
 </p>
 
 
-<div id="org43ee35b" class="figure">
+<div id="org031eb0e" class="figure">
 <p><img src="img/jax-parallel-mcmc-chains.png" alt="jax-parallel-mcmc-chains.png" width="100%" />
 </p>
 </div>
@@ -617,9 +617,9 @@ JAX can generate a billion samples in 25s on CPU. 20 times faster than Numpy.
 </div>
 
 
-<div id="outline-container-org2b60c94" class="outline-2">
-<h2 id="org2b60c94">Conclusion</h2>
-<div class="outline-text-2" id="text-org2b60c94">
+<div id="outline-container-orgb193327" class="outline-2">
+<h2 id="orgb193327">Conclusion</h2>
+<div class="outline-text-2" id="text-orgb193327">
 <p>
 For something that allows us to write code in pure python, JAX's performance is
 incredible. Numpy still is a decent contender, especially for the smaller
@@ -655,7 +655,7 @@ another breakthrough.
 <p class="date">Date: 2020-01-09 Thu 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-06-28 Tue 08:36</p>
+<p class="date">Created: 2022-06-29 Wed 04:22</p>
 </div>
 </body>
 </html>
