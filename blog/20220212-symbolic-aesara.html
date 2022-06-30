@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-29 Wed 04:22 -->
+<!-- 2022-06-30 Thu 07:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Rewriting Aesara graphs</title>
@@ -252,9 +252,9 @@ The output of <code>dprint</code> shows the underlying operators (<code>dot</cod
 To "math/search for" combinations of Aesara operations&#x2013;or, as we just saw, graphs&#x2013;we use <b>unification</b>; to "replace" parts of the graph (well, produce a copy with replaced parts) we use <b>reificatoin</b>. Aesara provides support for these via <b>expression-tuples</b>.
 </p>
 
-<div id="outline-container-org99cf004" class="outline-2">
-<h2 id="org99cf004">S-expressions</h2>
-<div class="outline-text-2" id="text-org99cf004">
+<div id="outline-container-org5123fac" class="outline-2">
+<h2 id="org5123fac">S-expressions</h2>
+<div class="outline-text-2" id="text-org5123fac">
 <p>
 We can convert an Aesara graphs into an <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/S-expression">S-expression-like</a> form using <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/etuples">etuples</a>.
 </p>
@@ -268,7 +268,7 @@ pprint(z_et)
 </pre>
 </div>
 
-<pre class="example" id="org49fe748">
+<pre class="example" id="orgf8740c8">
 e(
   e(aesara.tensor.math.Dot),
   A,
@@ -357,9 +357,9 @@ Working with S-expressions is much like manipulating a subset of Python AST, so,
 </div>
 </div>
 
-<div id="outline-container-orge0bf37d" class="outline-2">
-<h2 id="orge0bf37d">Operators and their parameters</h2>
-<div class="outline-text-2" id="text-orge0bf37d">
+<div id="outline-container-org8dad394" class="outline-2">
+<h2 id="org8dad394">Operators and their parameters</h2>
+<div class="outline-text-2" id="text-org8dad394">
 <p>
 In etuplized-graph-print the <code>etuple</code> form of our matrix-multuplication graph <code>z_et</code> produced Aesaa operators
 </p>
@@ -375,9 +375,9 @@ e(aesara.tensor.math.Dot)
 </div>
 </div>
 
-<div id="outline-container-orgdfd23d4" class="outline-2">
-<h2 id="orgdfd23d4">Unification and reification</h2>
-<div class="outline-text-2" id="text-orgdfd23d4">
+<div id="outline-container-org10e857c" class="outline-2">
+<h2 id="org10e857c">Unification and reification</h2>
+<div class="outline-text-2" id="text-org10e857c">
 <p>
 With the ability to use logic variables and Aesara graphs together, we can now "search" or "match" arbitrary graphs using <b>unification</b> and produce new graphs by replacing logic variables using <b>reification</b>.
 </p>
@@ -403,9 +403,9 @@ We start by making "patterns" or templates for the subgraphs we would like to ma
 </p>
 </div>
 
-<div id="outline-container-org32c6188" class="outline-3">
-<h3 id="org32c6188">Unification</h3>
-<div class="outline-text-3" id="text-org32c6188">
+<div id="outline-container-orgf1483bd" class="outline-3">
+<h3 id="orgf1483bd">Unification</h3>
+<div class="outline-text-3" id="text-orgf1483bd">
 <p>
 We can perform unification using the function <code>unify</code>. The result is a <code>dict</code> mapping logic variables to their unified values.
 </p>
@@ -436,9 +436,9 @@ The logic variable <code>A</code> has been correctly unified with <code>A_tt</co
 </div>
 </div>
 
-<div id="outline-container-orgd35594c" class="outline-3">
-<h3 id="orgd35594c">Reification</h3>
-<div class="outline-text-3" id="text-orgd35594c">
+<div id="outline-container-org88f6acd" class="outline-3">
+<h3 id="org88f6acd">Reification</h3>
+<div class="outline-text-3" id="text-org88f6acd">
 <p>
 Using <code>reify</code> we can "fill-in"&#x2013;or replace&#x2014;the logic variables of our "pattern" with the matches obtained by <code>unify</code> that are held within the variable s, or we could specify our own substitutions based on that information.
 </p>
@@ -456,7 +456,7 @@ pprint(z_et_re)
 </pre>
 </div>
 
-<pre class="example" id="org832d051">
+<pre class="example" id="orgee92072">
 e(
   e(aesara.tensor.math.Dot),
   X,
@@ -471,9 +471,9 @@ e(
 </div>
 </div>
 
-<div id="outline-container-org1ae773b" class="outline-3">
-<h3 id="org1ae773b">Finishing our implementation</h3>
-<div class="outline-text-3" id="text-org1ae773b">
+<div id="outline-container-org84eb165" class="outline-3">
+<h3 id="org84eb165">Finishing our implementation</h3>
+<div class="outline-text-3" id="text-org84eb165">
 <p>
 We can also reify an entirely different graph using the values extracted from the graph <code>z_et</code>. In this case, we create an "output" pattern graph, to complement our new "input" pattern graph <code>dot_pattern</code>. If we combine our dot product and addition <code>etuple</code> patterns, we can extract all the arguments needed as input to a distributed multiplication pattern.
 </p>
@@ -509,7 +509,7 @@ pprint(s_add)
 </pre>
 </div>
 
-<pre class="example" id="orgaa13cf1">
+<pre class="example" id="org6498eba">
 {~A: X,
  ~B: e(
    e(
@@ -528,7 +528,7 @@ aesara.dprint(z_new.evaled_obj)
 </pre>
 </div>
 
-<pre class="example" id="org97eb456">
+<pre class="example" id="org99afcf7">
 Elemwise{add,no_inplace} [id A] ''
  |dot [id B] ''
  | |X [id C]
@@ -552,9 +552,9 @@ Next we will introduce another major element of Aesara that orchestrates and sim
 </div>
 </div>
 
-<div id="outline-container-org90679c7" class="outline-2">
-<h2 id="org90679c7">Relational programming in miniKanren</h2>
-<div class="outline-text-2" id="text-org90679c7">
+<div id="outline-container-org335b26a" class="outline-2">
+<h2 id="org335b26a">Relational programming in miniKanren</h2>
+<div class="outline-text-2" id="text-org335b26a">
 <p>
 Aesara uses a Python implementation of the embedded domain-specific language miniKanren&#x2013;provided by the <code>kanren</code> package&#x2013;to orchestrate more sophisticated uses of unification and reification. For a quick intro, see <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren/blob/master/doc/basic.md">the basic introduction</a> provided by the <code>kanren</code> package. We'll cover most of the same basic material here.
 </p>
@@ -568,9 +568,9 @@ In their most basic form, miniKanren <b>states</b> are simply the substitution m
 </p>
 </div>
 
-<div id="outline-container-org48d4d59" class="outline-3">
-<h3 id="org48d4d59">The basic goals</h3>
-<div class="outline-text-3" id="text-org48d4d59">
+<div id="outline-container-org1851d31" class="outline-3">
+<h3 id="org1851d31">The basic goals</h3>
+<div class="outline-text-3" id="text-org1851d31">
 <p>
 Normally, a user will only need to construct compound goals from a basic set of primitives. Arguably, the most primitive goal is the <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Equivalence_relation">equivalence relation</a> under unification denoted by <code>eq</code> in Python.
 </p>
@@ -690,9 +690,9 @@ pprint(mk_res)
 </div>
 </div>
 
-<div id="outline-container-orgba5c2f4" class="outline-3">
-<h3 id="orgba5c2f4">A better implementation</h3>
-<div class="outline-text-3" id="text-orgba5c2f4">
+<div id="outline-container-org43b6871" class="outline-3">
+<h3 id="org43b6871">A better implementation</h3>
+<div class="outline-text-3" id="text-org43b6871">
 <p>
 Since miniKanren uses unification and reification, we can apply its basic goals to Aesara graphs, as we did earlier, and reproduce the entire implementation in a much more concise manner.
 </p>
@@ -703,7 +703,7 @@ pprint(mk_res)
 </pre>
 </div>
 
-<pre class="example" id="orgdef7e7a">
+<pre class="example" id="orgec10426">
 (e(
    e(
      aesara.tensor.elemwise.Elemwise,
@@ -731,7 +731,7 @@ We obtain an etuple that we can evaluate to get the graph
 </pre>
 </div>
 
-<pre class="example" id="orga7364f2">
+<pre class="example" id="org92f5c25">
 Elemwise{add,no_inplace} [id A] ''
  |dot [id B] ''
  | |A [id C]
@@ -787,7 +787,7 @@ aesara.dprint(mk_res[0].evaled_obj)
 </pre>
 </div>
 
-<pre class="example" id="org271047a">
+<pre class="example" id="orgd5ab8b1">
 Elemwise{add,no_inplace} [id A] ''
  |dot [id B] ''
  | |A [id C]
@@ -806,9 +806,9 @@ When combinations of miniKanren goals comprise logical units, we can wrap their 
 </div>
 </div>
 
-<div id="outline-container-org6afdb19" class="outline-3">
-<h3 id="org6afdb19">Goals Constructors</h3>
-<div class="outline-text-3" id="text-org6afdb19">
+<div id="outline-container-org967421e" class="outline-3">
+<h3 id="org967421e">Goals Constructors</h3>
+<div class="outline-text-3" id="text-org967421e">
 <p>
 Using our distributive law example, we can create a goal constructor that creates our combined pattern and applies it in one go.
 </p>
@@ -873,9 +873,9 @@ dot [id A] ''
 </div>
 </div>
 
-<div id="outline-container-org296caf6" class="outline-3">
-<h3 id="org296caf6">Graph-based goals</h3>
-<div class="outline-text-3" id="text-org296caf6">
+<div id="outline-container-org814d015" class="outline-3">
+<h3 id="org814d015">Graph-based goals</h3>
+<div class="outline-text-3" id="text-org814d015">
 <p>
 In most situation the desired graphs will be subgraphs of much larger ones. Aesara introduces some miniKanren goals that apply other goals throughout graphs until a fixed-point is reached. This sequence of operations is generally necessary for graph simplification and rewriting.
 </p>
@@ -891,7 +891,7 @@ pprint(z_graph_et)
 </pre>
 </div>
 
-<pre class="example" id="orgfcdcf58">
+<pre class="example" id="orgd10e053">
 e(
   e(
     aesara.tensor.elemwise.Elemwise,
@@ -938,7 +938,7 @@ aesara.dprint(mk_res[0].evaled_obj)
 </pre>
 </div>
 
-<pre class="example" id="org9a5e297">
+<pre class="example" id="orgc63ec55">
 Elemwise{add,no_inplace} [id A] ''
  |Elemwise{mul,no_inplace} [id B] ''
  | |InplaceDimShuffle{x} [id C] ''
@@ -961,7 +961,7 @@ Elemwise{add,no_inplace} [id A] ''
 <p class="date">Date: 2022-04-12 Tue 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-06-29 Wed 04:22</p>
+<p class="date">Created: 2022-06-30 Thu 07:40</p>
 </div>
 </body>
 </html>
