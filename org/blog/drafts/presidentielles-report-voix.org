@@ -1,32 +1,22 @@
 #+TITLE: Estimer le report des voix aux présidentielles
 #+DATE: <2022-06-13 Mon>
 
-Cet article fait suite au [[https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb][travail de Laurent Perrinet]] sur les reports de voix entre le premier et le deuxième tour des élections présidentielles en 2022. La démarche de ce travail est intéressante (et autant que je sache originale) : elle consiste à prendre les résultats des élections au niveau des bureaux de vote aux deux tours, et essayer d'estimer une matrice de transition i.e. la probabilité que quelqu'un ayant voté pour X (par exemple Fabien Roussel) vote pour Y (par exemple Marine Le Pen) au second tour.
+Cet article fait suite au [[https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb][travail de Laurent Perrinet]] sur les reports de voix entre le premier et le deuxième tour des élections présidentielles en 2022. La démarche de ce travail est intéressante (et autant que je sache originale) : elle consiste à prendre les résultats des élections au niveau des bureaux de vote aux deux tours, et essayer d'estimer la valeurs des éléments d'une matrice de transition i.e. la probabilité que quelqu'un ayant voté pour X (par exemple Fabien Roussel) vote pour Y (par exemple Marine Le Pen) au second tour.
 
-Le modèle utilisé est déterministe. Il est implémenté avec PyTorch:
+Le modèle utilisé est déterministe:
 
-#+begin_src python
-import torch
-from torch.utils.data import TensorDataset, DataLoader, random_split
-import torch.nn.functional as F
+\begin{align*}
+M_{i} &= \operatorname{Softmax}\left(\tilde{M}_{i}\right) \qquad \forall i = 1 \dots N_1\; \text{lignes}\\
+p_2 &= p_1\,M\\
+\end{align*}
 
-torch.set_default_tensor_type("torch.FloatTensor")
+où la somme des éléments de chaque ligne de la matrice $M$ est contrainte et égale à 1; En réalité on cherche la valeur des élements de la matrice non constrainte $\tilde{M}$ en utilisant un algorithme d'optimisation. L'expression du modèle ainsi que les résultats de l'article sus-cités suggèrent plusieurs pistes d'amélioration :
 
-class TransfertVoix(torch.nn.Module):
-    def __init__(self, N_1er, N_2eme):#, device=None):
-        super(TransfertVoix, self).__init__()
-        self.lin = torch.nn.Linear(N_2eme, N_1er, bias=False)
+- Lorsqu'on le verra plus loin, les distributions marginales $P\left(Y_2 | X_1)$ sont très étalées. Or le modèle n'est pas probabiliste et ne retourne qu'une seule valeur; Un /modèle bayésien/ correctement calibré permettrait a priori de rendre compte de l'étalement de ces distributions;
+- L'hypothèse d'une matrice unique pour tout le territoire est peut-être suffisante, mais elle est osée. On pourrait envisager un /modèle hiérarchique/, où l'on apprend une matrice par territoire mais ou une certaine information est partagée entre les territoires.
+- À l'échelle nationale, les sondages de sortie d'urne peuvent servir à informer les /distributions a priori/ des probabilités de transition.
 
-    def forward(self, p_1):
-        M = torch.softmax(self.lin.weight, axis=1)
-        p_2_pred = torch.matmul(p_1, M)
-        return p_2_pred
-#+end_src
-
-A première lecture des résultats et au vu du modèle ci-dessus plusieurs pistes d'amélioration me viennent en tête:
-1. L'auteur montre les corrélations entre le vote Mélenchon au premier tour, et celui de Macron au second tour. Les distributions marginales sont très étalées. Je m'attend à une variabilité encore plus grande pour les candidats avec un score moindre. Cette variabilité peut avoir un effet non-négligeable sur les résultats; je suis par exemple surpris des forts reports vers Le Pen calculés pour Arthaud, Poutou et Roussel. Ce n'est pas à exclure, certes, mais je pense que l'on bénéficierait d'une approche bayésienne et bénéficier d'une marge d'erreur sur ces résultats;
-2. L'hypothèse d'un report uniforme sur tout le territoire me parait également osée. On devrait envisager un modèle hiérarchique;
-3. Les sondages de sortie d'urne peuvent servir pour définir le prior (hyperprior dans le cas d'un modèle hiérarchique).
+On se placera ici à l'échelle de la circonscription législative. Le découpage à l'échelle du bureau de vote est intéressant, mais le but implicite de cette étude est de donner une idée des reports de voix pour le second tour des législatives 2022 (et permet d'itérer rapidement sur un modèle de taille raisonnable). J'utilise ici le code de [[https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb][Laurent Perrinet]] en le modifiant (les erreurs éventuelles sont de mon fait).
 
 #+begin_src python :session :result silent
 import os
@@ -38,7 +28,7 @@ import pandas as pd
 
 * Les données
 
-On se placera ici à l'échelle de la circonscription législative. Le découpage à l'échelle du bureau de vote est intéressant, mais le but implicite de cette étude est de donner une idée des reports de voix pour le second tour des législatives 2022. J'utilise ici le code de [[https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb][Laurent Perrinet]] en le modifiant (les erreurs éventuelles sont de mon fait).
+Les résultats des élections présidentielles 2022 sont publiquement disponibles à l'échelle des circonscriptions législatives sous format =xlsx=. On utilise la librairies python =pandas= pour les manipuler et convertir dans le format approprié pour le modèle.
 
 ** Premier tour
 
@@ -54,27 +44,32 @@ if not os.path.isfile(fname):
 T1 = pd.read_excel(fname)
 #+end_src
 
+On vérifie que les données ont été bien téléchargées et converties:
 
 #+begin_src python :session
 T1.tail()
 #+end_src
 
 #+RESULTS:
-:     Code du département           Libellé du département  Code de la circonscription Libellé de la circonscription Etat saisie  ...    Unnamed: 98  Unnamed: 99  Unnamed: 100  Unnamed: 101  Unnamed: 102
-: 572                  ZZ  Français établis hors de France                           7          7ème circonscription     Complet  ...  DUPONT-AIGNAN      Nicolas           639          0.52          1.23
-: 573                  ZZ  Français établis hors de France                           8          8ème circonscription     Complet  ...  DUPONT-AIGNAN      Nicolas           300          0.23          1.28
-: 574                  ZZ  Français établis hors de France                           9          9ème circonscription     Complet  ...  DUPONT-AIGNAN      Nicolas           381          0.31          0.97
-: 575                  ZZ  Français établis hors de France                          10         10ème circonscription     Complet  ...  DUPONT-AIGNAN      Nicolas           530          0.51          1.33
-: 576                  ZZ  Français établis hors de France                          11         11ème circonscription     Complet  ...  DUPONT-AIGNAN      Nicolas           595          0.60          1.58
+:     Code du département           Libellé du département  Code de la circonscription Libellé de la circonscription Etat saisie  Inscrits  ...  Unnamed: 97    Unnamed: 98  Unnamed: 99  Unnamed: 100  Unnamed: 101  Unnamed: 102
+: 572                  ZZ  Français établis hors de France                           7          7ème circonscription     Complet    122158  ...            M  DUPONT-AIGNAN      Nicolas           639          0.52          1.23
+: 573                  ZZ  Français établis hors de France                           8          8ème circonscription     Complet    130065  ...            M  DUPONT-AIGNAN      Nicolas           300          0.23          1.28
+: 574                  ZZ  Français établis hors de France                           9          9ème circonscription     Complet    121122  ...            M  DUPONT-AIGNAN      Nicolas           381          0.31          0.97
+: 575                  ZZ  Français établis hors de France                          10         10ème circonscription     Complet    103910  ...            M  DUPONT-AIGNAN      Nicolas           530          0.51          1.33
+: 576                  ZZ  Français établis hors de France                          11         11ème circonscription     Complet     98784  ...            M  DUPONT-AIGNAN      Nicolas           595          0.60          1.58
 :
 : [5 rows x 103 columns]
+
+On regroupe les abstentions, votes blancs et nuls sous la catégorie des votes non-exprimés, et on formatte le nom des circonscriptions
 
 #+begin_src python :session
 df_1 = T1[['Nuls', 'Blancs', 'Abstentions']].copy()
 df_1["Non exprimés"] =  df_1['Nuls'] + df_1['Blancs'] + df_1['Abstentions']
 df_1 = df_1[["Non exprimés"]].copy()
+
 T1['Code de la circonscription'] = T1['Code de la circonscription'].apply(str)
-#df_1['circonscription'] = T1['Code du département'] + T1['Code de la circonscription']
+circonscriptions = T1['Code du département'] + T1['Code de la circonscription']
+
 df_1.head()
 #+end_src
 
@@ -86,6 +81,7 @@ df_1.head()
 : 3         21599
 : 4         20130
 
+Et on réccupère maintenant les votes par candidat:
 
 #+begin_src python :session :results silent
 col_start = 21
@@ -94,30 +90,41 @@ candidats = T1.iloc[0][col_start::col_par_cdt]
 
 for i_candidat, candidat in enumerate(candidats):
     i_col = col_start + i_candidat*col_par_cdt + 2
-    print('# colonne', i_col, ' résultats=', T1.iloc[:, i_col].values)
     df_1[candidat] = T1.iloc[:, i_col].values
 #+end_src
 
+On peut maintenant regarder la distribution des votes au premier tour:
 
-Let's check the results by plotting the distribution of votes:
-
-#+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
+#+begin_src python :session :results file :exports both :var filename="figs/presidentielles-report-voix/resultats-premier-tour.png"
 import matplotlib.pyplot as plt
 
+results = df_1.sum()/df_1.sum().sum()
+
 fig, ax = plt.subplots(figsize=(13, 5))
-k = df_1.sum()/df_1.sum().sum()
-ax = k.plot.bar(ax=ax)
-ax.set_xlabel('Choix 1er tour')
-ax.set_ylabel('Pourcentage');
+ax = results.plot.bar(ax=ax)
+
+ax.set_yticks([])
+
+spines_to_remove = ["top", "left", "right"]
+for spine in spines_to_remove:
+    ax.spines[spine].set_visible(False)
+
+
+for i, val in enumerate(list(results.values)):
+    plt.text(i, val + 0.01, f"{val*100:.01f}%", ha="center")
+
+plt.title("Résultats du premier tour")
 plt.savefig(filename, bbox_inches="tight")
 filename
 #+end_src
 
 
 #+RESULTS:
-[[file:/tmp/babel-XyHH31/figureFbqdwF.png]]
+[[file:figs/presidentielles-report-voix/resultats-premier-tour.png]]
 
 ** Deuxième tour
+
+Le processus de récupération des données est identique pour le second tour :
 
 #+begin_src python :session :results silent
 fname = '/tmp/T2.xlsx'
@@ -128,41 +135,11 @@ if not os.path.isfile(fname):
     urllib.request.urlretrieve(url, fname)
 
 T2 = pd.read_excel(fname)
-#+end_src
 
-
-#+begin_src python :session
-T2.tail()
-#+end_src
-
-#+RESULTS:
-:     Code du département           Libellé du département  Code de la circonscription Libellé de la circonscription Etat saisie  Inscrits  ...  Unnamed: 27  Unnamed: 28  Unnamed: 29  Unnamed: 30  Unnamed: 31  Unnamed: 32
-: 572                  ZZ  Français établis hors de France                           7          7ème circonscription     Complet    122145  ...            F       LE PEN       Marine         4987         4.08         8.58
-: 573                  ZZ  Français établis hors de France                           8          8ème circonscription     Complet    130068  ...            F       LE PEN       Marine         3345         2.57        14.02
-: 574                  ZZ  Français établis hors de France                           9          9ème circonscription     Complet    121013  ...            F       LE PEN       Marine         4988         4.12        13.28
-: 575                  ZZ  Français établis hors de France                          10         10ème circonscription     Complet    104829  ...            F       LE PEN       Marine         8085         7.71        20.39
-: 576                  ZZ  Français établis hors de France                          11         11ème circonscription     Complet     98707  ...            F       LE PEN       Marine         7246         7.34        18.88
-:
-: [5 rows x 33 columns]
-
-#+begin_src python :session
 df_2 = T2[['Nuls', 'Blancs', 'Abstentions']].copy()
 df_2["Non exprimés"] =  df_2['Nuls'] + df_2['Blancs'] + df_2['Abstentions']
 df_2 = df_2[["Non exprimés"]].copy()
-T2['Code de la circonscription'] = T2['Code de la circonscription'].apply(str)
-#df_1['circonscription'] = T1['Code du département'] + T1['Code de la circonscription']
-df_2.head()
-#+end_src
 
-#+RESULTS:
-:    Non exprimés
-: 0         25547
-: 1         28855
-: 2         27496
-: 3         27276
-: 4         26071
-
-#+begin_src python :session :results silent
 col_start = 21
 col_par_cdt = 7
 candidats = T2.iloc[0][col_start::col_par_cdt]
@@ -173,18 +150,31 @@ for i_candidat, candidat in enumerate(candidats):
     df_2[candidat] = T2.iloc[:, i_col].values
 #+end_src
 
-#+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
+#+begin_src python :session :results file :exports both :var filename="figs/presidentielles-report-voix/resultats-second-tour.png"
+import matplotlib.pyplot as plt
+
+results = df_2.sum()/df_2.sum().sum()
+
 fig, ax = plt.subplots(figsize=(13, 5))
-k = df_2.sum()/df_2.sum().sum()
-ax = k.plot.bar(ax=ax)
-ax.set_xlabel('Candidat')
-ax.set_ylabel('pourcentage');
+ax = results.plot.bar(ax=ax)
+
+ax.set_yticks([])
+
+spines_to_remove = ["top", "left", "right"]
+for spine in spines_to_remove:
+    ax.spines[spine].set_visible(False)
+
+
+for i, val in enumerate(list(results.values)):
+    plt.text(i, val + 0.01, f"{val*100:.01f}%", ha="center")
+
+plt.title("Résultats du second tour")
 plt.savefig(filename, bbox_inches="tight")
 filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-XyHH31/figuremqqV6A.png]]
+[[file:figs/presidentielles-report-voix/resultats-second-tour.png]]
 
 ** Second order
 
