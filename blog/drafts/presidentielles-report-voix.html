@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-06-30 Thu 07:39 -->
+<!-- 2022-07-03 Sun 07:28 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Estimer le report des voix aux présidentielles</title>
@@ -253,17 +253,17 @@ On se placera ici à l'échelle de la circonscription législative. Le découpag
 </pre>
 </div>
 
-<div id="outline-container-org0a143a1" class="outline-2">
-<h2 id="org0a143a1">Les données</h2>
-<div class="outline-text-2" id="text-org0a143a1">
+<div id="outline-container-org50e997b" class="outline-2">
+<h2 id="org50e997b">Les données</h2>
+<div class="outline-text-2" id="text-org50e997b">
 <p>
 Les résultats des élections présidentielles 2022 sont publiquement disponibles à l'échelle des circonscriptions législatives sous format <code>xlsx</code>. On utilise la librairies python <code>pandas</code> pour les manipuler et convertir dans le format approprié pour le modèle.
 </p>
 </div>
 
-<div id="outline-container-orgf78d3d2" class="outline-3">
-<h3 id="orgf78d3d2">Premier tour</h3>
-<div class="outline-text-3" id="text-orgf78d3d2">
+<div id="outline-container-org172f6aa" class="outline-3">
+<h3 id="org172f6aa">Premier tour</h3>
+<div class="outline-text-3" id="text-org172f6aa">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">'/tmp/T1.xlsx'</span>
 
@@ -368,16 +368,16 @@ filename
 
 
 
-<div id="org6bbcf8a" class="figure">
+<div id="orga64ffb2" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-premier-tour.png" alt="resultats-premier-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org205bd29" class="outline-3">
-<h3 id="org205bd29">Deuxième tour</h3>
-<div class="outline-text-3" id="text-org205bd29">
+<div id="outline-container-orgb5527a9" class="outline-3">
+<h3 id="orgb5527a9">Deuxième tour</h3>
+<div class="outline-text-3" id="text-orgb5527a9">
 <p>
 Le processus de récupération des données est identique pour le second tour :
 </p>
@@ -432,16 +432,16 @@ filename
 </div>
 
 
-<div id="org27cdae5" class="figure">
+<div id="org7dd39f3" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-second-tour.png" alt="resultats-second-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgc4d9c0b" class="outline-3">
-<h3 id="orgc4d9c0b">Second order</h3>
-<div class="outline-text-3" id="text-orgc4d9c0b">
+<div id="outline-container-orgee737e2" class="outline-3">
+<h3 id="orgee737e2">Second order</h3>
+<div class="outline-text-3" id="text-orgee737e2">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
 
@@ -463,7 +463,7 @@ filename
 </div>
 
 
-<div id="orga12d8d9" class="figure">
+<div id="org7f93b3b" class="figure">
 <p><img src="file:///tmp/babel-XyHH31/figurepOF83v.png" alt="figurepOF83v.png" />
 </p>
 </div>
@@ -490,7 +490,7 @@ filename
 </div>
 
 
-<div id="org73613a1" class="figure">
+<div id="org295264f" class="figure">
 <p><img src="file:///tmp/babel-XyHH31/figuree61a2v.png" alt="figuree61a2v.png" />
 </p>
 </div>
@@ -516,7 +516,7 @@ filename
 </div>
 
 
-<div id="org2f0401c" class="figure">
+<div id="org08f25d1" class="figure">
 <p><img src="file:///tmp/babel-XyHH31/figurer9WIUm.png" alt="figurer9WIUm.png" />
 </p>
 </div>
@@ -524,9 +524,9 @@ filename
 </div>
 </div>
 
-<div id="outline-container-org094394e" class="outline-2">
-<h2 id="org094394e">Simple modèle écologique</h2>
-<div class="outline-text-2" id="text-org094394e">
+<div id="outline-container-org17d7994" class="outline-2">
+<h2 id="org17d7994">Simple modèle écologique</h2>
+<div class="outline-text-2" id="text-org17d7994">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:577, :]
 <span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:577:]
@@ -541,9 +541,9 @@ The model we implement is taken from <a target='_blank' rel='noopener noreferrer
 </p>
 </div>
 
-<div id="outline-container-org41d2b87" class="outline-3">
-<h3 id="org41d2b87">Simplified version (full mixing of the transition matrix)</h3>
-<div class="outline-text-3" id="text-org41d2b87">
+<div id="outline-container-org4a04057" class="outline-3">
+<h3 id="org4a04057">Simplified version (full mixing of the transition matrix)</h3>
+<div class="outline-text-3" id="text-org4a04057">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 <span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
@@ -1171,9 +1171,9 @@ On vérifie que le modèle, aussi surprenant que cela soit, est k
 </div>
 </div>
 
-<div id="outline-container-org0aa17bc" class="outline-3">
-<h3 id="org0aa17bc">Hyperprior on dirichlet</h3>
-<div class="outline-text-3" id="text-org0aa17bc">
+<div id="outline-container-org5ed100c" class="outline-3">
+<h3 id="org5ed100c">Hyperprior on dirichlet</h3>
+<div class="outline-text-3" id="text-org5ed100c">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:100,:]
 <span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:100,:]
