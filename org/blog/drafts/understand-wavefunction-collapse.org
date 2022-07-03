@@ -1,0 +1,78 @@
+#+TITLE: Wavefunction Collapse I - The Simplest Tiled Model
+
+#+begin_comment
+The original idea was to explore MarkovJunior which uses Markov algorithms to generate images. /MarkovJunior/ is about rewrite rules; it has a set of possible rewrites that it applies recursively, selecting one of the possible rewrites at random at each step. The algorithm stops when no rewrite can be performed anymore. Here we suggest to re-express MarkovJunior using miniKanren, and probably e-graphs (for rewrite saturation at each step)
+
+Markov Junior says how the image should be modified = term rewriting.
+
+What I do not know about yet is how to choose the final solution, but I'll figure it out? Also how does kanren work with an egraph and augments one? all that is v interesting and probably leads me to
+
+One thing is that is purely search and
+#+end_comment
+
+
+In a similar fashion to [[file:~/projects/thetypicalset/org/blog/solve-sudokus-kanren.org][Peter Norvig's solution to the sudoku]], a lot of thought is given to the. WaveFunction Collapse is one search strategy among many strategy possible.
+
+Image generation does lend itself quite naturally to /declarative programming/: what matters is not the process by which an image is generated but what that image looks like.
+
+I have come accross
+
+[[https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/][This link]] has a simple explanation of Wavefunction Collapse in terms of constraint propagation.
+
+The first wavefunction is a superposition of every possible results (akin to logic variables). Collapsing is taking one possible solution at random from all the possiblities. This choice has consequences that ripple out throught the rest of the solution space -> remove the solutions that become impossible conditional to the first choice you made. Repeat until everything is collapsed or until you've met a /contradiction/ (which makes collapse impossible). Start again if it fails.
+
+Here we try to arrange pixels in an input image.
+
+* Even simpler tiled model
+
+In the /Even Simpler Tiled Model/ we specify the adjacency rules between pixels of a single color.
+
+#+begin_src python :session
+a = (("sea", "coast"), ("coast", "sea"))
+#+end_src
+
+We can have the program parse an input image and learn adjacencies from this.
+
+* Simple tiled model
+
+Small number of small pre-defined tiles that define "rules" such as land, sea, coast, mountains. We choose the tile with the lowest entropy to collapse the wavefunction.
+
+Initially the state is completely unobserved:
+
+#+begin_src python
+from kanren import vars
+
+width = 10
+height = 10
+
+grid = vars(width * height)
+#+end_src
+
+Well actually, each pixel value is constrained to be one of the colors of the input bitmap
+
+#+begin_src python
+from kanren import lall, membero
+
+BITMAP = (1, 2, 3, 4)
+goal = lall(*tuple(membero(pixel, BITMAP) for pixel in grid))
+#+end_src
+
+From what I understand the resulting grid can only be a combination of the input tiles. Let's consider a simple grid with 1x2 tiles:
+
+#+begin_src python
+input_tile = [(1, 2), (1, 1), (2, 3)]
+target_tiles = get_tiles(grid)  # extract tiles from the target grid
+goal = lall(*tuple(lany(*tuple(membero(tile, model) for model in input_tiles)) for tile in target_tiles))
+#+end_src
+
+So really the complicated thing is extracting the tiles in the grid and how you do that. Manage symmetries is just applying transforms to the input.
+
+#+begin_comment
+Weighed decisions seem to be made via the minimum entropy criterion.
+#+end_comment
+
+
+* TODO miniKanren solution to the even simpler model :noexport:
+* TODO Learn adjacency from image :noexport:
+* TODO Print animation with all of miniKanren's solutions :noexport:
+* TODO Program an interactive version? :noexport:
