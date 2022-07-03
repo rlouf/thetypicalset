@@ -6,7 +6,7 @@
 <!-- 2022-07-03 Sun 19:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>There is a positive correlation between interest rate and volume of credit</title>
+<title>Wavefunction Collapse I - The Simplest Tiled Model</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,45 +197,97 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">There is a positive correlation between interest rate and volume of credit</h1>
-<dl class="org-dl">
-<dt>tags</dt><dd><a href="20211201174631-doxa.html#ID-3971d3ec-85c6-49dc-b1ad-54b935a641d8">Doxa</a></dd>
-</dl>
-
+<h1 class="title">Wavefunction Collapse I - The Simplest Tiled Model</h1>
 <p>
-When people think about "easy money" they usually mean high volume of credit, and they make the underlying assumption that if interests rates are low, volumes are going to be high and vice-versa.
+In a similar fashion to <a href="file:///home/runner/projects/thetypicalset/org/blog/solve-sudokus-kanren.html">Peter Norvig's solution to the sudoku</a>, a lot of thought is given to the. WaveFunction Collapse is one search strategy among many strategy possible.
 </p>
 
 <p>
-<i>Demand side:</i> People want to borrow at low interest rates
-<i>Supply side:</i> Banks stil decide who to lend to
+Image generation does lend itself quite naturally to <i>declarative programming</i>: what matters is not the process by which an image is generated but what that image looks like.
 </p>
 
 <p>
-There is a high correlation between interest rate and volume of credit, as implied by the followig curve from Monetary Mechanics:
+I have come accross
 </p>
 
-
-<div id="orgd2b3589" class="figure">
-<p><img src="img/2022-05-27_10-43-15_https%3A%2F%2Fbucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com%2Fpublic%2Fimages%2F1d4895dc-9903-4a63-b0d2-f16a5b2d1e20_1833x1101.png" alt="2022-05-27_10-43-15_https%3A%2F%2Fbucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com%2Fpublic%2Fimages%2F1d4895dc-9903-4a63-b0d2-f16a5b2d1e20_1833x1101.png" />
+<p>
+<a target='_blank' rel='noopener noreferrer' class='external' href="https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/">This link</a> has a simple explanation of Wavefunction Collapse in terms of constraint propagation.
 </p>
+
+<p>
+The first wavefunction is a superposition of every possible results (akin to logic variables). Collapsing is taking one possible solution at random from all the possiblities. This choice has consequences that ripple out throught the rest of the solution space -&gt; remove the solutions that become impossible conditional to the first choice you made. Repeat until everything is collapsed or until you've met a <i>contradiction</i> (which makes collapse impossible). Start again if it fails.
+</p>
+
+<p>
+Here we try to arrange pixels in an input image.
+</p>
+
+<div id="outline-container-org4a8cc17" class="outline-2">
+<h2 id="org4a8cc17">Even simpler tiled model</h2>
+<div class="outline-text-2" id="text-org4a8cc17">
+<p>
+In the <i>Even Simpler Tiled Model</i> we specify the adjacency rules between pixels of a single color.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">a</span> = ((<span style="font-style: italic;">"sea"</span>, <span style="font-style: italic;">"coast"</span>), (<span style="font-style: italic;">"coast"</span>, <span style="font-style: italic;">"sea"</span>))
+</pre>
 </div>
 
-
-
 <p>
-Interests rates are high when everyone is bidding for funding to take advantage of differential between current interest rates and future returns on investment.
+We can have the program parse an input image and learn adjacencies from this.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6c143cd" class="outline-2">
+<h2 id="org6c143cd">Simple tiled model</h2>
+<div class="outline-text-2" id="text-org6c143cd">
+<p>
+Small number of small pre-defined tiles that define "rules" such as land, sea, coast, mountains. We choose the tile with the lowest entropy to collapse the wavefunction.
 </p>
 
-<div id="outline-container-orga9a8cf7" class="outline-2">
-<h2 id="orga9a8cf7"><span class="todo TODO">TODO</span> Plot EFFR vs variation in number of loans</h2>
-</div>
-<div id="outline-container-orgb459f45" class="outline-2">
-<h2 id="orgb459f45"><span class="todo TODO">TODO</span> Compute the correlations between the two</h2>
+<p>
+Initially the state is completely unobserved:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> <span style="font-weight: bold;">vars</span>
+
+<span style="font-weight: bold; font-style: italic;">width</span> = 10
+<span style="font-weight: bold; font-style: italic;">height</span> = 10
+
+<span style="font-weight: bold; font-style: italic;">grid</span> = <span style="font-weight: bold;">vars</span>(width * height)
+</pre>
 </div>
 
-<div id="outline-container-orgf2b0654" class="outline-2">
-<h2 id="orgf2b0654">Links to this note</h2>
+<p>
+Well actually, each pixel value is constrained to be one of the colors of the input bitmap
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall, membero
+
+<span style="font-weight: bold; font-style: italic;">BITMAP</span> = (1, 2, 3, 4)
+<span style="font-weight: bold; font-style: italic;">goal</span> = lall(*<span style="font-weight: bold;">tuple</span>(membero(pixel, BITMAP) <span style="font-weight: bold;">for</span> pixel <span style="font-weight: bold;">in</span> grid))
+</pre>
+</div>
+
+<p>
+From what I understand the resulting grid can only be a combination of the input tiles. Let's consider a simple grid with 1x2 tiles:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">input_tile</span> = [(1, 2), (1, 1), (2, 3)]
+<span style="font-weight: bold; font-style: italic;">target_tiles</span> = get_tiles(grid)  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">extract tiles from the target grid</span>
+<span style="font-weight: bold; font-style: italic;">goal</span> = lall(*<span style="font-weight: bold;">tuple</span>(lany(*<span style="font-weight: bold;">tuple</span>(membero(tile, model) <span style="font-weight: bold;">for</span> model <span style="font-weight: bold;">in</span> input_tiles)) <span style="font-weight: bold;">for</span> tile <span style="font-weight: bold;">in</span> target_tiles))
+</pre>
+</div>
+
+<p>
+So really the complicated thing is extracting the tiles in the grid and how you do that. Manage symmetries is just applying transforms to the input.
+</p>
+</div>
 </div>
 </div>
 </body>
