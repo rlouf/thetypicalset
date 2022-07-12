@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-06 Wed 13:44 -->
+<!-- 2022-07-12 Tue 06:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Estimer le report des voix aux présidentielles</title>
@@ -220,11 +220,11 @@
 <div id="content" class="content">
 <h1 class="title">Estimer le report des voix aux présidentielles</h1>
 <p>
-Cet article fait suite au <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb">travail de Laurent Perrinet</a> sur les reports de voix entre le premier et le deuxième tour des élections présidentielles en 2022. La démarche de ce travail est intéressante (et autant que je sache originale) : elle consiste à prendre les résultats des élections au niveau des bureaux de vote aux deux tours, et essayer d'estimer la valeurs des éléments d'une matrice de transition i.e. la probabilité que quelqu'un ayant voté pour X (par exemple Fabien Roussel) vote pour Y (par exemple Marine Le Pen) au second tour.
+Cet article fait suite au <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb">travail de Laurent Perrinet</a> sur les reports de voix entre le premier et le deuxième tour des élections présidentielles en 2022. La démarche de ce travail est intéressante (et autant que je sache originale) : elle consiste à prendre les résultats des élections au niveau des bureaux de vote aux deux tours, et essayer d'estimer la probabilité que quelqu'un ayant voté pour X (par exemple Fabien Roussel) vote pour Y (par exemple Marine Le Pen) au second tour.
 </p>
 
 <p>
-Le modèle utilisé est déterministe:
+Le modèle utilisé est déterministe. Il suppose les résultats des premier et second tour connus et cherche à estimer la valeurs des éléments d'une matrice \(M\) de transition:
 </p>
 
 \begin{align*}
@@ -253,17 +253,17 @@ On se placera ici à l'échelle de la circonscription législative. Le découpag
 </pre>
 </div>
 
-<div id="outline-container-org8fad380" class="outline-2">
-<h2 id="org8fad380">Les données</h2>
-<div class="outline-text-2" id="text-org8fad380">
+<div id="outline-container-orga9f8a48" class="outline-2">
+<h2 id="orga9f8a48">Les données</h2>
+<div class="outline-text-2" id="text-orga9f8a48">
 <p>
 Les résultats des élections présidentielles 2022 sont publiquement disponibles à l'échelle des circonscriptions législatives sous format <code>xlsx</code>. On utilise la librairies python <code>pandas</code> pour les manipuler et convertir dans le format approprié pour le modèle.
 </p>
 </div>
 
-<div id="outline-container-org0cee431" class="outline-3">
-<h3 id="org0cee431">Premier tour</h3>
-<div class="outline-text-3" id="text-org0cee431">
+<div id="outline-container-org2e3ae4e" class="outline-3">
+<h3 id="org2e3ae4e">Premier tour</h3>
+<div class="outline-text-3" id="text-org2e3ae4e">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">'/tmp/T1.xlsx'</span>
 
@@ -286,12 +286,12 @@ On vérifie que les données ont été bien téléchargées et converties:
 </div>
 
 <pre class="example">
-    Code du département           Libellé du département  Code de la circonscription Libellé de la circonscription Etat saisie  Inscrits  ...  Unnamed: 97    Unnamed: 98  Unnamed: 99  Unnamed: 100  Unnamed: 101  Unnamed: 102
-572                  ZZ  Français établis hors de France                           7          7ème circonscription     Complet    122158  ...            M  DUPONT-AIGNAN      Nicolas           639          0.52          1.23
-573                  ZZ  Français établis hors de France                           8          8ème circonscription     Complet    130065  ...            M  DUPONT-AIGNAN      Nicolas           300          0.23          1.28
-574                  ZZ  Français établis hors de France                           9          9ème circonscription     Complet    121122  ...            M  DUPONT-AIGNAN      Nicolas           381          0.31          0.97
-575                  ZZ  Français établis hors de France                          10         10ème circonscription     Complet    103910  ...            M  DUPONT-AIGNAN      Nicolas           530          0.51          1.33
-576                  ZZ  Français établis hors de France                          11         11ème circonscription     Complet     98784  ...            M  DUPONT-AIGNAN      Nicolas           595          0.60          1.58
+    Code du département           Libellé du département  Code de la circonscription  ... Unnamed: 100 Unnamed: 101  Unnamed: 102
+572                  ZZ  Français établis hors de France                           7  ...          639         0.52          1.23
+573                  ZZ  Français établis hors de France                           8  ...          300         0.23          1.28
+574                  ZZ  Français établis hors de France                           9  ...          381         0.31          0.97
+575                  ZZ  Français établis hors de France                          10  ...          530         0.51          1.33
+576                  ZZ  Français établis hors de France                          11  ...          595         0.60          1.58
 
 [5 rows x 103 columns]
 </pre>
@@ -370,16 +370,16 @@ filename
 #+attr<sub>html</sub> :width 100%
 </p>
 
-<div id="org731eed0" class="figure">
+<div id="org462469b" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-premier-tour.png" alt="resultats-premier-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgd839bf1" class="outline-3">
-<h3 id="orgd839bf1">Deuxième tour</h3>
-<div class="outline-text-3" id="text-orgd839bf1">
+<div id="outline-container-orgff913c9" class="outline-3">
+<h3 id="orgff913c9">Deuxième tour</h3>
+<div class="outline-text-3" id="text-orgff913c9">
 <p>
 Le processus de récupération des données est identique pour le second tour :
 </p>
@@ -437,16 +437,16 @@ filename
 #+attr<sub>html</sub> :width 100%
 </p>
 
-<div id="orgcb2306b" class="figure">
+<div id="org9087b9b" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-second-tour.png" alt="resultats-second-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org5b0a888" class="outline-3">
-<h3 id="org5b0a888">Second order</h3>
-<div class="outline-text-3" id="text-org5b0a888">
+<div id="outline-container-orgdf2d227" class="outline-3">
+<h3 id="orgdf2d227">Second order</h3>
+<div class="outline-text-3" id="text-orgdf2d227">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
 
@@ -461,15 +461,15 @@ filename
 <span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="font-weight: bold;">sum</span>(axis=1)
 
 <span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind=<span style="font-style: italic;">'hist'</span>, height=8);
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0, 0.02), ylim=(0, 1), kind=<span style="font-style: italic;">'hist'</span>, height=8);
 plt.savefig(filename)
 filename
 </pre>
 </div>
 
 
-<div id="orgec998a5" class="figure">
-<p><img src="file:///tmp/babel-XyHH31/figurepOF83v.png" alt="figurepOF83v.png" />
+<div id="org6e38ccb" class="figure">
+<p><img src="file:///tmp/babel-DTyOHT/figures6n2pL.png" alt="figures6n2pL.png" />
 </p>
 </div>
 
@@ -488,23 +488,23 @@ filename
 <span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="font-weight: bold;">sum</span>(axis=1)
 
 <span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind=<span style="font-style: italic;">'hist'</span>, height=8);
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0,0.02), ylim=(0, 1), kind=<span style="font-style: italic;">'hist'</span>, height=8);
 plt.savefig(filename)
 filename
 </pre>
 </div>
 
 
-<div id="org1c942e8" class="figure">
-<p><img src="file:///tmp/babel-XyHH31/figuree61a2v.png" alt="figuree61a2v.png" />
+<div id="orgfb5bea9" class="figure">
+<p><img src="file:///tmp/babel-DTyOHT/figurePLSP8R.png" alt="figurePLSP8R.png" />
 </p>
 </div>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
 
-<span style="font-weight: bold; font-style: italic;">CDT_1</span> = <span style="font-style: italic;">"POUTOU"</span>
-<span style="font-weight: bold; font-style: italic;">CDT_2</span> = <span style="font-style: italic;">"LE PEN"</span>
+<span style="font-weight: bold; font-style: italic;">CDT_1</span> = <span style="font-style: italic;">"Non exprim&#233;s"</span>
+<span style="font-weight: bold; font-style: italic;">CDT_2</span> = <span style="font-style: italic;">"MACRON"</span>
 
 <span style="font-weight: bold; font-style: italic;">df_12</span> = pd.DataFrame()
 <span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_1[CDT_1].copy()
@@ -514,24 +514,27 @@ filename
 <span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="font-weight: bold;">sum</span>(axis=1)
 
 <span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind=<span style="font-style: italic;">'hist'</span>, height=8);
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0, 1), ylim=(0, 1), kind=<span style="font-style: italic;">'hist'</span>, height=8);
 plt.savefig(filename)
 filename
 </pre>
 </div>
 
 
-<div id="org11314d0" class="figure">
-<p><img src="file:///tmp/babel-XyHH31/figurer9WIUm.png" alt="figurer9WIUm.png" />
+<div id="org37808ac" class="figure">
+<p><img src="file:///tmp/babel-DTyOHT/figurei4jzIx.png" alt="figurei4jzIx.png" />
 </p>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgd8f2bbe" class="outline-2">
-<h2 id="orgd8f2bbe">Simple modèle écologique</h2>
-<div class="outline-text-2" id="text-orgd8f2bbe">
+<div id="outline-container-org2df4b89" class="outline-2">
+<h2 id="org2df4b89"><span class="todo TODO">TODO</span> Better bivariate plots</h2>
+</div>
+<div id="outline-container-org3645efb" class="outline-2">
+<h2 id="org3645efb">Simple modèle écologique</h2>
+<div class="outline-text-2" id="text-org3645efb">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:577, :]
 <span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:577:]
@@ -546,9 +549,9 @@ The model we implement is taken from <a target='_blank' rel='noopener noreferrer
 </p>
 </div>
 
-<div id="outline-container-orgbb257be" class="outline-3">
-<h3 id="orgbb257be">Simplified version (full mixing of the transition matrix)</h3>
-<div class="outline-text-3" id="text-orgbb257be">
+<div id="outline-container-orgf5a052b" class="outline-3">
+<h3 id="orgf5a052b">Simplified version (full mixing of the transition matrix)</h3>
+<div class="outline-text-3" id="text-orgf5a052b">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 <span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
@@ -1176,9 +1179,9 @@ On vérifie que le modèle, aussi surprenant que cela soit, est k
 </div>
 </div>
 
-<div id="outline-container-org49b4c90" class="outline-3">
-<h3 id="org49b4c90">Hyperprior on dirichlet</h3>
-<div class="outline-text-3" id="text-org49b4c90">
+<div id="outline-container-org0c388b9" class="outline-3">
+<h3 id="org0c388b9">Hyperprior on dirichlet</h3>
+<div class="outline-text-3" id="text-org0c388b9">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:100,:]
 <span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:100,:]

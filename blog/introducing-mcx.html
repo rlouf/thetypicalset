@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-06 Wed 13:44 -->
+<!-- 2022-07-12 Tue 06:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Probabilistic programming via source code rewriting (MCX)</title>
@@ -324,9 +324,9 @@ It has random variables, random variables that are used to define othe random va
 Welcome MCX. Well, almost.
 </p>
 
-<div id="outline-container-org60e6dd4" class="outline-2">
-<h2 id="org60e6dd4">Defining probabilistic models with MCX</h2>
-<div class="outline-text-2" id="text-org60e6dd4">
+<div id="outline-container-orged07c0f" class="outline-2">
+<h2 id="orged07c0f">Defining probabilistic models with MCX</h2>
+<div class="outline-text-2" id="text-orged07c0f">
 <p>
 Here is how you express the beta-binomial model in MCX:
 </p>
@@ -365,9 +365,9 @@ observed. While MCX models also represent a distribution, in the API we treat th
 </div>
 </div>
 
-<div id="outline-container-org8527b2b" class="outline-2">
-<h2 id="org8527b2b">Interacting with MCX models</h2>
-<div class="outline-text-2" id="text-org8527b2b">
+<div id="outline-container-org61619a1" class="outline-2">
+<h2 id="org61619a1">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-org61619a1">
 <p>
 Consider the following linear regression model:
 </p>
@@ -496,9 +496,9 @@ Unlike the original model, however, the evaluated program is not a distribution.
 </p>
 </div>
 
-<div id="outline-container-org0afe3f8" class="outline-3">
-<h3 id="org0afe3f8">Go on your own</h3>
-<div class="outline-text-3" id="text-org0afe3f8">
+<div id="outline-container-org7c75d5b" class="outline-3">
+<h3 id="org7c75d5b">Go on your own</h3>
+<div class="outline-text-3" id="text-org7c75d5b">
 <p>
 MCX provides a convenient interface to interact with the model's predictive,
 joint prior and posterior distributions, but should you want to build something
@@ -523,13 +523,13 @@ particular, allows to you to write your model with MCX and use another library
 </div>
 </div>
 </div>
-<div id="outline-container-org7397876" class="outline-2">
-<h2 id="org7397876">How does it work? MCX's internals</h2>
-<div class="outline-text-2" id="text-org7397876">
+<div id="outline-container-orgd2e27a1" class="outline-2">
+<h2 id="orgd2e27a1">How does it work? MCX's internals</h2>
+<div class="outline-text-2" id="text-orgd2e27a1">
 </div>
-<div id="outline-container-orgf6894aa" class="outline-3">
-<h3 id="orgf6894aa">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
-<div class="outline-text-3" id="text-orgf6894aa">
+<div id="outline-container-org190ef59" class="outline-3">
+<h3 id="org190ef59">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
+<div class="outline-text-3" id="text-org190ef59">
 <p>
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 </p>
@@ -546,7 +546,7 @@ sampling, reparametrization is trivial to do, etc. Manipulating the graph is
 pretty much akin to manipulating the mathematical object.
 </p>
 
-<pre class="example" id="org62fb257">
+<pre class="example" id="orgebbde78">
 
                                      +----&gt; logpdf
 @mcx.model                           |
@@ -579,7 +579,7 @@ framework-agnostic. Hell, you could even write, without too much effort, an
 edward2, pymc3 or pyro compiler!
 </p>
 
-<pre class="example" id="org6c3b767">
+<pre class="example" id="org498384e">
 Example with control flow and different
 </pre>
 
@@ -591,15 +591,15 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 </p>
 
-<pre class="example" id="orgfee4fdf">
+<pre class="example" id="org9cb6f84">
 model.source_logpdf
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org9469988" class="outline-3">
-<h3 id="org9469988">Inference</h3>
-<div class="outline-text-3" id="text-org9469988">
+<div id="outline-container-org8722467" class="outline-3">
+<h3 id="org8722467">Inference</h3>
+<div class="outline-text-3" id="text-org8722467">
 <p>
 <i>The modeling language and the inference module are completely separate.</i> The modeling language compiles to a logpdf, and that is all the samplers need.
 </p>
@@ -614,7 +614,7 @@ Inference in MCX is also very modular. The idea is that inference in traditional
 <li><i>Runtimes</i>, that tie the data, the model and the kernel together and then make the chains move forward following an execution plan.</li>
 </ol>
 
-<pre class="example" id="org3abca5c">
+<pre class="example" id="orgd38f5fc">
 Runtime (Sampling loop)
 -------------------------------------------------
 Programs (HMC)
@@ -656,7 +656,7 @@ In fact I am not sure everyone who uses PPLs have formalized this, which makes t
 <p class="date">Date: 2020-02-12 Wed 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-07-06 Wed 13:44</p>
+<p class="date">Created: 2022-07-12 Tue 06:43</p>
 </div>
 </body>
 </html>
