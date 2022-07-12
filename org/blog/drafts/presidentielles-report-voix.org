@@ -1,9 +1,9 @@
 #+TITLE: Estimer le report des voix aux présidentielles
 #+DATE: <2022-06-13 Mon>
 
-Cet article fait suite au [[https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb][travail de Laurent Perrinet]] sur les reports de voix entre le premier et le deuxième tour des élections présidentielles en 2022. La démarche de ce travail est intéressante (et autant que je sache originale) : elle consiste à prendre les résultats des élections au niveau des bureaux de vote aux deux tours, et essayer d'estimer la valeurs des éléments d'une matrice de transition i.e. la probabilité que quelqu'un ayant voté pour X (par exemple Fabien Roussel) vote pour Y (par exemple Marine Le Pen) au second tour.
+Cet article fait suite au [[https://github.com/laurentperrinet/2022-05-04_transfert-des-voix/blob/main/2022-06-08_transfert-des-voix.ipynb][travail de Laurent Perrinet]] sur les reports de voix entre le premier et le deuxième tour des élections présidentielles en 2022. La démarche de ce travail est intéressante (et autant que je sache originale) : elle consiste à prendre les résultats des élections au niveau des bureaux de vote aux deux tours, et essayer d'estimer la probabilité que quelqu'un ayant voté pour X (par exemple Fabien Roussel) vote pour Y (par exemple Marine Le Pen) au second tour.
 
-Le modèle utilisé est déterministe:
+Le modèle utilisé est déterministe. Il suppose les résultats des premier et second tour connus et cherche à estimer la valeurs des éléments d'une matrice $M$ de transition:
 
 \begin{align*}
 M_{i} &= \operatorname{Softmax}\left(\tilde{M}_{i}\right) \qquad \forall i = 1 \dots N_1\; \text{lignes}\\
@@ -51,12 +51,12 @@ T1.tail()
 #+end_src
 
 #+RESULTS:
-:     Code du département           Libellé du département  Code de la circonscription Libellé de la circonscription Etat saisie  Inscrits  ...  Unnamed: 97    Unnamed: 98  Unnamed: 99  Unnamed: 100  Unnamed: 101  Unnamed: 102
-: 572                  ZZ  Français établis hors de France                           7          7ème circonscription     Complet    122158  ...            M  DUPONT-AIGNAN      Nicolas           639          0.52          1.23
-: 573                  ZZ  Français établis hors de France                           8          8ème circonscription     Complet    130065  ...            M  DUPONT-AIGNAN      Nicolas           300          0.23          1.28
-: 574                  ZZ  Français établis hors de France                           9          9ème circonscription     Complet    121122  ...            M  DUPONT-AIGNAN      Nicolas           381          0.31          0.97
-: 575                  ZZ  Français établis hors de France                          10         10ème circonscription     Complet    103910  ...            M  DUPONT-AIGNAN      Nicolas           530          0.51          1.33
-: 576                  ZZ  Français établis hors de France                          11         11ème circonscription     Complet     98784  ...            M  DUPONT-AIGNAN      Nicolas           595          0.60          1.58
+:     Code du département           Libellé du département  Code de la circonscription  ... Unnamed: 100 Unnamed: 101  Unnamed: 102
+: 572                  ZZ  Français établis hors de France                           7  ...          639         0.52          1.23
+: 573                  ZZ  Français établis hors de France                           8  ...          300         0.23          1.28
+: 574                  ZZ  Français établis hors de France                           9  ...          381         0.31          0.97
+: 575                  ZZ  Français établis hors de France                          10  ...          530         0.51          1.33
+: 576                  ZZ  Français établis hors de France                          11  ...          595         0.60          1.58
 :
 : [5 rows x 103 columns]
 
@@ -193,13 +193,13 @@ df_12[CDT_1] = df_12[CDT_1]/df_1.sum(axis=1)
 df_12[CDT_2] = df_12[CDT_2]/df_2.sum(axis=1)
 
 fig = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind='hist', height=8);
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0, 0.02), ylim=(0, 1), kind='hist', height=8);
 plt.savefig(filename)
 filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-XyHH31/figurepOF83v.png]]
+[[file:/tmp/babel-DTyOHT/figures6n2pL.png]]
 
 
 #+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
@@ -216,19 +216,19 @@ df_12[CDT_1] = df_12[CDT_1]/df_1.sum(axis=1)
 df_12[CDT_2] = df_12[CDT_2]/df_2.sum(axis=1)
 
 fig = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind='hist', height=8);
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0,0.02), ylim=(0, 1), kind='hist', height=8);
 plt.savefig(filename)
 filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-XyHH31/figuree61a2v.png]]
+[[file:/tmp/babel-DTyOHT/figurePLSP8R.png]]
 
 #+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
 import seaborn as sns
 
-CDT_1 = "POUTOU"
-CDT_2 = "LE PEN"
+CDT_1 = "Non exprimés"
+CDT_2 = "MACRON"
 
 df_12 = pd.DataFrame()
 df_12[CDT_1] = df_1[CDT_1].copy()
@@ -238,14 +238,15 @@ df_12[CDT_1] = df_12[CDT_1]/df_1.sum(axis=1)
 df_12[CDT_2] = df_12[CDT_2]/df_2.sum(axis=1)
 
 fig = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], kind='hist', height=8);
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0, 1), ylim=(0, 1), kind='hist', height=8);
 plt.savefig(filename)
 filename
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-XyHH31/figurer9WIUm.png]]
+[[file:/tmp/babel-DTyOHT/figurei4jzIx.png]]
 
+* TODO Better bivariate plots
 * Simple modèle écologique
 
 
