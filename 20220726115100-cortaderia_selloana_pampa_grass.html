@@ -6,7 +6,7 @@
 <!-- 2022-07-28 Thu 02:47 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Solve the Spelling Bee with kanren</title>
+<title>Cortaderia selloana (Pampa grass)</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,40 +197,28 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Solve the Spelling Bee with kanren</h1>
-<p>
-The constraints are:
-</p>
-<ol class="org-ol">
-<li>Only 7 letters are allowed to write words of arbitrary lengths;</li>
-<li>One letter is compulsory</li>
-</ol>
+<h1 class="title">Cortaderia selloana (Pampa grass)</h1>
+<ul class="org-ul">
+<li>Grows to be between 1.5 and 3 meters high and wide</li>
+<li>Full sun / partial shade</li>
+<li>Drained soil</li>
+<li>Prune to the ground in late winter <i>every year</i></li>
+<li>Watering in drought time</li>
+</ul>
 
-<p>
-We can find <a target='_blank' rel='noopener noreferrer' class='external' href="https://raw.githubusercontent.com/dwyl/english-words/master/words.txt">lists of english words online</a>. The file linked before is only 4Mb.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> membero, fact, Relation
-
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Populate a dictionary (start with short words)</span>
-<span style="font-weight: bold; font-style: italic;">dictionary</span> = Relation(<span style="font-style: italic;">"dictionary"</span>)
-<span style="font-weight: bold;">for</span> word <span style="font-weight: bold;">in</span> dictionary:
-    fact(dictionary, word)
-
-<span style="font-weight: bold; font-style: italic;">word</span> = var()
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">spellingbeeo</span>(word):
-    <span style="font-weight: bold; font-style: italic;">letter_constraints</span> = [membero(letter, letters) <span style="font-weight: bold;">for</span> letter <span style="font-weight: bold;">in</span> word]
-    <span style="font-weight: bold; font-style: italic;">compulsory_letter_constraint</span> = membero(compulsory_letter, word)
-    <span style="font-weight: bold; font-style: italic;">dictionary_constraint</span> = dictionary(word)
-    <span style="font-weight: bold;">return</span> lall(dictionary_constraint, compulsory_letter_constraint, *letter_constraints)
-</pre>
+<div id="outline-container-orgf3d5be5" class="outline-2">
+<h2 id="orgf3d5be5">References</h2>
+<div class="outline-text-2" id="text-orgf3d5be5">
+<ul class="org-ul">
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.youtube.com/watch?v=wVjvYXq4NOM">When and how to prune pampa grass [video]​</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.youtube.com/watch?v=TMTb07gm0TI">Pruning pampa grass [video]​</a></li>
+</ul>
+</div>
 </div>
 
-<p>
-The `letter<sub>constraints</sub>` goal is actually not enough; it will not guarantee that other letters won't be present in the word. We need a goal that states that a set is a subset of another?
-</p>
+<div id="outline-container-org31d1912" class="outline-2">
+<h2 id="org31d1912">Links to this note</h2>
+</div>
 </div>
 </body>
 </html>
