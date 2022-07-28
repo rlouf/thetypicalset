@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-28 Thu 23:45 -->
+<!-- 2022-07-28 Thu 23:44 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ornstein-Uhlenbeck kernel</title>
+<title>Polya-Gamma augmentation</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -218,76 +218,126 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Ornstein-Uhlenbeck kernel</h1>
+<h1 class="title">Polya-Gamma augmentation</h1>
 <p>
-The Laplacian function kernel defines a stationary <a href="20211125173010-gaussian_process.html#ID-f2d80a0e-47f7-4531-a654-8343c72dd962">gaussian process</a>, the Ornstein-Uhlenbeck process:
+Let us consider the binary target \(\boldsymbol{y} = \left[ y_1, \dots, y_N\right]\) and the dependant variables \(X = \left[\boldsymbol{x}_1, \dots, \boldsymbol{x}_N\right]\) such that
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-<span style="font-weight: bold;">\displaystyle</span>
-K(x, x') &amp;= <span style="font-weight: bold;">\sigma</span>^2<span style="font-weight: bold;">\,\exp\left</span>(-<span style="font-weight: bold;">\frac</span>{|d|}{l}<span style="font-weight: bold;">\right</span>),<span style="font-weight: bold;">\quad</span> d=x'-x
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
+\begin{equation*}
+P\left(\boldsymbol{y} | X, \boldsymbol{\beta} \right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x}_i, \boldsymbol{\beta} \right)
+\end{equation*}
+
+<p>
+We further assume that
+</p>
 
 \begin{align*}
-\displaystyle
-K(x, x') &= \sigma^2\,\exp\left(-\frac{|d|}{l}\right),\quad d=x'-x
+y_i | \boldsymbol{x_i}, \boldsymbol{\beta} &\sim \operatorname{Bernoulli}\left(p_i\right)\\
+p_i & = \sigma(\boldsymbol{x_i}^T\,\boldsymbol{\beta})\\
+\sigma(x) &= \left(1 + \exp(-x)\right)^{-1}
 \end{align*}
 
 <p>
-Unlike the <a href="20211129201642-wiener_kernel.html#ID-dc211cf2-78b4-4269-91e8-fc88fb49def5">Wiener process</a>, this process is <i>mean reverting</i> and admits a stationary probability distribution. It is convenient to model <i>time-series</i>. It can be seen as a <i>noisy relaxation model</i>. (cite:rasmussen2003 p.212)
+It can be shown that
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
-<span style="font-weight: bold;">from</span> matplotlib <span style="font-weight: bold;">import</span> pyplot <span style="font-weight: bold;">as</span> plt
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">kernel</span>(x1, x2, l2):
-    <span style="font-weight: bold;">return</span> np.exp(-np.<span style="font-weight: bold;">abs</span>(x1-x2) / l2)
-
-</pre>
-</div>
+\begin{equation*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\exp\left(y_i\: \boldsymbol{x}_i^T \boldsymbol{\beta}\right)}{1 + \exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)}
+\end{equation*}
 
 <p>
-The parameter \(l\) is the characteristic lengthscale of the process. As one can see on the figure below, the larger the value of \(l\) the "further" the kernel takes non-negligible values.
+while assuming a normal prior on each coefficient \(\beta_j\)
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">xx</span>, <span style="font-weight: bold; font-style: italic;">yy</span> = np.meshgrid(np.linspace(0, 10, 100), np.linspace(0, 10, 100))
-<span style="font-weight: bold; font-style: italic;">values_1</span> = kernel(xx.ravel(), yy.ravel(), 1.).reshape(xx.shape)
-<span style="font-weight: bold; font-style: italic;">values_10</span> = kernel(xx.ravel(), yy.ravel(), 10.).reshape(xx.shape)
+\begin{equation*}
+\beta_j \sim \operatorname{N}\left(\mu, \sigma^2\right)
+\end{equation*}
 
-<span style="font-weight: bold; font-style: italic;">fig</span>, <span style="font-weight: bold; font-style: italic;">axes</span> = plt.subplots(figsize=(12,6), ncols=2)
-axes[0].pcolormesh(xx, yy, values_1, cmap=plt.cm.RdBu_r)
-axes[0].set_title(<span style="font-style: italic;">"l=1"</span>)
-axes[1].pcolormesh(xx, yy, values_10, cmap=plt.cm.RdBu_r)
-axes[1].set_title(<span style="font-style: italic;">"l=10."</span>)
-
-plt.tight_layout()
-
-<span style="font-weight: bold; font-style: italic;">fname</span> = f<span style="font-style: italic;">"images/kernel-ornstein-heatmap.png"</span>
-plt.savefig(fname)
-fname
-</pre>
-</div>
-
-
-<div id="org35a878f" class="figure">
-<p><img src="img/kernel-ornstein-heatmap.png" alt="kernel-ornstein-heatmap.png" width="90%" />
+<p>
+So the posterior distribution:
 </p>
+
+<p>
+\[
+P(\beta|y, X) \propto P(Y| X, \beta) P(\beta)
+\]
+</p>
+
+<p>
+does not have a closed-form solution.
+</p>
+
+<p>
+But behold! Polson et al. remind us of this neat result:
+</p>
+
+
+\begin{align*}
+\frac{\left(e^u)^a}{\left(1 + e^u\right)^b} &= \frac{1}{2^b}\, e^{\kappa u}\,\int_0^\infty e^{-\frac{u^2}{2} \omega}\; p(\omega) \mathrm{d}\omega\\
+\kappa &= a - \frac{b}{2}\\
+p(\omega) &= \mathrm{PG}\left(\omega|b, 0\right)
+\end{align*}
+
+
+<p>
+So if we set \(b=1\), \(u = \boldsymbol{x}_i^T \boldsymbol{\beta}\) and \(a = y_i\) the following holds:
+</p>
+
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\infty \exp\left( y_i \boldsymbol{x_i}^T\,\boldsymbol{\beta} - \frac{\left(\boldsymbol{x_i}^T\,\boldsymbol{\beta})^2}{2} \omega\right)\;P(\omega) \mathrm{d}\omega\\
+&= \frac{1}{2} \int_0^\infty \exp\left( -\frac{\omega}{2} \left( \frac{y_i}{\omega} - \boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2\right)\;P(\omega) \mathrm{d}\omega\\
+\end{align*}
+
+
+<p>
+I guess Gibbs sampling works because we're able to successively
+</p>
+
+<div id="outline-container-org01b2b19" class="outline-2">
+<h2 id="org01b2b19">Bernoulli likelihood</h2>
+<div class="outline-text-2" id="text-org01b2b19">
+<p>
+Let us derive the likelihood \(p(\boldsymbol{y} | x, \boldsymbol{\beta} )\) assuming that the observations are i.i.d. from the same distribution:
+</p>
+
+\begin{align*}
+P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) &= \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right)\\
+&=\prod_{i=1}^n\; p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
+&=\prod_{i=1}^n\; \left[ \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{\,1-y_i}\,\left[1 - \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{y_i}\\
+&=\prod_{i=1}^n\; \left[ \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{\,1-y_i}\,\left[\frac{1}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{y_i}\\
+&=\prod_{i=1}^n\; \frac{\left[ \exp(-x_i^T \boldsymbol{\beta}) \right]^{\,1-y_i}}{1 + \exp(-x_i^T \boldsymbol{\beta})}\\
+&=\prod_{i=1}^n\; \frac{\left( \exp(x_i^T \boldsymbol{\beta}) \right)^{\,y_i}}{1 + \exp(x_i^T \boldsymbol{\beta})}\\
+\end{align*}
+
+
+<p>
+So that:
+</p>
+\begin{equation*}
+\mathcal{L}_i(\boldsymbol{\beta}) = P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\left(\exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i}}{1 + \exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)}
+\end{equation*}
+</div>
 </div>
 
-<div id="outline-container-org9aab452" class="outline-2">
-<h2 id="org9aab452">Links to this note</h2>
-<div class="outline-text-2" id="text-org9aab452">
+<div id="outline-container-org52382b9" class="outline-2">
+<h2 id="org52382b9">References</h2>
+<div class="outline-text-2" id="text-org52382b9">
 <ul class="org-ul">
-<li><a href="./20211125145059-polls_aggregator.html">Predict the result of French elections</a></li>
-<li><a href="./20220108202812-types_of_notes.html">Types of notes</a></li>
-<li><a href="./20211125173010-gaussian_process.html">Gaussian process</a></li>
-<li><a href="./20211213085917-gaussian_markov_processes.html">Gaussian Markov processes</a></li>
-<li><a href="./20211125113956-my_digital_garden.html">Navigate linked notes</a></li>
+<li>Dunson, etc. Bayesian inference for logistic models using Polya-Gamma latent variables. (2013)</li>
+<li>Slides: <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf">http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://tiao.io/post/polya-gamma-bayesian-logistic-regression/#i">https://tiao.io/post/polya-gamma-bayesian-logistic-regression/#i</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://gregorygundersen.com/blog/2019/09/20/polya-gamma/">https://gregorygundersen.com/blog/2019/09/20/polya-gamma/</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org159993d" class="outline-2">
+<h2 id="org159993d">Links to this note</h2>
+<div class="outline-text-2" id="text-org159993d">
+<ul class="org-ul">
+<li><a href="./inbox.html">Writing inbox</a></li>
+<li><a href="./20220728171643-gibbs_sampling.html">Gibbs sampling</a></li>
+<li><a href="./20220728171643-gibbs_sampling.html">Gibbs sampling</a></li>
 </ul>
 </div>
 </div>
