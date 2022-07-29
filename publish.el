@@ -139,7 +139,7 @@
   (when (org-roam-node-at-point)
     (goto-char (point-max))
     ;; Add a new header for the references
-    (let* ((backlinks (org-roam-backlinks-get (org-roam-node-at-point))))
+    (let* ((backlinks (org-roam-backlinks-get (org-roam-node-at-point) :unique t)))
       (dolist (backlink backlinks)
         (let* ((source-node (org-roam-backlink-source-node backlink))
                (point (org-roam-backlink-point backlink)))
