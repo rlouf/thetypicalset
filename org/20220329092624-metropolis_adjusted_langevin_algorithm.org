@@ -8,7 +8,7 @@
 
 The Metropolis-Adjusted Langevin algorithm updates the position of the chain $\boldsymbol{\theta}_t$ at time $t$ based of the overdamped Langevin diffusion equation:
 
-#+begin_src latex :results raw
+#+begin_src latex :results output
 \begin{equation}
 \mathrm{d} L_t = \mathrm{d} W_t + \frac{1}{2}\;\nabla \log \pi(L_t)\;\mathrm{d}t
 \end{equation}
@@ -22,7 +22,7 @@ The Metropolis-Adjusted Langevin algorithm updates the position of the chain $\b
 
 Where $W_t$ is the standard Brownian motion. Equation (1) is a continuous time diffusion and we instead use a discrete approximation to this diffusion:
 
-#+begin_src latex :results raw
+#+begin_src latex :results output
 \begin{equation*}
 \theta_{t+1} = \theta_t + \tau\;\nabla \log \pi(\theta_t) + \sqrt{2\, \tau\; \xi
 \end{equation*}
@@ -35,7 +35,7 @@ Where $W_t$ is the standard Brownian motion. Equation (1) is a continuous time d
 
 where
 
-#+begin_src latex :results raw
+#+begin_src latex :results output
 \begin{equation*}
 \xi \sim \operatorname{Normal}(0,\mathbb{I}_k)
 \end{equation*}
@@ -50,7 +50,7 @@ $k$ is the number of dimension of $\boldsymbol{\theta}$, $\tau$ the step size an
 
 The dynamics defined by the discretized version of the Langevin dynamics only maintain the invariance of $\pi$ approximately and so we need to perform an accept/reject step accepting $\boldsymbol{\theta}_t$ with probability:
 
-#+begin_src latex :results raw
+#+begin_src latex :results output
 \begin{equation*}
  \alpha = \min \left\{1, \frac{\pi(\theta_{t+1}) q(\theta_t | \theta_{t+1})}{\pi(\theta_{t}) q(\theta_{t+1} | \theta_{t})} \right\}
 \end{equation*}
@@ -64,7 +64,7 @@ The dynamics defined by the discretized version of the Langevin dynamics only ma
 
 where
 
-#+begin_src latex :results raw
+#+begin_src latex :results output
 \begin{equation*}
   q\left(\theta_{t+1}|\theta_{t}\right) = \exp\left(-\frac{1}{4\, \tau} || \theta_{t+1} - \theta_t - \tau\;\nabla\log \pi(\theta_t) ||_2\right)
 \end{equation*}
@@ -77,7 +77,7 @@ where
 
 since
 
-#+begin_src latex :results raw
+#+begin_src latex :results output
 \begin{equation*}
   \theta_{{t+1}} \sim \operatorname{Normal}\left( \theta_{t} + \frac{\tau}{2}\;\nabla\log \pi(\theta_{t}) \right, \tau\,\mathbb{I}_k)
 \end{equation*}
