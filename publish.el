@@ -30,8 +30,7 @@
             entry
             (org-publish-find-title entry project)))
 
-(setq org-html-validation-link nil ;; Do not show "Validate" link
-      org-export-babel-evaluate nil) ;; Do not execute code blocks
+(setq org-html-validation-link nil) ;; Do not show "Validate" link
 
 (setq org-publish-project-alist
       '(
