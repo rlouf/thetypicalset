@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 16:44 -->
+<!-- 2022-07-29 Fri 18:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gibbs sampling</title>
@@ -220,48 +220,60 @@
 <div id="content" class="content">
 <h1 class="title">Gibbs sampling</h1>
 <p>
-Gibbs sampling is a family of <a href="20220306194751-markov_chain_monte_carlo_new.html#ID-5acc4f0f-417e-424f-95a5-1c95e7e822ff">Markov Chain Monte Carlo</a> algorithm where we conditionally sample from each parameter while holding the others fixed, successively.
+Gibbs sampling is a family of <a href="20220306194751-markov_chain_monte_carlo_new.html#ID-5acc4f0f-417e-424f-95a5-1c95e7e822ff">Markov Chain Monte Carlo</a> algorithm where we conditionally sample from each parameter while holding the others fixed, successively. It is useful when the joint distribution is difficult to sample from (no closed-form expression, for instance) but where the conditional distribution of each variable is known.
 </p>
 
+<div id="outline-container-orgc293a3d" class="outline-2">
+<h2 id="orgc293a3d">General principle</h2>
+<div class="outline-text-2" id="text-orgc293a3d">
 <p>
-Let us briefly explain where it comes from and the motivations behind it. Let us consider a response variable \(\bb{Y}\), feature matrix \(X\) and a model with parameter \(\boldsymbol{\beta}\) so the likelihood of the data given the model and parameter values is given by
-</p>
-
-<p>
-\[
-P\left(Y | X, \beta\right)
-\]
-</p>
-
-<p>
-Given a test point \(x_*\) we are usually interested in the following predictive distribution:
-</p>
-
-<p>
-\[
-P\left(y_* | Y, X, \beta, x_*\right)
-\]
-</p>
-
-<p>
-Which can be written as:
-</p>
-
-<p>
-\[
-P\left(y_* | Y, X, x_*\right) = \int P(y_*| \beta, x_*) P(\beta|Y, X) \mathrm{d} \beta
-\]
+Assume that we want to generate \(N\) samples \(\left\{\tilde{\Theta}^{(n)}\right\}_{n=1 \dots N}\) from the joint distribution \(P\left(\theta_1, \dots, \theta_D\right)\). We start with an initial position \(\tilde{\Theta}^{(0)}\), and to generate \(\tilde{\Theta}}^{i+1}\) we successively draw from the following conditional distributions:
 </p>
 
 <ul class="org-ul">
-<li>Bernoulli logit regression:  <a href="20220728151132-polya_gamma_augmentation.html#ID-16338bc2-222c-4acf-aa28-38b951dfcb89">Polya-Gamma augmentation</a></li>
-<li>Negative Binomial logit regression:  <a href="20220728151132-polya_gamma_augmentation.html#ID-16338bc2-222c-4acf-aa28-38b951dfcb89">Polya-Gamma augmentation</a></li>
-<li>Horsehoe prior using the <a href="20220214161724-half_cauchy_distribution.html#ID-45ccc897-f07c-4adc-9142-9ae8870fbddc">inverse-gamma expansion of the Half-Cauchy distribution</a></li>
+<li>\(\tilde{\theta}^{(i+1)}_1 \sim P(\theta_1\; |\; \theta_2 = \tilde{\theta_2}^{(i)}, \dots, \theta_D = \tilde{\theta_D}^{(i)})\)</li>
+<li>\(\tilde{\theta}^{(i+1)}_2 \sim P(\theta_2\; |\; \theta_1 = \tilde{\theta_1}^{(i+1)}, \theta_3 = \tilde{\theta_3}^{(i)} \dots, \theta_D = \tilde{\theta_D}^{(i)})\)</li>
+<li>\(\tilde{\theta}^{(i+1)}_j \sim P(\theta_j\; |\; \theta_1 = \tilde{\theta_1}^{(i+1)}, \dots, \theta_{j-1} = \tilde{\theta}_{j-1}^{(i+1)}, \theta_{j+1} = \tilde{\theta}_{j+1}^{(i)}, \dots, \theta_D = \tilde{\theta_D}^{(i)})\)</li>
 </ul>
+</div>
+</div>
 
-<div id="outline-container-org49ac872" class="outline-2">
-<h2 id="org49ac872">Links to this note</h2>
-<div class="outline-text-2" id="text-org49ac872">
+<div id="outline-container-org70acaec" class="outline-2">
+<h2 id="org70acaec">Using auxiliary variables</h2>
+<div class="outline-text-2" id="text-org70acaec">
+<p>
+It is not uncommon to introduce auxiliary variables to the model to make computations easier. Let us consider the <i>augmented likelihood</i> \(P(y, \omega | \theta)\), so that the original likelihood:
+</p>
+
+<p>
+\[
+P(Y, \omega|\theta) = P(Y|\omega, \theta) P(\omega)
+\]
+</p>
+
+<p>
+This works/is useful iff:
+</p>
+
+<ol class="org-ol">
+<li>Marginalizing the augmented likelihood returns the original likleihood \(\int P(Y, \omega | \theta) \mathrm{d} \omega = \int P(Y|\omega, \theta) P(\omega) \mathrm{d}\omega = P(Y|\theta)\)</li>
+<li>The prior \(P(\theta)\) is conjugate to \(P(Y|\omega, \theta)\) so \(P(\theta|Y) \propto P(Y | \theta) P(\theta) = \int P(Y|\omega, \theta) P(\omega) P(\theta) \mathrm{d}\omega\)</li>
+</ol>
+
+<p>
+This trick is used to build Gibbs samplers for:
+</p>
+<ul class="org-ul">
+<li>The Bernoulli logit regression (<a href="20220728151132-polya_gamma_augmentation.html#ID-16338bc2-222c-4acf-aa28-38b951dfcb89">Polya-Gamma augmentation</a>)</li>
+<li>The Negative Binomial logit regression (Idem)</li>
+<li>The Horsehoe prior (using the <a href="20220214161724-half_cauchy_distribution.html#ID-45ccc897-f07c-4adc-9142-9ae8870fbddc">inverse-gamma expansion of the Half-Cauchy distribution</a>)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2db110a" class="outline-2">
+<h2 id="org2db110a">Links to this note</h2>
+<div class="outline-text-2" id="text-org2db110a">
 <ul class="org-ul">
 <li><a href="./inbox.html">Writing inbox</a></li>
 </ul>

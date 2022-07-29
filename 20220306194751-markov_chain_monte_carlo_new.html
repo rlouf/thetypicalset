@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 16:44 -->
+<!-- 2022-07-29 Fri 18:09 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Markov Chain Monte Carlo</title>
@@ -194,12 +194,80 @@
   .org-svg { }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">Markov Chain Monte Carlo</h1>
 <p>
 We are interested in new sampling algorithms, and more interestingly at methods to calibrate the samplers.
+</p>
+
+<div id="outline-container-org9ed7e43" class="outline-2">
+<h2 id="org9ed7e43">The motivation behind MCMC algorithms</h2>
+<div class="outline-text-2" id="text-org9ed7e43">
+<p>
+Let us briefly explain where it comes from and the motivations behind it. Let us consider a response variable \(\bb{Y}\), feature matrix \(X\) and a model with parameter \(\boldsymbol{\beta}\) so the likelihood of the data given the model and parameter values is given by
+</p>
+
+<p>
+\[
+P\left(Y | X, \beta\right)
+\]
+</p>
+
+<p>
+Given a test point \(x_*\) we are usually interested in the distribution over predictions \(Y_*\) (a random variable):
+</p>
+
+<p>
+\[
+P\left(Y_* | Y, X, x_*\right)
+\]
+</p>
+
+<p>
+Let us a assume we have a function (assumed to be deterministic here) that returns a sample \(y_*\) of \(Y_*\)'s distribution given a value of the set of parameters \(\tilde{\beta}\):
+</p>
+
+<p>
+\[
+y_* = f(\tilde{\beta}, x_*)
+\]
+</p>
+
+<p>
+Then we get this by marginalizing:
+</p>
+
+<p>
+\[
+P\left(Y_* | Y, X, x_*\right) = \int P(f\left(x_*, \beta\right)| \beta, x_*) P(\beta|Y, X) \mathrm{d} \beta
+\]
+</p>
+
+<p>
+where \(P(\beta|Y, X)\) is the <i>posterior distribution</i> of the model's parameters. This is the integral that we would like to evaluate for all practical purposes. Given \(\left\{\tilde{\beta}_1, \dots, \tilde{\beta}_N \right\}\) \(N\) samples from the posterior distribution.
 </p>
 
 <p>
@@ -209,18 +277,22 @@ We are interested in new sampling algorithms, and more interestingly at methods 
 <p>
 (Junpeng) - <a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/pdf/2110.00610.pdf">Delayed rejection sampling</a>, <a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/pdf/2111.02434.pdf">Hamiltonian dynamics with non-newtonian momentum for rapid sampling</a>
 </p>
-<div id="outline-container-org8b3a663" class="outline-2">
-<h2 id="org8b3a663">References</h2>
-<div class="outline-text-2" id="text-org8b3a663">
+</div>
+</div>
+
+<div id="outline-container-org84f4b61" class="outline-2">
+<h2 id="org84f4b61">References</h2>
+<div class="outline-text-2" id="text-org84f4b61">
 <ul class="org-ul">
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Monte_Carlo_integration">Monte Carlo integration (Wikipedia)</a></li>
 <li>Andrieu et al <a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/2012.14881">A general perspective on the Metropolis-Hastings kernel</a> (2020)</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org6b24f95" class="outline-2">
-<h2 id="org6b24f95">Links to this note</h2>
-<div class="outline-text-2" id="text-org6b24f95">
+<div id="outline-container-org8479b27" class="outline-2">
+<h2 id="org8479b27">Links to this note</h2>
+<div class="outline-text-2" id="text-org8479b27">
 <ul class="org-ul">
 <li><a href="./20211202110014-reversible_jump_mcmc.html">Reversible-jump MCMC</a></li>
 <li><a href="./20211202111457-involutive_mcmc_a_unifying_framework.html">Involutive MCMC</a></li>
