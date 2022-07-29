@@ -54,14 +54,19 @@ p(\omega) &= \mathrm{PG}\left(\omega|b, 0\right)
 So if we set $b=1$, $u = \boldsymbol{x}_i^T \boldsymbol{\beta}$ and $a = y_i$ the following holds:
 
 \begin{align*}
-P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\infty \exp\left( y_i \boldsymbol{x_i}^T\,\boldsymbol{\beta} - \frac{\left(\boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2}{2} \omega\right)\;P(\omega) \mathrm{d}\omega\\
-&= \frac{1}{2} \int_0^\infty \exp\left( -\frac{\omega}{2} \left( \frac{y_i}{\omega} - \boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2\right)\;P(\omega) \mathrm{d}\omega\\
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\infty \exp\left( y_i \boldsymbol{x_i}^T\,\boldsymbol{\beta} - \frac{\left(\boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2}{2} \omega\right)\;P(\omega)\; \mathrm{d}\omega\\
+&= \frac{1}{2} \int_0^\infty \exp\left( -\frac{\omega}{2} \left( \frac{y_i}{\omega} - \boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2\right)\;P(\omega)\; \mathrm{d}\omega\\
 \end{align*}
 
 
-I guess Gibbs sampling works because we're able to successively
+So if we condition on $\omega_n$ we find that $P(y_i | x_i, \beta, \omega_n)$, and hence $P(\beta|Y, X, \omega_n)$ to be gaaussian (if $\omega_n$ is draws from $\operatorname{PG}(1, 0)$)
 
-* Likelihood
+* TODO Simple example with a bimodal distribution
+And $Y_i$ indicates which mode the sample belongs to. We can use the =polyagamma= library.
+
+* Appendix
+
+** Likelihood
 
 Let us derive the likelihood $p(\boldsymbol{y} | x, \boldsymbol{\beta} )$ for the [[id:82cc8d0e-682d-4082-90ac-36cf7fadcb72][Bernoulli]] and [[id:273bfd3a-7e6e-4971-b422-048f930ae5b0][Negative Binomial]] observation distribution. Assuming that the observations are i.i.d. from the same distribution we can write:
 
@@ -69,8 +74,7 @@ Let us derive the likelihood $p(\boldsymbol{y} | x, \boldsymbol{\beta} )$ for th
 P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right)
 \end{equation*}
 
-
-** Bernoulli observation distribution
+*** Bernoulli observation distribution
 
 In this case:
 
@@ -118,7 +122,7 @@ f = at.dot(X.T, beta)
 # loglikelihood = at.prod(at.pow(at.exp(f), y) / (1 + at.dot(exp(f)))...)
 #+end_src
 
-** Negative binomial observation distribution
+*** Negative binomial observation distribution
 
 If we note $r$ the [[id:273bfd3a-7e6e-4971-b422-048f930ae5b0][negative binomial]]'s dispersion parameter, and $y_i$ the number of observations in experiment $i$, then:
 
@@ -143,9 +147,11 @@ So that
 \mathcal{L}_i\left(\boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \prod_{i=1}^N \frac{\left(\exp\left( - \boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{r}}{\left(1 + \exp\left(-\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i+r}}
 \end{equation*}
 
+
 * References
 
 - Dunson, etc. Bayesian inference for logistic models using Polya-Gamma latent variables. (2013)
 - Slides: [[http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf]]
 - https://tiao.io/post/polya-gamma-bayesian-logistic-regression/#i
 - https://gregorygundersen.com/blog/2019/09/20/polya-gamma/
+- [[https://github.com/aesara-devs/aemcmc][Implementation]] in =AeMCMC=
