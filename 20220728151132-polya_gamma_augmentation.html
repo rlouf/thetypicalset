@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 03:07 -->
+<!-- 2022-07-29 Fri 03:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Polya-Gamma augmentation</title>
@@ -219,7 +219,7 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Polya-Gamma augmentation</h1>
-<div class="abstract" id="org872ba22">
+<div class="abstract" id="orgcf00912">
 <p>
 In this note we will go over the Polya-Gamma augmentation for logistic regression models.
 </p>
@@ -280,7 +280,7 @@ But behold! Polson et al. remind us of this neat result:
 
 
 \begin{align*}
-\frac{\left(e^u)^a}{\left(1 + e^u\right)^b} &= \frac{1}{2^b}\, e^{\kappa u}\,\int_0^\infty e^{-\frac{u^2}{2} \omega}\; p(\omega) \mathrm{d}\omega\\
+\frac{\left(e^u\right)^a}{\left(1 + e^u\right)^b} &= \frac{1}{2^b}\, e^{\kappa u}\,\int_0^\infty e^{-\frac{u^2}{2} \omega}\; p(\omega)\, \mathrm{d}\omega\\
 \kappa &= a - \frac{b}{2}\\
 p(\omega) &= \mathrm{PG}\left(\omega|b, 0\right)
 \end{align*}
@@ -291,7 +291,7 @@ So if we set \(b=1\), \(u = \boldsymbol{x}_i^T \boldsymbol{\beta}\) and \(a = y_
 </p>
 
 \begin{align*}
-P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\infty \exp\left( y_i \boldsymbol{x_i}^T\,\boldsymbol{\beta} - \frac{\left(\boldsymbol{x_i}^T\,\boldsymbol{\beta})^2}{2} \omega\right)\;P(\omega) \mathrm{d}\omega\\
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\infty \exp\left( y_i \boldsymbol{x_i}^T\,\boldsymbol{\beta} - \frac{\left(\boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2}{2} \omega\right)\;P(\omega) \mathrm{d}\omega\\
 &= \frac{1}{2} \int_0^\infty \exp\left( -\frac{\omega}{2} \left( \frac{y_i}{\omega} - \boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2\right)\;P(\omega) \mathrm{d}\omega\\
 \end{align*}
 
@@ -300,9 +300,9 @@ P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\
 I guess Gibbs sampling works because we're able to successively
 </p>
 
-<div id="outline-container-org0b590e7" class="outline-2">
-<h2 id="org0b590e7">Bernoulli likelihood</h2>
-<div class="outline-text-2" id="text-org0b590e7">
+<div id="outline-container-org6f8eb8f" class="outline-2">
+<h2 id="org6f8eb8f">Bernoulli likelihood</h2>
+<div class="outline-text-2" id="text-org6f8eb8f">
 <p>
 Let us derive the likelihood \(p(\boldsymbol{y} | x, \boldsymbol{\beta} )\) assuming that the observations are i.i.d. from the same distribution:
 </p>
@@ -326,9 +326,9 @@ So that:
 </div>
 </div>
 
-<div id="outline-container-org1b35e0a" class="outline-2">
-<h2 id="org1b35e0a">References</h2>
-<div class="outline-text-2" id="text-org1b35e0a">
+<div id="outline-container-orga0f91f4" class="outline-2">
+<h2 id="orga0f91f4">References</h2>
+<div class="outline-text-2" id="text-orga0f91f4">
 <ul class="org-ul">
 <li>Dunson, etc. Bayesian inference for logistic models using Polya-Gamma latent variables. (2013)</li>
 <li>Slides: <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf">http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf</a></li>
@@ -338,9 +338,9 @@ So that:
 </div>
 </div>
 
-<div id="outline-container-org414cc1f" class="outline-2">
-<h2 id="org414cc1f">Links to this note</h2>
-<div class="outline-text-2" id="text-org414cc1f">
+<div id="outline-container-org40b08cb" class="outline-2">
+<h2 id="org40b08cb">Links to this note</h2>
+<div class="outline-text-2" id="text-org40b08cb">
 <ul class="org-ul">
 <li><a href="./inbox.html">Writing inbox</a></li>
 <li><a href="./20220728171643-gibbs_sampling.html">Gibbs sampling</a></li>
