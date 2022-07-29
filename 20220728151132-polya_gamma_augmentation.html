@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 03:11 -->
+<!-- 2022-07-29 Fri 03:37 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Polya-Gamma augmentation</title>
@@ -219,7 +219,7 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Polya-Gamma augmentation</h1>
-<div class="abstract" id="orgcf00912">
+<div class="abstract" id="org257faf0">
 <p>
 In this note we will go over the Polya-Gamma augmentation for logistic regression models.
 </p>
@@ -300,20 +300,39 @@ P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\
 I guess Gibbs sampling works because we're able to successively
 </p>
 
-<div id="outline-container-org6f8eb8f" class="outline-2">
-<h2 id="org6f8eb8f">Bernoulli likelihood</h2>
-<div class="outline-text-2" id="text-org6f8eb8f">
+<div id="outline-container-org5dfd1b5" class="outline-2">
+<h2 id="org5dfd1b5">Likelihood</h2>
+<div class="outline-text-2" id="text-org5dfd1b5">
 <p>
-Let us derive the likelihood \(p(\boldsymbol{y} | x, \boldsymbol{\beta} )\) assuming that the observations are i.i.d. from the same distribution:
+Let us derive the likelihood \(p(\boldsymbol{y} | x, \boldsymbol{\beta} )\) for the Bernoulli and Negative Binomial observation distribution. Assuming that the observations are i.i.d. from the same distribution we can write:
+</p>
+
+\begin{equation*}
+P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right)
+\end{equation*}
+</div>
+
+
+<div id="outline-container-orgd0592a4" class="outline-3">
+<h3 id="orgd0592a4">Bernoulli observation distribution</h3>
+<div class="outline-text-3" id="text-orgd0592a4">
+<p>
+In this case:
 </p>
 
 \begin{align*}
-P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) &= \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right)\\
-&=\prod_{i=1}^n\; p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
-&=\prod_{i=1}^n\; \left[ \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{\,1-y_i}\,\left[1 - \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{y_i}\\
-&=\prod_{i=1}^n\; \left[ \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{\,1-y_i}\,\left[\frac{1}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{y_i}\\
-&=\prod_{i=1}^n\; \frac{\left[ \exp(-x_i^T \boldsymbol{\beta}) \right]^{\,1-y_i}}{1 + \exp(-x_i^T \boldsymbol{\beta})}\\
-&=\prod_{i=1}^n\; \frac{\left( \exp(x_i^T \boldsymbol{\beta}) \right)^{\,y_i}}{1 + \exp(x_i^T \boldsymbol{\beta})}\\
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
+p_i &= \frac{\exp(f_i)}{1 + \exp(f_i)}\\
+f_i &= - x_i^T\,\boldsymbol{\beta}
+\end{align*}
+
+
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,1-y_i}\,\left[1 - \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,1-y_i}\,\left[\frac{1}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \frac{\left( \exp(f_i) \right)^{\,1-y_i}}{1 + \exp(f_i)}\\
+&= \frac{\left( \exp(-f_i) \right)^{\,y_i}}{1 + \exp(-f_i)}\\
 \end{align*}
 
 
@@ -323,12 +342,74 @@ So that:
 \begin{equation*}
 \mathcal{L}_i(\boldsymbol{\beta}) = P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\left(\exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i}}{1 + \exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)}
 \end{equation*}
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">X</span> = at.matrix(<span style="font-style: italic;">"X"</span>)
+<span style="font-weight: bold; font-style: italic;">beta</span> = at.vector(<span style="font-style: italic;">"beta"</span>)
+
+<span style="font-weight: bold; font-style: italic;">p</span> = at.sigmoid(at.dot(X.T, beta))
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.bernoulli(p, size=X.shape[0])
+<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
+
+<span style="font-weight: bold; font-style: italic;">loglikelihood</span> = y.logprob(y_vv)
+</pre>
+</div>
+
+<p>
+Is equivalent to:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">X</span> = at.matrix(<span style="font-style: italic;">"X"</span>)
+<span style="font-weight: bold; font-style: italic;">beta</span> = at.vector(<span style="font-style: italic;">"beta"</span>)
+<span style="font-weight: bold; font-style: italic;">f</span> = at.dot(X.T, beta)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">loglikelihood = at.prod(at.pow(at.exp(f), y) / (1 + at.dot(exp(f)))...)</span>
+</pre>
+</div>
 </div>
 </div>
 
-<div id="outline-container-orga0f91f4" class="outline-2">
-<h2 id="orga0f91f4">References</h2>
-<div class="outline-text-2" id="text-orga0f91f4">
+<div id="outline-container-org4c176f4" class="outline-3">
+<h3 id="org4c176f4">Negative binomial observation distribution</h3>
+<div class="outline-text-3" id="text-org4c176f4">
+<p>
+If we note \(r\) the <a href="20210420200526-negative_binomial_distribution.html#ID-273bfd3a-7e6e-4971-b422-048f930ae5b0">negative binomial</a>'s dispersion parameter, and \(y_i\) the number of observations in experiment \(i\), then:
+</p>
+
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,r}\,\left(1 - p_i\right)^{y_i}\\
+p_i &= \frac{\exp(f_i)}{1 + \exp(f_i)}\\
+f_i &= - x_i^T\,\boldsymbol{\beta}
+\end{align*}
+
+<p>
+The previous calculation trivially applies to this as well:
+</p>
+
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &\propto p_i^{\,r}\,\left(1 - p_i\right)^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,r}\,\left[1 - \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,r}\,\left[\frac{1}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \frac{\left( \exp(f_i) \right)^{\,r}}{\left(1 + \exp(f_i)\right)^{y_i+r}}\\
+\end{align*}
+
+<p>
+So that
+</p>
+
+\begin{equation*}
+\mathcal{L}_i(\boldsymbol{\beta}) = P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\left(\exp\left( - \boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{r}}{\left(1 + \exp\left(-\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right^{y_i+r}}
+\end{equation*}
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdbffddf" class="outline-2">
+<h2 id="orgdbffddf">References</h2>
+<div class="outline-text-2" id="text-orgdbffddf">
 <ul class="org-ul">
 <li>Dunson, etc. Bayesian inference for logistic models using Polya-Gamma latent variables. (2013)</li>
 <li>Slides: <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf">http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf</a></li>
@@ -338,9 +419,9 @@ So that:
 </div>
 </div>
 
-<div id="outline-container-org40b08cb" class="outline-2">
-<h2 id="org40b08cb">Links to this note</h2>
-<div class="outline-text-2" id="text-org40b08cb">
+<div id="outline-container-org4b44057" class="outline-2">
+<h2 id="org4b44057">Links to this note</h2>
+<div class="outline-text-2" id="text-org4b44057">
 <ul class="org-ul">
 <li><a href="./inbox.html">Writing inbox</a></li>
 <li><a href="./20220728171643-gibbs_sampling.html">Gibbs sampling</a></li>
