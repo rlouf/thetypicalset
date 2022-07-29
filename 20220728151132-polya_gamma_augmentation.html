@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:08 -->
+<!-- 2022-07-29 Fri 18:35 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Polya-Gamma augmentation</title>
@@ -219,7 +219,7 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Polya-Gamma augmentation</h1>
-<div class="abstract" id="org1e62d92">
+<div class="abstract" id="org63eea09">
 <p>
 In this note we will go over the Polya-Gamma augmentation for logistic regression models.
 </p>
@@ -291,18 +291,31 @@ So if we set \(b=1\), \(u = \boldsymbol{x}_i^T \boldsymbol{\beta}\) and \(a = y_
 </p>
 
 \begin{align*}
-P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\infty \exp\left( y_i \boldsymbol{x_i}^T\,\boldsymbol{\beta} - \frac{\left(\boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2}{2} \omega\right)\;P(\omega) \mathrm{d}\omega\\
-&= \frac{1}{2} \int_0^\infty \exp\left( -\frac{\omega}{2} \left( \frac{y_i}{\omega} - \boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2\right)\;P(\omega) \mathrm{d}\omega\\
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\infty \exp\left( y_i \boldsymbol{x_i}^T\,\boldsymbol{\beta} - \frac{\left(\boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2}{2} \omega\right)\;P(\omega)\; \mathrm{d}\omega\\
+&= \frac{1}{2} \int_0^\infty \exp\left( -\frac{\omega}{2} \left( \frac{y_i}{\omega} - \boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2\right)\;P(\omega)\; \mathrm{d}\omega\\
 \end{align*}
 
 
 <p>
-I guess Gibbs sampling works because we're able to successively
+So if we condition on \(\omega_n\) we find that \(P(y_i | x_i, \beta, \omega_n)\), and hence \(P(\beta|Y, X, \omega_n)\) to be gaaussian (if \(\omega_n\) is draws from \(\operatorname{PG}(1, 0)\))
 </p>
 
-<div id="outline-container-org9c03db7" class="outline-2">
-<h2 id="org9c03db7">Likelihood</h2>
-<div class="outline-text-2" id="text-org9c03db7">
+<div id="outline-container-org572203a" class="outline-2">
+<h2 id="org572203a"><span class="todo TODO">TODO</span> Simple example with a bimodal distribution</h2>
+<div class="outline-text-2" id="text-org572203a">
+<p>
+And \(Y_i\) indicates which mode the sample belongs to. We can use the <code>polyagamma</code> library.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org482e1b9" class="outline-2">
+<h2 id="org482e1b9">Appendix</h2>
+<div class="outline-text-2" id="text-org482e1b9">
+</div>
+<div id="outline-container-org2d26f1b" class="outline-3">
+<h3 id="org2d26f1b">Likelihood</h3>
+<div class="outline-text-3" id="text-org2d26f1b">
 <p>
 Let us derive the likelihood \(p(\boldsymbol{y} | x, \boldsymbol{\beta} )\) for the <a href="20220729104422-bernoulli_distribution.html#ID-82cc8d0e-682d-4082-90ac-36cf7fadcb72">Bernoulli</a> and <a href="20210420200526-negative_binomial_distribution.html#ID-273bfd3a-7e6e-4971-b422-048f930ae5b0">Negative Binomial</a> observation distribution. Assuming that the observations are i.i.d. from the same distribution we can write:
 </p>
@@ -312,10 +325,9 @@ P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i 
 \end{equation*}
 </div>
 
-
-<div id="outline-container-orgdd47e65" class="outline-3">
-<h3 id="orgdd47e65">Bernoulli observation distribution</h3>
-<div class="outline-text-3" id="text-orgdd47e65">
+<div id="outline-container-org5adb7b6" class="outline-4">
+<h4 id="org5adb7b6">Bernoulli observation distribution</h4>
+<div class="outline-text-4" id="text-org5adb7b6">
 <p>
 In this case:
 </p>
@@ -372,9 +384,9 @@ Is equivalent to:
 </div>
 </div>
 
-<div id="outline-container-orgacf8658" class="outline-3">
-<h3 id="orgacf8658">Negative binomial observation distribution</h3>
-<div class="outline-text-3" id="text-orgacf8658">
+<div id="outline-container-orgb43474a" class="outline-4">
+<h4 id="orgb43474a">Negative binomial observation distribution</h4>
+<div class="outline-text-4" id="text-orgb43474a">
 <p>
 If we note \(r\) the <a href="20210420200526-negative_binomial_distribution.html#ID-273bfd3a-7e6e-4971-b422-048f930ae5b0">negative binomial</a>'s dispersion parameter, and \(y_i\) the number of observations in experiment \(i\), then:
 </p>
@@ -406,22 +418,25 @@ So that
 </div>
 </div>
 </div>
+</div>
 
-<div id="outline-container-orge99a86c" class="outline-2">
-<h2 id="orge99a86c">References</h2>
-<div class="outline-text-2" id="text-orge99a86c">
+
+<div id="outline-container-org2768f3f" class="outline-2">
+<h2 id="org2768f3f">References</h2>
+<div class="outline-text-2" id="text-org2768f3f">
 <ul class="org-ul">
 <li>Dunson, etc. Bayesian inference for logistic models using Polya-Gamma latent variables. (2013)</li>
 <li>Slides: <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf">http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf</a></li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://tiao.io/post/polya-gamma-bayesian-logistic-regression/#i">https://tiao.io/post/polya-gamma-bayesian-logistic-regression/#i</a></li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://gregorygundersen.com/blog/2019/09/20/polya-gamma/">https://gregorygundersen.com/blog/2019/09/20/polya-gamma/</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc">Implementation</a> in <code>AeMCMC</code></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org533a9fc" class="outline-2">
-<h2 id="org533a9fc">Links to this note</h2>
-<div class="outline-text-2" id="text-org533a9fc">
+<div id="outline-container-org682edbc" class="outline-2">
+<h2 id="org682edbc">Links to this note</h2>
+<div class="outline-text-2" id="text-org682edbc">
 <ul class="org-ul">
 <li><a href="./inbox.html">Writing inbox</a></li>
 <li><a href="./20220728171643-gibbs_sampling.html">Gibbs sampling</a></li>
