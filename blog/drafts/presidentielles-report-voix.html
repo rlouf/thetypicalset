@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Estimer le report des voix aux présidentielles</title>
@@ -253,17 +253,17 @@ On se placera ici à l'échelle de la circonscription législative. Le découpag
 </pre>
 </div>
 
-<div id="outline-container-org91bc18b" class="outline-2">
-<h2 id="org91bc18b">Les données</h2>
-<div class="outline-text-2" id="text-org91bc18b">
+<div id="outline-container-org6d0b147" class="outline-2">
+<h2 id="org6d0b147">Les données</h2>
+<div class="outline-text-2" id="text-org6d0b147">
 <p>
 Les résultats des élections présidentielles 2022 sont publiquement disponibles à l'échelle des circonscriptions législatives sous format <code>xlsx</code>. On utilise la librairies python <code>pandas</code> pour les manipuler et convertir dans le format approprié pour le modèle.
 </p>
 </div>
 
-<div id="outline-container-org26fa07c" class="outline-3">
-<h3 id="org26fa07c">Premier tour</h3>
-<div class="outline-text-3" id="text-org26fa07c">
+<div id="outline-container-orgbf8544d" class="outline-3">
+<h3 id="orgbf8544d">Premier tour</h3>
+<div class="outline-text-3" id="text-orgbf8544d">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">'/tmp/T1.xlsx'</span>
 
@@ -285,18 +285,6 @@ On vérifie que les données ont été bien téléchargées et converties:
 </pre>
 </div>
 
-<pre class="example">
-    Code du département           Libellé du département  Code de la circonscription  ... Unnamed: 100 Unnamed: 101  Unnamed: 102
-572                  ZZ  Français établis hors de France                           7  ...          639         0.52          1.23
-573                  ZZ  Français établis hors de France                           8  ...          300         0.23          1.28
-574                  ZZ  Français établis hors de France                           9  ...          381         0.31          0.97
-575                  ZZ  Français établis hors de France                          10  ...          530         0.51          1.33
-576                  ZZ  Français établis hors de France                          11  ...          595         0.60          1.58
-
-[5 rows x 103 columns]
-</pre>
-
-
 <p>
 On regroupe les abstentions, votes blancs et nuls sous la catégorie des votes non-exprimés, et on formatte le nom des circonscriptions
 </p>
@@ -312,16 +300,6 @@ On regroupe les abstentions, votes blancs et nuls sous la catégorie des votes n
 df_1.head()
 </pre>
 </div>
-
-<pre class="example">
-   Non exprimés
-0         20139
-1         21636
-2         21581
-3         21599
-4         20130
-</pre>
-
 
 <p>
 Et on réccupère maintenant les votes par candidat:
@@ -370,16 +348,16 @@ filename
 #+attr<sub>html</sub> :width 100%
 </p>
 
-<div id="orgcc77738" class="figure">
+<div id="orgc462984" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-premier-tour.png" alt="resultats-premier-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org53cfd85" class="outline-3">
-<h3 id="org53cfd85">Deuxième tour</h3>
-<div class="outline-text-3" id="text-org53cfd85">
+<div id="outline-container-org6ab575c" class="outline-3">
+<h3 id="org6ab575c">Deuxième tour</h3>
+<div class="outline-text-3" id="text-org6ab575c">
 <p>
 Le processus de récupération des données est identique pour le second tour :
 </p>
@@ -437,16 +415,16 @@ filename
 #+attr<sub>html</sub> :width 100%
 </p>
 
-<div id="org9c55e5b" class="figure">
+<div id="orgc863c81" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-second-tour.png" alt="resultats-second-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org0ea3c2b" class="outline-3">
-<h3 id="org0ea3c2b">Second order</h3>
-<div class="outline-text-3" id="text-org0ea3c2b">
+<div id="outline-container-orgfd82ab4" class="outline-3">
+<h3 id="orgfd82ab4">Second order</h3>
+<div class="outline-text-3" id="text-orgfd82ab4">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
 
@@ -468,7 +446,7 @@ filename
 </div>
 
 
-<div id="orgcbd0684" class="figure">
+<div id="orgc46e8f1" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figures6n2pL.png" alt="figures6n2pL.png" />
 </p>
 </div>
@@ -495,7 +473,7 @@ filename
 </div>
 
 
-<div id="org34686d4" class="figure">
+<div id="orgd05cd8b" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figurePLSP8R.png" alt="figurePLSP8R.png" />
 </p>
 </div>
@@ -521,7 +499,7 @@ filename
 </div>
 
 
-<div id="orgb4f700b" class="figure">
+<div id="orgd57d03b" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figurei4jzIx.png" alt="figurei4jzIx.png" />
 </p>
 </div>
@@ -529,12 +507,12 @@ filename
 </div>
 </div>
 
-<div id="outline-container-orgced03d4" class="outline-2">
-<h2 id="orgced03d4"><span class="todo TODO">TODO</span> Better bivariate plots</h2>
+<div id="outline-container-orgb9d5797" class="outline-2">
+<h2 id="orgb9d5797"><span class="todo TODO">TODO</span> Better bivariate plots</h2>
 </div>
-<div id="outline-container-org2e7ebd9" class="outline-2">
-<h2 id="org2e7ebd9">Simple modèle écologique</h2>
-<div class="outline-text-2" id="text-org2e7ebd9">
+<div id="outline-container-org29ac3e4" class="outline-2">
+<h2 id="org29ac3e4">Simple modèle écologique</h2>
+<div class="outline-text-2" id="text-org29ac3e4">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:577, :]
 <span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:577:]
@@ -549,9 +527,9 @@ The model we implement is taken from <a target='_blank' rel='noopener noreferrer
 </p>
 </div>
 
-<div id="outline-container-org69df853" class="outline-3">
-<h3 id="org69df853">Simplified version (full mixing of the transition matrix)</h3>
-<div class="outline-text-3" id="text-org69df853">
+<div id="outline-container-orgf931524" class="outline-3">
+<h3 id="orgf931524">Simplified version (full mixing of the transition matrix)</h3>
+<div class="outline-text-3" id="text-orgf931524">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 <span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
@@ -619,11 +597,6 @@ mode.JAX.optimizer.optimize(fgraph)
 </pre>
 </div>
 
-<pre class="example">
--2310109.6672252584
-</pre>
-
-
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logpdf</span>(beta):
     <span style="font-weight: bold;">return</span> jax_fn(beta, second)[0]
@@ -671,192 +644,10 @@ jnp.mean(a, axis=0)
 </pre>
 </div>
 
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">0.878604297</td>
-<td class="org-right">0.0258612203</td>
-<td class="org-right">0.0955344828</td>
-</tr>
-
-<tr>
-<td class="org-right">0.000223786225</td>
-<td class="org-right">0.00017233535</td>
-<td class="org-right">0.999603878</td>
-</tr>
-
-<tr>
-<td class="org-right">0.353812974</td>
-<td class="org-right">0.000762828276</td>
-<td class="org-right">0.645424198</td>
-</tr>
-
-<tr>
-<td class="org-right">1.23942505e-05</td>
-<td class="org-right">0.999982994</td>
-<td class="org-right">4.6121251e-06</td>
-</tr>
-
-<tr>
-<td class="org-right">0.456609718</td>
-<td class="org-right">9.08177981e-05</td>
-<td class="org-right">0.543299464</td>
-</tr>
-
-<tr>
-<td class="org-right">4.226596e-06</td>
-<td class="org-right">3.34375375e-06</td>
-<td class="org-right">0.99999243</td>
-</tr>
-
-<tr>
-<td class="org-right">0.334170929</td>
-<td class="org-right">0.165825645</td>
-<td class="org-right">0.500003427</td>
-</tr>
-
-<tr>
-<td class="org-right">0.413016729</td>
-<td class="org-right">0.567315435</td>
-<td class="org-right">0.0196678352</td>
-</tr>
-
-<tr>
-<td class="org-right">0.000552152712</td>
-<td class="org-right">0.99932251</td>
-<td class="org-right">0.000125337773</td>
-</tr>
-
-<tr>
-<td class="org-right">4.11361658e-05</td>
-<td class="org-right">0.999943891</td>
-<td class="org-right">1.49731413e-05</td>
-</tr>
-
-<tr>
-<td class="org-right">0.0369822017</td>
-<td class="org-right">0.962924784</td>
-<td class="org-right">9.30145364e-05</td>
-</tr>
-
-<tr>
-<td class="org-right">0.00201357423</td>
-<td class="org-right">0.0014996482</td>
-<td class="org-right">0.996486778</td>
-</tr>
-
-<tr>
-<td class="org-right">9.11804856e-05</td>
-<td class="org-right">6.04221729e-05</td>
-<td class="org-right">0.999848397</td>
-</tr>
-</tbody>
-</table>
-
 <div class="org-src-container">
 <pre class="src src-python">jnp.std(a, axis=0)
 </pre>
 </div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">0.000512569718</td>
-<td class="org-right">0.000422569878</td>
-<td class="org-right">0.000411759099</td>
-</tr>
-
-<tr>
-<td class="org-right">0.000227764635</td>
-<td class="org-right">0.000163277737</td>
-<td class="org-right">0.000285016154</td>
-</tr>
-
-<tr>
-<td class="org-right">0.00835850634</td>
-<td class="org-right">0.00073835611</td>
-<td class="org-right">0.00834943886</td>
-</tr>
-
-<tr>
-<td class="org-right">1.17570106e-05</td>
-<td class="org-right">1.25917198e-05</td>
-<td class="org-right">4.70890492e-06</td>
-</tr>
-
-<tr>
-<td class="org-right">0.00365140492</td>
-<td class="org-right">8.73912586e-05</td>
-<td class="org-right">0.00365640129</td>
-</tr>
-
-<tr>
-<td class="org-right">4.43859768e-06</td>
-<td class="org-right">3.56362398e-06</td>
-<td class="org-right">5.91070475e-06</td>
-</tr>
-
-<tr>
-<td class="org-right">0.00381819399</td>
-<td class="org-right">0.00359687914</td>
-<td class="org-right">0.00259848234</td>
-</tr>
-
-<tr>
-<td class="org-right">0.0010802287</td>
-<td class="org-right">0.00095616888</td>
-<td class="org-right">0.000884318653</td>
-</tr>
-
-<tr>
-<td class="org-right">0.00056388714</td>
-<td class="org-right">0.000574331051</td>
-<td class="org-right">0.000130463264</td>
-</tr>
-
-<tr>
-<td class="org-right">3.99026341e-05</td>
-<td class="org-right">4.14860574e-05</td>
-<td class="org-right">1.49185181e-05</td>
-</tr>
-
-<tr>
-<td class="org-right">0.00503139143</td>
-<td class="org-right">0.00502770986</td>
-<td class="org-right">9.19645282e-05</td>
-</tr>
-
-<tr>
-<td class="org-right">0.0019754635</td>
-<td class="org-right">0.00158481525</td>
-<td class="org-right">0.00251857998</td>
-</tr>
-
-<tr>
-<td class="org-right">8.87382366e-05</td>
-<td class="org-right">6.1380908e-05</td>
-<td class="org-right">0.000105200007</td>
-</tr>
-</tbody>
-</table>
 
 <p>
 On vérifie que le modèle, aussi surprenant que cela soit, est k
@@ -866,322 +657,12 @@ On vérifie que le modèle, aussi surprenant que cela soit, est k
 <pre class="src src-python">a[:, 1, 2][:100]
 </pre>
 </div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">0.99962791</td>
-<td class="org-right">0.99991623</td>
-<td class="org-right">0.99966305</td>
-<td class="org-right">0.99946064</td>
-<td class="org-right">0.99938046</td>
-<td class="org-right">0.99937188</td>
-<td class="org-right">0.99980659</td>
-<td class="org-right">0.999792</td>
-<td class="org-right">0.99923505</td>
-<td class="org-right">0.99953717</td>
-<td class="org-right">0.99951034</td>
-<td class="org-right">0.99959796</td>
-<td class="org-right">0.99957745</td>
-<td class="org-right">0.99986323</td>
-<td class="org-right">0.99975899</td>
-<td class="org-right">0.9996055</td>
-<td class="org-right">0.99928098</td>
-<td class="org-right">0.99986385</td>
-<td class="org-right">0.99988614</td>
-<td class="org-right">0.99984921</td>
-<td class="org-right">0.99942679</td>
-<td class="org-right">0.99886797</td>
-<td class="org-right">0.99980025</td>
-<td class="org-right">0.9995409</td>
-<td class="org-right">0.99961997</td>
-<td class="org-right">0.99944473</td>
-<td class="org-right">0.99943799</td>
-<td class="org-right">0.99949746</td>
-<td class="org-right">0.99953126</td>
-<td class="org-right">0.99979873</td>
-<td class="org-right">0.99968739</td>
-<td class="org-right">0.99986479</td>
-<td class="org-right">0.99959014</td>
-<td class="org-right">0.99985252</td>
-<td class="org-right">0.99920973</td>
-<td class="org-right">0.99971285</td>
-<td class="org-right">0.99979184</td>
-<td class="org-right">0.99950867</td>
-<td class="org-right">0.99925911</td>
-<td class="org-right">0.99948833</td>
-<td class="org-right">0.99949589</td>
-<td class="org-right">0.9996224</td>
-<td class="org-right">0.99961641</td>
-<td class="org-right">0.99974562</td>
-<td class="org-right">0.99960092</td>
-<td class="org-right">0.99979708</td>
-<td class="org-right">0.99991249</td>
-<td class="org-right">0.99940249</td>
-<td class="org-right">0.99975145</td>
-<td class="org-right">0.99934725</td>
-<td class="org-right">0.99997605</td>
-<td class="org-right">0.99810388</td>
-<td class="org-right">0.99983037</td>
-<td class="org-right">0.99966022</td>
-<td class="org-right">0.99944754</td>
-<td class="org-right">0.99954732</td>
-<td class="org-right">0.99942889</td>
-<td class="org-right">0.99945266</td>
-<td class="org-right">0.99898081</td>
-<td class="org-right">0.99995676</td>
-<td class="org-right">0.9999735</td>
-<td class="org-right">0.99997122</td>
-<td class="org-right">0.99996205</td>
-<td class="org-right">0.99800344</td>
-<td class="org-right">0.99998724</td>
-<td class="org-right">0.99987909</td>
-<td class="org-right">0.99979481</td>
-<td class="org-right">0.99981912</td>
-<td class="org-right">0.9998331</td>
-<td class="org-right">0.99980382</td>
-<td class="org-right">0.99970231</td>
-<td class="org-right">0.99978394</td>
-<td class="org-right">0.99973909</td>
-<td class="org-right">0.99961615</td>
-<td class="org-right">0.99966534</td>
-<td class="org-right">0.99957562</td>
-<td class="org-right">0.99971179</td>
-<td class="org-right">0.99955648</td>
-<td class="org-right">0.99947529</td>
-<td class="org-right">0.99900012</td>
-<td class="org-right">0.99977318</td>
-<td class="org-right">0.99986157</td>
-<td class="org-right">0.99981946</td>
-<td class="org-right">0.99949235</td>
-<td class="org-right">0.99975582</td>
-<td class="org-right">0.99978152</td>
-<td class="org-right">0.99940828</td>
-<td class="org-right">0.99943139</td>
-<td class="org-right">0.99903068</td>
-<td class="org-right">0.99912911</td>
-<td class="org-right">0.99981919</td>
-<td class="org-right">0.99974803</td>
-<td class="org-right">0.99903316</td>
-<td class="org-right">0.99971128</td>
-<td class="org-right">0.99949675</td>
-<td class="org-right">0.9996083</td>
-<td class="org-right">0.99977729</td>
-<td class="org-right">0.99960927</td>
-<td class="org-right">0.99948289</td>
-<td class="org-right">0.99941847</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 
-<div id="outline-container-org2cd5a9c" class="outline-3">
-<h3 id="org2cd5a9c">Hyperprior on dirichlet</h3>
-<div class="outline-text-3" id="text-org2cd5a9c">
+<div id="outline-container-org5d557c4" class="outline-3">
+<h3 id="org5d557c4">Hyperprior on dirichlet</h3>
+<div class="outline-text-3" id="text-org5d557c4">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:100,:]
 <span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:100,:]
@@ -1265,11 +746,6 @@ mode.JAX.optimizer.optimize(fgraph)
 </pre>
 </div>
 
-<pre class="example">
--325017.85796774126
-</pre>
-
-
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logpdf</span>(x):
     <span style="font-weight: bold; font-style: italic;">beta</span>, <span style="font-weight: bold; font-style: italic;">delta</span> = x
@@ -1318,192 +794,10 @@ jnp.mean(a, axis=0)
 </pre>
 </div>
 
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">29.60603574</td>
-<td class="org-right">2.34199847</td>
-<td class="org-right">2.98394168</td>
-</tr>
-
-<tr>
-<td class="org-right">0.44175271</td>
-<td class="org-right">0.31861708</td>
-<td class="org-right">18.08521358</td>
-</tr>
-
-<tr>
-<td class="org-right">14.2330665</td>
-<td class="org-right">0.4175809</td>
-<td class="org-right">16.53486333</td>
-</tr>
-
-<tr>
-<td class="org-right">0.14939946</td>
-<td class="org-right">13.42957026</td>
-<td class="org-right">0.16539151</td>
-</tr>
-
-<tr>
-<td class="org-right">10.85680003</td>
-<td class="org-right">0.13078875</td>
-<td class="org-right">11.67389942</td>
-</tr>
-
-<tr>
-<td class="org-right">0.0426811</td>
-<td class="org-right">0.14017083</td>
-<td class="org-right">11.50171714</td>
-</tr>
-
-<tr>
-<td class="org-right">3.61469926</td>
-<td class="org-right">0.94584796</td>
-<td class="org-right">23.13918023</td>
-</tr>
-
-<tr>
-<td class="org-right">8.4651884</td>
-<td class="org-right">14.49454873</td>
-<td class="org-right">0.18589097</td>
-</tr>
-
-<tr>
-<td class="org-right">18.55727688</td>
-<td class="org-right">4.93651698</td>
-<td class="org-right">0.21684371</td>
-</tr>
-
-<tr>
-<td class="org-right">0.19961832</td>
-<td class="org-right">11.31421649</td>
-<td class="org-right">0.11511398</td>
-</tr>
-
-<tr>
-<td class="org-right">2.14471167</td>
-<td class="org-right">17.3388221</td>
-<td class="org-right">0.3826252</td>
-</tr>
-
-<tr>
-<td class="org-right">1.08048987</td>
-<td class="org-right">0.3547419</td>
-<td class="org-right">18.32616482</td>
-</tr>
-
-<tr>
-<td class="org-right">0.34198671</td>
-<td class="org-right">0.24493664</td>
-<td class="org-right">15.64597391</td>
-</tr>
-</tbody>
-</table>
-
 <div class="org-src-container">
 <pre class="src src-python">jnp.std(a, axis=0)
 </pre>
 </div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">2.22044605e-16</td>
-<td class="org-right">1.38777878e-17</td>
-<td class="org-right">3.33066907e-16</td>
-</tr>
-
-<tr>
-<td class="org-right">7.77156117e-16</td>
-<td class="org-right">2.77555756e-17</td>
-<td class="org-right">2.77555756e-17</td>
-</tr>
-
-<tr>
-<td class="org-right">6.31088724e-30</td>
-<td class="org-right">5.55111512e-17</td>
-<td class="org-right">1.11022302e-16</td>
-</tr>
-
-<tr>
-<td class="org-right">1.05879118e-22</td>
-<td class="org-right">6.66133815e-16</td>
-<td class="org-right">1.11022302e-16</td>
-</tr>
-
-<tr>
-<td class="org-right">5.95570041e-23</td>
-<td class="org-right">2.11758237e-22</td>
-<td class="org-right">5.55111512e-16</td>
-</tr>
-
-<tr>
-<td class="org-right">1.48230766e-21</td>
-<td class="org-right">9.99200722e-16</td>
-<td class="org-right">9.71445147e-17</td>
-</tr>
-
-<tr>
-<td class="org-right">5.55111512e-16</td>
-<td class="org-right">5.22024357e-53</td>
-<td class="org-right">1.04083409e-17</td>
-</tr>
-
-<tr>
-<td class="org-right">4.7433845e-20</td>
-<td class="org-right">0.0</td>
-<td class="org-right">1.11022302e-16</td>
-</tr>
-
-<tr>
-<td class="org-right">0.0</td>
-<td class="org-right">2.22044605e-16</td>
-<td class="org-right">4.06575815e-20</td>
-</tr>
-
-<tr>
-<td class="org-right">3.33066907e-16</td>
-<td class="org-right">0.0</td>
-<td class="org-right">3.33066907e-16</td>
-</tr>
-
-<tr>
-<td class="org-right">0.0</td>
-<td class="org-right">7.57306469e-29</td>
-<td class="org-right">0.0</td>
-</tr>
-
-<tr>
-<td class="org-right">6.6174449e-24</td>
-<td class="org-right">3.33066907e-16</td>
-<td class="org-right">8.47032947e-22</td>
-</tr>
-
-<tr>
-<td class="org-right">6.24500451e-17</td>
-<td class="org-right">5.55111512e-16</td>
-<td class="org-right">0.0</td>
-</tr>
-</tbody>
-</table>
 
 <p>
 Les résultats sont de toute évidence faux: il suffit de comparer les graphes avec les statistiques de second ordre plus haut et les valeurs que l'on obtient pour les priors des distributions des lignes de la matrice de transition. Pour comprendre ce qui se passe il va falloir retourner au tableau, et notamment regarder les <i>prior predictive distributions</i> pour les matrices de transition et voir si elles permettent de retrouver les courbes X au premier tour vs Y au second tour. Trois hypothèses:

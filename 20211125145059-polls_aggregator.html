@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Predict the result of French elections</title>
@@ -227,16 +227,16 @@ Sorry but this is a very rough draft written for myself.
 See <a href="20211207101052-forecasting_elections_in_multiparty_systems_a_bayesian_approach_combining_polls_and_fundamentals.html#ID-4fd036f0-8812-411d-bd25-acd1ebefb7d9">Forecasting elections in multiparty systems: a Bayesian approach combining polls and fundamentals</a>
 </p>
 
-<div id="outline-container-orgd833b63" class="outline-2">
-<h2 id="orgd833b63"><span class="todo TODO">TODO</span> Link Gaussian process to stochastic processes</h2>
+<div id="outline-container-org1817a61" class="outline-2">
+<h2 id="org1817a61"><span class="todo TODO">TODO</span> Link Gaussian process to stochastic processes</h2>
 </div>
-<div id="outline-container-orgc647ba5" class="outline-2">
-<h2 id="orgc647ba5"><span class="todo TODO">TODO</span> Make the gaussian process work with a non-diagonal covariance matrix</h2>
+<div id="outline-container-org0118804" class="outline-2">
+<h2 id="org0118804"><span class="todo TODO">TODO</span> Make the gaussian process work with a non-diagonal covariance matrix</h2>
 </div>
 
-<div id="outline-container-org6157aef" class="outline-2">
-<h2 id="org6157aef">Introduction</h2>
-<div class="outline-text-2" id="text-org6157aef">
+<div id="outline-container-org806364f" class="outline-2">
+<h2 id="org806364f">Introduction</h2>
+<div class="outline-text-2" id="text-org806364f">
 <p>
 Dimensions:
 </p>
@@ -281,29 +281,13 @@ We use Gaussian processes to model the time evolution of the different parameter
 </div>
 
 
-<div id="outline-container-orgbaae36d" class="outline-2">
-<h2 id="orgbaae36d">Intercepts</h2>
-<div class="outline-text-2" id="text-orgbaae36d">
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\sigma</span>_{\iota} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfNormal}(0.5)<span style="font-weight: bold;">\\</span>
- <span style="font-weight: bold;">\iota</span>_{e,p} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{ZeroSumNormal}(0, <span style="font-weight: bold;">\sigma</span>_{\iota})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
-
+<div id="outline-container-org29b6ec1" class="outline-2">
+<h2 id="org29b6ec1">Intercepts</h2>
+<div class="outline-text-2" id="text-org29b6ec1">
 \begin{align*}
   \sigma_{\iota} &\sim \operatorname{HalfNormal}(0.5)\\
  \iota_{e,p} &\sim \operatorname{ZeroSumNormal}(0, \sigma_{\iota})
 \end{align*}
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\sigma</span>_{\tilde{\iota}} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfNormal}(0.5)<span style="font-weight: bold;">\\</span>
- <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\iota</span>}_{p} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{ZeroSumNormal}(0, <span style="font-weight: bold;">\sigma</span>_{\tilde{\iota}})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
 
 \begin{align*}
   \sigma_{\tilde{\iota}} &\sim \operatorname{HalfNormal}(0.5)\\
@@ -312,19 +296,12 @@ We use Gaussian processes to model the time evolution of the different parameter
 </div>
 </div>
 
-<div id="outline-container-org19c486d" class="outline-2">
-<h2 id="org19c486d">House effect</h2>
-<div class="outline-text-2" id="text-org19c486d">
+<div id="outline-container-org2fd332d" class="outline-2">
+<h2 id="org2fd332d">House effect</h2>
+<div class="outline-text-2" id="text-org2fd332d">
 <p>
 The systemic poll biais shared by every pollster for each political party:
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- <span style="font-weight: bold;">\zeta</span>_{p} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{ZeroSumNormal}(0, 0.15)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
  \zeta_{p} \sim \operatorname{ZeroSumNormal}(0, 0.15)
@@ -334,13 +311,6 @@ The systemic poll biais shared by every pollster for each political party:
 The house effet per party
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- <span style="font-weight: bold;">\epsilon</span>_{h,p} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{ZeroSumNormal}(0, 0.15)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
 \begin{equation}
  \epsilon_{h,p} \sim \operatorname{ZeroSumNormal}(0, 0.15)
 \end{equation}
@@ -349,14 +319,6 @@ The house effet per party
 And the house effect per (election, party)
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\sigma</span>_{\tilde{\epsilon}, h, p} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfNormal}(0.15)<span style="font-weight: bold;">\\</span>
- <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\epsilon</span>}_{h, p, e} &amp;= <span style="font-weight: bold;">\sigma</span>_{\tilde{\epsilon}, h, p} <span style="font-weight: bold;">\;\operatorname</span>{ZeroSumNormal}(0, 1)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
-
 \begin{align*}
   \sigma_{\tilde{\epsilon}, h, p} &\sim \operatorname{HalfNormal}(0.15)\\
  \tilde{\epsilon}_{h, p, e} &= \sigma_{\tilde{\epsilon}, h, p} \;\operatorname{ZeroSumNormal}(0, 1)
@@ -364,19 +326,12 @@ And the house effect per (election, party)
 </div>
 </div>
 
-<div id="outline-container-org9d4fce5" class="outline-2">
-<h2 id="org9d4fce5">Fundamental data</h2>
-<div class="outline-text-2" id="text-org9d4fce5">
+<div id="outline-container-org1e5daa3" class="outline-2">
+<h2 id="org1e5daa3">Fundamental data</h2>
+<div class="outline-text-2" id="text-org1e5daa3">
 <p>
 Idea that elections are simple to predict using fundamental data. Here we model the unemployment effect \(\nu_u\):
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- <span style="font-weight: bold;">\nu</span>_u <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{ZeroSumNormal}(0, 0.15)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
  \nu_u \sim \operatorname{ZeroSumNormal}(0, 0.15)
@@ -384,29 +339,22 @@ Idea that elections are simple to predict using fundamental data. Here we model 
 </div>
 </div>
 
-<div id="outline-container-org90ebd8b" class="outline-2">
-<h2 id="org90ebd8b">Time evolution</h2>
-<div class="outline-text-2" id="text-org90ebd8b">
+<div id="outline-container-orgfe2c7a5" class="outline-2">
+<h2 id="orgfe2c7a5">Time evolution</h2>
+<div class="outline-text-2" id="text-orgfe2c7a5">
 <p>
 We model the time evolution of parties' latent popularity with 3 gaussian processes with different length scales to catch the different time scales of the process.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orga59c26f" class="outline-2">
-<h2 id="orga59c26f">Combine the factors</h2>
-<div class="outline-text-2" id="text-orga59c26f">
+<div id="outline-container-org886f814" class="outline-2">
+<h2 id="org886f814">Combine the factors</h2>
+<div class="outline-text-2" id="text-org886f814">
 </div>
-<div id="outline-container-orgd55fa14" class="outline-3">
-<h3 id="orgd55fa14">Poll aggregator</h3>
-<div class="outline-text-3" id="text-orgd55fa14">
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- <span style="font-weight: bold;">\lambda</span>_{h, t, e, p} = <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\iota</span>}_{p} + <span style="font-weight: bold;">\iota</span>_{e,p} + <span style="font-weight: bold;">\mu</span>_{t,p} + <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\mu</span>}_{t,e,p} + <span style="font-weight: bold;">\zeta</span>_{u} <span style="font-weight: bold;">\;</span> U_{t} + <span style="font-weight: bold;">\zeta</span>_{p} + <span style="font-weight: bold;">\epsilon</span>_{h,p} + <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\epsilon</span>}_{h,p,e}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
+<div id="outline-container-org36e34c7" class="outline-3">
+<h3 id="org36e34c7">Poll aggregator</h3>
+<div class="outline-text-3" id="text-org36e34c7">
 \begin{equation}
  \lambda_{h, t, e, p} = \tilde{\iota}_{p} + \iota_{e,p} + \mu_{t,p} + \tilde{\mu}_{t,e,p} + \zeta_{u} \; U_{t} + \zeta_{p} + \epsilon_{h,p} + \tilde{\epsilon}_{h,p,e}
 \end{equation}
@@ -414,13 +362,6 @@ We model the time evolution of parties' latent popularity with 3 gaussian proces
 <p>
 We then note the vector \(\mathbf{p}_{h, t, e} = \left(p_{h,t,e,Green}, \dots, p_{h,t,e,Left}\right)\) and write
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-<span style="font-weight: bold;">\mathbf</span>{p}_{h, t, e} = <span style="font-weight: bold;">\operatorname</span>{Softmax}(<span style="font-weight: bold;">\lambda</span>_{h, t, e})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
 \mathbf{p}_{h, t, e} = \operatorname{Softmax}(\lambda_{h, t, e})
@@ -430,13 +371,6 @@ We then note the vector \(\mathbf{p}_{h, t, e} = \left(p_{h,t,e,Green}, \dots, p
 The latent popularity is given by removing the house effects &amp; poll biases:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- <span style="font-weight: bold;">\mathbf</span>{p}^{latent}_{h,t,e} = <span style="font-weight: bold;">\operatorname</span>{Softmax}<span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\iota</span>}_{p} + <span style="font-weight: bold;">\iota</span>_{e,p} + <span style="font-weight: bold;">\mu</span>_{tp} + <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\mu</span>}_{t,e,p} + <span style="font-weight: bold;">\nu</span>_{u} <span style="font-weight: bold;">\;</span> U_{t}<span style="font-weight: bold;">\right</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
 \begin{equation}
  \mathbf{p}^{latent}_{h,t,e} = \operatorname{Softmax}\left(\tilde{\iota}_{p} + \iota_{e,p} + \mu_{tp} + \tilde{\mu}_{t,e,p} + \nu_{u} \; U_{t}\right)
 \end{equation}
@@ -444,16 +378,9 @@ The latent popularity is given by removing the house effects &amp; poll biases:
 </div>
 
 
-<div id="outline-container-org8732917" class="outline-3">
-<h3 id="org8732917">Fundamentals model</h3>
-<div class="outline-text-3" id="text-org8732917">
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- <span style="font-weight: bold;">\tilde</span>{p}_{h, t, e, p} = <span style="font-weight: bold;">\operatorname</span>{Softmax}<span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\iota</span>}_{p} + <span style="font-weight: bold;">\iota</span>_{e,p} + <span style="font-weight: bold;">\mu</span>_{t_0,p} + <span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\mu</span>}_{t_0,e,p} + <span style="font-weight: bold;">\nu</span>_{u} <span style="font-weight: bold;">\;</span> U_{t_0}<span style="font-weight: bold;">\right</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
+<div id="outline-container-org56363e5" class="outline-3">
+<h3 id="org56363e5">Fundamentals model</h3>
+<div class="outline-text-3" id="text-org56363e5">
 \begin{equation}
  \tilde{p}_{h, t, e, p} = \operatorname{Softmax}\left(\tilde{\iota}_{p} + \iota_{e,p} + \mu_{t_0,p} + \tilde{\mu}_{t_0,e,p} + \nu_{u} \; U_{t_0}\right)
 \end{equation}
@@ -462,19 +389,12 @@ The latent popularity is given by removing the house effects &amp; poll biases:
 </div>
 
 
-<div id="outline-container-org578123e" class="outline-2">
-<h2 id="org578123e">Connect to poll results and election results</h2>
-<div class="outline-text-2" id="text-org578123e">
+<div id="outline-container-orgd27be87" class="outline-2">
+<h2 id="orgd27be87">Connect to poll results and election results</h2>
+<div class="outline-text-2" id="text-orgd27be87">
 <p>
 The concentration parametrer:
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- <span style="font-weight: bold;">\alpha</span> <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{InverseGamma}(1000, 100)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
  \alpha \sim \operatorname{InverseGamma}(1000, 100)
@@ -484,13 +404,6 @@ The concentration parametrer:
 We note \(n_{h, p, t, e}\) the result of a poll at time \(t\) for party \(p\), and \(N_{t}\) the number of respondents:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- n_{h, p,t, e} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{DirichletMultinomial}(<span style="font-weight: bold;">\alpha\,</span>p_{hpte}, N_{t})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
 \begin{equation}
  n_{h, p,t, e} \sim \operatorname{DirichletMultinomial}(\alpha\,p_{hpte}, N_{t})
 \end{equation}
@@ -498,13 +411,6 @@ We note \(n_{h, p, t, e}\) the result of a poll at time \(t\) for party \(p\), a
 <p>
 We note \(r_{pe}\) the result for party \(p\) at election \(e\), \(R_e\) the number of voters and we write
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  r_{pe} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{DirichletMultinomial}<span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\alpha\;\tilde</span>{p}_{pe}, R_{e}<span style="font-weight: bold;">\right</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
   r_{pe} \sim \operatorname{DirichletMultinomial}\left(\alpha\;\tilde{p}_{pe}, R_{e}\right)
@@ -516,8 +422,8 @@ Q: <i>What if there are several polls in one day?</i>
 </div>
 </div>
 
-<div id="outline-container-org2277fca" class="outline-2">
-<h2 id="org2277fca">Links to this note</h2>
+<div id="outline-container-org9494ff3" class="outline-2">
+<h2 id="org9494ff3">Links to this note</h2>
 </div>
 </div>
 </body>

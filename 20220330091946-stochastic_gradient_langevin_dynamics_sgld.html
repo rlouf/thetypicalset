@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:34 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Stochastic gradient Langevin Dynamics (SgLD)</title>
@@ -220,9 +220,9 @@
 <div id="content" class="content">
 <h1 class="title">Stochastic gradient Langevin Dynamics (SgLD)</h1>
 
-<div id="outline-container-org8420a62" class="outline-2">
-<h2 id="org8420a62">Principle and motivation</h2>
-<div class="outline-text-2" id="text-org8420a62">
+<div id="outline-container-org15e7b7b" class="outline-2">
+<h2 id="org15e7b7b">Principle and motivation</h2>
+<div class="outline-text-2" id="text-org15e7b7b">
 <p>
 We use the same solver for the overdamped Langevin dynamics as for the <a href="20220329092624-metropolis_adjusted_langevin_algorithm.html#ID-2b7665c9-e950-4432-b260-9e30b593b375">Metropolis-Adjusted Langevin Algorithm</a>, but we work with an <i>estimator</i> \(\hat{\nabla} \log \pi\) for the gradient of the log-probability density function instead of the gradient itself. There are two reasons why one would want to do that:
 </p>
@@ -242,10 +242,6 @@ The exposition follows [Welling &amp; Teh]. At time \(t\) a subset \(X_t = \left
 <span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation*</span>}
 </pre>
 </div>
-
-\begin{equation*}
-  \hat{\nabla} \log \pi(\theta_{t}) = \nabla \log p(\theta_{t}) + \frac{N}{n} \sum_{i} \nabla \log p(x_{it}|\theta_{t})
-\end{equation*}
 <p>
 So the proposed update using the Langevin dynamics is:
 </p>
@@ -258,11 +254,6 @@ So the proposed update using the Langevin dynamics is:
 </pre>
 </div>
 
-\begin{align*}
-  \theta_{t+1} &= \theta_{t} + \frac{\epsilon_{t}}{2}\;\left(\nabla \log p(\theta_{t}) + \frac{N}{n} \sum_{i} \nabla \log p(x_{it}|\theta_{t})\right) + \xi_{t}\\
-  \xi_t &\sim \operatorname{Normal}\left(0, \epsilon_t\right)
-\end{align*}
-
 
 <p>
 <i>We do not use RMH acceptance/rejection step</i> (which would require evaluation over the whole dataset).
@@ -270,21 +261,21 @@ So the proposed update using the Langevin dynamics is:
 </div>
 </div>
 
-<div id="outline-container-org6e0a7bd" class="outline-2">
-<h2 id="org6e0a7bd">Convergence</h2>
+<div id="outline-container-orgfb6fef9" class="outline-2">
+<h2 id="orgfb6fef9">Convergence</h2>
 </div>
 
-<div id="outline-container-orgbdd84bd" class="outline-2">
-<h2 id="orgbdd84bd">References</h2>
-<div class="outline-text-2" id="text-orgbdd84bd">
+<div id="outline-container-org7d7ebc4" class="outline-2">
+<h2 id="org7d7ebc4">References</h2>
+<div class="outline-text-2" id="text-org7d7ebc4">
 <ul class="org-ul">
 <li>Welling &amp; Teh (2011) <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf">Bayesian Learning via Stochastic Gradient Langevin Dynamics</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org1e3ba38" class="outline-2">
-<h2 id="org1e3ba38">Links to this note</h2>
+<div id="outline-container-org7be469d" class="outline-2">
+<h2 id="org7be469d">Links to this note</h2>
 </div>
 </div>
 </body>

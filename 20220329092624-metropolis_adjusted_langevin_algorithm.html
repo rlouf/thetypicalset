@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Metropolis-Adjusted Langevin Algorithm</title>
@@ -230,10 +230,6 @@ The Metropolis-Adjusted Langevin algorithm updates the position of the chain \(\
 </pre>
 </div>
 
-\begin{equation}
-\mathrm{d} L_t = \mathrm{d} W_t + \frac{1}{2}\;\nabla \log \pi(L_t)\;\mathrm{d}t
-\end{equation}
-
 
 <p>
 Where \(W_t\) is the standard Brownian motion. Equation (1) is a continuous time diffusion and we instead use a discrete approximation to this diffusion:
@@ -246,10 +242,6 @@ Where \(W_t\) is the standard Brownian motion. Equation (1) is a continuous time
 </pre>
 </div>
 
-\begin{equation*}
-\theta_{t+1} = \theta_t + \tau\;\nabla \log \pi(\theta_t) + \sqrt{2\, \tau\; \xi
-\end{equation*}
-
 <p>
 where
 </p>
@@ -260,10 +252,6 @@ where
 <span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation*</span>}
 </pre>
 </div>
-
-\begin{equation*}
-\xi \sim \operatorname{Normal}(0,\mathbb{I}_k)
-\end{equation*}
 
 <p>
 \(k\) is the number of dimension of \(\boldsymbol{\theta}\), \(\tau\) the step size and \(\pi\) the probability density. The idea, like with <a href="20220307090810-hamiltonian_monte_carlo.html#ID-dce96ffd-7673-4596-a6e7-2e7dd7299f76">Hamiltonian Monte Carlo</a>, is to use information about the gradient of the probability density funtion to produce a "better" proposal.
@@ -280,10 +268,6 @@ The dynamics defined by the discretized version of the Langevin dynamics only ma
 </pre>
 </div>
 
-\begin{equation*}
- \alpha = \min \left\{1, \frac{\pi(\theta_{t+1}) q(\theta_t | \theta_{t+1})}{\pi(\theta_{t}) q(\theta_{t+1} | \theta_{t})} \right\}
-\end{equation*}
-
 
 <p>
 where
@@ -296,10 +280,6 @@ where
 </pre>
 </div>
 
-\begin{equation*}
-  q\left(\theta_{t+1}|\theta_{t}\right) = \exp\left(-\frac{1}{4\, \tau} || \theta_{t+1} - \theta_t - \tau\;\nabla\log \pi(\theta_t) ||_2\right)
-\end{equation*}
-
 <p>
 since
 </p>
@@ -311,13 +291,9 @@ since
 </pre>
 </div>
 
-\begin{equation*}
-  \theta_{{t+1}} \sim \operatorname{Normal}\left( \theta_{t} + \frac{\tau}{2}\;\nabla\log \pi(\theta_{t}) \right, \tau\,\mathbb{I}_k)
-\end{equation*}
-
-<div id="outline-container-org48cae51" class="outline-2">
-<h2 id="org48cae51">References</h2>
-<div class="outline-text-2" id="text-org48cae51">
+<div id="outline-container-orga684429" class="outline-2">
+<h2 id="orga684429">References</h2>
+<div class="outline-text-2" id="text-orga684429">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Metropolis-adjusted_Langevin_algorithm">Wikipedia article</a></li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://sci-hub.hkvisa.net/10.2307/3318418">Exponential Convergence of Langevin Distributions and Their Discrete Approximations</a></li>
@@ -325,9 +301,9 @@ since
 </div>
 </div>
 
-<div id="outline-container-orgfa67c05" class="outline-2">
-<h2 id="orgfa67c05">Links to this note</h2>
-<div class="outline-text-2" id="text-orgfa67c05">
+<div id="outline-container-orgc75d4dc" class="outline-2">
+<h2 id="orgc75d4dc">Links to this note</h2>
+<div class="outline-text-2" id="text-orgc75d4dc">
 <ul class="org-ul">
 <li><a href="./20220330091946-stochastic_gradient_langevin_dynamics_sgld.html">Stochastic gradient Langevin Dynamics (SgLD)</a></li>
 </ul>

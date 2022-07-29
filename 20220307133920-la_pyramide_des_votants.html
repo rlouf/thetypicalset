@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>La pyramide des votants</title>
@@ -219,7 +219,7 @@ Et en faire une jolie visualization.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python" id="org8392201"><span style="font-style: italic;">"""</span>
+<pre class="src src-python" id="orge361079"><span style="font-style: italic;">"""</span>
 <span style="font-style: italic;">These data were downloaded from https://www.insee.fr/fr/statistiques/2381472#tableau-figure1</span>
 <span style="font-style: italic;">Key = age r&#233;volu (100 = 100 ans et plus)</span>
 <span style="font-style: italic;">Value = nombre de personnes dans la population fran&#231;aise</span>
@@ -331,7 +331,7 @@ Et en faire une jolie visualization.
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python" id="org4b71e89"><span style="font-weight: bold; font-style: italic;">ages_limite</span> = [24, 34, 49, 59, 69, 101]
+<pre class="src src-python" id="org7e60b06"><span style="font-weight: bold; font-style: italic;">ages_limite</span> = [24, 34, 49, 59, 69, 101]
 <span style="font-weight: bold; font-style: italic;">participation</span> = [.65, .66, .75, .78, .85, .89]
 <span style="font-weight: bold; font-style: italic;">intentions</span> = {
     <span style="font-style: italic;">"M&#233;lenchon"</span>: [.13, .12, .10, .09, .07, .03],
@@ -353,6 +353,7 @@ Et en faire une jolie visualization.
 </pre>
 </div>
 
+
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> bisect
 <span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
@@ -373,6 +374,7 @@ Et en faire une jolie visualization.
 <span style="font-weight: bold; font-style: italic;">mean</span> = {name: <span style="font-weight: bold;">int</span>(np.<span style="font-weight: bold;">sum</span>(np.array(ages) * values)/np.<span style="font-weight: bold;">sum</span>(values)) <span style="font-weight: bold;">for</span> name, values <span style="font-weight: bold;">in</span> votes.items()}
 </pre>
 </div>
+
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> matplotlib.pyplot <span style="font-weight: bold;">as</span> plt
@@ -458,7 +460,7 @@ filename
 </div>
 
 
-<div id="orgd618dc8" class="figure">
+<div id="org671d956" class="figure">
 <p><img src="file:///tmp/babel-bVlA5y/figureHYdpyt.png" alt="figureHYdpyt.png" />
 </p>
 </div>
@@ -473,24 +475,15 @@ ages[idx_median]
 </pre>
 </div>
 
-<pre class="example">
-50
-</pre>
-
-
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">idx_median</span> = bisect.bisect_left(np.cumsum(participants) / np.<span style="font-weight: bold;">sum</span>(participants), 0.5)
 ages[idx_median]
 </pre>
 </div>
 
-<pre class="example">
-56
-</pre>
-
-<div id="outline-container-org59fd764" class="outline-2">
-<h2 id="org59fd764"><span class="todo TODO">TODO</span> But would that change the election?</h2>
-<div class="outline-text-2" id="text-org59fd764">
+<div id="outline-container-orge961bcb" class="outline-2">
+<h2 id="orge961bcb"><span class="todo TODO">TODO</span> But would that change the election?</h2>
+<div class="outline-text-2" id="text-orge961bcb">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure(figsize=(8, 8))
 <span style="font-weight: bold; font-style: italic;">gs</span> = gridspec.GridSpec(<span style="font-weight: bold;">len</span>(intentions)+1, 1, figure=fig)
@@ -515,7 +508,7 @@ filename
 </div>
 
 
-<div id="orge83f965" class="figure">
+<div id="org4ec7d81" class="figure">
 <p><img src="file:///tmp/babel-5YZCny/figurewWIjZ7.png" alt="figurewWIjZ7.png" />
 </p>
 </div>
@@ -531,15 +524,15 @@ Est-il suffisant que tous les 19-25 ans aillent voter pour équilibrer ce multip
 </div>
 
 
-<div id="outline-container-orga53bf83" class="outline-2">
-<h2 id="orga53bf83"><span class="todo TODO">TODO</span> Tracer la pyramide des âges des gens en âge de voter</h2>
+<div id="outline-container-org5343577" class="outline-2">
+<h2 id="org5343577"><span class="todo TODO">TODO</span> Tracer la pyramide des âges des gens en âge de voter</h2>
 </div>
-<div id="outline-container-org95a2679" class="outline-2">
-<h2 id="org95a2679"><span class="todo TODO">TODO</span> Tracer la distribution cumulative par âge</h2>
+<div id="outline-container-orgcc4277a" class="outline-2">
+<h2 id="orgcc4277a"><span class="todo TODO">TODO</span> Tracer la distribution cumulative par âge</h2>
 </div>
-<div id="outline-container-org3c1b7a6" class="outline-2">
-<h2 id="org3c1b7a6"><span class="todo TODO">TODO</span> Tracer la pyramide des personnes sûres de voter</h2>
-<div class="outline-text-2" id="text-org3c1b7a6">
+<div id="outline-container-org468a753" class="outline-2">
+<h2 id="org468a753"><span class="todo TODO">TODO</span> Tracer la pyramide des personnes sûres de voter</h2>
+<div class="outline-text-2" id="text-org468a753">
 <p>
 On compare la pyramide des âges de la population en âge de voter avec la pyramide des âges des gens qui sont certains ou presque certains d'aller voter.
 </p>
@@ -555,16 +548,16 @@ Il est heureusement assez simple de répondre à cette question: il suffit de co
 </div>
 
 
-<div id="outline-container-org3fec6c5" class="outline-2">
-<h2 id="org3fec6c5"><span class="todo TODO">TODO</span> Superposer la cumlative sûrs de voter avec la cumulative des âges</h2>
+<div id="outline-container-orgb37f4d5" class="outline-2">
+<h2 id="orgb37f4d5"><span class="todo TODO">TODO</span> Superposer la cumlative sûrs de voter avec la cumulative des âges</h2>
 </div>
-<div id="outline-container-org6a470c4" class="outline-2">
-<h2 id="org6a470c4"><span class="todo TODO">TODO</span> Tracer la pyramide des votes mélenchon, macron, lepen, jadot, pécresse, zemmour</h2>
+<div id="outline-container-orgfd805db" class="outline-2">
+<h2 id="orgfd805db"><span class="todo TODO">TODO</span> Tracer la pyramide des votes mélenchon, macron, lepen, jadot, pécresse, zemmour</h2>
 </div>
 
-<div id="outline-container-orgaf57f01" class="outline-2">
-<h2 id="orgaf57f01">Data</h2>
-<div class="outline-text-2" id="text-orgaf57f01">
+<div id="outline-container-org92024c7" class="outline-2">
+<h2 id="org92024c7">Data</h2>
+<div class="outline-text-2" id="text-org92024c7">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="http://www.commission-des-sondages.fr/notices/files/notices/2022/janvier/9303-p-ipsos-le-monde-fjj-cevipof-janvier-2022.pdf">Sondage Ipsos Janvier 2022</a></li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.insee.fr/fr/statistiques/2381472">Pyramide des âges INSEE</a></li>
@@ -575,8 +568,8 @@ J
 </div>
 </div>
 
-<div id="outline-container-orgeb8d3b4" class="outline-2">
-<h2 id="orgeb8d3b4">Links to this note</h2>
+<div id="outline-container-org851743c" class="outline-2">
+<h2 id="org851743c">Links to this note</h2>
 </div>
 </div>
 </body>

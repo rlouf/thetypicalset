@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Ornstein-Uhlenbeck kernel</title>
@@ -223,14 +223,6 @@
 The Laplacian function kernel defines a stationary <a href="20211125173010-gaussian_process.html#ID-f2d80a0e-47f7-4531-a654-8343c72dd962">gaussian process</a>, the Ornstein-Uhlenbeck process:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-<span style="font-weight: bold;">\displaystyle</span>
-K(x, x') &amp;= <span style="font-weight: bold;">\sigma</span>^2<span style="font-weight: bold;">\,\exp\left</span>(-<span style="font-weight: bold;">\frac</span>{|d|}{l}<span style="font-weight: bold;">\right</span>),<span style="font-weight: bold;">\quad</span> d=x'-x
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
-
 \begin{align*}
 \displaystyle
 K(x, x') &= \sigma^2\,\exp\left(-\frac{|d|}{l}\right),\quad d=x'-x
@@ -240,48 +232,19 @@ K(x, x') &= \sigma^2\,\exp\left(-\frac{|d|}{l}\right),\quad d=x'-x
 Unlike the <a href="20211129201642-wiener_kernel.html#ID-dc211cf2-78b4-4269-91e8-fc88fb49def5">Wiener process</a>, this process is <i>mean reverting</i> and admits a stationary probability distribution. It is convenient to model <i>time-series</i>. It can be seen as a <i>noisy relaxation model</i>. (cite:rasmussen2003 p.212)
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
-<span style="font-weight: bold;">from</span> matplotlib <span style="font-weight: bold;">import</span> pyplot <span style="font-weight: bold;">as</span> plt
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">kernel</span>(x1, x2, l2):
-    <span style="font-weight: bold;">return</span> np.exp(-np.<span style="font-weight: bold;">abs</span>(x1-x2) / l2)
-
-</pre>
-</div>
-
 <p>
 The parameter \(l\) is the characteristic lengthscale of the process. As one can see on the figure below, the larger the value of \(l\) the "further" the kernel takes non-negligible values.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">xx</span>, <span style="font-weight: bold; font-style: italic;">yy</span> = np.meshgrid(np.linspace(0, 10, 100), np.linspace(0, 10, 100))
-<span style="font-weight: bold; font-style: italic;">values_1</span> = kernel(xx.ravel(), yy.ravel(), 1.).reshape(xx.shape)
-<span style="font-weight: bold; font-style: italic;">values_10</span> = kernel(xx.ravel(), yy.ravel(), 10.).reshape(xx.shape)
 
-<span style="font-weight: bold; font-style: italic;">fig</span>, <span style="font-weight: bold; font-style: italic;">axes</span> = plt.subplots(figsize=(12,6), ncols=2)
-axes[0].pcolormesh(xx, yy, values_1, cmap=plt.cm.RdBu_r)
-axes[0].set_title(<span style="font-style: italic;">"l=1"</span>)
-axes[1].pcolormesh(xx, yy, values_10, cmap=plt.cm.RdBu_r)
-axes[1].set_title(<span style="font-style: italic;">"l=10."</span>)
-
-plt.tight_layout()
-
-<span style="font-weight: bold; font-style: italic;">fname</span> = f<span style="font-style: italic;">"images/kernel-ornstein-heatmap.png"</span>
-plt.savefig(fname)
-fname
-</pre>
-</div>
-
-
-<div id="orgafd9587" class="figure">
+<div id="orgb9e476a" class="figure">
 <p><img src="img/kernel-ornstein-heatmap.png" alt="kernel-ornstein-heatmap.png" width="90%" />
 </p>
 </div>
 
-<div id="outline-container-org08827a4" class="outline-2">
-<h2 id="org08827a4">Links to this note</h2>
-<div class="outline-text-2" id="text-org08827a4">
+<div id="outline-container-org71951b9" class="outline-2">
+<h2 id="org71951b9">Links to this note</h2>
+<div class="outline-text-2" id="text-org71951b9">
 <ul class="org-ul">
 <li><a href="./20211125145059-polls_aggregator.html">Predict the result of French elections</a></li>
 <li><a href="./20220108202812-types_of_notes.html">Types of notes</a></li>

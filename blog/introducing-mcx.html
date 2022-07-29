@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Probabilistic programming via source code rewriting (MCX)</title>
@@ -223,14 +223,6 @@
 The mathematical representation of graphical model is simple. Take the Beta-Binomial model, which is typically used to model the results of \(N\) coin flips in introductory classes:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-p &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Beta}(1, 2)<span style="font-weight: bold;">\\</span>
-b &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Binomial}(p, N)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
-
 \begin{align*}
 p &\sim \operatorname{Beta}(1, 2)\\
 Y &\sim \operatorname{Binomial}(p)
@@ -283,17 +275,6 @@ Representing the model as a class becomes more tedious with complex graphical mo
 Existing PPLs have different ways to do this, I recommend Junpeng's <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.youtube.com/watch?v=WHoS1ETYFrw">talk at PyData Córdoba</a> for an overview, but we will take a different approach here. When I design an API, I like to take a sufficiently (but not too) complex example and to <a href="../20220405092736-start_with_designing_the_api_you_want.html#ID-0d452ccf-03aa-47ba-b70e-06b464ed152e">start implementing the API I want</a>. The following linear regression model will do:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  Y &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(<span style="font-weight: bold;">\theta</span>, <span style="font-weight: bold;">\sigma</span>)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\theta</span> &amp;= <span style="font-weight: bold;">\alpha</span> + X^{T} <span style="font-weight: bold;">\beta</span><span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\sigma</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfNormal}(1)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\alpha</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, 10)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\beta</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, 10)<span style="font-weight: bold;">\\</span>
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
-
 \begin{align*}
   Y &\sim \operatorname{Normal}(\theta, \sigma)\\
   \theta &= \alpha + X^{T} \beta\\
@@ -324,9 +305,9 @@ It has random variables, random variables that are used to define othe random va
 Welcome MCX. Well, almost.
 </p>
 
-<div id="outline-container-org572e717" class="outline-2">
-<h2 id="org572e717">Defining probabilistic models with MCX</h2>
-<div class="outline-text-2" id="text-org572e717">
+<div id="outline-container-org6702efe" class="outline-2">
+<h2 id="org6702efe">Defining probabilistic models with MCX</h2>
+<div class="outline-text-2" id="text-org6702efe">
 <p>
 Here is how you express the beta-binomial model in MCX:
 </p>
@@ -365,9 +346,9 @@ observed. While MCX models also represent a distribution, in the API we treat th
 </div>
 </div>
 
-<div id="outline-container-org9a13086" class="outline-2">
-<h2 id="org9a13086">Interacting with MCX models</h2>
-<div class="outline-text-2" id="text-org9a13086">
+<div id="outline-container-orge300cb2" class="outline-2">
+<h2 id="orge300cb2">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-orge300cb2">
 <p>
 Consider the following linear regression model:
 </p>
@@ -496,9 +477,9 @@ Unlike the original model, however, the evaluated program is not a distribution.
 </p>
 </div>
 
-<div id="outline-container-org1cf3091" class="outline-3">
-<h3 id="org1cf3091">Go on your own</h3>
-<div class="outline-text-3" id="text-org1cf3091">
+<div id="outline-container-org960b34b" class="outline-3">
+<h3 id="org960b34b">Go on your own</h3>
+<div class="outline-text-3" id="text-org960b34b">
 <p>
 MCX provides a convenient interface to interact with the model's predictive,
 joint prior and posterior distributions, but should you want to build something
@@ -523,13 +504,13 @@ particular, allows to you to write your model with MCX and use another library
 </div>
 </div>
 </div>
-<div id="outline-container-org377ecf6" class="outline-2">
-<h2 id="org377ecf6">How does it work? MCX's internals</h2>
-<div class="outline-text-2" id="text-org377ecf6">
+<div id="outline-container-org98cadab" class="outline-2">
+<h2 id="org98cadab">How does it work? MCX's internals</h2>
+<div class="outline-text-2" id="text-org98cadab">
 </div>
-<div id="outline-container-orgad9703e" class="outline-3">
-<h3 id="orgad9703e">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
-<div class="outline-text-3" id="text-orgad9703e">
+<div id="outline-container-org71cf3f4" class="outline-3">
+<h3 id="org71cf3f4">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
+<div class="outline-text-3" id="text-org71cf3f4">
 <p>
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 </p>
@@ -546,7 +527,7 @@ sampling, reparametrization is trivial to do, etc. Manipulating the graph is
 pretty much akin to manipulating the mathematical object.
 </p>
 
-<pre class="example" id="org308713a">
+<pre class="example" id="org8fa02bb">
 
                                      +----&gt; logpdf
 @mcx.model                           |
@@ -579,7 +560,7 @@ framework-agnostic. Hell, you could even write, without too much effort, an
 edward2, pymc3 or pyro compiler!
 </p>
 
-<pre class="example" id="org2f1e1b3">
+<pre class="example" id="orgf13e7bc">
 Example with control flow and different
 </pre>
 
@@ -591,15 +572,15 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 </p>
 
-<pre class="example" id="org95508fc">
+<pre class="example" id="orgc6bdf73">
 model.source_logpdf
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org1d4c86a" class="outline-3">
-<h3 id="org1d4c86a">Inference</h3>
-<div class="outline-text-3" id="text-org1d4c86a">
+<div id="outline-container-org59f71cd" class="outline-3">
+<h3 id="org59f71cd">Inference</h3>
+<div class="outline-text-3" id="text-org59f71cd">
 <p>
 <i>The modeling language and the inference module are completely separate.</i> The modeling language compiles to a logpdf, and that is all the samplers need.
 </p>
@@ -614,7 +595,7 @@ Inference in MCX is also very modular. The idea is that inference in traditional
 <li><i>Runtimes</i>, that tie the data, the model and the kernel together and then make the chains move forward following an execution plan.</li>
 </ol>
 
-<pre class="example" id="org09ca26e">
+<pre class="example" id="orgaa48660">
 Runtime (Sampling loop)
 -------------------------------------------------
 Programs (HMC)
@@ -656,7 +637,7 @@ In fact I am not sure everyone who uses PPLs have formalized this, which makes t
 <p class="date">Date: 2020-02-12 Wed 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-07-29 Fri 18:35</p>
+<p class="date">Created: 2022-07-29 Fri 18:49</p>
 </div>
 </body>
 </html>

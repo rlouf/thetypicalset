@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Wiener kernel</title>
@@ -223,14 +223,6 @@
 The Wiener kernel defines a non-stationary <a href="20211125173010-gaussian_process.html#ID-f2d80a0e-47f7-4531-a654-8343c72dd962">gaussian process</a>, the Wiener process:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation*</span>}
-<span style="font-weight: bold;">\displaystyle</span>
-K(x, x') = <span style="font-weight: bold;">\min</span>(x, x')
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation*</span>}
-</pre>
-</div>
-
 \begin{equation*}
 \displaystyle
 K(x, x') = \min(x, x')
@@ -240,40 +232,17 @@ K(x, x') = \min(x, x')
 It is convenient to model <i>time-series</i>. It is the limit as \(n \rightarrow \infty\) of a random walk of length \(n\) (cite:rasmussen2003 p213). An interesting variant is the <i>brownian bridge</i> obtained by conditioning \(X(t_0)=0\) (cite:grimmett2020 p534).
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
-<span style="font-weight: bold;">from</span> matplotlib <span style="font-weight: bold;">import</span> pyplot <span style="font-weight: bold;">as</span> plt
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">kernel</span>(x1, x2):
-    <span style="font-weight: bold;">return</span> np.<span style="font-weight: bold;">min</span>(x1-x2)
-</pre>
-</div>
-
 <p>
 The parameter \(l\) is the characteristic lengthscale of the process. As one can see on the figure below, the larger the value of \(l\) the "further" the kernel takes non-negligible values.
 </p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">xx</span>, <span style="font-weight: bold; font-style: italic;">yy</span> = np.meshgrid(np.linspace(0, 10, 100), np.linspace(0, 10, 100))
-<span style="font-weight: bold; font-style: italic;">values</span> = kernel(xx.ravel(), yy.ravel()).reshape(xx.shape)
-
-<span style="font-weight: bold; font-style: italic;">fig</span>, <span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplots(figsize=(6,6))
-ax.pcolormesh(xx, yy, values, cmap=plt.cm.RdBu_r)
-plt.tight_layout()
-
-<span style="font-weight: bold; font-style: italic;">fname</span> = f<span style="font-style: italic;">"images/kernel-wiener-heatmap.png"</span>
-plt.savefig(fname)
-fname
-</pre>
-</div>
 
 <p>
 <a href=""></a>
 </p>
 
-<div id="outline-container-org8e3ab98" class="outline-2">
-<h2 id="org8e3ab98">Links to this note</h2>
-<div class="outline-text-2" id="text-org8e3ab98">
+<div id="outline-container-org6f15d5d" class="outline-2">
+<h2 id="org6f15d5d">Links to this note</h2>
+<div class="outline-text-2" id="text-org6f15d5d">
 <ul class="org-ul">
 <li><a href="./20211125145059-polls_aggregator.html">Predict the result of French elections</a></li>
 <li><a href="./20211129200726-gaussian_noise_kernel.html">Ornstein-Uhlenbeck kernel</a></li>

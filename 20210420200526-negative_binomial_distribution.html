@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Negative Binomial distribution</title>
@@ -223,19 +223,12 @@
 <dt>tags</dt><dd><a href="20220105154404-probability_distribution.html#ID-accc4a58-2f96-42da-a43d-c8140996d0d3">Probability distribution</a></dd>
 </dl>
 
-<div id="outline-container-orga465241" class="outline-2">
-<h2 id="orga465241">Canonical parametrization</h2>
-<div class="outline-text-2" id="text-orga465241">
+<div id="outline-container-org6b76996" class="outline-2">
+<h2 id="org6b76996">Canonical parametrization</h2>
+<div class="outline-text-2" id="text-org6b76996">
 <p>
 The negative binomial distribution is usually introduced as the probability distribution of the number \(X\) of failures before the \(r\) th success in a Bernoulli process with probability \(p\in [0,1]\). It is expressed as:
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-P(X=x|p, r) = <span style="font-weight: bold;">\binom</span>{r+x-1}{x} (1-p)^x<span style="font-weight: bold;">\,</span> p^r
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
 P(X=x|p, r) = \binom{r+x-1}{x} (1-p)^x\, p^r
@@ -247,19 +240,12 @@ However, the negative binomial is rarely used in this canonical context but rath
 </div>
 </div>
 
-<div id="outline-container-orgd972f72" class="outline-2">
-<h2 id="orgd972f72">Mean-variance parametrization</h2>
-<div class="outline-text-2" id="text-orgd972f72">
+<div id="outline-container-org81a3fcd" class="outline-2">
+<h2 id="org81a3fcd">Mean-variance parametrization</h2>
+<div class="outline-text-2" id="text-org81a3fcd">
 <p>
 We can indeed reparametrize the distribution as a function of its mean \(\mu\) and variance \(\sigma\):
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-r = <span style="font-weight: bold;">\frac</span>{<span style="font-weight: bold;">\mu</span>^2}{<span style="font-weight: bold;">\sigma</span>^{2}-<span style="font-weight: bold;">\mu</span>}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
 r = \frac{\mu^2}{\sigma^{2}-\mu}
@@ -269,13 +255,6 @@ r = \frac{\mu^2}{\sigma^{2}-\mu}
 and
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  p = <span style="font-weight: bold;">\frac</span>{r}{r + <span style="font-weight: bold;">\mu</span>}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
 \begin{equation}
   p = \frac{r}{r + \mu}
 \end{equation}
@@ -283,13 +262,6 @@ and
 <p>
 Viewing \(\mu\) and \(\sigma\) as parameters means we abandon the combinatorial motivation of the negative binomial to view it as a model for count data. A <b>very important property</b> of this parametrization is the link between \(\mu\) and the variance:
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-<span style="font-weight: bold;">\sigma</span>^{2} = <span style="font-weight: bold;">\mu</span> + <span style="font-weight: bold;">\frac</span>{1}{r} <span style="font-weight: bold;">\mu</span>^{2}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
 \sigma^{2} = \mu + \frac{1}{r} \mu^{2}
@@ -307,20 +279,12 @@ Most problems people have with negative binomial models come from ignoring this 
 </div>
 </div>
 
-<div id="outline-container-orga2a328d" class="outline-2">
-<h2 id="orga2a328d">As a Poisson-Gamma compound distribution</h2>
-<div class="outline-text-2" id="text-orga2a328d">
+<div id="outline-container-org35ed05a" class="outline-2">
+<h2 id="org35ed05a">As a Poisson-Gamma compound distribution</h2>
+<div class="outline-text-2" id="text-org35ed05a">
 <p>
 The negative binomial distribution can also be seen as a Poisson distribution where the rate parameter follows a Gamma distribution (conjugate distribution):
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  X &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Poisson}(<span style="font-weight: bold;">\Lambda</span>)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\Lambda</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Gamma}(<span style="font-weight: bold;">\alpha</span>, <span style="font-weight: bold;">\beta</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
 
 \begin{align*}
   X &\sim \operatorname{Poisson}(\Lambda)\\
@@ -330,13 +294,6 @@ The negative binomial distribution can also be seen as a Poisson distribution wh
 <p>
 Then we can show that the distribution of \(X\) is a negative binomial with \(r = \alpha\) and \(p = 1 / (1 + \beta)\), so that the mean and variance follow:
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  <span style="font-weight: bold;">\sigma</span>^{2} = <span style="font-weight: bold;">\mu</span> + <span style="font-weight: bold;">\frac</span>{1}{<span style="font-weight: bold;">\alpha</span>}<span style="font-weight: bold;">\,</span> <span style="font-weight: bold;">\mu</span>^{2}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
   \sigma^{2} = \mu + \frac{1}{\alpha}\, \mu^{2}
@@ -349,9 +306,9 @@ Which is a nice, less ad-hoc interpretation of the negative binomial with the me
 </div>
 
 
-<div id="outline-container-orgfc00618" class="outline-2">
-<h2 id="orgfc00618">References</h2>
-<div class="outline-text-2" id="text-orgfc00618">
+<div id="outline-container-org70ea463" class="outline-2">
+<h2 id="org70ea463">References</h2>
+<div class="outline-text-2" id="text-org70ea463">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.johndcook.com/negative_binomial.pdf">John Cook's notes</a></li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://docs.pymc.io/api/distributions/discrete.html#pymc3.distributions.discrete.NegativeBinomial">PyMC3's implementation documentation</a></li>
@@ -359,9 +316,9 @@ Which is a nice, less ad-hoc interpretation of the negative binomial with the me
 </div>
 </div>
 
-<div id="outline-container-org8d15789" class="outline-2">
-<h2 id="org8d15789">Links to this note</h2>
-<div class="outline-text-2" id="text-org8d15789">
+<div id="outline-container-orgf959551" class="outline-2">
+<h2 id="orgf959551">Links to this note</h2>
+<div class="outline-text-2" id="text-orgf959551">
 <ul class="org-ul">
 <li><a href="./simpsonPenalisingModelComponent2015.html">Penalising model component complexity: A principled, practical approach to constructing priors</a></li>
 <li><a href="./20220214170817-zero_inflated_negative_binomial.html">Zero-inflated Negative Binomial</a></li>

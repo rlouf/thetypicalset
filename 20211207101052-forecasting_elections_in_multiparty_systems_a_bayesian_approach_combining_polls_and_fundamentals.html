@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Forecasting elections in multiparty systems: a Bayesian approach combining polls and fundamentals</title>
@@ -229,13 +229,6 @@ Uses the backward random-walk approach taken in <a href="20211207101343-dynamic_
 The <i>measurement model</i> that estimates the current level of party support (poll agregator).
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  <span style="font-weight: bold;">\mathbf</span>{y}_{ct} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Multinomial}(<span style="font-weight: bold;">\mathbf</span>{<span style="font-weight: bold;">\pi</span>_{ct}^{*}}, N_{ct})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
 \begin{equation}
   \mathbf{y}_{ct} \sim \operatorname{Multinomial}(\mathbf{\pi_{ct}^{*}}, N_{ct})
 \end{equation}
@@ -243,14 +236,6 @@ The <i>measurement model</i> that estimates the current level of party support (
 <p>
 The latent underlying support is normalized to sum to \(1\) using a log-transform:
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\mathbf</span>{<span style="font-weight: bold;">\pi</span>}_{ct} &amp;= <span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\log\left</span>(<span style="font-weight: bold;">\frac</span>{<span style="font-weight: bold;">\pi</span>^{*}_{ct1}}{<span style="font-weight: bold;">\pi</span>^{*}_{ctP}}<span style="font-weight: bold;">\right</span>), <span style="font-weight: bold;">\dots</span>, <span style="font-weight: bold;">\log</span> <span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\frac</span>{<span style="font-weight: bold;">\pi</span>^{*}_{ct(P-1)}}{<span style="font-weight: bold;">\pi</span>^{*}_{ctP}}<span style="font-weight: bold;">\right</span>)<span style="font-weight: bold;">\right</span>)<span style="font-weight: bold;">\\</span>
-  &amp;= <span style="font-weight: bold;">\alpha</span>_{t} + <span style="font-weight: bold;">\delta</span>_c
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
 
 \begin{align*}
   \mathbf{\pi}_{ct} &= \left(\log\left(\frac{\pi^{*}_{ct1}}{\pi^{*}_{ctP}}\right), \dots, \log \left(\frac{\pi^{*}_{ct(P-1)}}{\pi^{*}_{ctP}}\right)\right)\\
@@ -271,14 +256,6 @@ And \(\alpha_t = \alpha_{t+1} + \omega_t\) where \(\omega_t \sim \operatorname{N
 The latent state of party support \(\alpha_T\) on election day (with predictors \(x_E\) that day) is given by
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  P(<span style="font-weight: bold;">\alpha</span>_{T}|x_{E}) = <span style="font-weight: bold;">\operatorname</span>{alr}<span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\int</span>_{\theta}P(v_{E}|<span style="font-weight: bold;">\theta</span>, x_{E})P(<span style="font-weight: bold;">\theta</span>|V,X)<span style="font-weight: bold;">\mathrm</span>{d}<span style="font-weight: bold;">\theta\right</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-
-</pre>
-</div>
-
 \begin{equation}
   P(\alpha_{T}|x_{E}) = \operatorname{alr}\left(\int_{\theta}P(v_{E}|\theta, x_{E})P(\theta|V,X)\mathrm{d}\theta\right)
 \end{equation}
@@ -286,15 +263,6 @@ The latent state of party support \(\alpha_T\) on election day (with predictors 
 <p>
 In other words, the prediction of the fundamental model and the intentions coimputed by the poll aggregator should somehow coincide. Joint posterior distribution of both the fundamentals model and the dynamics poll modelL
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\mathcal</span>{L}_{poll} &amp;= P(Y|<span style="font-weight: bold;">\alpha</span>, <span style="font-weight: bold;">\delta</span>, W)<span style="font-weight: bold;">\,\left</span>(<span style="font-weight: bold;">\prod</span>_{t=1}^{T} P(<span style="font-weight: bold;">\mathbf</span>{<span style="font-weight: bold;">\alpha</span>}_{t}|<span style="font-weight: bold;">\mathbf</span>{<span style="font-weight: bold;">\alpha</span>}_{t+1}, W)<span style="font-weight: bold;">\right</span>)<span style="font-weight: bold;">\,</span>P(W)<span style="font-weight: bold;">\,</span>P(<span style="font-weight: bold;">\delta</span>)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\mathcal</span>{L}_{fund} &amp;= P(V|<span style="font-weight: bold;">\theta</span>, X)<span style="font-weight: bold;">\,</span> P(<span style="font-weight: bold;">\theta</span>)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\mathcal</span>{L} &amp;= <span style="font-weight: bold;">\mathcal</span>{L}_{fund}<span style="font-weight: bold;">\,\mathcal</span>{L}_{poll}<span style="font-weight: bold;">\,</span>P(<span style="font-weight: bold;">\alpha</span>_T|x_E)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
 
 \begin{align*}
   \mathcal{L}_{poll} &= P(Y|\alpha, \delta, W)\,\left(\prod_{t=1}^{T} P(\mathbf{\alpha}_{t}|\mathbf{\alpha}_{t+1}, W)\right)\,P(W)\,P(\delta)\\
@@ -306,9 +274,9 @@ In other words, the prediction of the fundamental model and the intentions coimp
 <a href="20211207103524-integrate_polls_aggregation_and_fundamentals_predictions.html#ID-b7fbd68f-d171-4627-9691-80156939ab12">Integrate polls aggregation and fundamentals predictions</a>
 </p>
 
-<div id="outline-container-orgb601976" class="outline-2">
-<h2 id="orgb601976">Links to this note</h2>
-<div class="outline-text-2" id="text-orgb601976">
+<div id="outline-container-orgb7e4c72" class="outline-2">
+<h2 id="orgb7e4c72">Links to this note</h2>
+<div class="outline-text-2" id="text-orgb7e4c72">
 <ul class="org-ul">
 <li><a href="./20211125145059-polls_aggregator.html">Predict the result of French elections</a></li>
 </ul>

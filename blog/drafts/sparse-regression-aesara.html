@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sparse regression with Aesara</title>
@@ -219,16 +219,6 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Sparse regression with Aesara</h1>
-<div class="org-src-container">
-<pre class="src src-bash">mkvirtualenv blog-sparse-aesara &amp;&amp; pip install <span style="font-weight: bold; font-style: italic;">aesara</span>==2.5.3 <span style="font-weight: bold; font-style: italic;">aeppl</span>==0.0.28
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-elisp">(pyvenv-workon 'blog-sparse-aesara)
-</pre>
-</div>
-
 <p>
 A few conventions, that are useful to follow:
 </p>
@@ -251,21 +241,12 @@ We will first import <code>aesara</code> and initialize our RandomStream (TODO: 
 </pre>
 </div>
 
-<div id="outline-container-orgc3e517e" class="outline-2">
-<h2 id="orgc3e517e">Horseshoe prior</h2>
-<div class="outline-text-2" id="text-orgc3e517e">
+<div id="outline-container-org0cd0a41" class="outline-2">
+<h2 id="org0cd0a41">Horseshoe prior</h2>
+<div class="outline-text-2" id="text-org0cd0a41">
 <p>
 Now we can define a simple horsehoe prior:
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\lambda</span> &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1)<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\tau</span>_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{HalfCauchy}(0, 1) <span style="font-weight: bold;">\quad</span> <span style="font-weight: bold;">\forall</span> i <span style="font-weight: bold;">\in</span> [1 <span style="font-weight: bold;">\dots</span> k]<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\beta</span>_{j}&amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}(0, <span style="font-weight: bold;">\lambda</span> <span style="font-weight: bold;">\,\tau</span>_{j}) <span style="font-weight: bold;">\quad</span> <span style="font-weight: bold;">\forall</span> i <span style="font-weight: bold;">\in</span> [1 <span style="font-weight: bold;">\dots</span> k]
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
 
 \begin{align*}
   \lambda &\sim \operatorname{HalfCauchy}(0, 1)\\
@@ -300,31 +281,6 @@ We can already check that the horsehoe prior is giving us reasonable values by c
 </pre>
 </div>
 
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">-0.01845157</td>
-<td class="org-right">0.01955231</td>
-<td class="org-right">0.00578295</td>
-<td class="org-right">-0.06913793</td>
-<td class="org-right">0.01796698</td>
-</tr>
-</tbody>
-</table>
-
 <p>
 Note that every time <code>.eval()</code> is called aesara returns a different value:
 </p>
@@ -333,42 +289,17 @@ Note that every time <code>.eval()</code> is called aesara returns a different v
 <pre class="src src-python">beta_rv.<span style="font-weight: bold;">eval</span>()
 </pre>
 </div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">-0.13155471</td>
-<td class="org-right">0.58111438</td>
-<td class="org-right">2.11742873</td>
-<td class="org-right">-0.02413002</td>
-<td class="org-right">-1.44338626</td>
-</tr>
-</tbody>
-</table>
 </div>
 
-<div id="outline-container-org5a9970f" class="outline-3">
-<h3 id="org5a9970f"><span class="todo TODO">TODO</span> What can we do with this graph?</h3>
+<div id="outline-container-org2f35cb8" class="outline-3">
+<h3 id="org2f35cb8"><span class="todo TODO">TODO</span> What can we do with this graph?</h3>
 </div>
-<div id="outline-container-orgb8a07fd" class="outline-3">
-<h3 id="orgb8a07fd"><span class="todo TODO">TODO</span> Why is it great compared to e.g. PyMC3?</h3>
+<div id="outline-container-org2167de7" class="outline-3">
+<h3 id="org2167de7"><span class="todo TODO">TODO</span> Why is it great compared to e.g. PyMC3?</h3>
 </div>
-<div id="outline-container-org6cedcec" class="outline-3">
-<h3 id="org6cedcec">Prior predictive sampling</h3>
-<div class="outline-text-3" id="text-org6cedcec">
+<div id="outline-container-org7e26bd0" class="outline-3">
+<h3 id="org7e26bd0">Prior predictive sampling</h3>
+<div class="outline-text-3" id="text-org7e26bd0">
 <p>
 The graph indeed carries the random number generator state with it. We can sample more of these quickly using aesara's <code>scan</code> operator. Lets take the following example that works:
 </p>
@@ -385,103 +316,6 @@ sampling_fn(10)
 </pre>
 </div>
 
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">0.405859988</td>
-<td class="org-right">-2.41014501</td>
-<td class="org-right">0.176054554</td>
-<td class="org-right">0.0852350014</td>
-<td class="org-right">0.721708381</td>
-</tr>
-
-<tr>
-<td class="org-right">-0.0317619045</td>
-<td class="org-right">0.157715046</td>
-<td class="org-right">37.710734</td>
-<td class="org-right">-0.267652471</td>
-<td class="org-right">-0.149229285</td>
-</tr>
-
-<tr>
-<td class="org-right">0.00573360903</td>
-<td class="org-right">0.084061714</td>
-<td class="org-right">-0.219461796</td>
-<td class="org-right">-0.0207649624</td>
-<td class="org-right">0.273389193</td>
-</tr>
-
-<tr>
-<td class="org-right">35.9613479</td>
-<td class="org-right">-0.0985157085</td>
-<td class="org-right">-326.467685</td>
-<td class="org-right">-2.22400749</td>
-<td class="org-right">0.47244874</td>
-</tr>
-
-<tr>
-<td class="org-right">3.66607334</td>
-<td class="org-right">0.0672511244</td>
-<td class="org-right">-2.69710226</td>
-<td class="org-right">0.168394174</td>
-<td class="org-right">-0.88512722</td>
-</tr>
-
-<tr>
-<td class="org-right">1.01623835</td>
-<td class="org-right">-0.0301653169</td>
-<td class="org-right">-0.153511873</td>
-<td class="org-right">0.0457400714</td>
-<td class="org-right">0.217742742</td>
-</tr>
-
-<tr>
-<td class="org-right">-0.00583121544</td>
-<td class="org-right">-0.337305109</td>
-<td class="org-right">4.52317268</td>
-<td class="org-right">0.39519745</td>
-<td class="org-right">0.0101549592</td>
-</tr>
-
-<tr>
-<td class="org-right">-0.0313173918</td>
-<td class="org-right">0.026885706</td>
-<td class="org-right">-0.375113149</td>
-<td class="org-right">0.0140790607</td>
-<td class="org-right">0.153317241</td>
-</tr>
-
-<tr>
-<td class="org-right">-0.330069932</td>
-<td class="org-right">-0.000521303722</td>
-<td class="org-right">0.839653386</td>
-<td class="org-right">-0.0648112912</td>
-<td class="org-right">-0.0099520352</td>
-</tr>
-
-<tr>
-<td class="org-right">-0.296592302</td>
-<td class="org-right">-0.309485463</td>
-<td class="org-right">-0.00784502499</td>
-<td class="org-right">-0.0880720305</td>
-<td class="org-right">0.476919985</td>
-</tr>
-</tbody>
-</table>
-
 <p>
 And this one as well:
 </p>
@@ -497,110 +331,13 @@ And this one as well:
 sampling_fn(10)
 </pre>
 </div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">0.364703966</td>
-<td class="org-right">-7.10685506</td>
-<td class="org-right">1.43630544</td>
-<td class="org-right">-0.24586966</td>
-<td class="org-right">-1.22146442</td>
-</tr>
-
-<tr>
-<td class="org-right">0.0103566649</td>
-<td class="org-right">-5.47973106</td>
-<td class="org-right">0.0270241747</td>
-<td class="org-right">-0.0746477986</td>
-<td class="org-right">-2.12146348</td>
-</tr>
-
-<tr>
-<td class="org-right">0.172892799</td>
-<td class="org-right">-0.737105952</td>
-<td class="org-right">0.101925146</td>
-<td class="org-right">-0.053742616</td>
-<td class="org-right">-0.656710146</td>
-</tr>
-
-<tr>
-<td class="org-right">0.115183472</td>
-<td class="org-right">-1.8453838</td>
-<td class="org-right">0.566791242</td>
-<td class="org-right">-20.2095485</td>
-<td class="org-right">-0.276319377</td>
-</tr>
-
-<tr>
-<td class="org-right">0.189106255</td>
-<td class="org-right">-0.741009332</td>
-<td class="org-right">0.145825722</td>
-<td class="org-right">-0.0227399486</td>
-<td class="org-right">-0.0701896351</td>
-</tr>
-
-<tr>
-<td class="org-right">4.85519749</td>
-<td class="org-right">-11.8597856</td>
-<td class="org-right">4.06432252</td>
-<td class="org-right">-39.8576213</td>
-<td class="org-right">-2.37666075</td>
-</tr>
-
-<tr>
-<td class="org-right">0.277695679</td>
-<td class="org-right">-7.99205832</td>
-<td class="org-right">0.013353842</td>
-<td class="org-right">-4.61061848</td>
-<td class="org-right">-0.133225867</td>
-</tr>
-
-<tr>
-<td class="org-right">13.1047583</td>
-<td class="org-right">-14.4185369</td>
-<td class="org-right">1.50097678</td>
-<td class="org-right">-0.639444076</td>
-<td class="org-right">-11.3433922</td>
-</tr>
-
-<tr>
-<td class="org-right">0.874977379</td>
-<td class="org-right">-7.81316119</td>
-<td class="org-right">2.97887462</td>
-<td class="org-right">-0.250407827</td>
-<td class="org-right">-0.174617576</td>
-</tr>
-
-<tr>
-<td class="org-right">0.574659456</td>
-<td class="org-right">-3.62827211</td>
-<td class="org-right">8.63022882</td>
-<td class="org-right">-2.00437786</td>
-<td class="org-right">-2.42290588</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 
 
-<div id="outline-container-org5dabe66" class="outline-3">
-<h3 id="org5dabe66">Log-probability density function</h3>
-<div class="outline-text-3" id="text-org5dabe66">
+<div id="outline-container-orgfde40e1" class="outline-3">
+<h3 id="orgfde40e1">Log-probability density function</h3>
+<div class="outline-text-3" id="text-orgfde40e1">
 <p>
 Even though we won't need it in this blog post, we expect any PPL to be able to give the the log-probability density function (logpdf) of any model it has defined. For that we will use <code>aeppl</code>.
 </p>
@@ -623,11 +360,6 @@ logprob_fn(1., [1, 2, 3, 4, 5], [1, 1, 1, 1, 1])
 </pre>
 </div>
 
-<pre class="example">
--24.213113433295504
-</pre>
-
-
 <p>
 Amazing!
 </p>
@@ -635,20 +367,12 @@ Amazing!
 </div>
 </div>
 
-<div id="outline-container-orgc006130" class="outline-2">
-<h2 id="orgc006130">Negative Binomial regression</h2>
-<div class="outline-text-2" id="text-orgc006130">
+<div id="outline-container-org37f1927" class="outline-2">
+<h2 id="org37f1927">Negative Binomial regression</h2>
+<div class="outline-text-2" id="text-org37f1927">
 <p>
 We will now come back to the original topic, performing a /negative binomial sparse regression
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\boldsymbol</span>{<span style="font-weight: bold;">Y</span>}_{j} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{NegativeBinomial}(h, <span style="font-weight: bold;">\boldsymbol</span>{<span style="font-weight: bold;">\theta</span>})<span style="font-weight: bold;">\\</span>
-  <span style="font-weight: bold;">\boldsymbol</span>{<span style="font-weight: bold;">\theta</span>} &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Sigmoid}(- X^{T}<span style="font-weight: bold;">\;\beta</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
-</pre>
-</div>
 
 \begin{align*}
   \boldsymbol{Y}_{j} &\sim \operatorname{NegativeBinomial}(h, \boldsymbol{\theta})\\
@@ -667,60 +391,20 @@ We will now come back to the original topic, performing a /negative binomial spa
 Y_rv.<span style="font-weight: bold;">eval</span>()
 </pre>
 </div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">642</td>
-<td class="org-right">923</td>
-<td class="org-right">10378</td>
-<td class="org-right">10590</td>
-<td class="org-right">469</td>
-<td class="org-right">196</td>
-<td class="org-right">931</td>
-<td class="org-right">6298</td>
-<td class="org-right">257</td>
-<td class="org-right">176</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 
-<div id="outline-container-org9db4b91" class="outline-2">
-<h2 id="org9db4b91"><span class="todo TODO">TODO</span> New progression</h2>
-<div class="outline-text-2" id="text-org9db4b91">
+<div id="outline-container-orgcd62724" class="outline-2">
+<h2 id="orgcd62724"><span class="todo TODO">TODO</span> New progression</h2>
+<div class="outline-text-2" id="text-orgcd62724">
 <p>
 Show the whole model first, and show that we can actually sample from the prior of \(\beta\) to perform intermediate checks. Something we cannot do otherwise.
 </p>
 </div>
 </div>
-<div id="outline-container-orgcab8c29" class="outline-2">
-<h2 id="orgcab8c29"><span class="todo TODO">TODO</span> Sampling from the posterior</h2>
-<div class="outline-text-2" id="text-orgcab8c29">
+<div id="outline-container-orgb3d93f7" class="outline-2">
+<h2 id="orgb3d93f7"><span class="todo TODO">TODO</span> Sampling from the posterior</h2>
+<div class="outline-text-2" id="text-orgb3d93f7">
 <p>
 Sampling with <code>aemcmc</code> is great!
 </p>
@@ -748,14 +432,14 @@ Of course this interfaces easily with <code>ArviZ</code>
 </p>
 </div>
 
-<div id="outline-container-org8d318fc" class="outline-3">
-<h3 id="org8d318fc"><span class="todo TODO">TODO</span> Show trace and posterior distributions with arviz</h3>
+<div id="outline-container-orgd916d14" class="outline-3">
+<h3 id="orgd916d14"><span class="todo TODO">TODO</span> Show trace and posterior distributions with arviz</h3>
 </div>
 </div>
 
-<div id="outline-container-orgecb8f76" class="outline-2">
-<h2 id="orgecb8f76"><span class="todo TODO">TODO</span> Posterior predictive sampling</h2>
-<div class="outline-text-2" id="text-orgecb8f76">
+<div id="outline-container-org0627613" class="outline-2">
+<h2 id="org0627613"><span class="todo TODO">TODO</span> Posterior predictive sampling</h2>
+<div class="outline-text-2" id="text-org0627613">
 <p>
 Posterior predictive sampling is simply that the variables are no longer random variables but have a value. Here it is enough to specify the value of \(\beta\).
 </p>
@@ -765,46 +449,6 @@ Posterior predictive sampling is simply that the variables are no longer random 
 post_pred_fn([1., 1., 1., 1., 1.])
 </pre>
 </div>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-
-<col  class="org-right" />
-</colgroup>
-<tbody>
-<tr>
-<td class="org-right">576</td>
-<td class="org-right">1664</td>
-<td class="org-right">3315</td>
-<td class="org-right">2087</td>
-<td class="org-right">842</td>
-<td class="org-right">970</td>
-<td class="org-right">2454</td>
-<td class="org-right">893</td>
-<td class="org-right">872</td>
-<td class="org-right">512</td>
-</tr>
-</tbody>
-</table>
 
 <p>
 To compute this for an array of samples, we can resort to the equivalent of JAX's <code>vmap</code>: numpy universal functions.

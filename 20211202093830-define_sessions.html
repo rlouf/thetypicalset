@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-07-29 Fri 18:35 -->
+<!-- 2022-07-29 Fri 18:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Define user sessions in mobile applications</title>
@@ -224,7 +224,7 @@ No one really know how to define what a <i>session</i> in a mobile app is, and i
 </p>
 
 
-<div id="org4be39e9" class="figure">
+<div id="orgb78caa5" class="figure">
 <p><img src="images/session-length.png" alt="session-length.png" />
 </p>
 </div>
@@ -245,34 +245,13 @@ The key is to realize that the above distributions are the results of different 
 It is known that the inter-event time between human actions such as responding to emails follows a Pareto distribution so we will assume that the inter-session time follows a Pareto distribution:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  T_{session} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Pareto}(<span style="font-weight: bold;">\alpha</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
 <p>
 We will assume a distribution with shorter tails yet flexible for inter-actions times:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
- T_{action} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Gamma}(k, <span style="font-weight: bold;">\theta</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
 <p>
 So the inter-event time \(T\) in the data is given by a mixture:
 </p>
-
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  P(T|k,<span style="font-weight: bold;">\theta</span>,<span style="font-weight: bold;">\alpha</span>) = <span style="font-weight: bold;">\omega</span>_{a}<span style="font-weight: bold;">\,</span> P(T_{action}|k,<span style="font-weight: bold;">\theta</span>) + <span style="font-weight: bold;">\omega</span>_{s}<span style="font-weight: bold;">\,</span> P(T_{session}|<span style="font-weight: bold;">\alpha</span>)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
 
 \begin{equation}
   P(T|k,\theta,\alpha) = \omega_{a}\, P(T_{action}|k,\theta) + \omega_{s}\, P(T_{session}|\alpha)
@@ -313,13 +292,6 @@ The implementation in PyMC3 is straightforward:
 To delineate sessions we need to find a time scale \(\Delta t\) such that if no actions has been performed since more than \(\Delta t\) we consider the session to be over. We look for the maximum value of \(\Delta t\) such that:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  P(T = <span style="font-weight: bold;">\Delta</span> t| inter-actions) &gt; <span style="font-weight: bold;">\epsilon\:</span>P(T = <span style="font-weight: bold;">\Delta</span> t| inter-sessions)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
-</pre>
-</div>
-
 \begin{equation}
   P(T = \Delta t| inter-actions) > \epsilon\:P(T = \Delta t| inter-sessions)
 \end{equation}
@@ -329,7 +301,7 @@ Where \(\epsilon\) is a constant to dermine (we can probably use decision theory
 </p>
 
 
-<div id="org61218e6" class="figure">
+<div id="orge6d701e" class="figure">
 <p><img src="images/session-length-delta-t.png" alt="session-length-delta-t.png" />
 </p>
 </div>
@@ -339,7 +311,7 @@ In other words, we will consider that a session is still active as long as \(\De
 </p>
 
 
-<div id="org260255a" class="figure">
+<div id="orgc121504" class="figure">
 <p><img src="images/session-length-model.png" alt="session-length-model.png" />
 </p>
 </div>
@@ -348,9 +320,9 @@ In other words, we will consider that a session is still active as long as \(\De
 Of course there are details to iron out. The definition could be improved by discarding "noise" events (that lead to these very short inter-action times) but the main idea (using a mixture) is here.
 </p>
 
-<div id="outline-container-org2c4a091" class="outline-2">
-<h2 id="org2c4a091">Links to this note</h2>
-<div class="outline-text-2" id="text-org2c4a091">
+<div id="outline-container-org6ce43c5" class="outline-2">
+<h2 id="org6ce43c5">Links to this note</h2>
+<div class="outline-text-2" id="text-org6ce43c5">
 <ul class="org-ul">
 <li><a href="./20211125144125-bayesian_statistics.html">Bayesian statistics</a></li>
 <li><a href="./20211202091119-how_to_define_urban_areas.html">How to define urban areas</a></li>
