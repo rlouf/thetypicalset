@@ -61,23 +61,86 @@ P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\
 
 I guess Gibbs sampling works because we're able to successively
 
-* Bernoulli likelihood
+* Likelihood
 
-Let us derive the likelihood $p(\boldsymbol{y} | x, \boldsymbol{\beta} )$ assuming that the observations are i.i.d. from the same distribution:
+Let us derive the likelihood $p(\boldsymbol{y} | x, \boldsymbol{\beta} )$ for the Bernoulli and Negative Binomial observation distribution. Assuming that the observations are i.i.d. from the same distribution we can write:
+
+\begin{equation*}
+P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right)
+\end{equation*}
+
+
+** Bernoulli observation distribution
+
+In this case:
 
 \begin{align*}
-P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) &= \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right)\\
-&=\prod_{i=1}^n\; p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
-&=\prod_{i=1}^n\; \left[ \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{\,1-y_i}\,\left[1 - \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{y_i}\\
-&=\prod_{i=1}^n\; \left[ \frac{\exp(-x_i^T \boldsymbol{\beta})}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{\,1-y_i}\,\left[\frac{1}{1 + \exp(-x_i^T \boldsymbol{\beta})}\right]^{y_i}\\
-&=\prod_{i=1}^n\; \frac{\left[ \exp(-x_i^T \boldsymbol{\beta}) \right]^{\,1-y_i}}{1 + \exp(-x_i^T \boldsymbol{\beta})}\\
-&=\prod_{i=1}^n\; \frac{\left( \exp(x_i^T \boldsymbol{\beta}) \right)^{\,y_i}}{1 + \exp(x_i^T \boldsymbol{\beta})}\\
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
+p_i &= \frac{\exp(f_i)}{1 + \exp(f_i)}\\
+f_i &= - x_i^T\,\boldsymbol{\beta}
+\end{align*}
+
+
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,1-y_i}\,\left[1 - \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,1-y_i}\,\left[\frac{1}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \frac{\left( \exp(f_i) \right)^{\,1-y_i}}{1 + \exp(f_i)}\\
+&= \frac{\left( \exp(-f_i) \right)^{\,y_i}}{1 + \exp(-f_i)}\\
 \end{align*}
 
 
 So that:
 \begin{equation*}
 \mathcal{L}_i(\boldsymbol{\beta}) = P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\left(\exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i}}{1 + \exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)}
+\end{equation*}
+
+#+begin_src python
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+X = at.matrix("X")
+beta = at.vector("beta")
+
+p = at.sigmoid(at.dot(X.T, beta))
+Y_rv = srng.bernoulli(p, size=X.shape[0])
+y_vv = Y_rv.clone()
+
+loglikelihood = y.logprob(y_vv)
+#+end_src
+
+Is equivalent to:
+
+#+begin_src python
+X = at.matrix("X")
+beta = at.vector("beta")
+f = at.dot(X.T, beta)
+# loglikelihood = at.prod(at.pow(at.exp(f), y) / (1 + at.dot(exp(f)))...)
+#+end_src
+
+** Negative binomial observation distribution
+
+If we note $r$ the [[id:273bfd3a-7e6e-4971-b422-048f930ae5b0][negative binomial]]'s dispersion parameter, and $y_i$ the number of observations in experiment $i$, then:
+
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,r}\,\left(1 - p_i\right)^{y_i}\\
+p_i &= \frac{\exp(f_i)}{1 + \exp(f_i)}\\
+f_i &= - x_i^T\,\boldsymbol{\beta}
+\end{align*}
+
+The previous calculation trivially applies to this as well:
+
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &\propto p_i^{\,r}\,\left(1 - p_i\right)^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,r}\,\left[1 - \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,r}\,\left[\frac{1}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \frac{\left( \exp(f_i) \right)^{\,r}}{\left(1 + \exp(f_i)\right)^{y_i+r}}\\
+\end{align*}
+
+So that
+
+\begin{equation*}
+\mathcal{L}_i(\boldsymbol{\beta}) = P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\left(\exp\left( - \boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{r}}{\left(1 + \exp\left(-\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right^{y_i+r}}
 \end{equation*}
 
 * References
