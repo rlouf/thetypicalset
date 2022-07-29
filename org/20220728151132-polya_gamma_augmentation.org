@@ -63,7 +63,7 @@ I guess Gibbs sampling works because we're able to successively
 
 * Likelihood
 
-Let us derive the likelihood $p(\boldsymbol{y} | x, \boldsymbol{\beta} )$ for the Bernoulli and Negative Binomial observation distribution. Assuming that the observations are i.i.d. from the same distribution we can write:
+Let us derive the likelihood $p(\boldsymbol{y} | x, \boldsymbol{\beta} )$ for the [[id:82cc8d0e-682d-4082-90ac-36cf7fadcb72][Bernoulli]] and [[id:273bfd3a-7e6e-4971-b422-048f930ae5b0][Negative Binomial]] observation distribution. Assuming that the observations are i.i.d. from the same distribution we can write:
 
 \begin{equation*}
 P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right)
@@ -92,7 +92,7 @@ P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,1-y_i}\,\left
 
 So that:
 \begin{equation*}
-\mathcal{L}_i(\boldsymbol{\beta}) = P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\left(\exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i}}{1 + \exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)}
+\mathcal{L}(\boldsymbol{\beta}) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \prod_{i=1}^N \frac{\left(\exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i}}{1 + \exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)}
 \end{equation*}
 
 #+begin_src python
@@ -140,7 +140,7 @@ P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &\propto p_i^{\,r}\,\le
 So that
 
 \begin{equation*}
-\mathcal{L}_i(\boldsymbol{\beta}) = P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\left(\exp\left( - \boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{r}}{\left(1 + \exp\left(-\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right^{y_i+r}}
+\mathcal{L}_i\left(\boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \prod_{i=1}^N \frac{\left(\exp\left( - \boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{r}}{\left(1 + \exp\left(-\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i+r}}
 \end{equation*}
 
 * References

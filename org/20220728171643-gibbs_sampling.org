@@ -3,26 +3,30 @@
 :END:
 #+title: Gibbs sampling
 
-Gibbs sampling is a family of [[id:5acc4f0f-417e-424f-95a5-1c95e7e822ff][Markov Chain Monte Carlo]] algorithm where we conditionally sample from each parameter while holding the others fixed, successively.
+Gibbs sampling is a family of [[id:5acc4f0f-417e-424f-95a5-1c95e7e822ff][Markov Chain Monte Carlo]] algorithm where we conditionally sample from each parameter while holding the others fixed, successively. It is useful when the joint distribution is difficult to sample from (no closed-form expression, for instance) but where the conditional distribution of each variable is known.
 
-Let us briefly explain where it comes from and the motivations behind it. Let us consider a response variable $\bb{Y}$, feature matrix $X$ and a model with parameter $\boldsymbol{\beta}$ so the likelihood of the data given the model and parameter values is given by
+* General principle
 
-$$
-P\left(Y | X, \beta\right)
-$$
+Assume that we want to generate $N$ samples $\left\{\tilde{\Theta}^{(n)}\right\}_{n=1 \dots N}$ from the joint distribution $P\left(\theta_1, \dots, \theta_D\right)$. We start with an initial position $\tilde{\Theta}^{(0)}$, and to generate $\tilde{\Theta}}^{i+1}$ we successively draw from the following conditional distributions:
 
-Given a test point $x_*$ we are usually interested in the following predictive distribution:
+- $\tilde{\theta}^{(i+1)}_1 \sim P(\theta_1\; |\; \theta_2 = \tilde{\theta_2}^{(i)}, \dots, \theta_D = \tilde{\theta_D}^{(i)})$
+- $\tilde{\theta}^{(i+1)}_2 \sim P(\theta_2\; |\; \theta_1 = \tilde{\theta_1}^{(i+1)}, \theta_3 = \tilde{\theta_3}^{(i)} \dots, \theta_D = \tilde{\theta_D}^{(i)})$
+- $\tilde{\theta}^{(i+1)}_j \sim P(\theta_j\; |\; \theta_1 = \tilde{\theta_1}^{(i+1)}, \dots, \theta_{j-1} = \tilde{\theta}_{j-1}^{(i+1)}, \theta_{j+1} = \tilde{\theta}_{j+1}^{(i)}, \dots, \theta_D = \tilde{\theta_D}^{(i)})$
 
-$$
-P\left(y_* | Y, X, \beta, x_*\right)
-$$
+* Using auxiliary variables
 
-Which can be written as:
+It is not uncommon to introduce auxiliary variables to the model to make computations easier. Let us consider the /augmented likelihood/ $P(y, \omega | \theta)$, so that the original likelihood:
 
 $$
-P\left(y_* | Y, X, x_*\right) = \int P(y_*| \beta, x_*) P(\beta|Y, X) \mathrm{d} \beta
+P(Y, \omega|\theta) = P(Y|\omega, \theta) P(\omega)
 $$
 
-- Bernoulli logit regression:  [[id:16338bc2-222c-4acf-aa28-38b951dfcb89][Polya-Gamma augmentation]]
-- Negative Binomial logit regression:  [[id:16338bc2-222c-4acf-aa28-38b951dfcb89][Polya-Gamma augmentation]]
-- Horsehoe prior using the [[id:45ccc897-f07c-4adc-9142-9ae8870fbddc][inverse-gamma expansion of the Half-Cauchy distribution]]
+This works/is useful iff:
+
+1. Marginalizing the augmented likelihood returns the original likleihood $\int P(Y, \omega | \theta) \mathrm{d} \omega = \int P(Y|\omega, \theta) P(\omega) \mathrm{d}\omega = P(Y|\theta)$
+2. The prior $P(\theta)$ is conjugate to $P(Y|\omega, \theta)$ so $P(\theta|Y) \propto P(Y | \theta) P(\theta) = \int P(Y|\omega, \theta) P(\omega) P(\theta) \mathrm{d}\omega$
+
+This trick is used to build Gibbs samplers for:
+- The Bernoulli logit regression ([[id:16338bc2-222c-4acf-aa28-38b951dfcb89][Polya-Gamma augmentation]])
+- The Negative Binomial logit regression (Idem)
+- The Horsehoe prior (using the [[id:45ccc897-f07c-4adc-9142-9ae8870fbddc][inverse-gamma expansion of the Half-Cauchy distribution]])
