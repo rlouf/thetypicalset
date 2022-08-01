@@ -1,0 +1,64 @@
+:PROPERTIES:
+:ID:       9b8fb37a-ea51-46ba-91bb-9dcf7348d093
+:END:
+#+title: Term rewriting in miniKanren
+#+DATE: <2022-08-01 Mon>
+#+PROPERTY: header-args :eval never-export
+
+Writing a goal that will apply the following rewrites to an expression:
+
+
+\begin{align*}
+x + x &= 2 * x\\
+\log \left(\exp(x)\right) &= x
+\end{align*}
+
+
+#+begin_src python :session
+from numbers import Real
+
+from etuples.core import ExpressionTuple, etuple
+
+from kanren import var, conde, lall
+from kanren.constraints import isinstanceo
+
+def single_math_reduceo(expanded_term, reduced_term):
+    x_lv = var()
+    return lall(
+        isinstanceo(x_lv, Real),
+        isinstanceo(x_lv, ExpressionTuple),
+        conde(
+            # add(x, x) == mul(2, x)
+            [eq(expanded_term, etuple(add, x_lv, x_lv)), eq(reduced_term, etuple(mul, 2, x))],
+            # exp(log(x)) == x
+            [eq(expanded_term, etuple(log, etuple(exp, x_lv))), eq(reduced_term, x_lv)],
+        )
+    )
+#+end_src
+
+/TBD:/ What this means exactly
+
+#+begin_src python :session
+from functools import partial
+
+from kanren import reduceo
+
+math_reduceo = partial(reduceo, single_math_reduceo)
+#+end_src
+
+/TBD:/ This too wtf means
+
+#+begin_src python :session
+from kanren.graph import walko
+
+math_walko = partial(walko, single_math_reduceo)
+#+end_src
+
+* Try a simple expansion
+
+We're starting from the expanded expression $3 + 3 + \exp(\log(\exp(5)))$ and will try to get the reduced version:
+
+#+begin_src python
+expanded_term  = etuple(add, etuple(add, 3, 3), euple(exp, etuple(log, etuple(exp, 5))))
+reduced_term = var()
+#+end_src
