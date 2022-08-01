@@ -6,7 +6,7 @@
 <!-- 2022-08-01 Mon 22:46 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Basel III</title>
+<title>FunctionGraph</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -194,21 +194,105 @@
   .org-svg { }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Basel III</h1>
+<h1 class="title">FunctionGraph</h1>
 <p>
-<a target='_blank' rel='noopener noreferrer' class='external' href="https://www.bis.org/bcbs/publications.htm?a=1&amp;from=01011991&amp;ty=1&amp;mp=any&amp;pi=title">Can be found here</a>
+From the documentation:
 </p>
 
-<div id="outline-container-orga9854e3" class="outline-2">
-<h2 id="orga9854e3">Links to this note</h2>
-<div class="outline-text-2" id="text-orga9854e3">
-<ul class="org-ul">
-<li><a href="./20220111193332-we_have_an_entropy_issue_with_finance.html">We have an entropy issue with finance</a></li>
-</ul>
+<blockquote>
+<p>
+A `FunctionGraph` represents a subgraph bound by a set of input variables and
+a set of output variables, ie a subgraph that specifies an Aesara function.
+The inputs list should contain all the inputs on which the outputs depend.
+`Variable`\s of type `Constant` are not counted as inputs.
+</p>
+
+<p>
+The `FunctionGraph` supports the replace operation which allows to replace
+a variable in the subgraph by another, e.g. replace ``(x + x).out`` by
+``(2 * x).out``. This is the basis for optimization in Aesara.
+</p>
+
+<p>
+This class is also responsible for verifying that a graph is valid
+(ie, all the dtypes and broadcast patterns are compatible with the
+way the `Variable`\s are used) and for tracking the `Variable`\s with
+a :attr:`FunctionGraph.clients` ``dict`` that specifies which `Apply` nodes
+use the `Variable`.  The :attr:`FunctionGraph.clients` field, combined with
+the :attr:`Variable.owner` and each :attr:`Apply.inputs`, allows the graph
+to be traversed in both directions.
+</p>
+
+<p>
+It can also be extended with new features using
+:meth:`FunctionGraph.attach<sub>feature</sub>`.  See `Feature` for event types and
+documentation.  Extra features allow the `FunctionGraph` to verify new
+properties of a graph as it is optimized.
+</p>
+</blockquote>
+
+<p>
+What I am wondering is: when is a <code>FunctionGraph</code> needed? When does it become cumbersome?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">from</span> aesara.graph.fg <span style="font-weight: bold;">import</span> FunctionGraph
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">x</span> = at.vector(<span style="font-style: italic;">'x'</span>)
+<span style="font-weight: bold; font-style: italic;">z</span> = at.log(at.exp(x + x)) + x + x
+
+<span style="font-weight: bold; font-style: italic;">fg</span> = FunctionGraph(outputs=[z])
+
+aesara.dprint(fg)
+</pre>
 </div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">print</span>(fg.clients)
+</pre>
+</div>
+
+<div id="outline-container-orgc22c9d8" class="outline-2">
+<h2 id="orgc22c9d8"><span class="todo TODO">TODO</span> What is the <code>clients</code> dictionary used for?</h2>
+<div class="outline-text-2" id="text-orgc22c9d8">
+<p>
+It looks like this is what allows to traverse the graph?
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc5e1f02" class="outline-2">
+<h2 id="orgc5e1f02"><span class="todo TODO">TODO</span> Keep track of where a <code>FunctionGraph</code> is necessary, where it is produced, where it is cloned, etc.</h2>
+</div>
+
+<div id="outline-container-org5ac68b0" class="outline-2">
+<h2 id="org5ac68b0">Links to this note</h2>
 </div>
 </div>
 </body>

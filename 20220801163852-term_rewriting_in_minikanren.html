@@ -6,7 +6,7 @@
 <!-- 2022-08-01 Mon 22:46 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Basel III</title>
+<title>Term rewriting in miniKanren</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -194,21 +194,106 @@
   .org-svg { }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Basel III</h1>
+<h1 class="title">Term rewriting in miniKanren</h1>
 <p>
-<a target='_blank' rel='noopener noreferrer' class='external' href="https://www.bis.org/bcbs/publications.htm?a=1&amp;from=01011991&amp;ty=1&amp;mp=any&amp;pi=title">Can be found here</a>
+Writing a goal that will apply the following rewrites to an expression:
 </p>
 
-<div id="outline-container-orga9854e3" class="outline-2">
-<h2 id="orga9854e3">Links to this note</h2>
-<div class="outline-text-2" id="text-orga9854e3">
-<ul class="org-ul">
-<li><a href="./20220111193332-we_have_an_entropy_issue_with_finance.html">We have an entropy issue with finance</a></li>
-</ul>
+
+\begin{align*}
+x + x &= 2 * x\\
+\log \left(\exp(x)\right) &= x
+\end{align*}
+
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> numbers <span style="font-weight: bold;">import</span> Real
+
+<span style="font-weight: bold;">from</span> etuples.core <span style="font-weight: bold;">import</span> ExpressionTuple, etuple
+
+<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> var, conde, lall
+<span style="font-weight: bold;">from</span> kanren.constraints <span style="font-weight: bold;">import</span> isinstanceo
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">single_math_reduceo</span>(expanded_term, reduced_term):
+    <span style="font-weight: bold; font-style: italic;">x_lv</span> = var()
+    <span style="font-weight: bold;">return</span> lall(
+        isinstanceo(x_lv, Real),
+        isinstanceo(x_lv, ExpressionTuple),
+        conde(
+            <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">add(x, x) == mul(2, x)</span>
+            [eq(expanded_term, etuple(add, x_lv, x_lv)), eq(reduced_term, etuple(mul, 2, x))],
+            <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">exp(log(x)) == x</span>
+            [eq(expanded_term, etuple(log, etuple(exp, x_lv))), eq(reduced_term, x_lv)],
+        )
+    )
+</pre>
 </div>
+
+<p>
+<i>TBD:</i> What this means exactly
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> functools <span style="font-weight: bold;">import</span> partial
+
+<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> reduceo
+
+<span style="font-weight: bold; font-style: italic;">math_reduceo</span> = partial(reduceo, single_math_reduceo)
+</pre>
+</div>
+
+<p>
+<i>TBD:</i> This too wtf means
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren.graph <span style="font-weight: bold;">import</span> walko
+
+<span style="font-weight: bold; font-style: italic;">math_walko</span> = partial(walko, single_math_reduceo)
+</pre>
+</div>
+
+<div id="outline-container-org85ef074" class="outline-2">
+<h2 id="org85ef074">Try a simple expansion</h2>
+<div class="outline-text-2" id="text-org85ef074">
+<p>
+We're starting from the expanded expression \(3 + 3 + \exp(\log(\exp(5)))\) and will try to get the reduced version:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">expanded_term</span>  = etuple(add, etuple(add, 3, 3), euple(exp, etuple(log, etuple(exp, 5))))
+<span style="font-weight: bold; font-style: italic;">reduced_term</span> = var()
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4c50856" class="outline-2">
+<h2 id="org4c50856">Links to this note</h2>
 </div>
 </div>
 </body>
