@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-08-03 Wed 22:21 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Random Variables in Aesara</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Random Variables in Aesara</h1>
+<ul class="org-ul">
+<li><code>RandomGenerator</code></li>
+<li><code>RandomState</code></li>
+<li><code>RandomStream</code></li>
+</ul>
+
+<div id="outline-container-orgeafa515" class="outline-2">
+<h2 id="orgeafa515">RandomVariable Ops</h2>
+<div class="outline-text-2" id="text-orgeafa515">
+<p>
+We have a <code>default_rng</code> function, but the result does not behave as a generator in <code>numpy</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> default_rng
+<span style="font-weight: bold; font-style: italic;">rng</span> = default_rng(32)
+rng.<span style="font-weight: bold;">type</span>
+</pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.tensor.random.basic <span style="font-weight: bold;">import</span> NormalRV
+
+<span style="font-weight: bold; font-style: italic;">norm</span> = NormalRV()
+<span style="font-weight: bold; font-style: italic;">norm_rv</span> = norm(0, 1, size=(2,), rng=rng)
+
+norm_rv.<span style="font-weight: bold;">eval</span>()
+</pre>
+</div>
+
+
+<p>
+<code>Aesara</code> also defines aliases for the <code>RandomVariable</code> Ops:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> normal
+
+<span style="font-weight: bold; font-style: italic;">normal_rv</span> = normal(0, 1, size=(2,), rng=rng)
+normal_rv.<span style="font-weight: bold;">eval</span>()
+</pre>
+</div>
+
+<p>
+Let's look at the graphs that are produced:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> default_rng, normal
+
+<span style="font-weight: bold; font-style: italic;">rng</span> = default_rng(0)
+<span style="font-weight: bold; font-style: italic;">a_rv</span> = normal(0, 1, rng=rng)
+<span style="font-weight: bold; font-style: italic;">b_rv</span> = normal(0, 1, rng=rng)
+<span style="font-weight: bold; font-style: italic;">c_tt</span> = a_rv + b_rv
+
+<span style="font-weight: bold; font-style: italic;">d_rv</span> = normal(0, 1, rng=rng)
+
+aesara.dprint(c_tt * d_rv)
+</pre>
+</div>
+
+<p>
+How does <code>RandomGeneratorType</code> work? It looks like it has internal state.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org60f2c49" class="outline-2">
+<h2 id="org60f2c49">Define custom random variables</h2>
+<div class="outline-text-2" id="text-org60f2c49">
+<p>
+It is fairly simple as <code>srng.gen(RV, *args)</code> will call <code>RV()(random_state, *args)</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">srng.gen(zero_truncated_betabinom, eta_at, kappa_rv, n_at),
+</pre>
+</div>
+
+<p>
+where the <code>RandomVariable</code> is implemented as:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">ZeroTruncatedBetaBinomial</span>(RandomVariable):
+    r<span style="font-style: italic;">"""A zero-truncated beta-binomial distribution.</span>
+
+<span style="font-style: italic;">    This distribution is implemented in the :math:`\kappa`</span>
+<span style="font-style: italic;">    and :math:`\eta` parameterization, which is related to</span>
+<span style="font-style: italic;">    the standard :math:`\alpha` and :math:`\beta` parameterization</span>
+<span style="font-style: italic;">    of the beta-binomial through the following:</span>
+
+<span style="font-style: italic;">    .. math::</span>
+<span style="font-style: italic;">        \alpha = \eta / \kappa \\</span>
+<span style="font-style: italic;">        \beta = (1 - \eta) / \kappa</span>
+
+<span style="font-style: italic;">    Truncation aside, for a :math:`Y \sim \operatorname{BetaBinom}\left(N, \eta, \kappa\right)`,  # noqa: E501</span>
+
+<span style="font-style: italic;">    .. math::</span>
+<span style="font-style: italic;">        \operatorname{E}\left[ Y \right] = N \eta \\</span>
+<span style="font-style: italic;">        \operatorname{Var}\left[ Y \right] = N \eta (1 - \eta) (N \kappa + 1) / (\kappa + 1)</span>
+
+
+<span style="font-style: italic;">    Under this parameterization, :math:`\kappa` in the standard beta-binomial</span>
+<span style="font-style: italic;">    serves as an over-dispersion term with the following properties:</span>
+
+<span style="font-style: italic;">    .. math::</span>
+<span style="font-style: italic;">        \lim_{\kappa \to 0} \operatorname{Var}\left[ Y \right] = N \eta (1 - \eta) \\</span>
+<span style="font-style: italic;">        \lim_{\kappa \to \infty} \operatorname{Var}\left[ Y \right] = N^2 \eta (1 - \eta)</span>
+
+<span style="font-style: italic;">    In other words, :math:`\kappa` modulates between the standard binomial</span>
+<span style="font-style: italic;">    variance and :math:`N`-times that variance.</span>
+
+<span style="font-style: italic;">    The un-truncated probability mass function (PMF) is as follows:</span>
+
+<span style="font-style: italic;">    .. math::</span>
+<span style="font-style: italic;">        \frac{\operatorname{B}\left(\frac{\eta}{\kappa} + y, n - y + \frac{1 - \eta}{\kappa}\right) {\binom{n}{y}}}{\operatorname{B}\left(\frac{\eta}{\kappa}, \frac{1 - \eta}{\kappa}\right)}  # noqa: E501</span>
+
+<span style="font-style: italic;">    and the zero-truncated PMF is as follows:</span>
+
+<span style="font-style: italic;">    .. math::</span>
+<span style="font-style: italic;">        \frac{\operatorname{B}\left(\frac{\eta}{\kappa} + y, - \frac{\eta}{\kappa} + n - y + \frac{1}{\kappa}\right) {\binom{n}{y}}}{\operatorname{B}\left(\frac{\eta}{\kappa}, - \frac{\eta}{\kappa} + \frac{1}{\kappa}\right) - \operatorname{B}\left(\frac{\eta}{\kappa}, - \frac{\eta}{\kappa} + n + \frac{1}{\kappa}\right)}  # noqa: E501</span>
+
+<span style="font-style: italic;">    """</span>
+    <span style="font-weight: bold; font-style: italic;">name</span> = <span style="font-style: italic;">"zero_truncated_betabinom"</span>
+    <span style="font-weight: bold; font-style: italic;">ndim_supp</span> = 0
+    <span style="font-weight: bold; font-style: italic;">ndims_params</span> = [0, 0, 0]
+    <span style="font-weight: bold; font-style: italic;">dtype</span> = <span style="font-style: italic;">"int64"</span>
+    <span style="font-weight: bold; font-style: italic;">_print_name</span> = (<span style="font-style: italic;">"ZeroTruncBetaBinom"</span>, <span style="font-style: italic;">"\\operatorname{BetaBinom}_{&gt;0}"</span>)
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__init__</span>(<span style="font-weight: bold;">self</span>, rejection_threshold=200, **kwargs):
+        <span style="font-style: italic;">"""</span>
+<span style="font-style: italic;">        Parameters</span>
+<span style="font-style: italic;">        ----------</span>
+<span style="font-style: italic;">        rejection_threshold</span>
+<span style="font-style: italic;">            The number of rejection iterations to perform before raising an</span>
+<span style="font-style: italic;">            exception.</span>
+<span style="font-style: italic;">        """</span>
+        <span style="font-weight: bold;">self</span>.rejection_threshold = rejection_threshold
+        <span style="font-weight: bold;">super</span>().__init__(**kwargs)
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__call__</span>(<span style="font-weight: bold;">self</span>, eta, kappa, n, size=<span style="font-weight: bold; text-decoration: underline;">None</span>, **kwargs):
+        <span style="font-style: italic;">"""</span>
+<span style="font-style: italic;">        Parameters</span>
+<span style="font-style: italic;">        ----------</span>
+<span style="font-style: italic;">        eta</span>
+<span style="font-style: italic;">        kappa</span>
+<span style="font-style: italic;">        n</span>
+<span style="font-style: italic;">        """</span>
+
+        <span style="font-weight: bold;">self</span>.eta = at.as_tensor_variable(eta, dtype=aesara.config.floatX)
+        <span style="font-weight: bold;">self</span>.kappa = at.as_tensor_variable(kappa, dtype=aesara.config.floatX)
+        <span style="font-weight: bold;">self</span>.n = at.as_tensor_variable(n, dtype=np.int64)
+
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">super</span>().__call__(eta, kappa, n, size=size, **kwargs)
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">rng_fn</span>(<span style="font-weight: bold;">self</span>, rng, eta, kappa, n, size):
+        <span style="font-style: italic;">"""A naive hybrid rejection + inverse sampler."""</span>
+
+        <span style="font-weight: bold; font-style: italic;">n</span> = np.asarray(n, dtype=np.int64)
+        <span style="font-weight: bold; font-style: italic;">eta</span> = np.asarray(eta, dtype=np.float64)
+        <span style="font-weight: bold; font-style: italic;">kappa</span> = np.asarray(kappa, dtype=np.float64)
+
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Values below this will produce errors (plus, it means this is really</span>
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">a binomial)</span>
+        <span style="font-weight: bold; font-style: italic;">alpha</span> = np.clip(eta / kappa, near_zero, 1e100)
+        <span style="font-weight: bold; font-style: italic;">beta</span> = np.clip((1 - eta) / kappa, near_zero, 1e100)
+
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">def zt_bb_inv(n, alpha, beta, size=None):</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;">"""A zero-truncated beta-binomial inverse sampler."""</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;"># bb_dist = scipy.stats.betabinom(n, alpha, beta)</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;">beta_smpls = np.clip(</span>
+        <span style="font-weight: bold; font-style: italic;">#         </span><span style="font-weight: bold; font-style: italic;">scipy.stats.beta(alpha, beta).rvs(size=size), 1e-10, np.inf</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;">)</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;">binom_dist = scipy.stats.binom(n, beta_smpls)</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;">u = np.random.uniform(size=size)</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;">F_0 = binom_dist.cdf(0)</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;">samples = binom_dist.ppf(F_0 + u * (1 - F_0))</span>
+        <span style="font-weight: bold; font-style: italic;">#     </span><span style="font-weight: bold; font-style: italic;">return samples</span>
+
+        <span style="font-weight: bold; font-style: italic;">samples</span> = scipy.stats.betabinom(n, alpha, beta).rvs(size=size, random_state=rng)
+        <span style="font-weight: bold; font-style: italic;">alpha</span> = np.broadcast_to(alpha, samples.shape)
+        <span style="font-weight: bold; font-style: italic;">beta</span> = np.broadcast_to(beta, samples.shape)
+        <span style="font-weight: bold; font-style: italic;">n</span> = np.broadcast_to(n, samples.shape)
+        <span style="font-weight: bold; font-style: italic;">rejects</span> = samples &lt;= 0
+
+        <span style="font-weight: bold; font-style: italic;">thresh_count</span> = 0
+        <span style="font-weight: bold;">while</span> rejects.<span style="font-weight: bold;">any</span>():
+            <span style="font-weight: bold; font-style: italic;">_n</span> = n[rejects] <span style="font-weight: bold;">if</span> np.size(n) &gt; 1 <span style="font-weight: bold;">else</span> n
+            <span style="font-weight: bold; font-style: italic;">_alpha</span> = alpha[rejects] <span style="font-weight: bold;">if</span> np.size(alpha) &gt; 1 <span style="font-weight: bold;">else</span> alpha
+            <span style="font-weight: bold; font-style: italic;">_beta</span> = beta[rejects] <span style="font-weight: bold;">if</span> np.size(beta) &gt; 1 <span style="font-weight: bold;">else</span> beta
+            <span style="font-weight: bold; font-style: italic;">_size</span> = rejects.<span style="font-weight: bold;">sum</span>()
+
+            <span style="font-weight: bold; font-style: italic;">beta_smpls</span> = np.clip(
+                scipy.stats.beta(_alpha, _beta).rvs(size=_size, random_state=rng),
+                near_zero,
+                near_one,
+            )
+            <span style="font-weight: bold; font-style: italic;">samples</span>[rejects] = scipy.stats.binom(_n, beta_smpls).rvs(
+                size=_size, random_state=rng
+            )
+            <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">samples[rejects] = scipy.stats.betabinom(_n, _alpha, _beta).rvs(size=_size)  # noqa: E501</span>
+
+            <span style="font-weight: bold; font-style: italic;">new_rejects</span> = samples &lt;= 0
+            <span style="font-weight: bold;">if</span> new_rejects.<span style="font-weight: bold;">sum</span>() == rejects.<span style="font-weight: bold;">sum</span>():
+                <span style="font-weight: bold;">if</span> thresh_count &gt; <span style="font-weight: bold;">self</span>.rejection_threshold:
+                    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;"># Attempt rejection sampling until the rejection results</span>
+                    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;"># get stuck, then use the inverse-sampler</span>
+                    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">samples[rejects] = zt_bb_inv(_n, _alpha, _beta, size=_size)</span>
+                    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">break</span>
+                    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">raise ValueError("The sampling rejection threshold was met")</span>
+                    warnings.warn(
+                        <span style="font-style: italic;">"The sampling rejection threshold was met "</span>
+                        <span style="font-style: italic;">"and mean values were used as sample values"</span>
+                    )
+                    <span style="font-weight: bold; font-style: italic;">sp_ref_dist</span> = scipy.stats.betabinom(_n, _alpha, _beta)
+                    <span style="font-weight: bold; font-style: italic;">trunc_mean</span> = sp_ref_dist.mean() / (1 - sp_ref_dist.cdf(0))
+                    <span style="font-weight: bold;">assert</span> np.<span style="font-weight: bold;">all</span>(trunc_mean &gt;= 1)
+                    <span style="font-weight: bold; font-style: italic;">samples</span>[rejects] = trunc_mean
+                    <span style="font-weight: bold;">break</span>
+                <span style="font-weight: bold;">else</span>:
+                    <span style="font-weight: bold; font-style: italic;">thresh_count</span> += 1
+            <span style="font-weight: bold;">else</span>:
+                <span style="font-weight: bold; font-style: italic;">thresh_count</span> = 0
+
+            <span style="font-weight: bold; font-style: italic;">rejects</span> = new_rejects
+
+        <span style="font-weight: bold;">return</span> samples
+
+
+<span style="font-weight: bold; font-style: italic;">zero_truncated_betabinom</span> = ZeroTruncatedBetaBinomial()
+
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">_logp</span>(value, eta, kappa, n):
+    <span style="font-weight: bold;">return</span> (
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">binomln(n, value)</span>
+        -at.log(n + 1)
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- betaln(n - value + 1, value + 1)</span>
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">+ betaln(value + alpha, n - value + beta)</span>
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- betaln(alpha, beta)</span>
+        - at.gammaln(n - value + 1)
+        - at.gammaln(value + 1)
+        + at.gammaln(n + 2)
+        + at.gammaln(value + eta / kappa)
+        + at.gammaln(n - value + (1 - eta) / kappa)
+        - at.gammaln(1 / kappa + n)
+        - at.gammaln(eta / kappa)
+        - at.gammaln((1 - eta) / kappa)
+        + at.gammaln(1 / kappa)
+    )
+
+
+<span style="font-weight: bold; text-decoration: underline;">@_logprob.register</span>(ZeroTruncatedBetaBinomial)
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">zero_truncated_betabinom_logprob</span>(op, values, *inputs, **kwargs):
+    (values,) = values
+    (eta, kappa, n) = inputs[3:]
+
+    <span style="font-weight: bold; font-style: italic;">l0</span> = (
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">gammaln(alpha + beta)</span>
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">+ gammaln(n + beta)</span>
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- gammaln(beta)</span>
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">- gammaln(alpha + beta + n)</span>
+        at.gammaln(1 / kappa)
+        + at.gammaln(n + (1 - eta) / kappa)
+        - at.gammaln((1 - eta) / kappa)
+        - at.gammaln(1 / kappa + n)
+    )
+
+    <span style="font-weight: bold; font-style: italic;">log1mP0</span> = at.log1mexp(l0)
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">log1mP0 = 0</span>
+
+    <span style="font-weight: bold; font-style: italic;">res</span> = CheckParameterValue(<span style="font-style: italic;">"values &lt;= n, eta &gt; 0, kappa &gt; 0"</span>)(
+        at.switch(values &gt; 0, _logp(values, eta, kappa, n) - log1mP0, -np.inf),
+        at.<span style="font-weight: bold;">all</span>(values &lt;= n),
+        at.<span style="font-weight: bold;">all</span>(eta &gt; 0),
+        at.<span style="font-weight: bold;">all</span>(kappa &gt; 0),
+    )
+    <span style="font-weight: bold;">return</span> res
+</pre>
+</div>
+
+<p>
+Note that you can also define this random variables' logprob dispatching <code>_logprob</code> for the <code>ZeroTruncBetaBinom</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5693af8" class="outline-2">
+<h2 id="org5693af8">Sampling vs Logprobability <code>aeppl</code></h2>
+<div class="outline-text-2" id="text-org5693af8">
+<ul class="org-ul">
+<li>How define the logprob of a custom distribution?</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgc167995" class="outline-2">
+<h2 id="orgc167995">Shapes</h2>
+<div class="outline-text-2" id="text-orgc167995">
+<p>
+Shapes are always a mess when it comes to random variables. In <code>aesara</code> we note two distinct shapes:
+</p>
+<ul class="org-ul">
+<li><code>ndim_supp</code> the number of dimensions of the RV's support.</li>
+<li><code>ndim_params</code></li>
+<li><code>size</code> which is the sample size</li>
+</ul>
+
+<p>
+Remember that shapes in Aesara can be determined at runtime! So if we assume that:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">batch_shape</span> = size
+np.ndim(sample_shape) = ndim_supp
+<span style="font-weight: bold; font-style: italic;">shape</span> = sample_shape + batch_shape
+</pre>
+</div>
+
+<p>
+And we should have a look at broadcasting rules because they are not all very obvious.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">a_rv</span> = srng.normal(0, 1, size=(2,3))
+<span style="font-weight: bold;">print</span>(a_rv.<span style="font-weight: bold;">eval</span>())
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">mu</span> = at.as_tensor([1., 2., 3.])
+<span style="font-weight: bold; font-style: italic;">a_rv</span> = srng.normal(mu, 1, size=(2,3))
+<span style="font-weight: bold;">print</span>(a_rv.<span style="font-weight: bold;">eval</span>())
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">mu</span> = at.as_tensor([1., 2.])
+<span style="font-weight: bold; font-style: italic;">a_rv</span> = srng.normal(mu, 1, size=(2,3))
+<span style="font-weight: bold;">print</span>(a_rv.<span style="font-weight: bold;">eval</span>())
+</pre>
+</div>
+
+<p>
+More complex is the case where the random variable is non-scalar, as multivariate normal. Here you can see that the "event shape" is equal to 2. The resulting shape, if we assume <code>event_shape</code> and <code>batch_shape</code> are tuples is given by:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">shape</span> = event_shape + batch_shape
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+
+<span style="font-weight: bold; font-style: italic;">mu</span> = np.r_[1, 2]
+<span style="font-weight: bold; font-style: italic;">sigma</span> = np.array([[.5, .5], [.4, .6]])
+<span style="font-weight: bold; font-style: italic;">a_rv</span> = srng.multivariate_normal(mu, sigma, size=(2, 5))
+<span style="font-weight: bold;">print</span>(a_rv.<span style="font-weight: bold;">eval</span>().shape)
+</pre>
+</div>
+
+<p>
+See <a target='_blank' rel='noopener noreferrer' class='external' href="https://ericmjl.github.io/blog/2019/5/29/reasoning-about-shapes-and-probability-distributions/">Eric Ma's blog post on the topic</a>.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org18ea565" class="outline-2">
+<h2 id="org18ea565">Proposal</h2>
+<div class="outline-text-2" id="text-org18ea565">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomState
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org38b7e6f" class="outline-2">
+<h2 id="org38b7e6f">Links to this note</h2>
+<div class="outline-text-2" id="text-org38b7e6f">
+<ul class="org-ul">
+<li><a href="./20220729163627-aesara.html">Aesara</a></li>
+<li><a href="./inbox.html">Writing inbox</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>
