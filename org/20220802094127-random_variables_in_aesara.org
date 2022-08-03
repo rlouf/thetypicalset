@@ -1,0 +1,377 @@
+:PROPERTIES:
+:ID:       2e41e200-be7a-482b-8cfe-d0d67df26920
+:END:
+#+title: Random Variables in Aesara
+
+- =RandomGenerator=
+- =RandomState=
+- =RandomStream=
+
+* RandomVariable Ops
+
+We have a =default_rng= function, but the result does not behave as a generator in =numpy=.
+
+#+begin_src python :session
+from aesara.tensor.random import default_rng
+rng = default_rng(32)
+rng.type
+#+end_src
+
+#+RESULTS:
+: RandomGeneratorType
+
+
+#+begin_src python :session
+from aesara.tensor.random.basic import NormalRV
+
+norm = NormalRV()
+norm_rv = norm(0, 1, size=(2,), rng=rng)
+
+norm_rv.eval()
+#+end_src
+
+#+RESULTS:
+| -0.0242532 | 0.72212055 |
+
+
+=Aesara= also defines aliases for the =RandomVariable= Ops:
+
+#+begin_src python :session
+from aesara.tensor.random import normal
+
+normal_rv = normal(0, 1, size=(2,), rng=rng)
+normal_rv.eval()
+#+end_src
+
+#+RESULTS:
+| 0.93330371 | -0.22801103 |
+
+Let's look at the graphs that are produced:
+
+#+begin_src python :results output
+import aesara
+from aesara.tensor.random import default_rng, normal
+
+rng = default_rng(0)
+a_rv = normal(0, 1, rng=rng)
+b_rv = normal(0, 1, rng=rng)
+c_tt = a_rv + b_rv
+
+d_rv = normal(0, 1, rng=rng)
+
+aesara.dprint(c_tt * d_rv)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Elemwise{mul,no_inplace} [id A]
+ |Elemwise{add,no_inplace} [id B]
+ | |normal_rv{0, (0, 0), floatX, False}.1 [id C]
+ | | |DefaultGeneratorMakerOp [id D]
+ | | | |TensorConstant{0} [id E]
+ | | |TensorConstant{[]} [id F]
+ | | |TensorConstant{11} [id G]
+ | | |TensorConstant{0} [id H]
+ | | |TensorConstant{1} [id I]
+ | |normal_rv{0, (0, 0), floatX, False}.1 [id J]
+ |   |DefaultGeneratorMakerOp [id D]
+ |   |TensorConstant{[]} [id K]
+ |   |TensorConstant{11} [id L]
+ |   |TensorConstant{0} [id M]
+ |   |TensorConstant{1} [id N]
+ |normal_rv{0, (0, 0), floatX, False}.1 [id O]
+   |DefaultGeneratorMakerOp [id D]
+   |TensorConstant{[]} [id P]
+   |TensorConstant{11} [id Q]
+   |TensorConstant{0} [id R]
+   |TensorConstant{1} [id S]
+#+end_example
+
+How does =RandomGeneratorType= work? It looks like it has internal state.
+
+* Define custom random variables
+
+It is fairly simple as =srng.gen(RV, *args)= will call =RV()(random_state, *args)=.
+
+#+begin_src python
+srng.gen(zero_truncated_betabinom, eta_at, kappa_rv, n_at),
+#+end_src
+
+where the =RandomVariable= is implemented as:
+
+#+begin_src python
+class ZeroTruncatedBetaBinomial(RandomVariable):
+    r"""A zero-truncated beta-binomial distribution.
+
+    This distribution is implemented in the :math:`\kappa`
+    and :math:`\eta` parameterization, which is related to
+    the standard :math:`\alpha` and :math:`\beta` parameterization
+    of the beta-binomial through the following:
+
+    .. math::
+        \alpha = \eta / \kappa \\
+        \beta = (1 - \eta) / \kappa
+
+    Truncation aside, for a :math:`Y \sim \operatorname{BetaBinom}\left(N, \eta, \kappa\right)`,  # noqa: E501
+
+    .. math::
+        \operatorname{E}\left[ Y \right] = N \eta \\
+        \operatorname{Var}\left[ Y \right] = N \eta (1 - \eta) (N \kappa + 1) / (\kappa + 1)
+
+
+    Under this parameterization, :math:`\kappa` in the standard beta-binomial
+    serves as an over-dispersion term with the following properties:
+
+    .. math::
+        \lim_{\kappa \to 0} \operatorname{Var}\left[ Y \right] = N \eta (1 - \eta) \\
+        \lim_{\kappa \to \infty} \operatorname{Var}\left[ Y \right] = N^2 \eta (1 - \eta)
+
+    In other words, :math:`\kappa` modulates between the standard binomial
+    variance and :math:`N`-times that variance.
+
+    The un-truncated probability mass function (PMF) is as follows:
+
+    .. math::
+        \frac{\operatorname{B}\left(\frac{\eta}{\kappa} + y, n - y + \frac{1 - \eta}{\kappa}\right) {\binom{n}{y}}}{\operatorname{B}\left(\frac{\eta}{\kappa}, \frac{1 - \eta}{\kappa}\right)}  # noqa: E501
+
+    and the zero-truncated PMF is as follows:
+
+    .. math::
+        \frac{\operatorname{B}\left(\frac{\eta}{\kappa} + y, - \frac{\eta}{\kappa} + n - y + \frac{1}{\kappa}\right) {\binom{n}{y}}}{\operatorname{B}\left(\frac{\eta}{\kappa}, - \frac{\eta}{\kappa} + \frac{1}{\kappa}\right) - \operatorname{B}\left(\frac{\eta}{\kappa}, - \frac{\eta}{\kappa} + n + \frac{1}{\kappa}\right)}  # noqa: E501
+
+    """
+    name = "zero_truncated_betabinom"
+    ndim_supp = 0
+    ndims_params = [0, 0, 0]
+    dtype = "int64"
+    _print_name = ("ZeroTruncBetaBinom", "\\operatorname{BetaBinom}_{>0}")
+
+    def __init__(self, rejection_threshold=200, **kwargs):
+        """
+        Parameters
+        ----------
+        rejection_threshold
+            The number of rejection iterations to perform before raising an
+            exception.
+        """
+        self.rejection_threshold = rejection_threshold
+        super().__init__(**kwargs)
+
+    def __call__(self, eta, kappa, n, size=None, **kwargs):
+        """
+        Parameters
+        ----------
+        eta
+        kappa
+        n
+        """
+
+        self.eta = at.as_tensor_variable(eta, dtype=aesara.config.floatX)
+        self.kappa = at.as_tensor_variable(kappa, dtype=aesara.config.floatX)
+        self.n = at.as_tensor_variable(n, dtype=np.int64)
+
+        return super().__call__(eta, kappa, n, size=size, **kwargs)
+
+    def rng_fn(self, rng, eta, kappa, n, size):
+        """A naive hybrid rejection + inverse sampler."""
+
+        n = np.asarray(n, dtype=np.int64)
+        eta = np.asarray(eta, dtype=np.float64)
+        kappa = np.asarray(kappa, dtype=np.float64)
+
+        # Values below this will produce errors (plus, it means this is really
+        # a binomial)
+        alpha = np.clip(eta / kappa, near_zero, 1e100)
+        beta = np.clip((1 - eta) / kappa, near_zero, 1e100)
+
+        # def zt_bb_inv(n, alpha, beta, size=None):
+        #     """A zero-truncated beta-binomial inverse sampler."""
+        #     # bb_dist = scipy.stats.betabinom(n, alpha, beta)
+        #     beta_smpls = np.clip(
+        #         scipy.stats.beta(alpha, beta).rvs(size=size), 1e-10, np.inf
+        #     )
+        #     binom_dist = scipy.stats.binom(n, beta_smpls)
+        #     u = np.random.uniform(size=size)
+        #     F_0 = binom_dist.cdf(0)
+        #     samples = binom_dist.ppf(F_0 + u * (1 - F_0))
+        #     return samples
+
+        samples = scipy.stats.betabinom(n, alpha, beta).rvs(size=size, random_state=rng)
+        alpha = np.broadcast_to(alpha, samples.shape)
+        beta = np.broadcast_to(beta, samples.shape)
+        n = np.broadcast_to(n, samples.shape)
+        rejects = samples <= 0
+
+        thresh_count = 0
+        while rejects.any():
+            _n = n[rejects] if np.size(n) > 1 else n
+            _alpha = alpha[rejects] if np.size(alpha) > 1 else alpha
+            _beta = beta[rejects] if np.size(beta) > 1 else beta
+            _size = rejects.sum()
+
+            beta_smpls = np.clip(
+                scipy.stats.beta(_alpha, _beta).rvs(size=_size, random_state=rng),
+                near_zero,
+                near_one,
+            )
+            samples[rejects] = scipy.stats.binom(_n, beta_smpls).rvs(
+                size=_size, random_state=rng
+            )
+            # samples[rejects] = scipy.stats.betabinom(_n, _alpha, _beta).rvs(size=_size)  # noqa: E501
+
+            new_rejects = samples <= 0
+            if new_rejects.sum() == rejects.sum():
+                if thresh_count > self.rejection_threshold:
+                    # # Attempt rejection sampling until the rejection results
+                    # # get stuck, then use the inverse-sampler
+                    # samples[rejects] = zt_bb_inv(_n, _alpha, _beta, size=_size)
+                    # break
+                    # raise ValueError("The sampling rejection threshold was met")
+                    warnings.warn(
+                        "The sampling rejection threshold was met "
+                        "and mean values were used as sample values"
+                    )
+                    sp_ref_dist = scipy.stats.betabinom(_n, _alpha, _beta)
+                    trunc_mean = sp_ref_dist.mean() / (1 - sp_ref_dist.cdf(0))
+                    assert np.all(trunc_mean >= 1)
+                    samples[rejects] = trunc_mean
+                    break
+                else:
+                    thresh_count += 1
+            else:
+                thresh_count = 0
+
+            rejects = new_rejects
+
+        return samples
+
+
+zero_truncated_betabinom = ZeroTruncatedBetaBinomial()
+
+
+def _logp(value, eta, kappa, n):
+    return (
+        # binomln(n, value)
+        -at.log(n + 1)
+        # - betaln(n - value + 1, value + 1)
+        # + betaln(value + alpha, n - value + beta)
+        # - betaln(alpha, beta)
+        - at.gammaln(n - value + 1)
+        - at.gammaln(value + 1)
+        + at.gammaln(n + 2)
+        + at.gammaln(value + eta / kappa)
+        + at.gammaln(n - value + (1 - eta) / kappa)
+        - at.gammaln(1 / kappa + n)
+        - at.gammaln(eta / kappa)
+        - at.gammaln((1 - eta) / kappa)
+        + at.gammaln(1 / kappa)
+    )
+
+
+@_logprob.register(ZeroTruncatedBetaBinomial)
+def zero_truncated_betabinom_logprob(op, values, *inputs, **kwargs):
+    (values,) = values
+    (eta, kappa, n) = inputs[3:]
+
+    l0 = (
+        # gammaln(alpha + beta)
+        # + gammaln(n + beta)
+        # - gammaln(beta)
+        # - gammaln(alpha + beta + n)
+        at.gammaln(1 / kappa)
+        + at.gammaln(n + (1 - eta) / kappa)
+        - at.gammaln((1 - eta) / kappa)
+        - at.gammaln(1 / kappa + n)
+    )
+
+    log1mP0 = at.log1mexp(l0)
+    # log1mP0 = 0
+
+    res = CheckParameterValue("values <= n, eta > 0, kappa > 0")(
+        at.switch(values > 0, _logp(values, eta, kappa, n) - log1mP0, -np.inf),
+        at.all(values <= n),
+        at.all(eta > 0),
+        at.all(kappa > 0),
+    )
+    return res
+#+end_src
+
+Note that you can also define this random variables' logprob dispatching =_logprob= for the =ZeroTruncBetaBinom=.
+
+* Sampling vs Logprobability =aeppl=
+- How define the logprob of a custom distribution?
+
+* Shapes
+
+Shapes are always a mess when it comes to random variables. In =aesara= we note two distinct shapes:
+- =ndim_supp= the number of dimensions of the RV's support.
+- =ndim_params=
+- =size= which is the sample size
+
+Remember that shapes in Aesara can be determined at runtime! So if we assume that:
+
+#+begin_src python
+batch_shape = size
+np.ndim(sample_shape) = ndim_supp
+shape = sample_shape + batch_shape
+#+end_src
+
+And we should have a look at broadcasting rules because they are not all very obvious.
+
+#+begin_src python :session :results output
+import aesara.tensor as at
+from aesara.tensor.random import RandomStream
+
+srng = RandomStream(0)
+a_rv = srng.normal(0, 1, size=(2,3))
+print(a_rv.eval())
+#+end_src
+
+#+RESULTS:
+: [[ 1.44369095 -0.89594598  0.73595567]
+:  [ 0.00587704  0.85338179  0.16094803]]
+
+#+begin_src python :session :results output
+mu = at.as_tensor([1., 2., 3.])
+a_rv = srng.normal(mu, 1, size=(2,3))
+print(a_rv.eval())
+#+end_src
+
+#+RESULTS:
+: [[0.05413093 1.105416   4.68806659]
+:  [0.63396273 1.38008182 1.99801801]]
+
+#+begin_src python :session :results output
+mu = at.as_tensor([1., 2.])
+a_rv = srng.normal(mu, 1, size=(2,3))
+print(a_rv.eval())
+#+end_src
+
+#+RESULTS:
+
+More complex is the case where the random variable is non-scalar, as multivariate normal. Here you can see that the "event shape" is equal to 2. The resulting shape, if we assume =event_shape= and =batch_shape= are tuples is given by:
+
+#+begin_src python
+shape = event_shape + batch_shape
+#+end_src
+
+#+begin_src python :session :results output
+import numpy as np
+
+mu = np.r_[1, 2]
+sigma = np.array([[.5, .5], [.4, .6]])
+a_rv = srng.multivariate_normal(mu, sigma, size=(2, 5))
+print(a_rv.eval().shape)
+#+end_src
+
+#+RESULTS:
+: (2, 5, 2)
+
+See [[https://ericmjl.github.io/blog/2019/5/29/reasoning-about-shapes-and-probability-distributions/][Eric Ma's blog post on the topic]].
+
+
+* Proposal
+
+#+begin_src python
+from aesara.tensor.random import RandomState
+#+end_src
