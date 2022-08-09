@@ -1,0 +1,109 @@
+:PROPERTIES:
+:ID:       833af8d8-dc08-49f3-8ed9-cd12aa5c57bb
+:END:
+#+title: condp
+
+#+begin_quote
+The designers of search-based programming tools strive to find a balance between making a tool that is easy to use, and one that models the smart ways in which humans approach problems. Without =condp=, miniKanren achieves the first goal, and =condp=, only adding the work of a few small suggestion functions, brings miniKanren closer to achieving the second goal.
+#+end_quote
+
+=miniKanren= works with an interleaving depth-first search. Each disjunct operator (including =conde=) creates a new branch that has to be fully explored. As a result the search-space grows exponentially with the size of the problem. The way the search is interleaved can be substantially improves, and the authors proposed an replacement for =conde= where users can indicate which branch can be pre-emptively pruned. Humans are not only able to describe a problem relationally (like a [[file:blog/solve-sudokus-kanren.org][sudoku grid]]), but also what a reasonable search strategy looks like. The current naive search strategy is what is problematic with =miniKanren=, but this can be easily solved.
+
+The current implementation of =conde= in =kanren= calls the following function where the interleaving is implemented using =toolz='s =interleaving=. This is the part that is targeted by =condp=:
+
+#+begin_src python
+def ldisj_seq(goals: Iterable[GoalType]) -> GoalType:
+    """Produce a goal that returns the appended state stream from all successful goal arguments.
+    In other words, it behaves like logical disjunction/OR for goals.
+    """  # noqa: E501
+
+    if length_hint(goals, -1) == 0:
+        return succeed
+
+    assert isinstance(goals, Iterable)
+
+    def ldisj_seq_goal(S: StateType) -> StateStreamType:
+        nonlocal goals
+
+        goals, _goals = tee(goals)
+
+        yield from interleave(g(S) for g in _goals)
+
+    return ldisj_seq_goal
+
+#+end_src
+
+#+RESULTS:
+
+#+begin_quote
+=condp= allows users to perform /partial reification/ mid-computation, which applies the current substitutions but leaves the underlying representation of fresh variables in the resulting values. This allows =condp= lines to be pruned when they are guaranteed to fail, while freshness of variables remains known.
+#+end_quote
+
+This allows user to specify flexible search structures. Authors use the example of =Pie=, a dependent-type library which is complex enough to reach =conde='s limitations.
+
+* Suggestion functions
+
+The user passes /suggestion functions/ to =condp= that can tell miniKanren which lines of =condp= are relevant or not.
+
+#+begin_quote
+The goal when designing suggestion functions is to convey how search would be performed by hand.
+#+end_quote
+
+Functions are implemented in the host language (here python), and it is thus possible to use logic that is not available to miniKanren.
+
+- Conditional branches are given a label;
+- Suggestion functions take the current state and return labels;
+
+#+begin_src python
+def _ls_keys(ls):
+    if isvar(ls):
+        return ("use-maybe",)
+    elif isinstance(ls, ConsNull):
+        return ("BASE",)
+    elif isinstance(ls, ConsPair):
+        return ("KEEP", "SWAP")
+    else:
+        return ()
+
+def _o_keys(o):
+    if isvar(o):
+        return ("BASE", "KEEP", "SWAP")
+    elif isinstance(o, ConsNull):
+        return ("BASE",)
+    elif isinstance(o, ConsPair):
+        if isvar(car(o)) or "novel" == car(o):
+            return ("KEEP", "SWAP")
+        else:
+            return ("KEEP",)
+    else:
+        return ()
+
+def swap_somep(ls, o):
+    a, d, res = var(), var(), var()
+    res = condp(
+        ((_ls_keys, ls), (_o_keys, o)),
+        {
+            "BASE": (nullo(ls), nullo(o)),
+            "KEEP": (
+                eq(cons(a, d), ls),
+                eq(cons(a, res), o),
+                Zzz(swap_somep, d, res),
+            ),
+            "SWAP": (
+                eq(cons(a, d), ls),
+                eq(cons("novel", res), o),
+                Zzz(swap_somep, d, res),
+            ),
+        },
+    )
+    return res
+
+def swap_someo(ls, o):
+    """The original `conde` version."""
+    a, d, res = var(), var(), var()
+    return conde(
+        [nullo(ls), nullo(o)],
+        [eq(cons(a, d), ls), eq(cons(a, res), o), Zzz(swap_someo, d, res)],
+        [eq(cons(a, d), ls), eq(cons("novel", res), o), Zzz(swap_someo, d, res)],
+    )
+#+end_src

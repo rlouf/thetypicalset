@@ -1,0 +1,111 @@
+#+title: miniKanren in Python
+
+In this article I will give an overview of the =kanren= library which is an implementation of miniKanren in python. We will go over the library's design. We assume that we are able to define =unify= and =reify= functions.
+
+* Goals
+
+In =kanren= we wish to express relations between variables with /goals/:
+
+#+begin_src python :session
+def relation(s, t):
+    def relation_goal(s):
+        pass
+    pass
+#+end_src
+
+The simplest example of this is the =eq= relation, which specifies that two variables must unify:
+
+#+begin_src python :session
+from unification import unify, reify, var
+
+def eq(u, v):
+    # u and v are two variables. They can be python variables or logic variables
+
+    def eq_goal(s):
+        s = unify(u, v, s)
+        if s is not False:
+            return iter((s,))
+        else:
+            return iter(())
+
+    return eq_goal
+#+end_src
+
+#+RESULTS:
+
+Initial state is the empty dictionary ={}=. Then what =run= does is reifying the input variable with whatever
+
+#+begin_src python :session
+q = var('q')
+goal = eq(q, 1)
+res = next(goal({}))
+reify(q, res)
+#+end_src
+
+#+RESULTS:
+: 1
+
+is equivalent to the following:
+
+#+begin_src python :results output
+from kanren import var, run, eq
+
+q = var('q')
+res = run(0, q, eq(q, 1.))
+print(res[0])
+#+end_src
+
+#+RESULTS:
+: 1.0
+
+So far so good, nothing exceptional here. Difficulty comes when we add logic to combine goals.
+
+* Combining goals
+
+** Conjunction of goals
+
+#+begin_src python :session
+def conj(goal1, goal2):
+
+    def and_goal(S):
+        S1 = goal1(S)
+        yield from map(goal2, S1)
+
+    return and_goal
+#+end_src
+
+So we can now use our =eq= operator defined above. This is where the possibility to pass a =state= to =unify= shows its usefulness:
+
+#+begin_src python :session :results output
+goal1 = eq(q, 2)
+goal2 = eq(q, 3)
+
+state1 = next(goal1({}))
+print(state1)
+
+state2 = next(goal2({}))
+print(state2)
+
+print(next(goal2({q: 3})))
+print(next(goal2({q: 2})))
+#+end_src
+
+#+RESULTS:
+: {~q: 2}
+: {~q: 3}
+: {~q: 3}
+
+Yep, if the state is incompatible then the iterator has nothing to offer. This looks like the following:
+
+#+begin_src ascii
+| goal1 | ---> unified state1 ---> | goal2 | ---> unified state compatible with state1
+#+end_src
+
+/Unify does all the work here/.
+
+** Disjunctions of goals
+
+Here we just interleave results. Both branches are contributing possible states. The current implementation uses a naive interleaving mechanism.
+
+** Conditional
+** Negations
