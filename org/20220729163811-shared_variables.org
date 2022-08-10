@@ -6,6 +6,7 @@
 
 The documentation defines shared variables as variables that "may be shared between different functions". Well it turns out they have a much deeper meaning that was not explicited in =Aesara=, and was not made obvious by this name. Let's explore what =shared= variables are, what they can be used for, where they occur in the library and where they make things difficult.
 
+
 Example taken from [[https://aesara.readthedocs.io/en/latest/tutorial/examples.html?highlight=shared#using-shared-variables][the documentation]]:
 
 #+begin_src python :results output
@@ -55,8 +56,7 @@ They also allow sharing state between compiled graphs.
 We can read the following =aesara.function='s docstring:
 
 #+begin_quote
-1. RemoveShared: shared variables are just an abstraction to make
-things more convenient for the user. The shared variables are
+1. RemoveShared: shared variables are just an abstraction to make things more convenient for the user. The shared variables are
 transformed into implicit inputs and implicit outputs. The
 optimizations don't see which variables are shared or not.
 #+end_quote
@@ -175,6 +175,7 @@ If the updates still refer to the original shared variables then nothing is goin
 Instead we need to use functions like =aesara.compile.function.pfunc.rebuild_collec_shared= to also get the updated updates.
 
 ** TODO Why do we use =shared= variables for the =RandomStream=?
+** TODO Shared variables don't have a sense of scope (give example)
 
 * References
 
