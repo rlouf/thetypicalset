@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-09 Tue 15:28 -->
+<!-- 2022-08-10 Wed 02:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Wavefunction Collapse I - The Simplest Tiled Model</title>
+<title>MiniKanren and WaveFunction Collapse I - The Even Simpler Tiled Model</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,18 +197,15 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Wavefunction Collapse I - The Simplest Tiled Model</h1>
+<h1 class="title">MiniKanren and WaveFunction Collapse I - The Even Simpler Tiled Model</h1>
 <p>
-In a similar fashion to <a href="file:///home/runner/projects/thetypicalset/org/blog/solve-sudokus-kanren.html">Peter Norvig's solution to the sudoku</a>, a lot of thought is given to the. WaveFunction Collapse is one search strategy among many strategy possible.
+Image generation does lend itself quite naturally to <i>declarative programming</i>. In the end we are not so interested in <i>how</i> the image was generated as <i>what</i> it looks like. What it looks like is determined by how neighbouring pixels <i>relate</i> to each other.
 </p>
 
 <p>
-Image generation does lend itself quite naturally to <i>declarative programming</i>: what matters is not the process by which an image is generated but what that image looks like.
+Methods like Wavefunction collapse will start from example tiles, which describe <i>how</i> we want the picture to look like, and try to extrapolate them to a larger picture. Wavefunction collapse is about finding the pixel arrangement that satistifies some local constraints as defined by the original tiles. But quite in a similar fashion to <a href="file:///home/runner/projects/thetypicalset/org/blog/solve-sudokus-kanren.html">Peter Norvig's solution to the sudoku</a>, much of the thought is given to the search strategy.
 </p>
 
-<p>
-I have come accross
-</p>
 
 <p>
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/">This link</a> has a simple explanation of Wavefunction Collapse in terms of constraint propagation.
@@ -222,27 +219,107 @@ The first wavefunction is a superposition of every possible results (akin to log
 Here we try to arrange pixels in an input image.
 </p>
 
-<div id="outline-container-orga38055d" class="outline-2">
-<h2 id="orga38055d">Even simpler tiled model</h2>
-<div class="outline-text-2" id="text-orga38055d">
+<div id="outline-container-org6d5e957" class="outline-2">
+<h2 id="org6d5e957">Even simpler tiled model</h2>
+</div>
+<div id="outline-container-org466efe5" class="outline-2">
+<h2 id="org466efe5"><span class="todo TODO">TODO</span> Do on 1D line (sea-cost-land-cost-sea-sea-cost-land-land-coast)</h2>
+<div class="outline-text-2" id="text-org466efe5">
 <p>
-In the <i>Even Simpler Tiled Model</i> we specify the adjacency rules between pixels of a single color.
+Here I reproduce the example of <a target='_blank' rel='noopener noreferrer' class='external' href="https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/">this article</a>.
+</p>
+
+<p>
+In the <i>Even Simpler Tiled Model</i> each tile is a single pixel of a single color. The rules specify how tiles can be placed one to another, and each rule is a tuple which designates two tiles, and how they can be adjacent to one another.
+</p>
+
+<p>
+For instance, <code>("sea", "coast", "left")</code> specifies that a <code>sea</code> tile can be placed on the <code>left</code> of a <code>coast</code> tile.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">a</span> = ((<span style="font-style: italic;">"sea"</span>, <span style="font-style: italic;">"coast"</span>), (<span style="font-style: italic;">"coast"</span>, <span style="font-style: italic;">"sea"</span>))
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">tiles</span> = ((<span style="font-style: italic;">"s"</span>,<span style="font-style: italic;">"s"</span>), (<span style="font-style: italic;">"s"</span>,<span style="font-style: italic;">"c"</span>), (<span style="font-style: italic;">"c"</span>,<span style="font-style: italic;">"s"</span>), (<span style="font-style: italic;">"c"</span>,<span style="font-style: italic;">"l"</span>), (<span style="font-style: italic;">"l,c"</span>), (<span style="font-style: italic;">"l,l"</span>))
 </pre>
 </div>
 
 <p>
-We can have the program parse an input image and learn adjacencies from this.
+We can have the program parse an input image and learn adjacencies from this. Apparently it also needs to count the number of times each tile appears.
 </p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">example_img</span> = [[<span style="font-style: italic;">"s"</span>, <span style="font-style: italic;">"s"</span>, <span style="font-style: italic;">"s"</span>], [<span style="font-style: italic;">"c"</span>, <span style="font-style: italic;">"c"</span>, <span style="font-style: italic;">"s"</span>], [<span style="font-style: italic;">"l"</span>, <span style="font-style: italic;">"l"</span>, <span style="font-style: italic;">"c"</span>]]
+</pre>
+</div>
+
+<p>
+There is a notion of randomness here that we cannot really account for with (or can we?). Let us extract from the grid the relations between pixels that we'd like to constraint:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">horizontal_pairs</span>(grid):
+    <span style="font-weight: bold; font-style: italic;">length</span> = <span style="font-weight: bold; font-style: italic;">height</span> = <span style="font-weight: bold;">len</span>(grid)
+    <span style="font-weight: bold;">return</span> [(grid[i][j], grid[i][j+1]) <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(height) <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(length-1)]
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">vertical_pairs</span>(grid):
+    <span style="font-weight: bold; font-style: italic;">length</span> = <span style="font-weight: bold; font-style: italic;">height</span> = <span style="font-weight: bold;">len</span>(grid)
+    <span style="font-weight: bold;">return</span> [(grid[i][j], grid[i+1][j]) <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(height-1) <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(length)]
+</pre>
+</div>
+
+
+<p>
+Let's say that the observed relations between grid elements are in the tuple <code>adjacency["left"]</code> then
+the correponding goal is:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall, lany, eq, <span style="font-weight: bold;">vars</span>
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">generate</span>(grid):
+    <span style="font-weight: bold;">return</span> lall(
+        lall(*(lany(*(eq(pair, adj) <span style="font-weight: bold;">for</span> adj <span style="font-weight: bold;">in</span> tiles)) <span style="font-weight: bold;">for</span> pair <span style="font-weight: bold;">in</span> horizontal_pairs(grid))),
+        lall(*(lany(*(eq(pair, adj) <span style="font-weight: bold;">for</span> adj <span style="font-weight: bold;">in</span> tiles)) <span style="font-weight: bold;">for</span> pair <span style="font-weight: bold;">in</span> vertical_pairs(grid)))
+    )
+
+<span style="font-weight: bold; font-style: italic;">N</span> = 20
+<span style="font-weight: bold; font-style: italic;">grid</span> = [<span style="font-weight: bold;">vars</span>(N) <span style="font-weight: bold;">for</span> _ <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(N)]
+
+<span style="font-weight: bold; font-style: italic;">res</span> = run(2, grid, generate(grid))
+<span style="font-weight: bold;">print</span>(res[-1])
+</pre>
 </div>
 </div>
 
-<div id="outline-container-orgf8ea591" class="outline-2">
-<h2 id="orgf8ea591">Simple tiled model</h2>
-<div class="outline-text-2" id="text-orgf8ea591">
+<div id="outline-container-orgddbce57" class="outline-3">
+<h3 id="orgddbce57"><span class="todo TODO">TODO</span> Plot the results each time</h3>
+</div>
+<div id="outline-container-org08bff42" class="outline-3">
+<h3 id="org08bff42"><span class="todo TODO">TODO</span> <code>RecursionError</code> is reached quite quickly on this example</h3>
+</div>
+</div>
+
+<div id="outline-container-orgb7353b4" class="outline-2">
+<h2 id="orgb7353b4"><span class="todo TODO">TODO</span> Show the grid as it is being built (i.e. the miniKanren state being passed)</h2>
+</div>
+<div id="outline-container-orgca6c632" class="outline-2">
+<h2 id="orgca6c632"><span class="todo TODO">TODO</span> Show the stream of possible grids in a stream.</h2>
+</div>
+<div id="outline-container-orgab7d114" class="outline-2">
+<h2 id="orgab7d114"><span class="todo TODO">TODO</span> What is the influence of the original adjacency matrix?</h2>
+<div class="outline-text-2" id="text-orgab7d114">
+<p>
+In particular I would like to understand if more land on the original image will indeed lead to
+more land on the final images. Maybe show the result as a function of % of land at the beginning. This is a central-ish feature of the Wavefunction Collapse.
+</p>
+</div>
+</div>
+<div id="outline-container-org3d252a9" class="outline-2">
+<h2 id="org3d252a9"><span class="todo TODO">TODO</span> Realtion between kanren and the entropy heuristic?</h2>
+</div>
+
+<div id="outline-container-orga15f1e9" class="outline-2">
+<h2 id="orga15f1e9">Simple tiled model</h2>
+<div class="outline-text-2" id="text-orga15f1e9">
 <p>
 Small number of small pre-defined tiles that define "rules" such as land, sea, coast, mountains. We choose the tile with the lowest entropy to collapse the wavefunction.
 </p>

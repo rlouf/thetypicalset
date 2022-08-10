@@ -6,7 +6,7 @@
 <!-- 2022-08-10 Wed 02:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Les 10% les plus riches ne gagnent que 3.5x plus que les 10% les plus pauvres</title>
+<title>condp</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -194,207 +194,138 @@
   .org-svg { }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Les 10% les plus riches ne gagnent que 3.5x plus que les 10% les plus pauvres</h1>
-<p>
-Une petite statistique récurrente que l'on entend ici et là sur les plateaux de télévision dès que pointe le sujet des inégalités en France. Prenons X Babeau de l'institut Sapiens, par exemple:
-</p>
-
+<h1 class="title">condp</h1>
 <blockquote>
 <p>
-La France est un des pays les plus égalitaires d'Europe, les 10% les plus riches ne gagnent que 3.5x plus que les 10% les moins riches.
+The designers of search-based programming tools strive to find a balance between making a tool that is easy to use, and one that models the smart ways in which humans approach problems. Without <code>condp</code>, miniKanren achieves the first goal, and <code>condp</code>, only adding the work of a few small suggestion functions, brings miniKanren closer to achieving the second goal.
 </p>
 </blockquote>
 
 <p>
-C'est inexact, et fallacieux. La statistique vient d'une étude de l'INSEE sur
-les revenus des ménages de 2018. Ce que l'INSEE dit est que le revenu
-corresponant au 9e décile (à droite duquel on à les 10% les plus riches) est
-égal à 3,5 fois celui correspondant au 1er décile (en-dessous duquel on trouve
-les 10% les moins riches).
-</p>
-
-
-<div id="outline-container-orge41a336" class="outline-2">
-<h2 id="orge41a336">Pourquoi est-ce fallacieux?</h2>
-<div class="outline-text-2" id="text-orge41a336">
-<p>
-Les déciles correspondent à une répartition de la <span class="underline">population</span> à parts égales. En 2018, le niveau de vie correspondant au 1er décile après redistribution est de \\(97,1\\). Imaginons que la population française soit de 100 personnes. Les 3 configuration suivantes donnent la meme valeur de 97,1:
-</p>
-
-<ul class="org-ul">
-<li>[1, 1, 1, 1, 1, 1, 1, 1, 1, 97.1]</li>
-<li>[10, 20, 30, 40, 50, 70, 80, 90, 92, 97.1]</li>
-<li>[97.1, 97.1, 97.1, 97.1, 97.1, 97.1, 97.1, 97.1, 97.1, 97.1]</li>
-</ul>
-
-<p>
-Pas du tout la même réalité, n'est-ce pas? De la même manière pour le 9e décile, le niveau de vie des plus riches peut-être concentré près du décile, ou être arbitrairement grande. Vous imaginez que le chiffre de 3.5 est totalement arbitraire, et ne représente pas comme les commentateurs le disent la différence de niveau de vie entre les 10% les plus pauvres et les 10% les plus riches.
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org638743f" class="outline-2">
-<h2 id="org638743f">Peut-on faire mieux ?</h2>
-<div class="outline-text-2" id="text-org638743f">
-<p>
-Oui ! Arrêtons-nous deux minutes pour réfléchir à la quantité que l'on veut vraiment mesurer ici. Déjà reformulons en terme de niveau de vie, puisque c'est bien ce dont les statistiques de l'INSEE parlent:
-</p>
-
-<blockquote>
-<p>
-Le niveau de vie des 10% les plus riches n'est que 3.5 fois plus élevé que celui des 10% les moins riches
-</p>
-</blockquote>
-
-<p>
-Si nous avions le niveau de vie de chacun des ménages français individuellement, nous pourrions pour calculer pour chaque paire \\((m\_1, m\_9)\\) de ménages respectivement dans le premier et le 9e décile le rapport de niveau de vie. La moyenne nous donnerait:
-</p>
-
-<blockquote>
-<p>
-Le niveau de vie des 10% les plus riches n'est en moyenne que X fois plus élevé que celui des 10% les moins riches
-</p>
-</blockquote>
-
-<p>
-Mais nous n'avons pas accès à ces données. Ce n'est pas grave! Nous pouvons ajuster une distribution à
-</p>
-</div>
-
-
-<div id="outline-container-org59faa77" class="outline-3">
-<h3 id="org59faa77">Données de l'INSEE</h3>
-<div class="outline-text-3" id="text-org59faa77">
-<ul class="org-ul">
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.insee.fr/fr/statistiques/2011101?geo=METRO-1#chiffre-cle-8">https://www.insee.fr/fr/statistiques/2011101?geo=METRO-1#chiffre-cle-8</a>
-Il y a 27,510,608 ménages en France en 2018</li>
-
-<li><p>
-<a target='_blank' rel='noopener noreferrer' class='external' href="https://www.insee.fr/fr/statistiques/4659174#figure1%5Fradio1">https://www.insee.fr/fr/statistiques/4659174#figure1%5Fradio1</a>
-Ca c'est en 2018, mais impossible de récupérer le niveau de vie median. En revanche on peut trouver les chiffres pour 2015:
+<code>miniKanren</code> works with an interleaving depth-first search. Each disjunct operator (including <code>conde</code>) creates a new branch that has to be fully explored. As a result the search-space grows exponentially with the size of the problem. The way the search is interleaved can be substantially improves, and the authors proposed an replacement for <code>conde</code> where users can indicate which branch can be pre-emptively pruned. Humans are not only able to describe a problem relationally (like a <a href="blog/solve-sudokus-kanren.html">sudoku grid</a>), but also what a reasonable search strategy looks like. The current naive search strategy is what is problematic with <code>miniKanren</code>, but this can be easily solved.
 </p>
 
 <p>
-tableaux de l'économie française 2018
-</p></li>
-</ul>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-
-<colgroup>
-<col  class="org-left" />
-
-<col  class="org-right" />
-</colgroup>
-<thead>
-<tr>
-<th scope="col" class="org-left">Décile</th>
-<th scope="col" class="org-right">Avant redistribution</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="org-left">D1</td>
-<td class="org-right">10860</td>
-</tr>
-
-<tr>
-<td class="org-left">Mediane</td>
-<td class="org-right">20300</td>
-</tr>
-
-<tr>
-<td class="org-left">D9</td>
-<td class="org-right">37510</td>
-</tr>
-</tbody>
-</table>
+The current implementation of <code>conde</code> in <code>kanren</code> calls the following function where the interleaving is implemented using <code>toolz</code>'s <code>interleaving</code>. This is the part that is targeted by <code>condp</code>:
+</p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">order_statistics</span>(num_points, quantiles, ):
-    <span style="font-weight: bold; font-style: italic;">logpdf</span> = 0
-    <span style="font-weight: bold; font-style: italic;">logpdf</span> += gammaln(N+1) - gammaln(N * q[0]) - gammaln(N - N * q[-1] + 1)
-    <span style="font-weight: bold; font-style: italic;">logpdf</span> += (N * q[0] - 1) * log(U[0])
-    <span style="font-weight: bold; font-style: italic;">logpdf</span> += (N-N*q[-1])*log(1-U[-1])
-    <span style="font-weight: bold;">for</span> val <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(1,M):
-        <span style="font-weight: bold; font-style: italic;">logpdf</span> +=
-<span style="font-style: italic;">"""</span>
-<span style="font-style: italic;">real orderstatistics(int N, int M, vector q, vector U){</span>
-<span style="font-style: italic;">    real lpdf = 0;</span>
-<span style="font-style: italic;">    lpdf += lgamma(N+1) - lgamma(N*q[1]) - lgamma(N-N*q[M]+1);</span>
-<span style="font-style: italic;">    lpdf += (N*q[1]-1)*log(U[1]);</span>
-<span style="font-style: italic;">    lpdf += (N-N*q[M])*log(1-U[M]);</span>
-<span style="font-style: italic;">    for (m in 2:M){</span>
-<span style="font-style: italic;">        lpdf += -lgamma(N*q[m]-N*q[m-1]);</span>
-<span style="font-style: italic;">        lpdf += (N*q[m]-N*q[m-1]-1)*log(U[m]-U[m-1]);</span>
-<span style="font-style: italic;">    }</span>
-<span style="font-style: italic;">    return lpdf;</span>
-<span style="font-style: italic;">"""</span>
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">ldisj_seq</span>(goals: Iterable[GoalType]) -&gt; GoalType:
+    <span style="font-style: italic;">"""Produce a goal that returns the appended state stream from all successful goal arguments.</span>
+<span style="font-style: italic;">    In other words, it behaves like logical disjunction/OR for goals.</span>
+<span style="font-style: italic;">    """</span>  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">noqa: E501</span>
+
+    <span style="font-weight: bold;">if</span> length_hint(goals, -1) == 0:
+        <span style="font-weight: bold;">return</span> succeed
+
+    <span style="font-weight: bold;">assert</span> <span style="font-weight: bold;">isinstance</span>(goals, Iterable)
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">ldisj_seq_goal</span>(S: StateType) -&gt; StateStreamType:
+        <span style="font-weight: bold;">nonlocal</span> goals
+
+        <span style="font-weight: bold; font-style: italic;">goals</span>, <span style="font-weight: bold; font-style: italic;">_goals</span> = tee(goals)
+
+        <span style="font-weight: bold;">yield</span> <span style="font-weight: bold;">from</span> interleave(g(S) <span style="font-weight: bold;">for</span> g <span style="font-weight: bold;">in</span> _goals)
+
+    <span style="font-weight: bold;">return</span> ldisj_seq_goal
+
 </pre>
 </div>
 
-<div class="org-src-container">
-<pre class="src src-python">
-<span style="font-weight: bold;">import</span> pymc3 <span style="font-weight: bold;">as</span> pm
+<blockquote>
+<p>
+<code>condp</code> allows users to perform <i>partial reification</i> mid-computation, which applies the current substitutions but leaves the underlying representation of fresh variables in the resulting values. This allows <code>condp</code> lines to be pruned when they are guaranteed to fail, while freshness of variables remains known.
+</p>
+</blockquote>
 
-<span style="font-weight: bold;">with</span> pm.Model() <span style="font-weight: bold;">as</span> curve_fitting:
-    <span style="font-weight: bold; font-style: italic;">stat</span> = pm.Factor((aaaaa))
+<p>
+This allows user to specify flexible search structures. Authors use the example of <code>Pie</code>, a dependent-type library which is complex enough to reach <code>conde</code>'s limitations.
+</p>
+
+<div id="outline-container-org07eeac2" class="outline-2">
+<h2 id="org07eeac2">Suggestion functions</h2>
+<div class="outline-text-2" id="text-org07eeac2">
+<p>
+The user passes <i>suggestion functions</i> to <code>condp</code> that can tell miniKanren which lines of <code>condp</code> are relevant or not.
+</p>
+
+<blockquote>
+<p>
+The goal when designing suggestion functions is to convey how search would be performed by hand.
+</p>
+</blockquote>
+
+<p>
+Functions are implemented in the host language (here python), and it is thus possible to use logic that is not available to miniKanren.
+</p>
+
+<ul class="org-ul">
+<li>Conditional branches are given a label;</li>
+<li>Suggestion functions take the current state and return labels;</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">_ls_keys</span>(ls):
+    <span style="font-weight: bold;">if</span> isvar(ls):
+        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"use-maybe"</span>,)
+    <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">isinstance</span>(ls, ConsNull):
+        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"BASE"</span>,)
+    <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">isinstance</span>(ls, ConsPair):
+        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"KEEP"</span>, <span style="font-style: italic;">"SWAP"</span>)
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span> ()
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">_o_keys</span>(o):
+    <span style="font-weight: bold;">if</span> isvar(o):
+        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"BASE"</span>, <span style="font-style: italic;">"KEEP"</span>, <span style="font-style: italic;">"SWAP"</span>)
+    <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">isinstance</span>(o, ConsNull):
+        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"BASE"</span>,)
+    <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">isinstance</span>(o, ConsPair):
+        <span style="font-weight: bold;">if</span> isvar(car(o)) <span style="font-weight: bold;">or</span> <span style="font-style: italic;">"novel"</span> == car(o):
+            <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"KEEP"</span>, <span style="font-style: italic;">"SWAP"</span>)
+        <span style="font-weight: bold;">else</span>:
+            <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"KEEP"</span>,)
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span> ()
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">swap_somep</span>(ls, o):
+    <span style="font-weight: bold; font-style: italic;">a</span>, <span style="font-weight: bold; font-style: italic;">d</span>, <span style="font-weight: bold; font-style: italic;">res</span> = var(), var(), var()
+    <span style="font-weight: bold; font-style: italic;">res</span> = condp(
+        ((_ls_keys, ls), (_o_keys, o)),
+        {
+            <span style="font-style: italic;">"BASE"</span>: (nullo(ls), nullo(o)),
+            <span style="font-style: italic;">"KEEP"</span>: (
+                eq(cons(a, d), ls),
+                eq(cons(a, res), o),
+                Zzz(swap_somep, d, res),
+            ),
+            <span style="font-style: italic;">"SWAP"</span>: (
+                eq(cons(a, d), ls),
+                eq(cons(<span style="font-style: italic;">"novel"</span>, res), o),
+                Zzz(swap_somep, d, res),
+            ),
+        },
+    )
+    <span style="font-weight: bold;">return</span> res
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">swap_someo</span>(ls, o):
+    <span style="font-style: italic;">"""The original `conde` version."""</span>
+    <span style="font-weight: bold; font-style: italic;">a</span>, <span style="font-weight: bold; font-style: italic;">d</span>, <span style="font-weight: bold; font-style: italic;">res</span> = var(), var(), var()
+    <span style="font-weight: bold;">return</span> conde(
+        [nullo(ls), nullo(o)],
+        [eq(cons(a, d), ls), eq(cons(a, res), o), Zzz(swap_someo, d, res)],
+        [eq(cons(a, d), ls), eq(cons(<span style="font-style: italic;">"novel"</span>, res), o), Zzz(swap_someo, d, res)],
+    )
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgab23589" class="outline-3">
-<h3 id="orgab23589">Pourquoi c'est faux</h3>
-</div>
-
-<div id="outline-container-org0a02c80" class="outline-3">
-<h3 id="org0a02c80">Méthodologie</h3>
-</div>
-
-<div id="outline-container-org42926da" class="outline-3">
-<h3 id="org42926da">References</h3>
-<div class="outline-text-3" id="text-org42926da">
-<ul class="org-ul">
-<li>Vidéo avec Boulo et Babeau</li>
-</ul>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org9535f95" class="outline-2">
-<h2 id="org9535f95">Links to this note</h2>
-<div class="outline-text-2" id="text-org9535f95">
-<ul class="org-ul">
-<li><a href="./20211201174631-doxa.html">Doxa</a></li>
-</ul>
-</div>
+<div id="outline-container-orgb3a96ff" class="outline-2">
+<h2 id="orgb3a96ff">Links to this note</h2>
 </div>
 </div>
 </body>
