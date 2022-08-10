@@ -1,4 +1,4 @@
-#+TITLE: Wavefunction Collapse I - The Simplest Tiled Model
+#+TITLE: MiniKanren and WaveFunction Collapse I - The Even Simpler Tiled Model
 #+PROPERTY: header-args :eval never-export
 
 #+begin_comment
@@ -11,12 +11,10 @@ What I do not know about yet is how to choose the final solution, but I'll figur
 One thing is that is purely search and
 #+end_comment
 
+Image generation does lend itself quite naturally to /declarative programming/. In the end we are not so interested in /how/ the image was generated as /what/ it looks like. What it looks like is determined by how neighbouring pixels /relate/ to each other.
 
-In a similar fashion to [[file:~/projects/thetypicalset/org/blog/solve-sudokus-kanren.org][Peter Norvig's solution to the sudoku]], a lot of thought is given to the. WaveFunction Collapse is one search strategy among many strategy possible.
+Methods like Wavefunction collapse will start from example tiles, which describe /how/ we want the picture to look like, and try to extrapolate them to a larger picture. Wavefunction collapse is about finding the pixel arrangement that satistifies some local constraints as defined by the original tiles. But quite in a similar fashion to [[file:~/projects/thetypicalset/org/blog/solve-sudokus-kanren.org][Peter Norvig's solution to the sudoku]], much of the thought is given to the search strategy.
 
-Image generation does lend itself quite naturally to /declarative programming/: what matters is not the process by which an image is generated but what that image looks like.
-
-I have come accross
 
 [[https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/][This link]] has a simple explanation of Wavefunction Collapse in terms of constraint propagation.
 
@@ -25,14 +23,75 @@ The first wavefunction is a superposition of every possible results (akin to log
 Here we try to arrange pixels in an input image.
 
 * Even simpler tiled model
+* TODO Do on 1D line (sea-cost-land-cost-sea-sea-cost-land-land-coast)
 
-In the /Even Simpler Tiled Model/ we specify the adjacency rules between pixels of a single color.
+Here I reproduce the example of [[https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/][this article]].
+
+In the /Even Simpler Tiled Model/ each tile is a single pixel of a single color. The rules specify how tiles can be placed one to another, and each rule is a tuple which designates two tiles, and how they can be adjacent to one another.
+
+For instance, =("sea", "coast", "left")= specifies that a =sea= tile can be placed on the =left= of a =coast= tile.
 
 #+begin_src python :session
-a = (("sea", "coast"), ("coast", "sea"))
+tiles = (("s","s"), ("s","c"), ("c","s"), ("c","l"), ("l,c"), ("l,l"))
 #+end_src
 
-We can have the program parse an input image and learn adjacencies from this.
+#+RESULTS:
+
+We can have the program parse an input image and learn adjacencies from this. Apparently it also needs to count the number of times each tile appears.
+
+#+begin_src python
+example_img = [["s", "s", "s"], ["c", "c", "s"], ["l", "l", "c"]]
+#+end_src
+
+#+RESULTS:
+: None
+
+There is a notion of randomness here that we cannot really account for with (or can we?). Let us extract from the grid the relations between pixels that we'd like to constraint:
+
+#+begin_src python :session
+def horizontal_pairs(grid):
+    length = height = len(grid)
+    return [(grid[i][j], grid[i][j+1]) for i in range(height) for j in range(length-1)]
+
+def vertical_pairs(grid):
+    length = height = len(grid)
+    return [(grid[i][j], grid[i+1][j]) for i in range(height-1) for j in range(length)]
+#+end_src
+
+#+RESULTS:
+
+
+Let's say that the observed relations between grid elements are in the tuple =adjacency["left"]= then
+the correponding goal is:
+
+#+begin_src python :session :results output
+from kanren import lall, lany, eq, vars
+
+def generate(grid):
+    return lall(
+        lall(*(lany(*(eq(pair, adj) for adj in tiles)) for pair in horizontal_pairs(grid))),
+        lall(*(lany(*(eq(pair, adj) for adj in tiles)) for pair in vertical_pairs(grid)))
+    )
+
+N = 20
+grid = [vars(N) for _ in range(N)]
+
+res = run(2, grid, generate(grid))
+print(res[-1])
+#+end_src
+
+#+RESULTS:
+: [['s', 'c', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's'], ['s', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's', 's']]
+
+** TODO Plot the results each time
+** TODO =RecursionError= is reached quite quickly on this example
+
+* TODO Show the grid as it is being built (i.e. the miniKanren state being passed)
+* TODO Show the stream of possible grids in a stream.
+* TODO What is the influence of the original adjacency matrix?
+In particular I would like to understand if more land on the original image will indeed lead to
+more land on the final images. Maybe show the result as a function of % of land at the beginning. This is a central-ish feature of the Wavefunction Collapse.
+* TODO Realtion between kanren and the entropy heuristic?
 
 * Simple tiled model
 
