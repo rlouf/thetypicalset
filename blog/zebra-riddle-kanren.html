@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-12 Fri 00:12 -->
+<!-- 2022-08-12 Fri 03:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Solve the Zebra puzzle with miniKanren</title>
@@ -234,13 +234,13 @@ In the interest of clarity, it must be added that each of the five houses is pai
 </p>
 </blockquote>
 
-<div id="outline-container-org8d29789" class="outline-2">
-<h2 id="org8d29789">Implementation</h2>
-<div class="outline-text-2" id="text-org8d29789">
+<div id="outline-container-org58c0f2f" class="outline-2">
+<h2 id="org58c0f2f">Implementation</h2>
+<div class="outline-text-2" id="text-org58c0f2f">
 </div>
-<div id="outline-container-orga04cc56" class="outline-3">
-<h3 id="orga04cc56">Houses and what's inside them</h3>
-<div class="outline-text-3" id="text-orga04cc56">
+<div id="outline-container-orgc0c1d42" class="outline-3">
+<h3 id="orgc0c1d42">Houses and what's inside them</h3>
+<div class="outline-text-3" id="text-orgc0c1d42">
 <p>
 The first line states that there are 5 houses. We will represent each house with a <i>logic variable</i> <code>Var</code>; the houses are stored in a tuple where the first element represents the leftmost house and the last element the rightmost house. Each house has 4 characteristics: its color, the nationality of the inhabitant, the kind of drink they're having, the kind of animal they own, and the brand of cigarettes they smoke. Given the structure of the problem, dataclasses where fields default to a new <code>Var</code> seems particularly adapted. We can use <code>unification</code>'s <code>@unifiable</code> decorator to make the dataclass "unifiable" so we can use it with <code>kanren</code>:
 </p>
@@ -288,9 +288,9 @@ membero(House(animal=<span style="font-style: italic;">"zebra"</span>), houses)
 </div>
 </div>
 
-<div id="outline-container-orgb66b07a" class="outline-3">
-<h3 id="orgb66b07a">Houses' location</h3>
-<div class="outline-text-3" id="text-orgb66b07a">
+<div id="outline-container-org4d847fc" class="outline-3">
+<h3 id="org4d847fc">Houses' location</h3>
+<div class="outline-text-3" id="text-org4d847fc">
 <p>
 Some of the statements are about the houses' <i>location</i>. In particular, statement 6 is aboout a house that is located to the right of another one. We thus need to define a <i>goal</i> that expresses that a house is to the right of another:
 </p>
@@ -331,9 +331,9 @@ eq(House(<span style="font-style: italic;">"Norwegian"</span>), houses[0])
 </div>
 </div>
 
-<div id="outline-container-org2e07d30" class="outline-2">
-<h2 id="org2e07d30">The solution</h2>
-<div class="outline-text-2" id="text-org2e07d30">
+<div id="outline-container-org4544325" class="outline-2">
+<h2 id="org4544325">The solution</h2>
+<div class="outline-text-2" id="text-org4544325">
 <p>
 Now that we have defined the concepts and objects we need, we can write the full solution:
 </p>
@@ -399,9 +399,9 @@ The Norwegian drinks water and the Japanese owns the zebra!
 </div>
 </div>
 
-<div id="outline-container-org6679990" class="outline-2">
-<h2 id="org6679990">Conclusion</h2>
-<div class="outline-text-2" id="text-org6679990">
+<div id="outline-container-org029466e" class="outline-2">
+<h2 id="org029466e">Conclusion</h2>
+<div class="outline-text-2" id="text-org029466e">
 <p>
 miniKanren's python implementation, <code>kanren</code>, allowed us to provide a very intuitive an easy-to-read solution to the Zebra puzzle. Being able to use python's data structures for relational programming goes a long way making miniKanren user friendly, and I hope this convinced you like it did convince me!
 </p>
@@ -416,7 +416,7 @@ In a next post we will see how you can make your own objects "unifiable" and thu
 <p class="date">Date: 2022-06-28 Tue 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-08-12 Fri 00:12</p>
+<p class="date">Created: 2022-08-12 Fri 03:40</p>
 </div>
 </body>
 </html>
