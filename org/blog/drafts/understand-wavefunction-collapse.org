@@ -32,7 +32,7 @@ In the /Even Simpler Tiled Model/ each tile is a single pixel of a single color.
 For instance, =("sea", "coast", "left")= specifies that a =sea= tile can be placed on the =left= of a =coast= tile.
 
 #+begin_src python :session
-tiles = (("s","s"), ("s","c"), ("c","s"), ("c","l"), ("l,c"), ("l,l"))
+tiles = (("s","s"), ("s","c"), ("c", "c"), ("c","s"), ("c","l"), ("l,c"), ("l,l"))
 #+end_src
 
 #+RESULTS:
@@ -65,21 +65,50 @@ Let's say that the observed relations between grid elements are in the tuple =ad
 the correponding goal is:
 
 #+begin_src python :session :results output
-from kanren import lall, lany, eq, vars
+from kanren import lall, lany, eq, vars, run
+from kanren.goals import permuteo
 
-def generate(grid):
+tiles = (("s","s"), ("s","c"), ("c", "c"), ("c","s"), ("c","l"), ("l,c"), ("l,l"))
+ratios = {"c": 3/9, "s": 4/9, "l": 2/9}
+tiles = [("s", "s")]
+
+def get_pairs(line):
+    return [(a, b) for a, b in zip(line[:-1], line[1:])]
+
+
+def generate(grid, colors):
+    pairs = get_pairs(grid)
     return lall(
-        lall(*(lany(*(eq(pair, adj) for adj in tiles)) for pair in horizontal_pairs(grid))),
-        lall(*(lany(*(eq(pair, adj) for adj in tiles)) for pair in vertical_pairs(grid)))
+        #permuteo(grid, colors),
+        *[lany(*[eq(obs, pair) for obs in tiles]) for pair in pairs]
     )
 
-N = 20
-grid = [vars(N) for _ in range(N)]
+N = 1000
+grid = vars(N)
+colors = ["c"] * int(ratios["c"] * N) + ["l"] * int(ratios["l"] * N) + ["s"] * (N - int(ratios["c"] * N) - int(ratios["l"] * N))
 
-res = run(2, grid, generate(grid))
-print(res[-1])
+res = run(1, grid, generate(grid, colors))
+print(res)
 #+end_src
 
+#+RESULTS:
+#+begin_src python
+from kanren import eq, lall, lany, run, vars
+
+observations = [(0, 1), (1, 0)]
+
+def generate(pixels):
+    pairs = [(a, b) for a, b in zip(pixels[:-1], pixels[1:])]
+    return lall(
+        *[lany(*[eq(obs, pair) for obs in observations]) for pair in pairs]
+    )
+
+N = 1000
+pixels = vars(N)
+res = run(1, pixels, generate(pixels))
+#+end_src
+
+#+RESULTS:
 
 Ok so this is not great.
 
@@ -95,9 +124,12 @@ N = 1000
 tiles = [0, 1]
 all_vars = vars(N)
 
-def generate(grid):
+def get_pairs(line):
+    return [(a, b) for a, b in zip(line[:-1], line[1:])]
+
+def generate(line):
     return lall(
-        ,*(lany(*(eq(pair, adj) for adj in tiles)) for pair in grid)
+        ,*(lany(*(eq(pair, adj) for adj in tiles)) for pair in get_pairs(line))
     )
 
 pdb.set_trace()
@@ -105,8 +137,25 @@ res = run(1, all_vars, generate(all_vars))
 print(res)
 #+end_src
 
+#+begin_src python
+from kanren import eq, lall, lany, run, vars
+
+observations = [(0, 1), (1, 0)]
+
+def generate(pixels):
+    pairs = [(a, b) for a, b in zip(pixels[:-1], pixels[1:])]
+    return lall(
+        *[lany(*[eq(obs, pair) for obs in observations]) for pair in pairs]
+    )
+
+N = 1000
+pixels = vars(N)
+res = run(1, pixels, generate(pixels))
+#+end_src
+
 #+RESULTS:
 
+* TODO
 
 * TODO Show the grid as it is being built (i.e. the miniKanren state being passed)
 * TODO Show the stream of possible grids in a stream.

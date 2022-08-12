@@ -3,11 +3,54 @@
 :END:
 #+title: miniKanren
 
-Could use miniKanren to rewrite =mypy=.
+[[http://minikanren.org][miniKanren]] is a DSL for [[id:f9dc079d-0b83-4ab5-afc4-c3a7045fb6a9][relational programming]]. It can be used to /declare/ the relations between the parameters of a problem, and let the computer find the values of the parameters that satisfy these relations. While the original implementation is in Scheme, I will be focusing in these notes on [[https://github.com/pythological/kanren][an implementation]] in [[id:5cbd01f8-88bb-4826-b82d-125ad3c759eb][Python]].
+
+* Learn
+
+The goal is to fully understand the python implementation. Here's a diagram that roughly summarizes what I need to understand:
+
+[[file:img/kanren-learning.png]]
+* Projects
+
+** Term rewriting
+
+I am using miniKanren in the following contexts/projects:
+- In [[https://github.com/aesara-devs/aemcmc][AeMCMC]] to walk through the possible parametrizations of a probabilistic model to find the most efficient sampler;
+- In [[https://github.com/aesara-devs/aesara][Aesara]] to simplify computation graphs.
+
+** Solving puzzles
+
+Puzzles are a good introduction to relational programming: they have a fixed number of rules, were designed to be solved by humans.
+
+- To solve the Zebra riddle ([[file:blog/zebra-riddle-kanren.org][blog post]]).
+- To solve Sudoku puzzles ([[file:blog/solve-sudokus-kanren.org][blog post]])
+  - The solver returns correct solution
+  - /Hangs for simple grids/. [[id:833af8d8-dc08-49f3-8ed9-cd12aa5c57bb][condp]] should help with this.
+- To solve the NYT's [[https://www.nytimes.com/puzzles/spelling-bee][Spelling Bee]] ([[file:blog/drafts/solve-spelling-bee-kanren.org][draft]])
+- A [[https://www.nytimes.com/games/wordle/index.html][Wordle]] solver (TODO)
+
+** Bitmaps generation
+
+- To connect to points with a line
+- To implement a declarative version of the [[id:b35260a8-8ef4-4f08-ad22-dc477c6311f0][WaveFunctionCollapse algorithm]]
+  - I get a [[https://github.com/pythological/kanren/issues/59][RecursionError]] for > 1000 pixels (we will need [[id:12cfb00f-633f-4ca5-9872-0fad6fb24cc6][Trampoline Evaluation]])
+  - The memory usage increases very quickly
+  - Performance needs to be improved
+- To implement the [[id:7209f257-52a4-43b4-bfcc-f87279bf2d45][MarkovJunior algorithm]]
+  - I need to understand [[id:f81ea2e9-76e9-4e6a-954d-eea005a18f96][walko]]
+  - Same performance concerns as with the [[id:b35260a8-8ef4-4f08-ad22-dc477c6311f0][WaveFunctionCollapse algorithm]]
+
+** Gardening
+
+Gardening is typically an area where we are trying to find solutions that satisfy some constraints. We could definitely use miniKanren to plan garden if the search scaled : we can enter informations about the different plants in a database, then some information about the garden we are trying to design, and look at the combinations that come out of it.
 
 * References
 
-- Something about =condp=
+- The Reasoned Schemer (2nd ed.)
 - [[https://dash.harvard.edu/bitstream/handle/1/41307116/tr-02-19.pdf?sequence=1&isAllowed=y#page=5][Proceedings of the 2019 Workshop on miniKanren and relational programming]]
     including /towards a miniKanren with fair search strategies/
-- Neural Guided Constraint Logic Programming for Program Synthesis https://proceedings.neurips.cc/paper/2018/file/67d16d00201083a2b118dd5128dd6f59-Paper.pdf
+- "Neural Guided Constraint Logic Programming for Program Synthesis" ([[https://proceedings.neurips.cc/paper/2018/file/67d16d00201083a2b118dd5128dd6f59-Paper.pdf][paper]])
+- "A surprisingly competitive conditional operator" ([[https://www.brinckerhoff.org/scheme2018/papers/Boskin_Ma_Christiansen_Friedman.pdf][paper]])
+- "$\mu Kanren: a functional core for relational programming$" ([[http://webyrd.net/scheme-2013/papers/HemannMuKanren2013.pdf][paper]] [[https://github.com/jasonhemann/microKanren][repo]])
+- Faster miniKanren ([[https://github.com/michaelballantyne/faster-minikanren][repo]])
+- Temporal logic programming with miniKanren ([[https://github.com/nathanielrb/ftmicroKanren][repo]])
