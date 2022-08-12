@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-10 Wed 17:54 -->
+<!-- 2022-08-12 Fri 00:12 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>miniKanren</title>
@@ -194,28 +194,134 @@
   .org-svg { }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">miniKanren</h1>
 <p>
-Could use miniKanren to rewrite <code>mypy</code>.
+<a target='_blank' rel='noopener noreferrer' class='external' href="http://minikanren.org">miniKanren</a> is a DSL for <a href="20220306194641-relational_programming.html#ID-f9dc079d-0b83-4ab5-afc4-c3a7045fb6a9">relational programming</a>. It can be used to <i>declare</i> the relations between the parameters of a problem, and let the computer find the values of the parameters that satisfy these relations. While the original implementation is in Scheme, I will be focusing in these notes on <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren">an implementation</a> in <a href="20220811152635-python.html#ID-5cbd01f8-88bb-4826-b82d-125ad3c759eb">Python</a>.
 </p>
 
-<div id="outline-container-orgbdb7969" class="outline-2">
-<h2 id="orgbdb7969">References</h2>
-<div class="outline-text-2" id="text-orgbdb7969">
+<div id="outline-container-org48225c8" class="outline-2">
+<h2 id="org48225c8">Learn</h2>
+<div class="outline-text-2" id="text-org48225c8">
+<p>
+The goal is to fully understand the python implementation. Here's a diagram that roughly summarizes what I need to understand:
+</p>
+
+
+<div id="org750ad7d" class="figure">
+<p><img src="img/kanren-learning.png" alt="kanren-learning.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf711e67" class="outline-2">
+<h2 id="orgf711e67">Projects</h2>
+<div class="outline-text-2" id="text-orgf711e67">
+</div>
+<div id="outline-container-orgb669617" class="outline-3">
+<h3 id="orgb669617">Term rewriting</h3>
+<div class="outline-text-3" id="text-orgb669617">
+<p>
+I am using miniKanren in the following contexts/projects:
+</p>
 <ul class="org-ul">
-<li>Something about <code>condp</code></li>
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://dash.harvard.edu/bitstream/handle/1/41307116/tr-02-19.pdf?sequence=1&amp;isAllowed=y#page=5">Proceedings of the 2019 Workshop on miniKanren and relational programming</a>
-including <i>towards a miniKanren with fair search strategies</i></li>
-<li>Neural Guided Constraint Logic Programming for Program Synthesis <a target='_blank' rel='noopener noreferrer' class='external' href="https://proceedings.neurips.cc/paper/2018/file/67d16d00201083a2b118dd5128dd6f59-Paper.pdf">https://proceedings.neurips.cc/paper/2018/file/67d16d00201083a2b118dd5128dd6f59-Paper.pdf</a></li>
+<li>In <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc">AeMCMC</a> to walk through the possible parametrizations of a probabilistic model to find the most efficient sampler;</li>
+<li>In <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara">Aesara</a> to simplify computation graphs.</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgf37fda2" class="outline-2">
-<h2 id="orgf37fda2">Links to this note</h2>
+<div id="outline-container-org22b8ad3" class="outline-3">
+<h3 id="org22b8ad3">Solving puzzles</h3>
+<div class="outline-text-3" id="text-org22b8ad3">
+<p>
+Puzzles are a good introduction to relational programming: they have a fixed number of rules, were designed to be solved by humans.
+</p>
+
+<ul class="org-ul">
+<li>To solve the Zebra riddle (<a href="blog/zebra-riddle-kanren.html">blog post</a>).</li>
+<li>To solve Sudoku puzzles (<a href="blog/solve-sudokus-kanren.html">blog post</a>)
+<ul class="org-ul">
+<li>The solver returns correct solution</li>
+<li><i>Hangs for simple grids</i>. <a href="20220809112203-condp.html#ID-833af8d8-dc08-49f3-8ed9-cd12aa5c57bb">condp</a> should help with this.</li>
+</ul></li>
+<li>To solve the NYT's <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.nytimes.com/puzzles/spelling-bee">Spelling Bee</a> (<a href="blog/drafts/solve-spelling-bee-kanren.html">draft</a>)</li>
+<li>A <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.nytimes.com/games/wordle/index.html">Wordle</a> solver (TODO)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgc36c129" class="outline-3">
+<h3 id="orgc36c129">Bitmaps generation</h3>
+<div class="outline-text-3" id="text-orgc36c129">
+<ul class="org-ul">
+<li>To connect to points with a line</li>
+<li>To implement a declarative version of the <a href="20220811160111-wavefunctioncollapse_algorithm.html#ID-b35260a8-8ef4-4f08-ad22-dc477c6311f0">WaveFunctionCollapse algorithm</a>
+<ul class="org-ul">
+<li>I get a <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren/issues/59">RecursionError</a> for &gt; 1000 pixels (we will need <a href="20220811160433-trampoline_evaluation.html#ID-12cfb00f-633f-4ca5-9872-0fad6fb24cc6">Trampoline Evaluation</a>)</li>
+<li>The memory usage increases very quickly</li>
+<li>Performance needs to be improved</li>
+</ul></li>
+<li>To implement the <a href="20220811171224-markovjunior_algorithm.html#ID-7209f257-52a4-43b4-bfcc-f87279bf2d45">MarkovJunior algorithm</a>
+<ul class="org-ul">
+<li>I need to understand <a href="20220811171306-walko.html#ID-f81ea2e9-76e9-4e6a-954d-eea005a18f96">walko</a></li>
+<li>Same performance concerns as with the <a href="20220811160111-wavefunctioncollapse_algorithm.html#ID-b35260a8-8ef4-4f08-ad22-dc477c6311f0">WaveFunctionCollapse algorithm</a></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org18b076f" class="outline-3">
+<h3 id="org18b076f">Gardening</h3>
+<div class="outline-text-3" id="text-org18b076f">
+<p>
+Gardening is typically an area where we are trying to find solutions that satisfy some constraints. We could definitely use miniKanren to plan garden if the search scaled : we can enter informations about the different plants in a database, then some information about the garden we are trying to design, and look at the combinations that come out of it.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgab57aaf" class="outline-2">
+<h2 id="orgab57aaf">References</h2>
+<div class="outline-text-2" id="text-orgab57aaf">
+<ul class="org-ul">
+<li>The Reasoned Schemer (2nd ed.)</li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://dash.harvard.edu/bitstream/handle/1/41307116/tr-02-19.pdf?sequence=1&amp;isAllowed=y#page=5">Proceedings of the 2019 Workshop on miniKanren and relational programming</a>
+including <i>towards a miniKanren with fair search strategies</i></li>
+<li>"Neural Guided Constraint Logic Programming for Program Synthesis" (<a target='_blank' rel='noopener noreferrer' class='external' href="https://proceedings.neurips.cc/paper/2018/file/67d16d00201083a2b118dd5128dd6f59-Paper.pdf">paper</a>)</li>
+<li>"A surprisingly competitive conditional operator" (<a target='_blank' rel='noopener noreferrer' class='external' href="https://www.brinckerhoff.org/scheme2018/papers/Boskin_Ma_Christiansen_Friedman.pdf">paper</a>)</li>
+<li>"\(\mu Kanren: a functional core for relational programming\)" (<a target='_blank' rel='noopener noreferrer' class='external' href="http://webyrd.net/scheme-2013/papers/HemannMuKanren2013.pdf">paper</a> <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jasonhemann/microKanren">repo</a>)</li>
+<li>Faster miniKanren (<a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/michaelballantyne/faster-minikanren">repo</a>)</li>
+<li>Temporal logic programming with miniKanren (<a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/nathanielrb/ftmicroKanren">repo</a>)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgd4547c0" class="outline-2">
+<h2 id="orgd4547c0">Links to this note</h2>
 </div>
 </div>
 </body>
