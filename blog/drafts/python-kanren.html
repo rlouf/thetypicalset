@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-12 Fri 18:27 -->
+<!-- 2022-08-16 Tue 18:23 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>miniKanren in Python</title>
@@ -202,9 +202,9 @@
 In this article I will give an overview of the <code>kanren</code> library which is an implementation of miniKanren in python. We will go over the library's design. We assume that we are able to define <code>unify</code> and <code>reify</code> functions.
 </p>
 
-<div id="outline-container-org4454b36" class="outline-2">
-<h2 id="org4454b36">Goals</h2>
-<div class="outline-text-2" id="text-org4454b36">
+<div id="outline-container-org9a50910" class="outline-2">
+<h2 id="org9a50910">Goals</h2>
+<div class="outline-text-2" id="text-org9a50910">
 <p>
 In <code>kanren</code> we wish to express relations between variables with <i>goals</i>:
 </p>
@@ -269,13 +269,13 @@ So far so good, nothing exceptional here. Difficulty comes when we add logic to 
 </div>
 </div>
 
-<div id="outline-container-orgdf3bd10" class="outline-2">
-<h2 id="orgdf3bd10">Combining goals</h2>
-<div class="outline-text-2" id="text-orgdf3bd10">
+<div id="outline-container-orgce23269" class="outline-2">
+<h2 id="orgce23269">Combining goals</h2>
+<div class="outline-text-2" id="text-orgce23269">
 </div>
-<div id="outline-container-org3587b09" class="outline-3">
-<h3 id="org3587b09">Conjunction of goals</h3>
-<div class="outline-text-3" id="text-org3587b09">
+<div id="outline-container-org55a0541" class="outline-3">
+<h3 id="org55a0541">Conjunction of goals</h3>
+<div class="outline-text-3" id="text-org55a0541">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">conj</span>(goal1, goal2):
 
@@ -321,20 +321,20 @@ Yep, if the state is incompatible then the iterator has nothing to offer. This l
 </div>
 </div>
 
-<div id="outline-container-orge15b86e" class="outline-3">
-<h3 id="orge15b86e">Disjunctions of goals</h3>
-<div class="outline-text-3" id="text-orge15b86e">
+<div id="outline-container-org6ee30fb" class="outline-3">
+<h3 id="org6ee30fb">Disjunctions of goals</h3>
+<div class="outline-text-3" id="text-org6ee30fb">
 <p>
 Here we just interleave results. Both branches are contributing possible states. The current implementation uses a naive interleaving mechanism.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org3c2f26f" class="outline-3">
-<h3 id="org3c2f26f">Conditional</h3>
+<div id="outline-container-org04dc2e2" class="outline-3">
+<h3 id="org04dc2e2">Conditional</h3>
 </div>
-<div id="outline-container-org0f6d4b7" class="outline-3">
-<h3 id="org0f6d4b7">Negations</h3>
+<div id="outline-container-org7643eda" class="outline-3">
+<h3 id="org7643eda">Negations</h3>
 </div>
 </div>
 </div>
