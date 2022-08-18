@@ -1,10 +1,21 @@
 #+title: Random Walk Rosenbluth-Metropolis-Hastings in Aesara
 
+* Abstract
+
+Right before I started working on [[file:~/projects/thetypicalset/org/blog/introducing-mcx.org][MCX]] I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, and I started working on a PPL based on =Aesara= (fork of Theano). So let me revisit this simple example with =Aesara=!
+
+- [ ] Implement a mixture model with =Aesara=
+- [ ] We can implement the Rosenbluth-Metropolis-Hastings algorithm in =Aesara=
+- [ ] Performance comparison with JAX on a single chain.
+- [ ] Compile to JAX
+- [ ] Compile to Numba
+- [ ] What's missing & how we're going to get there
+
 * Implement the mixture model
 
-Define the logprob_fn of a mixture:
+Implementing mixture model in =Aeasra= is very straightforward, and does not require any =Mixture= distribution like other PPLs in Python do:
 
-#+begin_src python :session :results output
+#+begin_src python :session :results silent
 import aesara.tensor as at
 import numpy as np
 
@@ -18,53 +29,61 @@ p = np.array([0.2, 0.3, 0.1, 0.4])
 I_rv = srng.categorical(p)
 
 Y_rv = N_rv[I_rv]
-
-print(Y_rv.eval())
 #+end_src
-
-#+RESULTS:
-: 0.7074420817840037
 
 ** TODO Sample from the prior predictive distribution and show results.
-** TODO Build the =logprob_fn=
 
-#+begin_src python :session :results output
+We can generate forward samples from this distributions:
+
+#+begin_src python :session
 import aesara
-from aeppl import joint_logprob
 
-def logprob_fn(y):
-    logprob = joint_logprob({Y_rv: y})
-    return logprob
-
-y_vv = Y_rv.clone()
-fn = aesara.function((y_vv,), logprob_fn(y_vv))
-print(fn(1.))
+sample = aesara.function((), Y_rv)
+samples = [sample() for _ in range(100)]
 #+end_src
 
-#+RESULTS:
-: -1.4189385332046727
+** DONE Build the =logprob_fn=
 
-It's weird, logpdf of mixture should be weighted sum of the different contributions but ok.
+We can build the logprob function using =AePPL='s =joint_logprob=:
 
-#+begin_src python :session :results output
+#+begin_src python :session
 import aesara
-from aeppl import joint_logprob
 
 y_vv = Y_rv.clone()
-i_vv = I_rv.clone()
+y_vv = I_rv.clone()
 logprob = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
-
 logprob_fn = aesara.function((y_vv, i_vv), logprob)
-print(logprob_fn(10, 0))
+#+end_src
+
+However we do not want to sample the category probability so we marginalize the logpdf over the different categories:
+
+#+begin_src python :session :results output
+import aesara
+from aeppl import joint_logprob
+
+def logprob_component(y, i):
+    """Compute the logprob associated with component `i`."""
+    i = at.as_tensor(i, dtype="int64")
+    return joint_logprob({Y_rv: y, I_rv: i})
+
+y_vv = Y_rv.clone()
+logprob = at.sum([val * logprob_component(y_vv, i) for i, val in enumerate(p)])
+logprob_fn = aesara.function((y_vv,), logprob)
+
+print(logprob_fn(1000))
 #+end_src
 
 #+RESULTS:
+: -247095.34102862852
 
 * Implement the algorithm
 
 #+begin_src python :session
 import aesara
 import aesara.tensor as at
+
+def logprob_fn(y):
+    return at.sum([val * logprob_component(y, i) for i, val in enumerate(p)])
 
 
 def rw_kernel(position, logprob):
@@ -89,12 +108,6 @@ results, updates = aesara.scan(
     outputs_info=(init_position, init_logprob),
     n_steps=num_samples,
 )
-
-sampling_fn = aesara.function(
-    (init_position, num_samples),
-    results[0],
-    updates=updates,
-)
 #+end_src
 
 #+RESULTS:
@@ -103,14 +116,53 @@ sampling_fn = aesara.function(
 import time
 
 start = time.time()
-samples = sampling_fn(1., 1e5)
+
+sampling_fn = aesara.function(
+    (init_position, num_samples),
+    results[0],
+    updates=updates,
+)
+samples = sampling_fn(1., 1e6)
+
 end = time.time()
 
-print(f"finished in {end-start:.2f}s")
+print(f"finished in {end-start:.4f}s")
 #+end_src
 
 #+RESULTS:
-: finished in 6.87s
+: finished in 1.0859s
 
-* TODO Compile to Numba
-* TODO Vectorize the execution (several chains)
+It looks like compilation in =Aesara= introduces a lot less overhead that compilation in JAX, while the compiled function in very close in terms of performance.
+
+* Perspectives
+
+** TODO Automatic marginalization of the =Categorical= RV
+
+Here we manually marginalized over the values of =Y_rv=, but it would be nice if we could automatically marginalize over discrete variables.
+
+[Link to the issue]
+
+** TODO Multiple backend
+
+Having multiple backends means that you can interact with different ecosystems / hardware with the same model expression in Python. You can also decide to leverage the strengths of XLA (JAX) or LLVM (Numba) depending on your application.
+
+*** TODO Compile to Numba
+
+When nothing is specified =Aesara= compiles functions to C. We have however introduced a new Numba backend to =Aesara=.
+
+[Example]
+[Link to the documentation]
+
+*** TODO Compile to JAX
+
+We can also compile functions to JAX so they can play nice with JAX ecosystems.
+
+[Example]
+[Link to the documentation]
+
+
+** TODO Vectorize the execution (several chains)
+
+We cannot vectorize the execution the same we can in =JAX= with =vmap=, but we should be able to. How?
+
+[Link to the relevant issues]
