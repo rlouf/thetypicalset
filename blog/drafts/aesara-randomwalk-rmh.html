@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-18 Thu 05:26 -->
+<!-- 2022-08-18 Thu 15:32 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Walk Rosenbluth-Metropolis-Hastings in Aesara</title>
@@ -199,9 +199,9 @@
 <div id="content" class="content">
 <h1 class="title">Random Walk Rosenbluth-Metropolis-Hastings in Aesara</h1>
 
-<div id="outline-container-org35b2bcf" class="outline-2">
-<h2 id="org35b2bcf">Implement the mixture model</h2>
-<div class="outline-text-2" id="text-org35b2bcf">
+<div id="outline-container-orgd45657c" class="outline-2">
+<h2 id="orgd45657c">Implement the mixture model</h2>
+<div class="outline-text-2" id="text-orgd45657c">
 <p>
 Define the logprob<sub>fn</sub> of a mixture:
 </p>
@@ -226,12 +226,12 @@ Define the logprob<sub>fn</sub> of a mixture:
 </div>
 </div>
 
-<div id="outline-container-org9e5b5c7" class="outline-3">
-<h3 id="org9e5b5c7"><span class="todo TODO">TODO</span> Sample from the prior predictive distribution and show results.</h3>
+<div id="outline-container-org67fb96c" class="outline-3">
+<h3 id="org67fb96c"><span class="todo TODO">TODO</span> Sample from the prior predictive distribution and show results.</h3>
 </div>
-<div id="outline-container-orgc3d0030" class="outline-3">
-<h3 id="orgc3d0030"><span class="todo TODO">TODO</span> Build the <code>logprob_fn</code></h3>
-<div class="outline-text-3" id="text-orgc3d0030">
+<div id="outline-container-org1b813dd" class="outline-3">
+<h3 id="org1b813dd"><span class="todo TODO">TODO</span> Build the <code>logprob_fn</code></h3>
+<div class="outline-text-3" id="text-org1b813dd">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 <span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
@@ -249,13 +249,26 @@ Define the logprob<sub>fn</sub> of a mixture:
 <p>
 It's weird, logpdf of mixture should be weighted sum of the different contributions but ok.
 </p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
+
+<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
+<span style="font-weight: bold; font-style: italic;">i_vv</span> = I_rv.clone()
+<span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
+
+<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((y_vv, i_vv), logprob)
+<span style="font-weight: bold;">print</span>(logprob_fn(10, 0))
+</pre>
+</div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgabdf448" class="outline-2">
-<h2 id="orgabdf448">Implement the algorithm</h2>
-<div class="outline-text-2" id="text-orgabdf448">
+<div id="outline-container-org7c5962b" class="outline-2">
+<h2 id="org7c5962b">Implement the algorithm</h2>
+<div class="outline-text-2" id="text-org7c5962b">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 <span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
@@ -305,11 +318,11 @@ It's weird, logpdf of mixture should be weighted sum of the different contributi
 </div>
 </div>
 
-<div id="outline-container-org8e610ae" class="outline-2">
-<h2 id="org8e610ae"><span class="todo TODO">TODO</span> Compile to Numba</h2>
+<div id="outline-container-org0703103" class="outline-2">
+<h2 id="org0703103"><span class="todo TODO">TODO</span> Compile to Numba</h2>
 </div>
-<div id="outline-container-org7a8f339" class="outline-2">
-<h2 id="org7a8f339"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h2>
+<div id="outline-container-orgb3d58f9" class="outline-2">
+<h2 id="orgb3d58f9"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h2>
 </div>
 </div>
 </body>
