@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-18 Thu 00:39 -->
+<!-- 2022-08-18 Thu 00:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Solve sudokus with miniKanren</title>
@@ -235,9 +235,9 @@ The following represents a (partially filled) grid with one row, one column, and
 Peter's solution is <i>imperative</i>: we implement a series of procedures that will give us the missing values in a Sudoku puzzle. The <i>nature</i> of the Sudoku, the rules, are hidden in this code. Here we will instead implement the rules of the Sudoku, i.e. the <i>relations</i> that the units must respect and let miniKanren search for the grids that respect these rules (given some hints) for us. Sounds too good to be true?
 </p>
 
-<div id="outline-container-org7bab063" class="outline-2">
-<h2 id="org7bab063">Solving sudoku rows</h2>
-<div class="outline-text-2" id="text-org7bab063">
+<div id="outline-container-org91e3112" class="outline-2">
+<h2 id="org91e3112">Solving sudoku rows</h2>
+<div class="outline-text-2" id="text-org91e3112">
 <p>
 Let us work on a simpler problem first: a sudoku row. We assume that we have a vector with 9 spaces already filled with a few hints. To represent a valid sudoku row the vector must be the permutation of the digits from 1 to 9. Let us consider the following puzzle as an example:
 </p>
@@ -259,6 +259,43 @@ row_expr
 </pre>
 </div>
 
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">~<sub>6</sub></td>
+<td class="org-left">~<sub>7</sub></td>
+<td class="org-left">~<sub>8</sub></td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+<td class="org-left">~<sub>9</sub></td>
+<td class="org-left">~<sub>10</sub></td>
+<td class="org-right">9</td>
+<td class="org-right">8</td>
+</tr>
+</tbody>
+</table>
+
 <p>
 We now need to express the relation that the elements of the vector must follow. In <code>kanren</code> we express these relations in the form of <i>goals</i>. <code>kanren</code> comes with a handy <code>permuteo</code> function which, when applied to two arguments, produces a goal that states that these two arguments must be a permutation of one another.
 </p>
@@ -272,6 +309,11 @@ goal
 </pre>
 </div>
 
+<pre class="example">
+&lt;function permuteo.&lt;locals&gt;.permuteo_goal at 0x7f412b2fc280&gt;
+</pre>
+
+
 <p>
 We are now ready to ask <code>kanren</code> to find the missing values for us using the <code>run</code> function, which takes an expression&#x2014;a data structure with logic variables whose value we want to compute&#x2014;one or several goals and returns results. Here we ask <code>kanren</code> for 3 solutions:
 </p>
@@ -284,15 +326,76 @@ results
 </pre>
 </div>
 
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+<td class="org-right">5</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+<td class="org-right">6</td>
+<td class="org-right">7</td>
+<td class="org-right">9</td>
+<td class="org-right">8</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+<td class="org-right">5</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+<td class="org-right">7</td>
+<td class="org-right">6</td>
+<td class="org-right">9</td>
+<td class="org-right">8</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+<td class="org-right">6</td>
+<td class="org-right">1</td>
+<td class="org-right">4</td>
+<td class="org-right">5</td>
+<td class="org-right">7</td>
+<td class="org-right">9</td>
+<td class="org-right">8</td>
+</tr>
+</tbody>
+</table>
+
 <p>
 As you can see, once we have described the relations, <code>kanren</code> does all the heavy lifting for us and searches for solutions that satifsy the relations. Let us now move back to our initial problem: solving sudoku grids.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org7ee5b35" class="outline-2">
-<h2 id="org7ee5b35">Solving sudoku grids</h2>
-<div class="outline-text-2" id="text-org7ee5b35">
+<div id="outline-container-orge329ce9" class="outline-2">
+<h2 id="orge329ce9">Solving sudoku grids</h2>
+<div class="outline-text-2" id="text-orge329ce9">
 <p>
 We store the sudoku grid as a 81-element list. Since constraints are defined on rows, columns and squares we need to be able to extract those units from a grid:
 </p>
@@ -392,15 +495,28 @@ Let us make sure that our code can solve a trivially easy problems where only a 
 </pre>
 </div>
 
+<pre class="example">
+5 3 4 6 7 8 9 1 2
+6 7 2 1 9 5 3 4 8
+1 9 8 3 4 2 5 6 7
+8 5 9 7 6 1 4 2 3
+4 2 6 8 5 3 7 9 1
+7 1 3 9 2 4 8 5 6
+9 6 1 5 3 7 2 8 4
+2 8 7 4 1 9 6 3 5
+3 4 5 2 8 6 1 7 9
+</pre>
+
+
 <p>
 This actually works! And since miniKanren does the search for us our solution is much more expressive than Peter's. It is obvious reading the code what the <i>rules</i> of the sudoku are. This is the beauty of relational programming and DSLs like miniKanren.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org15f24fe" class="outline-2">
-<h2 id="org15f24fe">Limitation</h2>
-<div class="outline-text-2" id="text-org15f24fe">
+<div id="outline-container-org6ffd1e6" class="outline-2">
+<h2 id="org6ffd1e6">Limitation</h2>
+<div class="outline-text-2" id="text-org6ffd1e6">
 <p>
 While <code>kanren</code> could find the solution for a ridiculously easy grid, the computation hangs on the following (supposedly easy) problem:
 </p>
@@ -427,9 +543,9 @@ While <code>kanren</code> could find the solution for a ridiculously easy grid, 
 </div>
 </div>
 
-<div id="outline-container-org847e701" class="outline-2">
-<h2 id="org847e701">Conclusion</h2>
-<div class="outline-text-2" id="text-org847e701">
+<div id="outline-container-org96fadad" class="outline-2">
+<h2 id="org96fadad">Conclusion</h2>
+<div class="outline-text-2" id="text-org96fadad">
 <p>
 This is a toy example, and miniKanren can be used for much more than solving sudoku puzzles. In <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc">Aemcmc</a> we use miniKanren extensively for several purposes, such as:
 </p>
@@ -445,18 +561,18 @@ The possibilities are endless, and to my knowledge haven't been explored much in
 </div>
 </div>
 
-<div id="outline-container-org35a34b0" class="outline-2">
-<h2 id="org35a34b0"><span class="todo TODO">TODO</span> Improve the solver's performance</h2>
+<div id="outline-container-orgc3d319a" class="outline-2">
+<h2 id="orgc3d319a"><span class="todo TODO">TODO</span> Improve the solver's performance</h2>
 </div>
-<div id="outline-container-org179a06b" class="outline-2">
-<h2 id="org179a06b"><span class="todo TODO">TODO</span> Generate valid sudoku puzzle using an empty grid as an input</h2>
+<div id="outline-container-org7f16e58" class="outline-2">
+<h2 id="org7f16e58"><span class="todo TODO">TODO</span> Generate valid sudoku puzzle using an empty grid as an input</h2>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2022-06-24 Fri 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-08-18 Thu 00:39</p>
+<p class="date">Created: 2022-08-18 Thu 00:40</p>
 </div>
 </body>
 </html>
