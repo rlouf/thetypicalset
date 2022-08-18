@@ -1,0 +1,202 @@
+#+title: Shape in Aesara
+#+date: <2022-08-17 Wed>
+
+[[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] has shape semantics for random variables: the shape of random tensors is partitionned in semantically different pieces.
+
+* Scalar distributions
+
+These are the distributions whose support is 1-dimensional; samples from these distribution are scalar values. Let's draw a sample from the normal distribution with Aesara to illustrate this:
+
+#+begin_src python :results output
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+rv = srng.normal(0, 1)
+sample = rv.eval()
+
+print(f"sample value: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample value: 1.4436909546981256
+: sample shape: ()
+
+** Batching
+
+If we want to take $3$ independent and indentically distributed samples from this distribution we can use the =size= keyword argument:
+
+#+begin_src python :results output
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+rv = srng.normal(0, 1, size=(3,))  # size=3 gives the same result
+sample = rv.eval()
+
+print(f"sample value: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample value: [ 1.44369095 -0.89594598  0.73595567]
+: sample shape: (3,)
+
+We can request /tensors/ with independent and identically distributed samples of arbitrary shape:
+
+#+begin_src python :results output
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+batch_shape = (2, 2, 2)
+rv = srng.normal(0, 1, size=batch_shape)
+sample = rv.eval()
+
+print(f"sample value: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample value: [[[ 1.44369095 -0.89594598]
+:   [ 0.73595567  0.00587704]]
+:
+:  [[ 0.85338179  0.16094803]
+:   [ 0.81931469  0.80565568]]]
+: sample shape: (2, 2, 2)
+
+We will say that =size= explicits the /batch shape/, which is the shape of the tensor of idependent random variables produced by the op. In this example the random variables are identically distributed, but this need not be the case.
+
+** Vectorizing
+
+Say we want a sample from three normal distributions with a $0$, $3$ and $5$ mean value respectively. One (cumbersome) way to achieve this is:
+
+#+begin_src python :results output
+import aesara.tensor as at
+
+srng = at.random.RandomStream()
+rv_0 = srng.normal(0, 1)
+rv_3 = srng.normal(3, 1)
+rv_5 = srng.normal(5, 1)
+rv = at.stack([rv_0, rv_3, rv_5])
+
+sample = rv.eval()
+print(f"sample value: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample value: [-0.41520246  1.92093324  6.74827434]
+: sample shape: (3,)
+
+To simplify this common operation we can use pass arrays as parameters:
+
+#+begin_src python :results output
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+mean = np.array([0, 3, 5])
+rv = srng.normal(mean, 1)
+
+sample = rv.eval()
+print(f"sample values: {sample}")
+print(f"batch shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample value: [1.44369095 2.10405402 5.73595567]
+: sample shape: (3,)
+
+ In this case the /batch shape/ is also  =(3,)=; it is the shape of the tensor that contains random variables that are independently distributed and whose distribution belong to the same family.
+
+ We can also use arrays for the standard deviation in this case. Standard broadcasting rules apply to determine the batch shape. For instance, the following fails with a shape mismatch error:
+
+#+begin_src python :results output
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2])
+rv = srng.normal(mean, sigma)
+rv.eval()
+#+end_src
+
+#+RESULTS:
+
+Indeed =mean= and =sigma= cannot be broadcast together:
+
+#+begin_src python :results output
+import numpy as np
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2])
+np.broadcast(mean, sigma)  # error
+#+end_src
+
+=np.broadcast(mean, sigma)= gives us the batch shape:
+
+#+begin_src python :results output
+import numpy as np
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2, 7])
+print(np.broadcast(mean, sigma).shape)
+#+end_src
+
+#+RESULTS:
+: (3,)
+
+Indeed:
+
+#+begin_src python :results output
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2, 3])
+rv = srng.normal(mean, sigma)
+
+sample = rv.eval()
+print(f"sample values: {sample}")
+print(f"batch shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [1.44369095 1.20810805 7.20786701]
+: batch shape: (3,)
+
+** Vectorizing + Batching
+
+It is possible to vectorize and batch at the same time. Unlike other frameworks, the /batch shape/ needs to  be fully specified by =size=:
+
+#+begin_src python :results output
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2, 3])
+rv = srng.normal(mean, sigma, size=(2, 3))
+
+sample = rv.eval()
+print(f"sample values: {sample}")
+print(f"batch shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [[1.44369095e+00 1.20810805e+00 7.20786701e+00]
+:  [5.87704041e-03 4.70676358e+00 5.48284410e+00]]
+: batch shape: (2, 3)
+
+where =np.broadcast(mean, sigma).shape= must correspond to the last dimensions of =size=.
+
+#+begin_quote
+**Shape semantic rule 1**
+
+If =size= is specified, =batch_shape = size=. Otherwise =batch_shape = np.broadcast(*args)=.
+#+end_quote
