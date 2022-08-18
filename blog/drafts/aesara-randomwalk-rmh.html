@@ -6,7 +6,7 @@
 <!-- 2022-08-18 Thu 05:26 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Symbolic and relational programming</title>
+<title>Random Walk Rosenbluth-Metropolis-Hastings in Aesara</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,39 +197,119 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Symbolic and relational programming</h1>
+<h1 class="title">Random Walk Rosenbluth-Metropolis-Hastings in Aesara</h1>
+
+<div id="outline-container-org35b2bcf" class="outline-2">
+<h2 id="org35b2bcf">Implement the mixture model</h2>
+<div class="outline-text-2" id="text-org35b2bcf">
+<p>
+Define the logprob<sub>fn</sub> of a mixture:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream()
+
+<span style="font-weight: bold; font-style: italic;">loc</span> = np.array([-2, 0, 3.2, 2.5])
+<span style="font-weight: bold; font-style: italic;">scale</span> = np.array([1.2, 1, 5, 2.8])
+<span style="font-weight: bold; font-style: italic;">N_rv</span> = srng.normal(loc, scale)
+
+<span style="font-weight: bold; font-style: italic;">p</span> = np.array([0.2, 0.3, 0.1, 0.4])
+<span style="font-weight: bold; font-style: italic;">I_rv</span> = srng.categorical(p)
+
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = N_rv[I_rv]
+
+<span style="font-weight: bold;">print</span>(Y_rv.<span style="font-weight: bold;">eval</span>())
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org9e5b5c7" class="outline-3">
+<h3 id="org9e5b5c7"><span class="todo TODO">TODO</span> Sample from the prior predictive distribution and show results.</h3>
+</div>
+<div id="outline-container-orgc3d0030" class="outline-3">
+<h3 id="orgc3d0030"><span class="todo TODO">TODO</span> Build the <code>logprob_fn</code></h3>
+<div class="outline-text-3" id="text-orgc3d0030">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logprob_fn</span>(y):
+    <span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({Y_rv: y})
+    <span style="font-weight: bold;">return</span> logprob
+
+<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
+<span style="font-weight: bold; font-style: italic;">fn</span> = aesara.function((y_vv,), logprob_fn(y_vv))
+<span style="font-weight: bold;">print</span>(fn(1.))
+</pre>
+</div>
+
+<p>
+It's weird, logpdf of mixture should be weighted sum of the different contributions but ok.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgabdf448" class="outline-2">
+<h2 id="orgabdf448">Implement the algorithm</h2>
+<div class="outline-text-2" id="text-orgabdf448">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
 
-<div id="outline-container-org3881ab7" class="outline-2">
-<h2 id="org3881ab7">Reading</h2>
-<div class="outline-text-2" id="text-org3881ab7">
-<ul class="org-ul">
-<li>Willsey et al.: <a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/pdf/2004.03082.pdf">egg: Fast and Extensible Equality Saturation</a></li>
-<li>Steele &amp; Byrd: <a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/2008.03441">dxo: A System for Relational Algebra and Differentiation</a></li>
-<li>Friedman, Byrd &amp; Kiselyov: The Reasoned Schemer</li>
-<li>Norvig: <a href="20220405161117-paradigms_of_artifical_intelligence_programming.html#ID-7258c862-403a-4269-86f5-9311ef1cccdd">Paradigms of Artifical Intelligence Programming</a></li>
-</ul>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">rw_kernel</span>(position, logprob):
+    <span style="font-weight: bold; font-style: italic;">move_proposal</span> = 0.1 * srng.normal(0, 1, size=position.shape)
+    <span style="font-weight: bold; font-style: italic;">proposal</span> = position + move_proposal
+    <span style="font-weight: bold; font-style: italic;">proposal_logprob</span> = logprob_fn(proposal)
+
+    <span style="font-weight: bold; font-style: italic;">log_uniform</span> = at.log(srng.uniform())
+    <span style="font-weight: bold; font-style: italic;">do_accept</span> = log_uniform &lt; proposal_logprob - logprob
+
+    <span style="font-weight: bold; font-style: italic;">position</span> = at.where(do_accept, proposal, position)
+    <span style="font-weight: bold; font-style: italic;">logprob</span> = at.where(do_accept, proposal_logprob, logprob)
+
+    <span style="font-weight: bold;">return</span> position, logprob
+
+<span style="font-weight: bold; font-style: italic;">num_samples</span> = at.iscalar()
+<span style="font-weight: bold; font-style: italic;">init_position</span> = at.scalar()
+<span style="font-weight: bold; font-style: italic;">init_logprob</span> = logprob_fn(init_position)
+
+<span style="font-weight: bold; font-style: italic;">results</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
+    rw_kernel,
+    outputs_info=(init_position, init_logprob),
+    n_steps=num_samples,
+)
+
+<span style="font-weight: bold; font-style: italic;">sampling_fn</span> = aesara.function(
+    (init_position, num_samples),
+    results[0],
+    updates=updates,
+)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> time
+
+<span style="font-weight: bold; font-style: italic;">start</span> = time.time()
+<span style="font-weight: bold; font-style: italic;">samples</span> = sampling_fn(1., 1e5)
+<span style="font-weight: bold; font-style: italic;">end</span> = time.time()
+
+<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"finished in {end-start:.2f}s"</span>)
+</pre>
+</div>
 </div>
 </div>
 
-<div id="outline-container-org3ef349b" class="outline-2">
-<h2 id="org3ef349b">Code</h2>
-<div class="outline-text-2" id="text-org3ef349b">
-<ul class="org-ul">
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological">Pythological</a> organization on github</li>
-<li>Peter Norvig released <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/norvig/paip-lisp">PAIP's code</a></li>
-<li>PiCat</li>
-</ul>
+<div id="outline-container-org8e610ae" class="outline-2">
+<h2 id="org8e610ae"><span class="todo TODO">TODO</span> Compile to Numba</h2>
 </div>
-</div>
-
-<div id="outline-container-org981ae89" class="outline-2">
-<h2 id="org981ae89">Links to this note</h2>
-<div class="outline-text-2" id="text-org981ae89">
-<ul class="org-ul">
-<li><a href="./20220804135950-minikanren.html">miniKanren</a></li>
-</ul>
-</div>
+<div id="outline-container-org7a8f339" class="outline-2">
+<h2 id="org7a8f339"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h2>
 </div>
 </div>
 </body>
