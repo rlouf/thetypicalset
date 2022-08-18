@@ -1,0 +1,102 @@
+#+title: Random Walk Rosenbluth-Metropolis-Hastings in Aesara
+
+* Implement the mixture model
+
+Define the logprob_fn of a mixture:
+
+#+begin_src python :session :results output
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream()
+
+loc = np.array([-2, 0, 3.2, 2.5])
+scale = np.array([1.2, 1, 5, 2.8])
+N_rv = srng.normal(loc, scale)
+
+p = np.array([0.2, 0.3, 0.1, 0.4])
+I_rv = srng.categorical(p)
+
+Y_rv = N_rv[I_rv]
+
+print(Y_rv.eval())
+#+end_src
+
+#+RESULTS:
+: 3.5563148843908534
+
+** TODO Sample from the prior predictive distribution and show results.
+** TODO Build the =logprob_fn=
+
+#+begin_src python :session :results output
+import aesara
+from aeppl import joint_logprob
+
+def logprob_fn(y):
+    logprob = joint_logprob({Y_rv: y})
+    return logprob
+
+y_vv = Y_rv.clone()
+fn = aesara.function((y_vv,), logprob_fn(y_vv))
+print(fn(1.))
+#+end_src
+
+#+RESULTS:
+: -1.4189385332046727
+
+It's weird, logpdf of mixture should be weighted sum of the different contributions but ok.
+
+* Implement the algorithm
+
+#+begin_src python :session
+import aesara
+import aesara.tensor as at
+
+
+def rw_kernel(position, logprob):
+    move_proposal = 0.1 * srng.normal(0, 1, size=position.shape)
+    proposal = position + move_proposal
+    proposal_logprob = logprob_fn(proposal)
+
+    log_uniform = at.log(srng.uniform())
+    do_accept = log_uniform < proposal_logprob - logprob
+
+    position = at.where(do_accept, proposal, position)
+    logprob = at.where(do_accept, proposal_logprob, logprob)
+
+    return position, logprob
+
+num_samples = at.iscalar()
+init_position = at.scalar()
+init_logprob = logprob_fn(init_position)
+
+results, updates = aesara.scan(
+    rw_kernel,
+    outputs_info=(init_position, init_logprob),
+    n_steps=num_samples,
+)
+
+sampling_fn = aesara.function(
+    (init_position, num_samples),
+    results[0],
+    updates=updates,
+)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session :results output
+import time
+
+start = time.time()
+samples = sampling_fn(1., 1e5)
+end = time.time()
+
+print(f"finished in {end-start:.2f}s")
+#+end_src
+
+#+RESULTS:
+: finished in 6.87s
+
+* TODO Compile to Numba
+* TODO Vectorize the execution (several chains)
