@@ -23,7 +23,7 @@ print(Y_rv.eval())
 #+end_src
 
 #+RESULTS:
-: 3.5563148843908534
+: 0.7074420817840037
 
 ** TODO Sample from the prior predictive distribution and show results.
 ** TODO Build the =logprob_fn=
@@ -45,6 +45,20 @@ print(fn(1.))
 : -1.4189385332046727
 
 It's weird, logpdf of mixture should be weighted sum of the different contributions but ok.
+
+#+begin_src python :session :results output
+import aesara
+from aeppl import joint_logprob
+
+y_vv = Y_rv.clone()
+i_vv = I_rv.clone()
+logprob = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
+
+logprob_fn = aesara.function((y_vv, i_vv), logprob)
+print(logprob_fn(10, 0))
+#+end_src
+
+#+RESULTS:
 
 * Implement the algorithm
 
