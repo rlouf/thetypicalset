@@ -3,25 +3,43 @@
 
 The constraints are:
 1. Only 7 letters are allowed to write words of arbitrary lengths;
-1. One letter is compulsory
+2. One those letters is compulsory =membero(compulsory_letter, word)=
+2. The word must be in the dictionary =dictionary(word)=
+
+
+* TODO Download simple dictionary and add constraint
 
 We can find [[https://raw.githubusercontent.com/dwyl/english-words/master/words.txt][lists of english words online]]. The file linked before is only 4Mb.
 
  #+begin_src python
-from kanren import membero, fact, Relation
+from kanren import fact, run, var
 
 # Populate a dictionary (start with short words)
 dictionary = Relation("dictionary")
 for word in dictionary:
     fact(dictionary, word)
 
-word = var()
-
-def spellingbeeo(word):
-    letter_constraints = [membero(letter, letters) for letter in word]
-    compulsory_letter_constraint = membero(compulsory_letter, word)
-    dictionary_constraint = dictionary(word)
-    return lall(dictionary_constraint, compulsory_letter_constraint, *letter_constraints)
+q = var()
+res = run(1, q, dictionary(q))
+print(res)
  #+end_src
 
+* TODO Constraint that one letter is compulory
+
+ #+begin_src python
+from kanren import membero, var
+
+compulsory_letter = "a"
+word = var()
+goal = membero(compulsory_letter, word)
+ #+end_src
+
+* TODO Constraint on the only allowed letters
+
 The `letter_constraints` goal is actually not enough; it will not guarantee that other letters won't be present in the word. We need a goal that states that a set is a subset of another?
+
+ #+begin_src python
+from kanren import membero, fact, Relation
+
+lall(*(not(membero(forbidden, word)) for forbidden in forbidden_letters)))
+#+end_src
