@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-18 Thu 15:32 -->
+<!-- 2022-08-19 Fri 15:02 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Walk Rosenbluth-Metropolis-Hastings in Aesara</title>
@@ -199,11 +199,29 @@
 <div id="content" class="content">
 <h1 class="title">Random Walk Rosenbluth-Metropolis-Hastings in Aesara</h1>
 
-<div id="outline-container-orgd45657c" class="outline-2">
-<h2 id="orgd45657c">Implement the mixture model</h2>
-<div class="outline-text-2" id="text-orgd45657c">
+<div id="outline-container-orgd93bce4" class="outline-2">
+<h2 id="orgd93bce4">Abstract</h2>
+<div class="outline-text-2" id="text-orgd93bce4">
 <p>
-Define the logprob<sub>fn</sub> of a mixture:
+Right before I started working on <a href="file:///home/runner/projects/thetypicalset/org/blog/introducing-mcx.html">MCX</a> I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, and I started working on a PPL based on <code>Aesara</code> (fork of Theano). So let me revisit this simple example with <code>Aesara</code>!
+</p>
+
+<ul class="org-ul">
+<li class="off"><code>[&#xa0;]</code> Implement a mixture model with <code>Aesara</code></li>
+<li class="off"><code>[&#xa0;]</code> We can implement the Rosenbluth-Metropolis-Hastings algorithm in <code>Aesara</code></li>
+<li class="off"><code>[&#xa0;]</code> Performance comparison with JAX on a single chain.</li>
+<li class="off"><code>[&#xa0;]</code> Compile to JAX</li>
+<li class="off"><code>[&#xa0;]</code> Compile to Numba</li>
+<li class="off"><code>[&#xa0;]</code> What's missing &amp; how we're going to get there</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org9fd627a" class="outline-2">
+<h2 id="org9fd627a">Implement the mixture model</h2>
+<div class="outline-text-2" id="text-org9fd627a">
+<p>
+Implementing mixture model in <code>Aeasra</code> is very straightforward, and does not require any <code>Mixture</code> distribution like other PPLs in Python do:
 </p>
 
 <div class="org-src-container">
@@ -220,58 +238,77 @@ Define the logprob<sub>fn</sub> of a mixture:
 <span style="font-weight: bold; font-style: italic;">I_rv</span> = srng.categorical(p)
 
 <span style="font-weight: bold; font-style: italic;">Y_rv</span> = N_rv[I_rv]
-
-<span style="font-weight: bold;">print</span>(Y_rv.<span style="font-weight: bold;">eval</span>())
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org67fb96c" class="outline-3">
-<h3 id="org67fb96c"><span class="todo TODO">TODO</span> Sample from the prior predictive distribution and show results.</h3>
-</div>
-<div id="outline-container-org1b813dd" class="outline-3">
-<h3 id="org1b813dd"><span class="todo TODO">TODO</span> Build the <code>logprob_fn</code></h3>
-<div class="outline-text-3" id="text-org1b813dd">
+<div id="outline-container-org8653f17" class="outline-3">
+<h3 id="org8653f17"><span class="todo TODO">TODO</span> Sample from the prior predictive distribution and show results.</h3>
+<div class="outline-text-3" id="text-org8653f17">
+<p>
+We can generate forward samples from this distributions:
+</p>
+
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
-<span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logprob_fn</span>(y):
-    <span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({Y_rv: y})
-    <span style="font-weight: bold;">return</span> logprob
+<span style="font-weight: bold; font-style: italic;">sample</span> = aesara.function((), Y_rv)
+<span style="font-weight: bold; font-style: italic;">samples</span> = [sample() <span style="font-weight: bold;">for</span> _ <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(100)]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orged1d985" class="outline-3">
+<h3 id="orged1d985"><span class="done DONE">DONE</span> Build the <code>logprob_fn</code></h3>
+<div class="outline-text-3" id="text-orged1d985">
+<p>
+We can build the logprob function using <code>AePPL</code>'s <code>joint_logprob</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 
 <span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
-<span style="font-weight: bold; font-style: italic;">fn</span> = aesara.function((y_vv,), logprob_fn(y_vv))
-<span style="font-weight: bold;">print</span>(fn(1.))
+<span style="font-weight: bold; font-style: italic;">y_vv</span> = I_rv.clone()
+<span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
+<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((y_vv, i_vv), logprob)
 </pre>
 </div>
 
 <p>
-It's weird, logpdf of mixture should be weighted sum of the different contributions but ok.
+However we do not want to sample the category probability so we marginalize the logpdf over the different categories:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 <span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
 
-<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
-<span style="font-weight: bold; font-style: italic;">i_vv</span> = I_rv.clone()
-<span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logprob_component</span>(y, i):
+    <span style="font-style: italic;">"""Compute the logprob associated with component `i`."""</span>
+    <span style="font-weight: bold; font-style: italic;">i</span> = at.as_tensor(i, dtype=<span style="font-style: italic;">"int64"</span>)
+    <span style="font-weight: bold;">return</span> joint_logprob({Y_rv: y, I_rv: i})
 
-<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((y_vv, i_vv), logprob)
-<span style="font-weight: bold;">print</span>(logprob_fn(10, 0))
+<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
+<span style="font-weight: bold; font-style: italic;">logprob</span> = at.<span style="font-weight: bold;">sum</span>([val * logprob_component(y_vv, i) <span style="font-weight: bold;">for</span> i, val <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(p)])
+<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((y_vv,), logprob)
+
+<span style="font-weight: bold;">print</span>(logprob_fn(1000))
 </pre>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org7c5962b" class="outline-2">
-<h2 id="org7c5962b">Implement the algorithm</h2>
-<div class="outline-text-2" id="text-org7c5962b">
+<div id="outline-container-org906a898" class="outline-2">
+<h2 id="org906a898">Implement the algorithm</h2>
+<div class="outline-text-2" id="text-org906a898">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 <span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logprob_fn</span>(y):
+    <span style="font-weight: bold;">return</span> at.<span style="font-weight: bold;">sum</span>([val * logprob_component(y, i) <span style="font-weight: bold;">for</span> i, val <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(p)])
 
 
 <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">rw_kernel</span>(position, logprob):
@@ -296,12 +333,6 @@ It's weird, logpdf of mixture should be weighted sum of the different contributi
     outputs_info=(init_position, init_logprob),
     n_steps=num_samples,
 )
-
-<span style="font-weight: bold; font-style: italic;">sampling_fn</span> = aesara.function(
-    (init_position, num_samples),
-    results[0],
-    updates=updates,
-)
 </pre>
 </div>
 
@@ -309,20 +340,93 @@ It's weird, logpdf of mixture should be weighted sum of the different contributi
 <pre class="src src-python"><span style="font-weight: bold;">import</span> time
 
 <span style="font-weight: bold; font-style: italic;">start</span> = time.time()
-<span style="font-weight: bold; font-style: italic;">samples</span> = sampling_fn(1., 1e5)
+
+<span style="font-weight: bold; font-style: italic;">sampling_fn</span> = aesara.function(
+    (init_position, num_samples),
+    results[0],
+    updates=updates,
+)
+<span style="font-weight: bold; font-style: italic;">samples</span> = sampling_fn(1., 1e6)
+
 <span style="font-weight: bold; font-style: italic;">end</span> = time.time()
 
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"finished in {end-start:.2f}s"</span>)
+<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"finished in {end-start:.4f}s"</span>)
 </pre>
+</div>
+
+<p>
+It looks like compilation in <code>Aesara</code> introduces a lot less overhead that compilation in JAX, while the compiled function in very close in terms of performance.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf2bc45e" class="outline-2">
+<h2 id="orgf2bc45e">Perspectives</h2>
+<div class="outline-text-2" id="text-orgf2bc45e">
+</div>
+<div id="outline-container-org15be5bd" class="outline-3">
+<h3 id="org15be5bd"><span class="todo TODO">TODO</span> Automatic marginalization of the <code>Categorical</code> RV</h3>
+<div class="outline-text-3" id="text-org15be5bd">
+<p>
+Here we manually marginalized over the values of <code>Y_rv</code>, but it would be nice if we could automatically marginalize over discrete variables.
+</p>
+
+<p>
+[Link to the issue]
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7c97170" class="outline-3">
+<h3 id="org7c97170"><span class="todo TODO">TODO</span> Multiple backend</h3>
+<div class="outline-text-3" id="text-org7c97170">
+<p>
+Having multiple backends means that you can interact with different ecosystems / hardware with the same model expression in Python. You can also decide to leverage the strengths of XLA (JAX) or LLVM (Numba) depending on your application.
+</p>
+</div>
+
+<div id="outline-container-org6a1a693" class="outline-4">
+<h4 id="org6a1a693"><span class="todo TODO">TODO</span> Compile to Numba</h4>
+<div class="outline-text-4" id="text-org6a1a693">
+<p>
+When nothing is specified <code>Aesara</code> compiles functions to C. We have however introduced a new Numba backend to <code>Aesara</code>.
+</p>
+
+<p>
+[Example]
+[Link to the documentation]
+</p>
+</div>
+</div>
+
+<div id="outline-container-org18bbd27" class="outline-4">
+<h4 id="org18bbd27"><span class="todo TODO">TODO</span> Compile to JAX</h4>
+<div class="outline-text-4" id="text-org18bbd27">
+<p>
+We can also compile functions to JAX so they can play nice with JAX ecosystems.
+</p>
+
+<p>
+[Example]
+[Link to the documentation]
+</p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org0703103" class="outline-2">
-<h2 id="org0703103"><span class="todo TODO">TODO</span> Compile to Numba</h2>
+
+<div id="outline-container-orga668100" class="outline-3">
+<h3 id="orga668100"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h3>
+<div class="outline-text-3" id="text-orga668100">
+<p>
+We cannot vectorize the execution the same we can in <code>JAX</code> with <code>vmap</code>, but we should be able to. How?
+</p>
+
+<p>
+[Link to the relevant issues]
+</p>
 </div>
-<div id="outline-container-orgb3d58f9" class="outline-2">
-<h2 id="orgb3d58f9"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h2>
+</div>
 </div>
 </div>
 </body>

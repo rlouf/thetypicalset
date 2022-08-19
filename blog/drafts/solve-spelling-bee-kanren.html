@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-18 Thu 15:32 -->
+<!-- 2022-08-19 Fri 15:02 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Solve the Spelling Bee with kanren</title>
@@ -203,34 +203,63 @@ The constraints are:
 </p>
 <ol class="org-ol">
 <li>Only 7 letters are allowed to write words of arbitrary lengths;</li>
-<li>One letter is compulsory</li>
+<li>One those letters is compulsory <code>membero(compulsory_letter, word)</code></li>
+<li>The word must be in the dictionary <code>dictionary(word)</code></li>
 </ol>
 
+
+<div id="outline-container-org998e634" class="outline-2">
+<h2 id="org998e634"><span class="todo TODO">TODO</span> Download simple dictionary and add constraint</h2>
+<div class="outline-text-2" id="text-org998e634">
 <p>
 We can find <a target='_blank' rel='noopener noreferrer' class='external' href="https://raw.githubusercontent.com/dwyl/english-words/master/words.txt">lists of english words online</a>. The file linked before is only 4Mb.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> membero, fact, Relation
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> fact, run, var
 
 <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Populate a dictionary (start with short words)</span>
 <span style="font-weight: bold; font-style: italic;">dictionary</span> = Relation(<span style="font-style: italic;">"dictionary"</span>)
 <span style="font-weight: bold;">for</span> word <span style="font-weight: bold;">in</span> dictionary:
     fact(dictionary, word)
 
-<span style="font-weight: bold; font-style: italic;">word</span> = var()
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">spellingbeeo</span>(word):
-    <span style="font-weight: bold; font-style: italic;">letter_constraints</span> = [membero(letter, letters) <span style="font-weight: bold;">for</span> letter <span style="font-weight: bold;">in</span> word]
-    <span style="font-weight: bold; font-style: italic;">compulsory_letter_constraint</span> = membero(compulsory_letter, word)
-    <span style="font-weight: bold; font-style: italic;">dictionary_constraint</span> = dictionary(word)
-    <span style="font-weight: bold;">return</span> lall(dictionary_constraint, compulsory_letter_constraint, *letter_constraints)
+<span style="font-weight: bold; font-style: italic;">q</span> = var()
+<span style="font-weight: bold; font-style: italic;">res</span> = run(1, q, dictionary(q))
+<span style="font-weight: bold;">print</span>(res)
 </pre>
 </div>
+</div>
+</div>
 
+<div id="outline-container-orgf3d25f1" class="outline-2">
+<h2 id="orgf3d25f1"><span class="todo TODO">TODO</span> Constraint that one letter is compulory</h2>
+<div class="outline-text-2" id="text-orgf3d25f1">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> membero, var
+
+<span style="font-weight: bold; font-style: italic;">compulsory_letter</span> = <span style="font-style: italic;">"a"</span>
+<span style="font-weight: bold; font-style: italic;">word</span> = var()
+<span style="font-weight: bold; font-style: italic;">goal</span> = membero(compulsory_letter, word)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org49935f7" class="outline-2">
+<h2 id="org49935f7"><span class="todo TODO">TODO</span> Constraint on the only allowed letters</h2>
+<div class="outline-text-2" id="text-org49935f7">
 <p>
 The `letter<sub>constraints</sub>` goal is actually not enough; it will not guarantee that other letters won't be present in the word. We need a goal that states that a set is a subset of another?
 </p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> membero, fact, Relation
+
+lall(*(<span style="font-weight: bold;">not</span>(membero(forbidden, word)) <span style="font-weight: bold;">for</span> forbidden <span style="font-weight: bold;">in</span> forbidden_letters)))
+</pre>
+</div>
+</div>
+</div>
 </div>
 </body>
 </html>
