@@ -25,7 +25,10 @@ import numpy as np
 import pandas as pd
 #+end_src
 
-#+RESULTS:
+* TODO Refactor the code a little bit
+** TODO No one cares about the data downloading, hide
+** TODO Factor the plotting code into functions
+** TODO Factor the sampling code into functions
 
 * Les données
 
@@ -247,9 +250,8 @@ filename
 #+RESULTS:
 [[file:/tmp/babel-DTyOHT/figurei4jzIx.png]]
 
-* TODO Better bivariate plots
-* Simple modèle écologique
 
+* Simple modèle écologique
 
 
 #+begin_src python :session :results silent
@@ -262,7 +264,7 @@ n_circos = premier.shape[0]
 
 The model we implement is taken from [[https://gking.harvard.edu/files/em.pdf][this paper.]] We will be using =aesara= for modelling and =blackjax= for sampling.
 
-** Simplified version (full mixing of the transition matrix)
+** TODO Full mixing
 
 #+begin_src python :session :results silent
 import aesara.tensor as at
@@ -277,7 +279,7 @@ p2_at_norm = p2_at / p2_at.sum(axis=1).reshape((p2_at.shape[0], 1))
 R2_rv = srng.multinomial(at.sum(second, axis=1), p2_at)
 #+end_src
 
-#+begin_src python :session :results silent
+#+begin_src python :session :results silent :exports none
 R2_vv = R2_rv.clone()
 beta_vv = beta_rv.clone()
 
@@ -293,7 +295,7 @@ logprob = joint_logprob(
 logprob_fn = aesara.function((beta_vv, R2_vv), logprob)
 #+end_src
 
-#+begin_src python :session :results output
+#+begin_src python :session :results output :exports none
 beta = SimplexTransform().forward(beta_rv).eval()
 print(logprob_fn(beta, second))
 #+end_src
@@ -423,7 +425,9 @@ a[:, 1, 2][:100]
 #+RESULTS:
 | 0.99962791 | 0.99991623 | 0.99966305 | 0.99946064 | 0.99938046 | 0.99937188 | 0.99980659 | 0.999792 | 0.99923505 | 0.99953717 | 0.99951034 | 0.99959796 | 0.99957745 | 0.99986323 | 0.99975899 | 0.9996055 | 0.99928098 | 0.99986385 | 0.99988614 | 0.99984921 | 0.99942679 | 0.99886797 | 0.99980025 | 0.9995409 | 0.99961997 | 0.99944473 | 0.99943799 | 0.99949746 | 0.99953126 | 0.99979873 | 0.99968739 | 0.99986479 | 0.99959014 | 0.99985252 | 0.99920973 | 0.99971285 | 0.99979184 | 0.99950867 | 0.99925911 | 0.99948833 | 0.99949589 | 0.9996224 | 0.99961641 | 0.99974562 | 0.99960092 | 0.99979708 | 0.99991249 | 0.99940249 | 0.99975145 | 0.99934725 | 0.99997605 | 0.99810388 | 0.99983037 | 0.99966022 | 0.99944754 | 0.99954732 | 0.99942889 | 0.99945266 | 0.99898081 | 0.99995676 | 0.9999735 | 0.99997122 | 0.99996205 | 0.99800344 | 0.99998724 | 0.99987909 | 0.99979481 | 0.99981912 | 0.9998331 | 0.99980382 | 0.99970231 | 0.99978394 | 0.99973909 | 0.99961615 | 0.99966534 | 0.99957562 | 0.99971179 | 0.99955648 | 0.99947529 | 0.99900012 | 0.99977318 | 0.99986157 | 0.99981946 | 0.99949235 | 0.99975582 | 0.99978152 | 0.99940828 | 0.99943139 | 0.99903068 | 0.99912911 | 0.99981919 | 0.99974803 | 0.99903316 | 0.99971128 | 0.99949675 | 0.9996083 | 0.99977729 | 0.99960927 | 0.99948289 | 0.99941847 |
 
-** Hyperprior on dirichlet
+** TODO Hyperprior on dirichlet
+
+Per the paper on ecological inference we add an exponential hyperprior on the dirichlet distribution.
 
 #+begin_src python :session :results silent
 second = df_2[1:].values[:100,:]
@@ -596,7 +600,13 @@ Les résultats sont de toute évidence faux: il suffit de comparer les graphes a
 - La paramétrisation du modèle est mauvaise;
 - L'impact des variations de la logprob correspondants aux petit candidats est tellement faible que le modèle est surtout déterminé par la valeur a priori. On peut alors soit prendre un sondage pour les valeurs a priori, soit les "fabriquer".
 - Le modèle hiérarchique est nécessaire. Un moyen de voir si cela va changer quelque chose est de fitter ce modèle sur une seule circonscription.
+** TODO Explain why we get weird results with full mixing
+** TODO Hierarchical model
+The hierarchical model should allow us to give more reasonable national estimates. It is not purely descriptive as this gives us access to a quantity we did not have access to before: the transition matrices.
+** TODO Extract information from the model
 
 * Notes :noexport:
 
-I think that we cannot do better than something descriptive with a hierarchical model here. Which, in itself, is not very interesting. But we should nevertheless be able to reproduce the original distirbutions. We could then look for variables that explain the different transitions (or, first, the state of affairs)
+Now that we are able to reproduce local transitions and give an estimate for the global transition we could look for variables that explain the difference.
+
+*It is suprising that the transitions are not the same everywhere. Why would Roussel's voters go vote for Le Pen in one district and Macron in another?*
