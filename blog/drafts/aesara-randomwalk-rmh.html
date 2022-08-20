@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-19 Fri 15:02 -->
+<!-- 2022-08-20 Sat 03:56 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Walk Rosenbluth-Metropolis-Hastings in Aesara</title>
@@ -198,175 +198,174 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Random Walk Rosenbluth-Metropolis-Hastings in Aesara</h1>
-
-<div id="outline-container-orgd93bce4" class="outline-2">
-<h2 id="orgd93bce4">Abstract</h2>
-<div class="outline-text-2" id="text-orgd93bce4">
 <p>
-Right before I started working on <a href="file:///home/runner/projects/thetypicalset/org/blog/introducing-mcx.html">MCX</a> I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, and I started working on a PPL based on <code>Aesara</code> (fork of Theano). So let me revisit this simple example with <code>Aesara</code>!
+Right before I started working on <a href="file:///home/runner/projects/thetypicalset/org/blog/introducing-mcx.html">MCX</a> I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, when I started working with a PPL based on <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara">Aesara</a>. So let me revisit this simple example using Aeasara!
+</p>
+
+<p>
+The full code was added to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py">repository</a>.
 </p>
 
 <ul class="org-ul">
-<li class="off"><code>[&#xa0;]</code> Implement a mixture model with <code>Aesara</code></li>
-<li class="off"><code>[&#xa0;]</code> We can implement the Rosenbluth-Metropolis-Hastings algorithm in <code>Aesara</code></li>
+<li>Implement a mixture model with <code>Aesara</code></li>
+<li>We can implement the Rosenbluth-Metropolis-Hastings algorithm in <code>Aesara</code></li>
+<li class="off"><code>[&#xa0;]</code> Run on several chains
+It is not clear how we can do this using <code>aeppl</code>'s <code>joint_logprob</code>.
+Of course I can just use the normal</li>
 <li class="off"><code>[&#xa0;]</code> Performance comparison with JAX on a single chain.</li>
 <li class="off"><code>[&#xa0;]</code> Compile to JAX</li>
 <li class="off"><code>[&#xa0;]</code> Compile to Numba</li>
 <li class="off"><code>[&#xa0;]</code> What's missing &amp; how we're going to get there</li>
 </ul>
-</div>
-</div>
 
-<div id="outline-container-org9fd627a" class="outline-2">
-<h2 id="org9fd627a">Implement the mixture model</h2>
-<div class="outline-text-2" id="text-org9fd627a">
+<div id="outline-container-org86e30df" class="outline-2">
+<h2 id="org86e30df">Mixture model</h2>
+<div class="outline-text-2" id="text-org86e30df">
 <p>
-Implementing mixture model in <code>Aeasra</code> is very straightforward, and does not require any <code>Mixture</code> distribution like other PPLs in Python do:
+<a href="file:///home/runner/projects/thetypicalset/org/blog/jax-parallel-mcmc.html">In the original blog post</a> I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in <code>Aesara</code> is straightforward. No need for a <code>Mixture</code> distribution (like in e.g. PyMC), you just write it like it is:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 <span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream()
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
 
 <span style="font-weight: bold; font-style: italic;">loc</span> = np.array([-2, 0, 3.2, 2.5])
 <span style="font-weight: bold; font-style: italic;">scale</span> = np.array([1.2, 1, 5, 2.8])
-<span style="font-weight: bold; font-style: italic;">N_rv</span> = srng.normal(loc, scale)
+<span style="font-weight: bold; font-style: italic;">weights</span> = np.array([0.2, 0.3, 0.1, 0.4])
 
-<span style="font-weight: bold; font-style: italic;">p</span> = np.array([0.2, 0.3, 0.1, 0.4])
-<span style="font-weight: bold; font-style: italic;">I_rv</span> = srng.categorical(p)
-
+<span style="font-weight: bold; font-style: italic;">N_rv</span> = srng.normal(loc, scale, name=<span style="font-style: italic;">"N"</span>)
+<span style="font-weight: bold; font-style: italic;">I_rv</span> = srng.categorical(weights, name=<span style="font-style: italic;">"I"</span>)
 <span style="font-weight: bold; font-style: italic;">Y_rv</span> = N_rv[I_rv]
 </pre>
 </div>
-</div>
 
-<div id="outline-container-org8653f17" class="outline-3">
-<h3 id="org8653f17"><span class="todo TODO">TODO</span> Sample from the prior predictive distribution and show results.</h3>
-<div class="outline-text-3" id="text-org8653f17">
 <p>
-We can generate forward samples from this distributions:
+We can generate forward samples from this model by compiling the model graph choosing <code>Y_rv</code> as an output:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 
-<span style="font-weight: bold; font-style: italic;">sample</span> = aesara.function((), Y_rv)
-<span style="font-weight: bold; font-style: italic;">samples</span> = [sample() <span style="font-weight: bold;">for</span> _ <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(100)]
+<span style="font-weight: bold; font-style: italic;">sample_fn</span> = aesara.function((), Y_rv)
+<span style="font-weight: bold; font-style: italic;">samples</span> = [sample_fn() <span style="font-weight: bold;">for</span> _ <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(10000)]
+
+<span style="font-weight: bold;">print</span>(samples[:100])
 </pre>
 </div>
-</div>
-</div>
 
-<div id="outline-container-orged1d985" class="outline-3">
-<h3 id="orged1d985"><span class="done DONE">DONE</span> Build the <code>logprob_fn</code></h3>
-<div class="outline-text-3" id="text-orged1d985">
 <p>
-We can build the logprob function using <code>AePPL</code>'s <code>joint_logprob</code>:
+If you are not familiar with Theano/Aesara, the <code>aesara.function</code> may surprise you. What does it do exactly? When you manipulate Aesara tensors, you are not manipulating numbers, but rather you are <i>describing the computation to perform on the inputs</i>. As a result, the result of an Aesara operation is a graph:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<pre class="src src-python">aesara.dprint(Y_rv)
+</pre>
+</div>
+
+<p>
+<code>aesara.function</code> is therefore used to <i>compile</i> the graph into a function that can be executed. For that, we need to specify the inputs and outputs of the function. In this case there are no outputs, and the value of <code>Y_rv</code> is the output.
+</p>
+
+<p>
+To compute the log-probability density function we can use <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aeppl">AePPL</a>'s <code>joint_logprob</code> function. AePPL transforms the Aesara model graph to get the graph that computes the model's joint logprob (see, working with computation graphs is nice!). We pass a dictionary that tells which value to associate with the random variables <code>Y_rv</code> and <code>I_rv</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
 
 <span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
-<span style="font-weight: bold; font-style: italic;">y_vv</span> = I_rv.clone()
+<span style="font-weight: bold; font-style: italic;">i_vv</span> = I_rv.clone()
 <span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
-<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((y_vv, i_vv), logprob)
+
+<span style="font-weight: bold;">print</span>(logprob.<span style="font-weight: bold;">eval</span>({y_vv: 10., i_vv: 3}))
+</pre>
+</div>
+
+<pre class="example">
+-6.452221131239579
+</pre>
+
+
+<p>
+Here we do not really care about the values that <code>I_rv</code> takes, so we marginalize the log-probability density function:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">logprob</span> = []
+<span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(4):
+    <span style="font-weight: bold; font-style: italic;">i_vv</span> = at.as_tensor(i, dtype=<span style="font-style: italic;">"int64"</span>)
+    logprob.append(joint_logprob({Y_rv: y_vv, I_rv: i_vv}))
+<span style="font-weight: bold; font-style: italic;">logprob</span> = at.stack(logprob, axis=0)
+<span style="font-weight: bold; font-style: italic;">total_logprob</span> = at.logsumexp(at.log(weights) + logprob)
+
+<span style="font-weight: bold;">print</span>(total_logprob.<span style="font-weight: bold;">eval</span>({y_vv: 10.}))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5121be9" class="outline-2">
+<h2 id="org5121be9">Implement the algorithm</h2>
+<div class="outline-text-2" id="text-org5121be9">
+<p>
+The random walk Rosenbluth-Metropolis-Hasting algorithm is also straightforward to implement:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">rw_metropolis_kernel</span>(srng, logprob_fn):
+    <span style="font-style: italic;">"""Build the random walk Rosenbluth-Metropolis-Hastings (RNH) kernel."""</span>
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">one_step</span>(position, logprob):
+        <span style="font-style: italic;">"""Generate one sample using the random walk RMH algorithm.</span>
+
+<span style="font-style: italic;">        Attributes</span>
+<span style="font-style: italic;">        ----------</span>
+<span style="font-style: italic;">        position:</span>
+<span style="font-style: italic;">            The initial position.</span>
+<span style="font-style: italic;">        logprob:</span>
+<span style="font-style: italic;">            The initial value of the logprobability.</span>
+
+<span style="font-style: italic;">        Returns</span>
+<span style="font-style: italic;">        ------</span>
+<span style="font-style: italic;">        The next positions and values of the logprobability.</span>
+
+<span style="font-style: italic;">        """</span>
+        <span style="font-weight: bold; font-style: italic;">move_proposal</span> = 0.1 * srng.normal(0, 1)
+        <span style="font-weight: bold; font-style: italic;">proposal</span> = position + move_proposal
+        <span style="font-weight: bold; font-style: italic;">proposal_logprob</span> = logprob_fn(proposal)
+
+        <span style="font-weight: bold; font-style: italic;">log_uniform</span> = at.log(srng.uniform())
+        <span style="font-weight: bold; font-style: italic;">do_accept</span> = log_uniform &lt; proposal_logprob - logprob
+
+        <span style="font-weight: bold; font-style: italic;">position</span> = at.where(do_accept, proposal, position)
+        <span style="font-weight: bold; font-style: italic;">logprob</span> = at.where(do_accept, proposal_logprob, logprob)
+
+        <span style="font-weight: bold;">return</span> position, logprob
+
+    <span style="font-weight: bold;">return</span> one_step
 </pre>
 </div>
 
 <p>
-However we do not want to sample the category probability so we marginalize the logpdf over the different categories:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
-<span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logprob_component</span>(y, i):
-    <span style="font-style: italic;">"""Compute the logprob associated with component `i`."""</span>
-    <span style="font-weight: bold; font-style: italic;">i</span> = at.as_tensor(i, dtype=<span style="font-style: italic;">"int64"</span>)
-    <span style="font-weight: bold;">return</span> joint_logprob({Y_rv: y, I_rv: i})
-
-<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
-<span style="font-weight: bold; font-style: italic;">logprob</span> = at.<span style="font-weight: bold;">sum</span>([val * logprob_component(y_vv, i) <span style="font-weight: bold;">for</span> i, val <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(p)])
-<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((y_vv,), logprob)
-
-<span style="font-weight: bold;">print</span>(logprob_fn(1000))
-</pre>
-</div>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org906a898" class="outline-2">
-<h2 id="org906a898">Implement the algorithm</h2>
-<div class="outline-text-2" id="text-org906a898">
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
-<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logprob_fn</span>(y):
-    <span style="font-weight: bold;">return</span> at.<span style="font-weight: bold;">sum</span>([val * logprob_component(y, i) <span style="font-weight: bold;">for</span> i, val <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(p)])
-
-
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">rw_kernel</span>(position, logprob):
-    <span style="font-weight: bold; font-style: italic;">move_proposal</span> = 0.1 * srng.normal(0, 1, size=position.shape)
-    <span style="font-weight: bold; font-style: italic;">proposal</span> = position + move_proposal
-    <span style="font-weight: bold; font-style: italic;">proposal_logprob</span> = logprob_fn(proposal)
-
-    <span style="font-weight: bold; font-style: italic;">log_uniform</span> = at.log(srng.uniform())
-    <span style="font-weight: bold; font-style: italic;">do_accept</span> = log_uniform &lt; proposal_logprob - logprob
-
-    <span style="font-weight: bold; font-style: italic;">position</span> = at.where(do_accept, proposal, position)
-    <span style="font-weight: bold; font-style: italic;">logprob</span> = at.where(do_accept, proposal_logprob, logprob)
-
-    <span style="font-weight: bold;">return</span> position, logprob
-
-<span style="font-weight: bold; font-style: italic;">num_samples</span> = at.iscalar()
-<span style="font-weight: bold; font-style: italic;">init_position</span> = at.scalar()
-<span style="font-weight: bold; font-style: italic;">init_logprob</span> = logprob_fn(init_position)
-
-<span style="font-weight: bold; font-style: italic;">results</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
-    rw_kernel,
-    outputs_info=(init_position, init_logprob),
-    n_steps=num_samples,
-)
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> time
-
-<span style="font-weight: bold; font-style: italic;">start</span> = time.time()
-
-<span style="font-weight: bold; font-style: italic;">sampling_fn</span> = aesara.function(
-    (init_position, num_samples),
-    results[0],
-    updates=updates,
-)
-<span style="font-weight: bold; font-style: italic;">samples</span> = sampling_fn(1., 1e6)
-
-<span style="font-weight: bold; font-style: italic;">end</span> = time.time()
-
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"finished in {end-start:.4f}s"</span>)
-</pre>
-</div>
-
-<p>
-It looks like compilation in <code>Aesara</code> introduces a lot less overhead that compilation in JAX, while the compiled function in very close in terms of performance.
+Syntactically, <code>aesara.tensor</code> looks like a drop-in replacement to <code>numpy</code>. Remember, however, that these functions do not act on numbers but add an operation to an existing graph of computation. In particular, <code>logprob_fn</code> is a function that takes a graph (possibly a single variable), and returns the graph that computes the value of the log-probability density function.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgf2bc45e" class="outline-2">
-<h2 id="orgf2bc45e">Perspectives</h2>
-<div class="outline-text-2" id="text-orgf2bc45e">
+
+<div id="outline-container-org9156e8d" class="outline-2">
+<h2 id="org9156e8d">So, does it work?</h2>
 </div>
-<div id="outline-container-org15be5bd" class="outline-3">
-<h3 id="org15be5bd"><span class="todo TODO">TODO</span> Automatic marginalization of the <code>Categorical</code> RV</h3>
-<div class="outline-text-3" id="text-org15be5bd">
+
+<div id="outline-container-org0412e39" class="outline-2">
+<h2 id="org0412e39">Perspectives</h2>
+<div class="outline-text-2" id="text-org0412e39">
+</div>
+<div id="outline-container-org0536371" class="outline-3">
+<h3 id="org0536371"><span class="todo TODO">TODO</span> Automatic marginalization of the <code>Categorical</code> RV</h3>
+<div class="outline-text-3" id="text-org0536371">
 <p>
 Here we manually marginalized over the values of <code>Y_rv</code>, but it would be nice if we could automatically marginalize over discrete variables.
 </p>
@@ -377,17 +376,17 @@ Here we manually marginalized over the values of <code>Y_rv</code>, but it would
 </div>
 </div>
 
-<div id="outline-container-org7c97170" class="outline-3">
-<h3 id="org7c97170"><span class="todo TODO">TODO</span> Multiple backend</h3>
-<div class="outline-text-3" id="text-org7c97170">
+<div id="outline-container-orgc41d1de" class="outline-3">
+<h3 id="orgc41d1de"><span class="todo TODO">TODO</span> Multiple backend</h3>
+<div class="outline-text-3" id="text-orgc41d1de">
 <p>
 Having multiple backends means that you can interact with different ecosystems / hardware with the same model expression in Python. You can also decide to leverage the strengths of XLA (JAX) or LLVM (Numba) depending on your application.
 </p>
 </div>
 
-<div id="outline-container-org6a1a693" class="outline-4">
-<h4 id="org6a1a693"><span class="todo TODO">TODO</span> Compile to Numba</h4>
-<div class="outline-text-4" id="text-org6a1a693">
+<div id="outline-container-orgb9b33b1" class="outline-4">
+<h4 id="orgb9b33b1"><span class="todo TODO">TODO</span> Compile to Numba</h4>
+<div class="outline-text-4" id="text-orgb9b33b1">
 <p>
 When nothing is specified <code>Aesara</code> compiles functions to C. We have however introduced a new Numba backend to <code>Aesara</code>.
 </p>
@@ -399,9 +398,9 @@ When nothing is specified <code>Aesara</code> compiles functions to C. We have h
 </div>
 </div>
 
-<div id="outline-container-org18bbd27" class="outline-4">
-<h4 id="org18bbd27"><span class="todo TODO">TODO</span> Compile to JAX</h4>
-<div class="outline-text-4" id="text-org18bbd27">
+<div id="outline-container-org485a6b3" class="outline-4">
+<h4 id="org485a6b3"><span class="todo TODO">TODO</span> Compile to JAX</h4>
+<div class="outline-text-4" id="text-org485a6b3">
 <p>
 We can also compile functions to JAX so they can play nice with JAX ecosystems.
 </p>
@@ -415,9 +414,9 @@ We can also compile functions to JAX so they can play nice with JAX ecosystems.
 </div>
 
 
-<div id="outline-container-orga668100" class="outline-3">
-<h3 id="orga668100"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h3>
-<div class="outline-text-3" id="text-orga668100">
+<div id="outline-container-orga946144" class="outline-3">
+<h3 id="orga946144"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h3>
+<div class="outline-text-3" id="text-orga946144">
 <p>
 We cannot vectorize the execution the same we can in <code>JAX</code> with <code>vmap</code>, but we should be able to. How?
 </p>
