@@ -1,138 +1,151 @@
 #+title: Random Walk Rosenbluth-Metropolis-Hastings in Aesara
 
-* Abstract
 
-Right before I started working on [[file:~/projects/thetypicalset/org/blog/introducing-mcx.org][MCX]] I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, and I started working on a PPL based on =Aesara= (fork of Theano). So let me revisit this simple example with =Aesara=!
+Right before I started working on [[file:~/projects/thetypicalset/org/blog/introducing-mcx.org][MCX]] I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, when I started working with a PPL based on [[https://github.com/aesara-devs/aesara][Aesara]]. So let me revisit this simple example using Aeasara!
 
-- [ ] Implement a mixture model with =Aesara=
-- [ ] We can implement the Rosenbluth-Metropolis-Hastings algorithm in =Aesara=
+The full code was added to the [[https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py][repository]].
+
+- [x] Implement a mixture model with =Aesara=
+- [x] We can implement the Rosenbluth-Metropolis-Hastings algorithm in =Aesara=
+- [ ] Run on several chains
+  It is not clear how we can do this using =aeppl='s =joint_logprob=.
+  Of course I can just use the normal
 - [ ] Performance comparison with JAX on a single chain.
 - [ ] Compile to JAX
 - [ ] Compile to Numba
 - [ ] What's missing & how we're going to get there
 
-* Implement the mixture model
+* Mixture model
 
-Implementing mixture model in =Aeasra= is very straightforward, and does not require any =Mixture= distribution like other PPLs in Python do:
+[[file:~/projects/thetypicalset/org/blog/jax-parallel-mcmc.org][In the original blog post]] I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in =Aesara= is straightforward. No need for a =Mixture= distribution (like in e.g. PyMC), you just write it like it is:
 
-#+begin_src python :session :results silent
+#+begin_src python :session :results silent :exports code
 import aesara.tensor as at
 import numpy as np
 
-srng = at.random.RandomStream()
+srng = at.random.RandomStream(0)
 
 loc = np.array([-2, 0, 3.2, 2.5])
 scale = np.array([1.2, 1, 5, 2.8])
-N_rv = srng.normal(loc, scale)
+weights = np.array([0.2, 0.3, 0.1, 0.4])
 
-p = np.array([0.2, 0.3, 0.1, 0.4])
-I_rv = srng.categorical(p)
-
+N_rv = srng.normal(loc, scale, name="N")
+I_rv = srng.categorical(weights, name="I")
 Y_rv = N_rv[I_rv]
 #+end_src
 
-** TODO Sample from the prior predictive distribution and show results.
-
-We can generate forward samples from this distributions:
-
-#+begin_src python :session
-import aesara
-
-sample = aesara.function((), Y_rv)
-samples = [sample() for _ in range(100)]
-#+end_src
-
-** DONE Build the =logprob_fn=
-
-We can build the logprob function using =AePPL='s =joint_logprob=:
-
-#+begin_src python :session
-import aesara
-
-y_vv = Y_rv.clone()
-y_vv = I_rv.clone()
-logprob = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
-logprob_fn = aesara.function((y_vv, i_vv), logprob)
-#+end_src
-
-However we do not want to sample the category probability so we marginalize the logpdf over the different categories:
+We can generate forward samples from this model by compiling the model graph choosing =Y_rv= as an output:
 
 #+begin_src python :session :results output
 import aesara
-from aeppl import joint_logprob
 
-def logprob_component(y, i):
-    """Compute the logprob associated with component `i`."""
-    i = at.as_tensor(i, dtype="int64")
-    return joint_logprob({Y_rv: y, I_rv: i})
+sample_fn = aesara.function((), Y_rv)
+samples = [sample_fn() for _ in range(10000)]
 
-y_vv = Y_rv.clone()
-logprob = at.sum([val * logprob_component(y_vv, i) for i, val in enumerate(p)])
-logprob_fn = aesara.function((y_vv,), logprob)
-
-print(logprob_fn(1000))
+print(samples[:100])
 #+end_src
 
 #+RESULTS:
-: -247095.34102862852
+: [array(2.51645571), array(0.16094803), array(4.16173818), array(-0.75365736), array(0.91897138), array(-1.96086176), array(2.60226408), array(2.28198192), array(-1.05260784), array(1.38469404), array(5.98739744), array(7.37274208), array(-2.15961733), array(8.43786623), array(-1.528235), array(-2.56085612), array(-1.49792648), array(-0.54058883), array(-1.73614481), array(2.68343646), array(-0.74588224), array(5.81172156), array(2.63622568), array(-1.52262747), array(-3.17441886), array(-0.83029964), array(2.57077231), array(-0.68490254), array(1.49112131), array(4.51531186), array(1.26036493), array(2.8718194), array(0.42948448), array(6.96430393), array(-1.41820233), array(-0.48159976), array(6.46244479), array(7.17495802), array(4.62729473), array(3.75983318), array(1.35390152), array(0.72638649), array(7.83843779), array(-1.93741605), array(-0.97753687), array(-2.6341784), array(-0.80476746), array(2.65904953), array(0.89057595), array(4.85358388), array(-0.30544774), array(-1.71254491), array(1.53838811), array(2.4976651), array(-4.49094492), array(-3.10530498), array(1.14952679), array(-2.0286298), array(-1.54603067), array(-2.27386863), array(-0.51537537), array(0.72265698), array(2.98239204), array(3.03497124), array(2.88541305), array(-0.79794257), array(-2.91166205), array(-1.14063909), array(-1.46864571), array(10.10318879), array(1.37147168), array(1.33971956), array(1.10113552), array(-1.23877521), array(0.35713318), array(1.36438476), array(-2.02780756), array(3.95659427), array(0.00671702), array(0.7383008), array(0.11008148), array(1.4652128), array(7.25069105), array(0.93955977), array(-0.07202498), array(-3.55905252), array(1.63349073), array(0.57912606), array(0.33508746), array(6.45579571), array(-0.14630237), array(-3.94949758), array(-1.6464691), array(0.50124777), array(-0.58339942), array(0.64205155), array(-4.46255652), array(1.17787744), array(-0.74443437), array(3.70892789)]
+
+If you are not familiar with Theano/Aesara, the =aesara.function= may surprise you. What does it do exactly? When you manipulate Aesara tensors, you are not manipulating numbers, but rather you are /describing the computation to perform on the inputs/. As a result, the result of an Aesara operation is a graph:
+
+#+begin_src python :session :results output
+aesara.dprint(Y_rv)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Subtensor{int64} [id A]
+ |normal_rv{0, (0, 0), floatX, False}.1 [id B] 'N'
+ | |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F83CD6F7220>) [id C]
+ | |TensorConstant{[]} [id D]
+ | |TensorConstant{11} [id E]
+ | |TensorConstant{[-2.   0. .. 3.2  2.5]} [id F]
+ | |TensorConstant{[1.2 1.  5.  2.8]} [id G]
+ |ScalarFromTensor [id H]
+   |categorical_rv{0, (1,), int64, False}.1 [id I] 'I'
+     |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F83CD7444A0>) [id J]
+     |TensorConstant{[]} [id K]
+     |TensorConstant{4} [id L]
+     |TensorConstant{[0.2 0.3 0.1 0.4]} [id M]
+#+end_example
+
+=aesara.function= is therefore used to /compile/ the graph into a function that can be executed. For that, we need to specify the inputs and outputs of the function. In this case there are no outputs, and the value of =Y_rv= is the output.
+
+To compute the log-probability density function we can use [[https://github.com/aesara-devs/aeppl][AePPL]]'s =joint_logprob= function. AePPL transforms the Aesara model graph to get the graph that computes the model's joint logprob (see, working with computation graphs is nice!). We pass a dictionary that tells which value to associate with the random variables =Y_rv= and =I_rv=:
+
+#+begin_src python :session :results output :exports both
+from aeppl import joint_logprob
+
+y_vv = Y_rv.clone()
+i_vv = I_rv.clone()
+logprob = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
+
+print(logprob.eval({y_vv: 10., i_vv: 3}))
+#+end_src
+
+#+RESULTS:
+: -6.452221131239579
+
+Here we do not really care about the values that =I_rv= takes, so we marginalize the log-probability density function:
+
+#+begin_src python :session :results output
+logprob = []
+for i in range(4):
+    i_vv = at.as_tensor(i, dtype="int64")
+    logprob.append(joint_logprob({Y_rv: y_vv, I_rv: i_vv}))
+logprob = at.stack(logprob, axis=0)
+total_logprob = at.logsumexp(at.log(weights) + logprob)
+
+print(total_logprob.eval({y_vv: 10.}))
+#+end_src
+
+#+RESULTS:
+: -6.961941398089025
 
 * Implement the algorithm
 
-#+begin_src python :session
-import aesara
-import aesara.tensor as at
+The random walk Rosenbluth-Metropolis-Hasting algorithm is also straightforward to implement:
 
-def logprob_fn(y):
-    return at.sum([val * logprob_component(y, i) for i, val in enumerate(p)])
+#+begin_src python
+def rw_metropolis_kernel(srng, logprob_fn):
+    """Build the random walk Rosenbluth-Metropolis-Hastings (RNH) kernel."""
 
+    def one_step(position, logprob):
+        """Generate one sample using the random walk RMH algorithm.
 
-def rw_kernel(position, logprob):
-    move_proposal = 0.1 * srng.normal(0, 1, size=position.shape)
-    proposal = position + move_proposal
-    proposal_logprob = logprob_fn(proposal)
+        Attributes
+        ----------
+        position:
+            The initial position.
+        logprob:
+            The initial value of the logprobability.
 
-    log_uniform = at.log(srng.uniform())
-    do_accept = log_uniform < proposal_logprob - logprob
+        Returns
+        ------
+        The next positions and values of the logprobability.
 
-    position = at.where(do_accept, proposal, position)
-    logprob = at.where(do_accept, proposal_logprob, logprob)
+        """
+        move_proposal = 0.1 * srng.normal(0, 1)
+        proposal = position + move_proposal
+        proposal_logprob = logprob_fn(proposal)
 
-    return position, logprob
+        log_uniform = at.log(srng.uniform())
+        do_accept = log_uniform < proposal_logprob - logprob
 
-num_samples = at.iscalar()
-init_position = at.scalar()
-init_logprob = logprob_fn(init_position)
+        position = at.where(do_accept, proposal, position)
+        logprob = at.where(do_accept, proposal_logprob, logprob)
 
-results, updates = aesara.scan(
-    rw_kernel,
-    outputs_info=(init_position, init_logprob),
-    n_steps=num_samples,
-)
+        return position, logprob
+
+    return one_step
 #+end_src
 
-#+RESULTS:
+Syntactically, =aesara.tensor= looks like a drop-in replacement to =numpy=. Remember, however, that these functions do not act on numbers but add an operation to an existing graph of computation. In particular, =logprob_fn= is a function that takes a graph (possibly a single variable), and returns the graph that computes the value of the log-probability density function.
 
-#+begin_src python :session :results output
-import time
 
-start = time.time()
-
-sampling_fn = aesara.function(
-    (init_position, num_samples),
-    results[0],
-    updates=updates,
-)
-samples = sampling_fn(1., 1e6)
-
-end = time.time()
-
-print(f"finished in {end-start:.4f}s")
-#+end_src
-
-#+RESULTS:
-: finished in 1.0859s
-
-It looks like compilation in =Aesara= introduces a lot less overhead that compilation in JAX, while the compiled function in very close in terms of performance.
+* So, does it work?
 
 * Perspectives
 
