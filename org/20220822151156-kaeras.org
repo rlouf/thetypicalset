@@ -1,0 +1,36 @@
+:PROPERTIES:
+:ID:       ee2b16f2-0d64-4172-90bb-fa3f6dab3eac
+:END:
+#+title: Kaeras
+
+
+Kaeras is a deep-learning API that sits on top of Aesara. It is heavily inspired by [[https://keras.io][Keras]], which used to be built on top of Theano, but now on top of Tensorflow 2.
+
+* Minimum Viable Project
+
+A minimum viable library could be to be able to reproduce Keras' documentation' examples. For instance the MNIST convnet:
+
+#+begin_src python
+model = keras.Sequential(
+    [
+        keras.Input(shape=input_shape),
+        layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+        layers.MaxPooling2D(pool_size=(2, 2)),
+        layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+        layers.MaxPooling2D(pool_size=(2, 2)),
+        layers.Flatten(),
+        layers.Dropout(0.5),
+        layers.Dense(num_classes, activation="softmax"),
+    ]
+)
+#+end_src
+
+Which requires the implementation of the following:
+
+- layers.Dense
+- layers.Activation
+- layers.BatchNormalization
+- layers.Conv2D
+- layers.MaxPooling2D
+- layers.Dropout
+- layers.Flatten
