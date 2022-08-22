@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 16:16 -->
+<!-- 2022-08-22 Mon 16:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shared variables</title>
@@ -246,9 +246,9 @@ They also allow sharing state between compiled graphs.
 <code>updates</code> parameter in <code>function</code> tells the compiler that when the function is going to be run the value of the shared variable is going to be modified in X way. They are necessary because the value of the shared variables needs to be propagated globally?
 </p>
 
-<div id="outline-container-orgad32eb9" class="outline-3">
-<h3 id="orgad32eb9"><span class="todo TODO">TODO</span> Conceptual understanding: what is a shared variable? Why is it not a Variable?</h3>
-<div class="outline-text-3" id="text-orgad32eb9">
+<div id="outline-container-org1605e45" class="outline-3">
+<h3 id="org1605e45"><span class="todo TODO">TODO</span> Conceptual understanding: what is a shared variable? Why is it not a Variable?</h3>
+<div class="outline-text-3" id="text-org1605e45">
 <p>
 <b>Variables are placeholders, mere step in a computation. They are variables in the mathematical sense. Shared variables are variables in the computing sense: a value store.</b> The problem is that shared variables introduce a notion of <a href="20220729171741-control_flow_in_aesara.html#ID-8d8344ab-49e9-480d-b1d6-1336dbf60f9f">imperative programming</a> (namely "update this register in memory with this value"). Shared variables allow us to:
 </p>
@@ -274,9 +274,9 @@ optimizations don't see which variables are shared or not.
 </div>
 </div>
 
-<div id="outline-container-org927628b" class="outline-3">
-<h3 id="org927628b"><span class="todo TODO">TODO</span> How does <code>scan</code> work with updates?</h3>
-<div class="outline-text-3" id="text-org927628b">
+<div id="outline-container-org9d0a1d8" class="outline-3">
+<h3 id="org9d0a1d8"><span class="todo TODO">TODO</span> How does <code>scan</code> work with updates?</h3>
+<div class="outline-text-3" id="text-org9d0a1d8">
 <p>
 Well, <code>scan</code> returns a graph that says how the shared variable within should be treated.
 </p>
@@ -353,9 +353,9 @@ So <code>Variables</code> are placeholders, they're not variables in the sense o
 </div>
 </div>
 
-<div id="outline-container-orgad0dbf2" class="outline-3">
-<h3 id="orgad0dbf2"><span class="todo TODO">TODO</span> What happens to shared variables when the graph is copied?</h3>
-<div class="outline-text-3" id="text-orgad0dbf2">
+<div id="outline-container-orgac09701" class="outline-3">
+<h3 id="orgac09701"><span class="todo TODO">TODO</span> What happens to shared variables when the graph is copied?</h3>
+<div class="outline-text-3" id="text-orgac09701">
 <p>
 If the updates still refer to the original shared variables then nothing is going to happen; so using <code>aesara.graph.basic.clone_get_equiv</code> and passing the origin updates will likely lead to buggy code since the original updates won't be applied to the cloned variable.
 </p>
@@ -366,16 +366,16 @@ Instead we need to use functions like <code>aesara.compile.function.pfunc.rebuil
 </div>
 </div>
 
-<div id="outline-container-org81e039c" class="outline-3">
-<h3 id="org81e039c"><span class="todo TODO">TODO</span> Why do we use <code>shared</code> variables for the <code>RandomStream</code>?</h3>
+<div id="outline-container-orgd652848" class="outline-3">
+<h3 id="orgd652848"><span class="todo TODO">TODO</span> Why do we use <code>shared</code> variables for the <code>RandomStream</code>?</h3>
 </div>
-<div id="outline-container-org6636ede" class="outline-3">
-<h3 id="org6636ede"><span class="todo TODO">TODO</span> Shared variables don't have a sense of scope (give example)</h3>
+<div id="outline-container-orgfb3f48f" class="outline-3">
+<h3 id="orgfb3f48f"><span class="todo TODO">TODO</span> Shared variables don't have a sense of scope (give example)</h3>
 </div>
 
-<div id="outline-container-org31452f8" class="outline-2">
-<h2 id="org31452f8">References</h2>
-<div class="outline-text-2" id="text-org31452f8">
+<div id="outline-container-org43d6402" class="outline-2">
+<h2 id="org43d6402">References</h2>
+<div class="outline-text-2" id="text-org43d6402">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://aesara.readthedocs.io/en/latest/library/compile/shared.html?highlight=shared#module-aesara.compile.sharedvalue"><code>shared</code> in the Aesara documentation</a></li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/blob/8763981ca4263e153c68e6be39c03a272c027b60/aesara/compile/sharedvalue.py#L34-L221">Implementation on github</a></li>
@@ -383,9 +383,9 @@ Instead we need to use functions like <code>aesara.compile.function.pfunc.rebuil
 </div>
 </div>
 
-<div id="outline-container-orga5733d6" class="outline-2">
-<h2 id="orga5733d6">Links to this note</h2>
-<div class="outline-text-2" id="text-orga5733d6">
+<div id="outline-container-orgf614e34" class="outline-2">
+<h2 id="orgf614e34">Links to this note</h2>
+<div class="outline-text-2" id="text-orgf614e34">
 <ul class="org-ul">
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
 <li><a href="./20220729171741-control_flow_in_aesara.html">imperative concepts in Aesara</a></li>
