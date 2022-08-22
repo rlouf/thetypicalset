@@ -3,209 +3,25 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:03 -->
+<!-- 2022-08-22 Mon 17:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Presidentielles 2022</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
-<style>
-  #content { max-width: 60em; margin: auto; }
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
-  .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
-  .tag    { background-color: #eee; font-family: monospace;
-            padding: 2px; font-size: 80%; font-weight: normal; }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
-  .underline { text-decoration: underline; }
-  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
-  p.verse { margin-left: 3%; }
-  pre {
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background-color: #f2f2f2;
-    padding: 8pt;
-    font-family: monospace;
-    overflow: auto;
-    margin: 1.2em;
-  }
-  pre.src {
-    position: relative;
-    overflow: auto;
-  }
-  pre.src:before {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    padding: 3px;
-    color: #555;
-    background-color: #f2f2f299;
-  }
-  pre.src:hover:before { display: inline; margin-top: 14px;}
-  /* Languages per Org manual */
-  pre.src-asymptote:before { content: 'Asymptote'; }
-  pre.src-awk:before { content: 'Awk'; }
-  pre.src-authinfo::before { content: 'Authinfo'; }
-  pre.src-C:before { content: 'C'; }
-  /* pre.src-C++ doesn't work in CSS */
-  pre.src-clojure:before { content: 'Clojure'; }
-  pre.src-css:before { content: 'CSS'; }
-  pre.src-D:before { content: 'D'; }
-  pre.src-ditaa:before { content: 'ditaa'; }
-  pre.src-dot:before { content: 'Graphviz'; }
-  pre.src-calc:before { content: 'Emacs Calc'; }
-  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-fortran:before { content: 'Fortran'; }
-  pre.src-gnuplot:before { content: 'gnuplot'; }
-  pre.src-haskell:before { content: 'Haskell'; }
-  pre.src-hledger:before { content: 'hledger'; }
-  pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
-  pre.src-latex:before { content: 'LaTeX'; }
-  pre.src-ledger:before { content: 'Ledger'; }
-  pre.src-lisp:before { content: 'Lisp'; }
-  pre.src-lilypond:before { content: 'Lilypond'; }
-  pre.src-lua:before { content: 'Lua'; }
-  pre.src-matlab:before { content: 'MATLAB'; }
-  pre.src-mscgen:before { content: 'Mscgen'; }
-  pre.src-ocaml:before { content: 'Objective Caml'; }
-  pre.src-octave:before { content: 'Octave'; }
-  pre.src-org:before { content: 'Org mode'; }
-  pre.src-oz:before { content: 'OZ'; }
-  pre.src-plantuml:before { content: 'Plantuml'; }
-  pre.src-processing:before { content: 'Processing.js'; }
-  pre.src-python:before { content: 'Python'; }
-  pre.src-R:before { content: 'R'; }
-  pre.src-ruby:before { content: 'Ruby'; }
-  pre.src-sass:before { content: 'Sass'; }
-  pre.src-scheme:before { content: 'Scheme'; }
-  pre.src-screen:before { content: 'Gnu Screen'; }
-  pre.src-sed:before { content: 'Sed'; }
-  pre.src-sh:before { content: 'shell'; }
-  pre.src-sql:before { content: 'SQL'; }
-  pre.src-sqlite:before { content: 'SQLite'; }
-  /* additional languages in org.el's org-babel-load-languages alist */
-  pre.src-forth:before { content: 'Forth'; }
-  pre.src-io:before { content: 'IO'; }
-  pre.src-J:before { content: 'J'; }
-  pre.src-makefile:before { content: 'Makefile'; }
-  pre.src-maxima:before { content: 'Maxima'; }
-  pre.src-perl:before { content: 'Perl'; }
-  pre.src-picolisp:before { content: 'Pico Lisp'; }
-  pre.src-scala:before { content: 'Scala'; }
-  pre.src-shell:before { content: 'Shell Script'; }
-  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
-  /* additional language identifiers per "defun org-babel-execute"
-       in ob-*.el */
-  pre.src-cpp:before  { content: 'C++'; }
-  pre.src-abc:before  { content: 'ABC'; }
-  pre.src-coq:before  { content: 'Coq'; }
-  pre.src-groovy:before  { content: 'Groovy'; }
-  /* additional language identifiers from org-babel-shell-names in
-     ob-shell.el: ob-shell is the only babel language using a lambda to put
-     the execution function name together. */
-  pre.src-bash:before  { content: 'bash'; }
-  pre.src-csh:before  { content: 'csh'; }
-  pre.src-ash:before  { content: 'ash'; }
-  pre.src-dash:before  { content: 'dash'; }
-  pre.src-ksh:before  { content: 'ksh'; }
-  pre.src-mksh:before  { content: 'mksh'; }
-  pre.src-posh:before  { content: 'posh'; }
-  /* Additional Emacs modes also supported by the LaTeX listings package */
-  pre.src-ada:before { content: 'Ada'; }
-  pre.src-asm:before { content: 'Assembler'; }
-  pre.src-caml:before { content: 'Caml'; }
-  pre.src-delphi:before { content: 'Delphi'; }
-  pre.src-html:before { content: 'HTML'; }
-  pre.src-idl:before { content: 'IDL'; }
-  pre.src-mercury:before { content: 'Mercury'; }
-  pre.src-metapost:before { content: 'MetaPost'; }
-  pre.src-modula-2:before { content: 'Modula-2'; }
-  pre.src-pascal:before { content: 'Pascal'; }
-  pre.src-ps:before { content: 'PostScript'; }
-  pre.src-prolog:before { content: 'Prolog'; }
-  pre.src-simula:before { content: 'Simula'; }
-  pre.src-tcl:before { content: 'tcl'; }
-  pre.src-tex:before { content: 'TeX'; }
-  pre.src-plain-tex:before { content: 'Plain TeX'; }
-  pre.src-verilog:before { content: 'Verilog'; }
-  pre.src-vhdl:before { content: 'VHDL'; }
-  pre.src-xml:before { content: 'XML'; }
-  pre.src-nxml:before { content: 'XML'; }
-  /* add a generic configuration mode; LaTeX export needs an additional
-     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
-  pre.src-conf:before { content: 'Configuration File'; }
-
-  table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
-  td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
-  dt { font-weight: bold; }
-  .footpara { display: inline; }
-  .footdef  { margin-bottom: 1em; }
-  .figure { padding: 1em; }
-  .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
-  .inlinetask {
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 10px;
-    background: #ffffcc;
-  }
-  #org-div-home-and-up
-   { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x: auto; }
-  .linenr { font-size: smaller }
-  .code-highlighted { background-color: #ffff00; }
-  .org-info-js_info-navigation { border-style: none; }
-  #org-info-js_console-label
-    { font-size: 10px; font-weight: bold; white-space: nowrap; }
-  .org-info-js_search-highlight
-    { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { }
-</style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">Presidentielles 2022</h1>
 
-<div id="outline-container-orgaaf075b" class="outline-2">
-<h2 id="orgaaf075b"><span class="todo TODO">TODO</span> Second tour</h2>
-<div class="outline-text-2" id="text-orgaaf075b">
+<div id="outline-container-org3be4edd" class="outline-2">
+<h2 id="org3be4edd"><span class="todo TODO">TODO</span> Second tour</h2>
+<div class="outline-text-2" id="text-org3be4edd">
 </div>
-<div id="outline-container-org026769b" class="outline-3">
-<h3 id="org026769b"><span class="todo TODO">TODO</span> Template HTML pour sondages election second tour</h3>
-<div class="outline-text-3" id="text-org026769b">
+<div id="outline-container-org008f34b" class="outline-3">
+<h3 id="org008f34b"><span class="todo TODO">TODO</span> Template HTML pour sondages election second tour</h3>
+<div class="outline-text-3" id="text-org008f34b">
 <ul class="org-ul">
 <li>Si la date de sortie du sondage est la même qu'aujourd'hui -&gt; "Aujourd'hui" sinon date</li>
 <li>Ecart avec 2e candidat</li>
@@ -239,21 +55,21 @@
 </table>
 </div>
 </div>
-<div id="outline-container-orgb3504f4" class="outline-3">
-<h3 id="orgb3504f4"><span class="todo TODO">TODO</span> Faire tourner sur 3-4 sondages</h3>
+<div id="outline-container-org9b7c165" class="outline-3">
+<h3 id="org9b7c165"><span class="todo TODO">TODO</span> Faire tourner sur 3-4 sondages</h3>
 </div>
-<div id="outline-container-org1c8444e" class="outline-3">
-<h3 id="org1c8444e"><span class="todo TODO">TODO</span> Graphe scenario le plus probable (sans incertitudes)</h3>
+<div id="outline-container-org8e04120" class="outline-3">
+<h3 id="org8e04120"><span class="todo TODO">TODO</span> Graphe scenario le plus probable (sans incertitudes)</h3>
 </div>
 </div>
 
-<div id="outline-container-orgb1f14d2" class="outline-2">
-<h2 id="orgb1f14d2"><span class="todo TODO">TODO</span> Premier tour</h2>
-<div class="outline-text-2" id="text-orgb1f14d2">
+<div id="outline-container-org7766c01" class="outline-2">
+<h2 id="org7766c01"><span class="todo TODO">TODO</span> Premier tour</h2>
+<div class="outline-text-2" id="text-org7766c01">
 </div>
-<div id="outline-container-org373c686" class="outline-3">
-<h3 id="org373c686"><span class="todo TODO">TODO</span> Template HTML pour sondages election premier tour</h3>
-<div class="outline-text-3" id="text-org373c686">
+<div id="outline-container-org0209f96" class="outline-3">
+<h3 id="org0209f96"><span class="todo TODO">TODO</span> Template HTML pour sondages election premier tour</h3>
+<div class="outline-text-3" id="text-org0209f96">
 <ul class="org-ul">
 <li>Si la date de sortie du sondage est la même qu'aujourd'hui -&gt; "Aujourd'hui" sinon date</li>
 <li>Ecart avec 3e candidat pour les deux premiers candidats</li>
@@ -290,21 +106,21 @@
 </div>
 
 
-<div id="outline-container-orgc6295bd" class="outline-2">
-<h2 id="orgc6295bd">Sondages</h2>
-<div class="outline-text-2" id="text-orgc6295bd">
+<div id="outline-container-org9668075" class="outline-2">
+<h2 id="org9668075">Sondages</h2>
+<div class="outline-text-2" id="text-org9668075">
 <p>
 On peut récupérer les sondages sur la <a target='_blank' rel='noopener noreferrer' class='external' href="https://fr.wikipedia.org/wiki/Liste_de_sondages_sur_l%27%C3%A9lection_pr%C3%A9sidentielle_fran%C3%A7aise_de_2022">page wikipédia</a> dédiée, qui parait plutôt à jour.
 </p>
 </div>
 
-<div id="outline-container-org7c8bfb3" class="outline-3">
-<h3 id="org7c8bfb3">Format de données</h3>
-<div class="outline-text-3" id="text-org7c8bfb3">
+<div id="outline-container-org645f67e" class="outline-3">
+<h3 id="org645f67e">Format de données</h3>
+<div class="outline-text-3" id="text-org645f67e">
 </div>
-<div id="outline-container-org521ea9f" class="outline-4">
-<h4 id="org521ea9f">Second tour</h4>
-<div class="outline-text-4" id="text-org521ea9f">
+<div id="outline-container-orgeefaf2e" class="outline-4">
+<h4 id="orgeefaf2e">Second tour</h4>
+<div class="outline-text-4" id="text-orgeefaf2e">
 <p>
 Il semble que la proportion d'indécis est importante; il est donc nécessaire de la prendre en compte. Mais il faut faire la distinction entre ce qui est de l'ordre du vote blanc/nul, du refus de se prononcer lors de l'étude
 </p>
@@ -320,8 +136,8 @@ La difficulté est que les différents instituts de sondage ne présentent pas l
 </div>
 
 <ul class="org-ul">
-<li><a id="orgc2233d6"></a>Harris<br />
-<div class="outline-text-5" id="text-orgc2233d6">
+<li><a id="orgc2716cb"></a>Harris<br />
+<div class="outline-text-5" id="text-orgc2716cb">
 <p>
 Les deux questions suivantes sont systématiquement posées:
 </p>
@@ -336,8 +152,8 @@ Dans la première notice il y a mention de l'abstention, blanc/nul mais plus ens
 </div>
 </li>
 
-<li><a id="orga40d9ab"></a>Elabe<br />
-<div class="outline-text-5" id="text-orga40d9ab">
+<li><a id="org8dbb4ce"></a>Elabe<br />
+<div class="outline-text-5" id="text-org8dbb4ce">
 <p>
 "Et au second tour de l’élection présidentielle en 2022, si vous aviez le choix entre les candidats suivants, pour qui voteriez-vous ?"
     • Emmanuel MACRON
@@ -348,8 +164,8 @@ Dans la première notice il y a mention de l'abstention, blanc/nul mais plus ens
 </div>
 </li>
 
-<li><a id="org4454d5c"></a>Ifop<br />
-<div class="outline-text-5" id="text-org4454d5c">
+<li><a id="org58a7930"></a>Ifop<br />
+<div class="outline-text-5" id="text-org58a7930">
 <ul class="org-ul">
 <li>"Si dimanche prochain devait se dérouler le second tour de l’élection</li>
 </ul>
@@ -363,8 +179,8 @@ Donne le pourcentage "ne se prononcent pas" -&gt; pas de vote blanc/nul? Ce n'es
 </div>
 </li>
 
-<li><a id="org28bbc54"></a>Ipsos<br />
-<div class="outline-text-5" id="text-org28bbc54">
+<li><a id="org11644fc"></a>Ipsos<br />
+<div class="outline-text-5" id="text-org11644fc">
 <p>
 "Si le 2nd tour de l’élection présidentielle avait lieu dimanche prochain et si vous aviez le choix entre les candidats
 suivants, quel est celui pour lequel il y aurait le plus de chances que vous votiez au 2nd tour?"
@@ -379,28 +195,28 @@ suivants, quel est celui pour lequel il y aurait le plus de chances que vous vot
 </div>
 </div>
 
-<div id="outline-container-orgc815052" class="outline-3">
-<h3 id="orgc815052"><span class="todo TODO">TODO</span> Entrer les sondages 2nd tour à la main dans un fichier yaml</h3>
+<div id="outline-container-orgd25bb2d" class="outline-3">
+<h3 id="orgd25bb2d"><span class="todo TODO">TODO</span> Entrer les sondages 2nd tour à la main dans un fichier yaml</h3>
 </div>
-<div id="outline-container-org8927ae6" class="outline-3">
-<h3 id="org8927ae6"><span class="todo TODO">TODO</span> Valider le yaml dans la CI</h3>
+<div id="outline-container-org963dd96" class="outline-3">
+<h3 id="org963dd96"><span class="todo TODO">TODO</span> Valider le yaml dans la CI</h3>
 </div>
-<div id="outline-container-orga0f0963" class="outline-3">
-<h3 id="orga0f0963"><span class="todo TODO">TODO</span> Plot 2nd tour polls using altair</h3>
+<div id="outline-container-org17a48f4" class="outline-3">
+<h3 id="org17a48f4"><span class="todo TODO">TODO</span> Plot 2nd tour polls using altair</h3>
 </div>
 </div>
 
-<div id="outline-container-orgd025f5d" class="outline-2">
-<h2 id="orgd025f5d">Site web</h2>
-<div class="outline-text-2" id="text-orgd025f5d">
+<div id="outline-container-orga5f3846" class="outline-2">
+<h2 id="orga5f3846">Site web</h2>
+<div class="outline-text-2" id="text-orga5f3846">
 <p>
 Il faut une page avec les <a target='_blank' rel='noopener noreferrer' class='external' href="https://projects.fivethirtyeight.com/polls/president-general/national/">derniers sondages</a> pour le premier et deuxième tour.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1d6c466" class="outline-2">
-<h2 id="org1d6c466">Links to this note</h2>
+<div id="outline-container-orgfcb0161" class="outline-2">
+<h2 id="orgfcb0161">Links to this note</h2>
 </div>
 </div>
 </body>

@@ -3,196 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:04 -->
+<!-- 2022-08-22 Mon 17:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Euro</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
-<style>
-  #content { max-width: 60em; margin: auto; }
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
-  .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
-  .tag    { background-color: #eee; font-family: monospace;
-            padding: 2px; font-size: 80%; font-weight: normal; }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
-  .underline { text-decoration: underline; }
-  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
-  p.verse { margin-left: 3%; }
-  pre {
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background-color: #f2f2f2;
-    padding: 8pt;
-    font-family: monospace;
-    overflow: auto;
-    margin: 1.2em;
-  }
-  pre.src {
-    position: relative;
-    overflow: auto;
-  }
-  pre.src:before {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    padding: 3px;
-    color: #555;
-    background-color: #f2f2f299;
-  }
-  pre.src:hover:before { display: inline; margin-top: 14px;}
-  /* Languages per Org manual */
-  pre.src-asymptote:before { content: 'Asymptote'; }
-  pre.src-awk:before { content: 'Awk'; }
-  pre.src-authinfo::before { content: 'Authinfo'; }
-  pre.src-C:before { content: 'C'; }
-  /* pre.src-C++ doesn't work in CSS */
-  pre.src-clojure:before { content: 'Clojure'; }
-  pre.src-css:before { content: 'CSS'; }
-  pre.src-D:before { content: 'D'; }
-  pre.src-ditaa:before { content: 'ditaa'; }
-  pre.src-dot:before { content: 'Graphviz'; }
-  pre.src-calc:before { content: 'Emacs Calc'; }
-  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-fortran:before { content: 'Fortran'; }
-  pre.src-gnuplot:before { content: 'gnuplot'; }
-  pre.src-haskell:before { content: 'Haskell'; }
-  pre.src-hledger:before { content: 'hledger'; }
-  pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
-  pre.src-latex:before { content: 'LaTeX'; }
-  pre.src-ledger:before { content: 'Ledger'; }
-  pre.src-lisp:before { content: 'Lisp'; }
-  pre.src-lilypond:before { content: 'Lilypond'; }
-  pre.src-lua:before { content: 'Lua'; }
-  pre.src-matlab:before { content: 'MATLAB'; }
-  pre.src-mscgen:before { content: 'Mscgen'; }
-  pre.src-ocaml:before { content: 'Objective Caml'; }
-  pre.src-octave:before { content: 'Octave'; }
-  pre.src-org:before { content: 'Org mode'; }
-  pre.src-oz:before { content: 'OZ'; }
-  pre.src-plantuml:before { content: 'Plantuml'; }
-  pre.src-processing:before { content: 'Processing.js'; }
-  pre.src-python:before { content: 'Python'; }
-  pre.src-R:before { content: 'R'; }
-  pre.src-ruby:before { content: 'Ruby'; }
-  pre.src-sass:before { content: 'Sass'; }
-  pre.src-scheme:before { content: 'Scheme'; }
-  pre.src-screen:before { content: 'Gnu Screen'; }
-  pre.src-sed:before { content: 'Sed'; }
-  pre.src-sh:before { content: 'shell'; }
-  pre.src-sql:before { content: 'SQL'; }
-  pre.src-sqlite:before { content: 'SQLite'; }
-  /* additional languages in org.el's org-babel-load-languages alist */
-  pre.src-forth:before { content: 'Forth'; }
-  pre.src-io:before { content: 'IO'; }
-  pre.src-J:before { content: 'J'; }
-  pre.src-makefile:before { content: 'Makefile'; }
-  pre.src-maxima:before { content: 'Maxima'; }
-  pre.src-perl:before { content: 'Perl'; }
-  pre.src-picolisp:before { content: 'Pico Lisp'; }
-  pre.src-scala:before { content: 'Scala'; }
-  pre.src-shell:before { content: 'Shell Script'; }
-  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
-  /* additional language identifiers per "defun org-babel-execute"
-       in ob-*.el */
-  pre.src-cpp:before  { content: 'C++'; }
-  pre.src-abc:before  { content: 'ABC'; }
-  pre.src-coq:before  { content: 'Coq'; }
-  pre.src-groovy:before  { content: 'Groovy'; }
-  /* additional language identifiers from org-babel-shell-names in
-     ob-shell.el: ob-shell is the only babel language using a lambda to put
-     the execution function name together. */
-  pre.src-bash:before  { content: 'bash'; }
-  pre.src-csh:before  { content: 'csh'; }
-  pre.src-ash:before  { content: 'ash'; }
-  pre.src-dash:before  { content: 'dash'; }
-  pre.src-ksh:before  { content: 'ksh'; }
-  pre.src-mksh:before  { content: 'mksh'; }
-  pre.src-posh:before  { content: 'posh'; }
-  /* Additional Emacs modes also supported by the LaTeX listings package */
-  pre.src-ada:before { content: 'Ada'; }
-  pre.src-asm:before { content: 'Assembler'; }
-  pre.src-caml:before { content: 'Caml'; }
-  pre.src-delphi:before { content: 'Delphi'; }
-  pre.src-html:before { content: 'HTML'; }
-  pre.src-idl:before { content: 'IDL'; }
-  pre.src-mercury:before { content: 'Mercury'; }
-  pre.src-metapost:before { content: 'MetaPost'; }
-  pre.src-modula-2:before { content: 'Modula-2'; }
-  pre.src-pascal:before { content: 'Pascal'; }
-  pre.src-ps:before { content: 'PostScript'; }
-  pre.src-prolog:before { content: 'Prolog'; }
-  pre.src-simula:before { content: 'Simula'; }
-  pre.src-tcl:before { content: 'tcl'; }
-  pre.src-tex:before { content: 'TeX'; }
-  pre.src-plain-tex:before { content: 'Plain TeX'; }
-  pre.src-verilog:before { content: 'Verilog'; }
-  pre.src-vhdl:before { content: 'VHDL'; }
-  pre.src-xml:before { content: 'XML'; }
-  pre.src-nxml:before { content: 'XML'; }
-  /* add a generic configuration mode; LaTeX export needs an additional
-     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
-  pre.src-conf:before { content: 'Configuration File'; }
-
-  table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
-  td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
-  dt { font-weight: bold; }
-  .footpara { display: inline; }
-  .footdef  { margin-bottom: 1em; }
-  .figure { padding: 1em; }
-  .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
-  .inlinetask {
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 10px;
-    background: #ffffcc;
-  }
-  #org-div-home-and-up
-   { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x: auto; }
-  .linenr { font-size: smaller }
-  .code-highlighted { background-color: #ffff00; }
-  .org-info-js_info-navigation { border-style: none; }
-  #org-info-js_console-label
-    { font-size: 10px; font-weight: bold; white-space: nowrap; }
-  .org-info-js_search-highlight
-    { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { }
-</style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -202,9 +18,9 @@
 <dt>tags</dt><dd><a href="20220103155222-monetary_systems.html#ID-1a53642d-c03e-4ae9-92e2-e164869927b3">Monetary systems</a></dd>
 </dl>
 
-<div id="outline-container-orgd5239f0" class="outline-2">
-<h2 id="orgd5239f0">Arguments in favor of the euro</h2>
-<div class="outline-text-2" id="text-orgd5239f0">
+<div id="outline-container-org0e385db" class="outline-2">
+<h2 id="org0e385db">Arguments in favor of the euro</h2>
+<div class="outline-text-2" id="text-org0e385db">
 <p>
 Regarder <a target='_blank' rel='noopener noreferrer' class='external' href="https://t.co/15vjPnkGOz?amp=1">Cette conférence de David Cayla sur la rationalité économique qui sous-tend l'euro</a>.
 </p>
@@ -215,21 +31,21 @@ Débat Attali, Chevènement, Garaud
 </p>
 </div>
 
-<div id="outline-container-org323a9d9" class="outline-3">
-<h3 id="org323a9d9"><span class="todo TODO">TODO</span> States can borrow at much better interest rates</h3>
+<div id="outline-container-org0c08a54" class="outline-3">
+<h3 id="org0c08a54"><span class="todo TODO">TODO</span> States can borrow at much better interest rates</h3>
 </div>
-<div id="outline-container-org8b13ed9" class="outline-3">
-<h3 id="org8b13ed9"><span class="todo TODO">TODO</span> La disparition des taux de change est bénéfique pour l'intégration économique</h3>
-<div class="outline-text-3" id="text-org8b13ed9">
+<div id="outline-container-org4261b85" class="outline-3">
+<h3 id="org4261b85"><span class="todo TODO">TODO</span> La disparition des taux de change est bénéfique pour l'intégration économique</h3>
+<div class="outline-text-3" id="text-org4261b85">
 <p>
 This could have introduced perverse effects in terms of fuind transfers. Need some digging and data. Remove
 cite:stiglitz2016 (p46)
 </p>
 </div>
 
-<div id="outline-container-org822b63d" class="outline-4">
-<h4 id="org822b63d">yes, but</h4>
-<div class="outline-text-4" id="text-org822b63d">
+<div id="outline-container-org5dc791e" class="outline-4">
+<h4 id="org5dc791e">yes, but</h4>
+<div class="outline-text-4" id="text-org5dc791e">
 <p>
 This had perverse effects, cite:stiglitz2016 (p46). We didn't need a common currency to integrate China in the globall supply chain. cite:stiglitz2016
 </p>
@@ -237,21 +53,21 @@ This had perverse effects, cite:stiglitz2016 (p46). We didn't need a common curr
 </div>
 </div>
 
-<div id="outline-container-org4f9a81f" class="outline-3">
-<h3 id="org4f9a81f">Inflation rates converge</h3>
-<div class="outline-text-3" id="text-org4f9a81f">
+<div id="outline-container-org9d6a3a4" class="outline-3">
+<h3 id="org9d6a3a4">Inflation rates converge</h3>
+<div class="outline-text-3" id="text-org9d6a3a4">
 <p>
 Ok but how is that relevant?
 </p>
 </div>
-<div id="outline-container-orge238e0e" class="outline-4">
-<h4 id="orge238e0e"><span class="todo TODO">TODO</span> Show on curve</h4>
+<div id="outline-container-orgdd6cb3f" class="outline-4">
+<h4 id="orgdd6cb3f"><span class="todo TODO">TODO</span> Show on curve</h4>
 </div>
 </div>
 
-<div id="outline-container-orgb82a88b" class="outline-3">
-<h3 id="orgb82a88b">L'Europe c'est la paix sociale qui pèse</h3>
-<div class="outline-text-3" id="text-orgb82a88b">
+<div id="outline-container-orgfb1b476" class="outline-3">
+<h3 id="orgfb1b476">L'Europe c'est la paix sociale qui pèse</h3>
+<div class="outline-text-3" id="text-orgfb1b476">
 <p>
 See cite:stiglitz2016 (p35-36). But the question is ill-posed: is a monetary union <i>necessary</i> to achieve this goal ? We need consensus first, but everyone is doing different things.
 </p>
@@ -262,9 +78,9 @@ Wrong, see the Greece crisis cite:stiglitz2016 (p59)
 </div>
 </div>
 
-<div id="outline-container-orgb1c9916" class="outline-3">
-<h3 id="orgb1c9916">Si ça marche aux US avec 50 état ça peut marcher avec 19 en europe</h3>
-<div class="outline-text-3" id="text-orgb1c9916">
+<div id="outline-container-orgbb4cb56" class="outline-3">
+<h3 id="orgbb4cb56">Si ça marche aux US avec 50 état ça peut marcher avec 19 en europe</h3>
+<div class="outline-text-3" id="text-orgbb4cb56">
 <p>
 Il existe 3 mecanismes d'ajustment aux US qui n'existent pas en Europe cite:stiglitz2016 (p89)
 </p>
@@ -277,9 +93,9 @@ Il existe 3 mecanismes d'ajustment aux US qui n'existent pas en Europe cite:stig
 </div>
 </div>
 
-<div id="outline-container-org225a83b" class="outline-3">
-<h3 id="org225a83b"><span class="todo TODO">TODO</span> Grâce à l'Euro l'Europe est prospère</h3>
-<div class="outline-text-3" id="text-org225a83b">
+<div id="outline-container-orgc0f061b" class="outline-3">
+<h3 id="orgc0f061b"><span class="todo TODO">TODO</span> Grâce à l'Euro l'Europe est prospère</h3>
+<div class="outline-text-3" id="text-orgc0f061b">
 <p>
 Following are taken from cite:stiglitz2016 p65 onwards
 </p>
@@ -312,13 +128,13 @@ Generally:
 
 
 <ul class="org-ul">
-<li><a id="org4cf7e7b"></a><span class="todo TODO">TODO</span> Reprendre le graphe de X-alternative sur l'industrie<br /></li>
+<li><a id="orgba726e5"></a><span class="todo TODO">TODO</span> Reprendre le graphe de X-alternative sur l'industrie<br /></li>
 </ul>
 
 
-<div id="outline-container-org1371fe1" class="outline-4">
-<h4 id="org1371fe1">Counterarguments</h4>
-<div class="outline-text-4" id="text-org1371fe1">
+<div id="outline-container-orgbd03fe0" class="outline-4">
+<h4 id="orgbd03fe0">Counterarguments</h4>
+<div class="outline-text-4" id="text-orgbd03fe0">
 <p>
 <i>It would have been worse without the euro.</i>
 <i>Maybe it's about changes in the economy that affected the eurozone that has nothing to do with the currency.</i>
@@ -332,9 +148,9 @@ cite:stiglitz2016 (p81)
 </div>
 </div>
 
-<div id="outline-container-orgafc50cd" class="outline-2">
-<h2 id="orgafc50cd">Links to this note</h2>
-<div class="outline-text-2" id="text-orgafc50cd">
+<div id="outline-container-orga334de6" class="outline-2">
+<h2 id="orga334de6">Links to this note</h2>
+<div class="outline-text-2" id="text-orga334de6">
 <ul class="org-ul">
 <li><a href="./20220103155222-monetary_systems.html">The Monetary systems</a></li>
 <li><a href="./20220107183247-we_can_borrow_at_lower_interest_rates_thanks_to_the_euro.html">We can borrow at lower interest rates thanks to the Euro</a></li>

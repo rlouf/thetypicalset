@@ -3,196 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:04 -->
+<!-- 2022-08-22 Mon 17:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Lightning fast recommandation with Birdland</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
-<style>
-  #content { max-width: 60em; margin: auto; }
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
-  .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
-  .tag    { background-color: #eee; font-family: monospace;
-            padding: 2px; font-size: 80%; font-weight: normal; }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
-  .underline { text-decoration: underline; }
-  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
-  p.verse { margin-left: 3%; }
-  pre {
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background-color: #f2f2f2;
-    padding: 8pt;
-    font-family: monospace;
-    overflow: auto;
-    margin: 1.2em;
-  }
-  pre.src {
-    position: relative;
-    overflow: auto;
-  }
-  pre.src:before {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    padding: 3px;
-    color: #555;
-    background-color: #f2f2f299;
-  }
-  pre.src:hover:before { display: inline; margin-top: 14px;}
-  /* Languages per Org manual */
-  pre.src-asymptote:before { content: 'Asymptote'; }
-  pre.src-awk:before { content: 'Awk'; }
-  pre.src-authinfo::before { content: 'Authinfo'; }
-  pre.src-C:before { content: 'C'; }
-  /* pre.src-C++ doesn't work in CSS */
-  pre.src-clojure:before { content: 'Clojure'; }
-  pre.src-css:before { content: 'CSS'; }
-  pre.src-D:before { content: 'D'; }
-  pre.src-ditaa:before { content: 'ditaa'; }
-  pre.src-dot:before { content: 'Graphviz'; }
-  pre.src-calc:before { content: 'Emacs Calc'; }
-  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-fortran:before { content: 'Fortran'; }
-  pre.src-gnuplot:before { content: 'gnuplot'; }
-  pre.src-haskell:before { content: 'Haskell'; }
-  pre.src-hledger:before { content: 'hledger'; }
-  pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
-  pre.src-latex:before { content: 'LaTeX'; }
-  pre.src-ledger:before { content: 'Ledger'; }
-  pre.src-lisp:before { content: 'Lisp'; }
-  pre.src-lilypond:before { content: 'Lilypond'; }
-  pre.src-lua:before { content: 'Lua'; }
-  pre.src-matlab:before { content: 'MATLAB'; }
-  pre.src-mscgen:before { content: 'Mscgen'; }
-  pre.src-ocaml:before { content: 'Objective Caml'; }
-  pre.src-octave:before { content: 'Octave'; }
-  pre.src-org:before { content: 'Org mode'; }
-  pre.src-oz:before { content: 'OZ'; }
-  pre.src-plantuml:before { content: 'Plantuml'; }
-  pre.src-processing:before { content: 'Processing.js'; }
-  pre.src-python:before { content: 'Python'; }
-  pre.src-R:before { content: 'R'; }
-  pre.src-ruby:before { content: 'Ruby'; }
-  pre.src-sass:before { content: 'Sass'; }
-  pre.src-scheme:before { content: 'Scheme'; }
-  pre.src-screen:before { content: 'Gnu Screen'; }
-  pre.src-sed:before { content: 'Sed'; }
-  pre.src-sh:before { content: 'shell'; }
-  pre.src-sql:before { content: 'SQL'; }
-  pre.src-sqlite:before { content: 'SQLite'; }
-  /* additional languages in org.el's org-babel-load-languages alist */
-  pre.src-forth:before { content: 'Forth'; }
-  pre.src-io:before { content: 'IO'; }
-  pre.src-J:before { content: 'J'; }
-  pre.src-makefile:before { content: 'Makefile'; }
-  pre.src-maxima:before { content: 'Maxima'; }
-  pre.src-perl:before { content: 'Perl'; }
-  pre.src-picolisp:before { content: 'Pico Lisp'; }
-  pre.src-scala:before { content: 'Scala'; }
-  pre.src-shell:before { content: 'Shell Script'; }
-  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
-  /* additional language identifiers per "defun org-babel-execute"
-       in ob-*.el */
-  pre.src-cpp:before  { content: 'C++'; }
-  pre.src-abc:before  { content: 'ABC'; }
-  pre.src-coq:before  { content: 'Coq'; }
-  pre.src-groovy:before  { content: 'Groovy'; }
-  /* additional language identifiers from org-babel-shell-names in
-     ob-shell.el: ob-shell is the only babel language using a lambda to put
-     the execution function name together. */
-  pre.src-bash:before  { content: 'bash'; }
-  pre.src-csh:before  { content: 'csh'; }
-  pre.src-ash:before  { content: 'ash'; }
-  pre.src-dash:before  { content: 'dash'; }
-  pre.src-ksh:before  { content: 'ksh'; }
-  pre.src-mksh:before  { content: 'mksh'; }
-  pre.src-posh:before  { content: 'posh'; }
-  /* Additional Emacs modes also supported by the LaTeX listings package */
-  pre.src-ada:before { content: 'Ada'; }
-  pre.src-asm:before { content: 'Assembler'; }
-  pre.src-caml:before { content: 'Caml'; }
-  pre.src-delphi:before { content: 'Delphi'; }
-  pre.src-html:before { content: 'HTML'; }
-  pre.src-idl:before { content: 'IDL'; }
-  pre.src-mercury:before { content: 'Mercury'; }
-  pre.src-metapost:before { content: 'MetaPost'; }
-  pre.src-modula-2:before { content: 'Modula-2'; }
-  pre.src-pascal:before { content: 'Pascal'; }
-  pre.src-ps:before { content: 'PostScript'; }
-  pre.src-prolog:before { content: 'Prolog'; }
-  pre.src-simula:before { content: 'Simula'; }
-  pre.src-tcl:before { content: 'tcl'; }
-  pre.src-tex:before { content: 'TeX'; }
-  pre.src-plain-tex:before { content: 'Plain TeX'; }
-  pre.src-verilog:before { content: 'Verilog'; }
-  pre.src-vhdl:before { content: 'VHDL'; }
-  pre.src-xml:before { content: 'XML'; }
-  pre.src-nxml:before { content: 'XML'; }
-  /* add a generic configuration mode; LaTeX export needs an additional
-     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
-  pre.src-conf:before { content: 'Configuration File'; }
-
-  table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
-  td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
-  dt { font-weight: bold; }
-  .footpara { display: inline; }
-  .footdef  { margin-bottom: 1em; }
-  .figure { padding: 1em; }
-  .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
-  .inlinetask {
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 10px;
-    background: #ffffcc;
-  }
-  #org-div-home-and-up
-   { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x: auto; }
-  .linenr { font-size: smaller }
-  .code-highlighted { background-color: #ffff00; }
-  .org-info-js_info-navigation { border-style: none; }
-  #org-info-js_console-label
-    { font-size: 10px; font-weight: bold; white-space: nowrap; }
-  .org-info-js_search-highlight
-    { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { }
-</style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
@@ -220,9 +36,9 @@
 <div id="content" class="content">
 <h1 class="title">Lightning fast recommandation with Birdland</h1>
 
-<div id="outline-container-orgaca5cc8" class="outline-2">
-<h2 id="orgaca5cc8"><span class="todo TODO">TODO</span> Finish this damn blog post</h2>
-<div class="outline-text-2" id="text-orgaca5cc8">
+<div id="outline-container-orgf0d7497" class="outline-2">
+<h2 id="orgf0d7497"><span class="todo TODO">TODO</span> Finish this damn blog post</h2>
+<div class="outline-text-2" id="text-orgf0d7497">
 <p>
 This post is a long overdue post on a recommendation algorithm that I developed
 and implemented with Etienne Duschene and Nicolas Martyanoff some 4 years ago: <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/rlouf/birdland">Birdland</a> (checkout the
@@ -239,9 +55,9 @@ This is a long post, so get a good cup of coffee (tea) and sit comfortably.
 </div>
 </div>
 
-<div id="outline-container-org605e116" class="outline-2">
-<h2 id="org605e116">You have to build a recommandation system</h2>
-<div class="outline-text-2" id="text-org605e116">
+<div id="outline-container-org8795e78" class="outline-2">
+<h2 id="org8795e78">You have to build a recommandation system</h2>
+<div class="outline-text-2" id="text-org8795e78">
 <p>
 I was asked a little less than 2 years ago to design a music recommendation
 algorithm for the application I was working on. The application was a social
@@ -278,17 +94,17 @@ both dubious theoretically speaking, and harder to implement that it seems.
 </div>
 </div>
 
-<div id="outline-container-org5a02a7a" class="outline-2">
-<h2 id="org5a02a7a">ImplicitMF sucks</h2>
-<div class="outline-text-2" id="text-org5a02a7a">
+<div id="outline-container-org6fe0e58" class="outline-2">
+<h2 id="org6fe0e58">ImplicitMF sucks</h2>
+<div class="outline-text-2" id="text-org6fe0e58">
 <p>
 In the context of music recommendation, implicitMF sucks. I've said it.
 </p>
 </div>
 
-<div id="outline-container-org057ebba" class="outline-3">
-<h3 id="org057ebba">It smells conceptually</h3>
-<div class="outline-text-3" id="text-org057ebba">
+<div id="outline-container-orgc372753" class="outline-3">
+<h3 id="orgc372753">It smells conceptually</h3>
+<div class="outline-text-3" id="text-orgc372753">
 <p>
 The MF part in "implicit MF" stands for implicit matrix factorization. Roughly
 speaking, it starts with a matrix \(R\) (user x song) where \(R_{i,j}\) is the
@@ -366,9 +182,9 @@ hidden engineering costs.
 </div>
 </div>
 
-<div id="outline-container-org774f5b6" class="outline-3">
-<h3 id="org774f5b6">It has hidden costs</h3>
-<div class="outline-text-3" id="text-org774f5b6">
+<div id="outline-container-org65763e6" class="outline-3">
+<h3 id="org65763e6">It has hidden costs</h3>
+<div class="outline-text-3" id="text-org65763e6">
 <p>
 The result of implicit Matrix Factorization is two matrices song-vector and
 user-song; it is an embedding of songs and users in a K-dimensional space. But
@@ -428,9 +244,9 @@ had to ditch matrix factorization early on.
 </div>
 
 
-<div id="outline-container-org781c497" class="outline-2">
-<h2 id="org781c497">Here comes Birdland</h2>
-<div class="outline-text-2" id="text-org781c497">
+<div id="outline-container-org3d8e54b" class="outline-2">
+<h2 id="org3d8e54b">Here comes Birdland</h2>
+<div class="outline-text-2" id="text-org3d8e54b">
 <p>
 So we sat down, and reformulated the problem as a question:
 </p>
@@ -460,9 +276,9 @@ thing we can do is to learn this kernel from the behavior of users themselves.
 </div>
 
 
-<div id="outline-container-org4dc6c3d" class="outline-3">
-<h3 id="org4dc6c3d">A network perspective</h3>
-<div class="outline-text-3" id="text-org4dc6c3d">
+<div id="outline-container-org75a2c07" class="outline-3">
+<h3 id="org75a2c07">A network perspective</h3>
+<div class="outline-text-3" id="text-org75a2c07">
 <p>
 Although this behaviour only holds in the infinite time limit, and
 recommendations would initially be based on the local neighbourhood, this can be
@@ -539,9 +355,9 @@ popularity.
 </div>
 
 
-<div id="outline-container-org3e5251e" class="outline-3">
-<h3 id="org3e5251e">Issues with this naive approach</h3>
-<div class="outline-text-3" id="text-org3e5251e">
+<div id="outline-container-org8cfc34c" class="outline-3">
+<h3 id="org8cfc34c">Issues with this naive approach</h3>
+<div class="outline-text-3" id="text-org8cfc34c">
 <p>
 Beyond the obvious criticisms that all recommendation schemes face, we had very
 good reason to leave this method aside:
@@ -566,9 +382,9 @@ distinct songs listened to by a user. The tradeoff: you have to recompute everyt
 </div>
 
 
-<div id="outline-container-org0f8a0bf" class="outline-3">
-<h3 id="org0f8a0bf">Recommendations using random walks.</h3>
-<div class="outline-text-3" id="text-org0f8a0bf">
+<div id="outline-container-orgd10c92c" class="outline-3">
+<h3 id="orgd10c92c">Recommendations using random walks.</h3>
+<div class="outline-text-3" id="text-orgd10c92c">
 <p>
 For those of you who are old enough to have known LastFM, you probably used the
 method I did when looking for new music to listen to. What I usually did was
@@ -656,9 +472,9 @@ matrix factorization.
 </div>
 </div>
 
-<div id="outline-container-org172e939" class="outline-3">
-<h3 id="org172e939">The long tail problem</h3>
-<div class="outline-text-3" id="text-org172e939">
+<div id="outline-container-org548414e" class="outline-3">
+<h3 id="org548414e">The long tail problem</h3>
+<div class="outline-text-3" id="text-org548414e">
 <p>
 [Explain the long-tail problem]
 </p>
@@ -722,13 +538,13 @@ Now, whether this is a good thing is another debate.
 </div>
 </div>
 
-<div id="outline-container-orgb3298fc" class="outline-3">
-<h3 id="orgb3298fc">Other variants</h3>
-<div class="outline-text-3" id="text-orgb3298fc">
+<div id="outline-container-org3ad32dd" class="outline-3">
+<h3 id="org3ad32dd">Other variants</h3>
+<div class="outline-text-3" id="text-org3ad32dd">
 </div>
-<div id="outline-container-orge4d40f6" class="outline-4">
-<h4 id="orge4d40f6">Social recommendation</h4>
-<div class="outline-text-4" id="text-orge4d40f6">
+<div id="outline-container-org286d9cc" class="outline-4">
+<h4 id="org286d9cc">Social recommendation</h4>
+<div class="outline-text-4" id="text-org286d9cc">
 <p>
 You can customize this algorithm as you wish. In our case, the goal was to get
 a recommendation algorithm that could be used for social recommendation. Easy:
@@ -756,9 +572,9 @@ fancier stuff by walking the social graph at the same time.
 </div>
 </div>
 
-<div id="outline-container-org46f0798" class="outline-4">
-<h4 id="org46f0798">Not all songs are created equal</h4>
-<div class="outline-text-4" id="text-org46f0798">
+<div id="outline-container-org4fd014f" class="outline-4">
+<h4 id="org4fd014f">Not all songs are created equal</h4>
+<div class="outline-text-4" id="text-org4fd014f">
 <p>
 You don't listen to songs the same number of times, so it is pretty stupid to
 pick songs uniformly at random in your history. Simple, just pick it at random
@@ -769,9 +585,9 @@ song.
 </div>
 </div>
 
-<div id="outline-container-orgfd201c3" class="outline-3">
-<h3 id="orgfd201c3">Recommending items from a list of songs</h3>
-<div class="outline-text-3" id="text-orgfd201c3">
+<div id="outline-container-org6c9d9c0" class="outline-3">
+<h3 id="org6c9d9c0">Recommending items from a list of songs</h3>
+<div class="outline-text-3" id="text-org6c9d9c0">
 <p>
 To recommend songs to users you would perform many, many random walks starting
 from that same user. Those walks will likely start from many different songs in
@@ -810,18 +626,18 @@ very well in practice too.
 </div>
 
 
-<div id="outline-container-org4933a94" class="outline-3">
-<h3 id="org4933a94">Birdland in practice</h3>
-<div class="outline-text-3" id="text-org4933a94">
+<div id="outline-container-org134ddb1" class="outline-3">
+<h3 id="org134ddb1">Birdland in practice</h3>
+<div class="outline-text-3" id="text-org134ddb1">
 <p>
 We implemented Birdland in Go both for speed (the algorithm had to run online),
 and because the backend was in Go.
 </p>
 </div>
 
-<div id="outline-container-org9fb6909" class="outline-4">
-<h4 id="org9fb6909">Recommending from walks.</h4>
-<div class="outline-text-4" id="text-org9fb6909">
+<div id="outline-container-org7fc7734" class="outline-4">
+<h4 id="org7fc7734">Recommending from walks.</h4>
+<div class="outline-text-4" id="text-org7fc7734">
 <ol class="org-ol">
 <li>The algorithm is randomized. You have guaranteed novelty every time you
 refresh the page.</li>

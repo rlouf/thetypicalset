@@ -3,196 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:04 -->
+<!-- 2022-08-22 Mon 17:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Fiscalité</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
-<style>
-  #content { max-width: 60em; margin: auto; }
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
-  .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
-  .tag    { background-color: #eee; font-family: monospace;
-            padding: 2px; font-size: 80%; font-weight: normal; }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
-  .underline { text-decoration: underline; }
-  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
-  p.verse { margin-left: 3%; }
-  pre {
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background-color: #f2f2f2;
-    padding: 8pt;
-    font-family: monospace;
-    overflow: auto;
-    margin: 1.2em;
-  }
-  pre.src {
-    position: relative;
-    overflow: auto;
-  }
-  pre.src:before {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    padding: 3px;
-    color: #555;
-    background-color: #f2f2f299;
-  }
-  pre.src:hover:before { display: inline; margin-top: 14px;}
-  /* Languages per Org manual */
-  pre.src-asymptote:before { content: 'Asymptote'; }
-  pre.src-awk:before { content: 'Awk'; }
-  pre.src-authinfo::before { content: 'Authinfo'; }
-  pre.src-C:before { content: 'C'; }
-  /* pre.src-C++ doesn't work in CSS */
-  pre.src-clojure:before { content: 'Clojure'; }
-  pre.src-css:before { content: 'CSS'; }
-  pre.src-D:before { content: 'D'; }
-  pre.src-ditaa:before { content: 'ditaa'; }
-  pre.src-dot:before { content: 'Graphviz'; }
-  pre.src-calc:before { content: 'Emacs Calc'; }
-  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-fortran:before { content: 'Fortran'; }
-  pre.src-gnuplot:before { content: 'gnuplot'; }
-  pre.src-haskell:before { content: 'Haskell'; }
-  pre.src-hledger:before { content: 'hledger'; }
-  pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
-  pre.src-latex:before { content: 'LaTeX'; }
-  pre.src-ledger:before { content: 'Ledger'; }
-  pre.src-lisp:before { content: 'Lisp'; }
-  pre.src-lilypond:before { content: 'Lilypond'; }
-  pre.src-lua:before { content: 'Lua'; }
-  pre.src-matlab:before { content: 'MATLAB'; }
-  pre.src-mscgen:before { content: 'Mscgen'; }
-  pre.src-ocaml:before { content: 'Objective Caml'; }
-  pre.src-octave:before { content: 'Octave'; }
-  pre.src-org:before { content: 'Org mode'; }
-  pre.src-oz:before { content: 'OZ'; }
-  pre.src-plantuml:before { content: 'Plantuml'; }
-  pre.src-processing:before { content: 'Processing.js'; }
-  pre.src-python:before { content: 'Python'; }
-  pre.src-R:before { content: 'R'; }
-  pre.src-ruby:before { content: 'Ruby'; }
-  pre.src-sass:before { content: 'Sass'; }
-  pre.src-scheme:before { content: 'Scheme'; }
-  pre.src-screen:before { content: 'Gnu Screen'; }
-  pre.src-sed:before { content: 'Sed'; }
-  pre.src-sh:before { content: 'shell'; }
-  pre.src-sql:before { content: 'SQL'; }
-  pre.src-sqlite:before { content: 'SQLite'; }
-  /* additional languages in org.el's org-babel-load-languages alist */
-  pre.src-forth:before { content: 'Forth'; }
-  pre.src-io:before { content: 'IO'; }
-  pre.src-J:before { content: 'J'; }
-  pre.src-makefile:before { content: 'Makefile'; }
-  pre.src-maxima:before { content: 'Maxima'; }
-  pre.src-perl:before { content: 'Perl'; }
-  pre.src-picolisp:before { content: 'Pico Lisp'; }
-  pre.src-scala:before { content: 'Scala'; }
-  pre.src-shell:before { content: 'Shell Script'; }
-  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
-  /* additional language identifiers per "defun org-babel-execute"
-       in ob-*.el */
-  pre.src-cpp:before  { content: 'C++'; }
-  pre.src-abc:before  { content: 'ABC'; }
-  pre.src-coq:before  { content: 'Coq'; }
-  pre.src-groovy:before  { content: 'Groovy'; }
-  /* additional language identifiers from org-babel-shell-names in
-     ob-shell.el: ob-shell is the only babel language using a lambda to put
-     the execution function name together. */
-  pre.src-bash:before  { content: 'bash'; }
-  pre.src-csh:before  { content: 'csh'; }
-  pre.src-ash:before  { content: 'ash'; }
-  pre.src-dash:before  { content: 'dash'; }
-  pre.src-ksh:before  { content: 'ksh'; }
-  pre.src-mksh:before  { content: 'mksh'; }
-  pre.src-posh:before  { content: 'posh'; }
-  /* Additional Emacs modes also supported by the LaTeX listings package */
-  pre.src-ada:before { content: 'Ada'; }
-  pre.src-asm:before { content: 'Assembler'; }
-  pre.src-caml:before { content: 'Caml'; }
-  pre.src-delphi:before { content: 'Delphi'; }
-  pre.src-html:before { content: 'HTML'; }
-  pre.src-idl:before { content: 'IDL'; }
-  pre.src-mercury:before { content: 'Mercury'; }
-  pre.src-metapost:before { content: 'MetaPost'; }
-  pre.src-modula-2:before { content: 'Modula-2'; }
-  pre.src-pascal:before { content: 'Pascal'; }
-  pre.src-ps:before { content: 'PostScript'; }
-  pre.src-prolog:before { content: 'Prolog'; }
-  pre.src-simula:before { content: 'Simula'; }
-  pre.src-tcl:before { content: 'tcl'; }
-  pre.src-tex:before { content: 'TeX'; }
-  pre.src-plain-tex:before { content: 'Plain TeX'; }
-  pre.src-verilog:before { content: 'Verilog'; }
-  pre.src-vhdl:before { content: 'VHDL'; }
-  pre.src-xml:before { content: 'XML'; }
-  pre.src-nxml:before { content: 'XML'; }
-  /* add a generic configuration mode; LaTeX export needs an additional
-     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
-  pre.src-conf:before { content: 'Configuration File'; }
-
-  table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
-  td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
-  dt { font-weight: bold; }
-  .footpara { display: inline; }
-  .footdef  { margin-bottom: 1em; }
-  .figure { padding: 1em; }
-  .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
-  .inlinetask {
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 10px;
-    background: #ffffcc;
-  }
-  #org-div-home-and-up
-   { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x: auto; }
-  .linenr { font-size: smaller }
-  .code-highlighted { background-color: #ffff00; }
-  .org-info-js_info-navigation { border-style: none; }
-  #org-info-js_console-label
-    { font-size: 10px; font-weight: bold; white-space: nowrap; }
-  .org-info-js_search-highlight
-    { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { }
-</style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -206,9 +22,9 @@
 Declaration DDHC article 13
 </p>
 
-<div id="outline-container-org7dcf9da" class="outline-2">
-<h2 id="org7dcf9da">Plan</h2>
-<div class="outline-text-2" id="text-org7dcf9da">
+<div id="outline-container-orgce0bd34" class="outline-2">
+<h2 id="orgce0bd34">Plan</h2>
+<div class="outline-text-2" id="text-orgce0bd34">
 <p>
 Deux problème fondamentaux avec l'impôt aujourd'hui:
 </p>
@@ -227,30 +43,30 @@ Il conviendra donc de trouver une solution à ces deux points. Nous dresserons u
 </div>
 </div>
 
-<div id="outline-container-org4b49bd6" class="outline-2">
-<h2 id="org4b49bd6"><span class="todo TODO">TODO</span> Historique de l'impôt en France et à l'étranger (pour chaque impôt)</h2>
+<div id="outline-container-orge73a956" class="outline-2">
+<h2 id="orge73a956"><span class="todo TODO">TODO</span> Historique de l'impôt en France et à l'étranger (pour chaque impôt)</h2>
 </div>
-<div id="outline-container-org08cfb42" class="outline-2">
-<h2 id="org08cfb42"><span class="todo TODO">TODO</span> Flécher où va l'argent de chaque impôt (fléchage)</h2>
+<div id="outline-container-orga217167" class="outline-2">
+<h2 id="orga217167"><span class="todo TODO">TODO</span> Flécher où va l'argent de chaque impôt (fléchage)</h2>
 </div>
-<div id="outline-container-org915077e" class="outline-2">
-<h2 id="org915077e"><span class="todo TODO">TODO</span> Inventaire de tous les transfers (chomage, aide au logement, RSA, etc)</h2>
+<div id="outline-container-orgd6a21a7" class="outline-2">
+<h2 id="orgd6a21a7"><span class="todo TODO">TODO</span> Inventaire de tous les transfers (chomage, aide au logement, RSA, etc)</h2>
 </div>
-<div id="outline-container-orgd56ec42" class="outline-2">
-<h2 id="orgd56ec42"><span class="todo TODO">TODO</span> Inventaire de toutes les taxes / tous les impots avec le montant qu'ils représentent</h2>
+<div id="outline-container-org4b66191" class="outline-2">
+<h2 id="org4b66191"><span class="todo TODO">TODO</span> Inventaire de toutes les taxes / tous les impots avec le montant qu'ils représentent</h2>
 </div>
-<div id="outline-container-orgd69f39f" class="outline-2">
-<h2 id="orgd69f39f"><span class="todo TODO">TODO</span> Inventaire de toutes les niches fiscales IRPP</h2>
+<div id="outline-container-org45a5282" class="outline-2">
+<h2 id="org45a5282"><span class="todo TODO">TODO</span> Inventaire de toutes les niches fiscales IRPP</h2>
 </div>
-<div id="outline-container-org4eca249" class="outline-2">
-<h2 id="org4eca249"><span class="todo TODO">TODO</span> Description de chaque impôt avec son assiette.</h2>
+<div id="outline-container-orgc11cd13" class="outline-2">
+<h2 id="orgc11cd13"><span class="todo TODO">TODO</span> Description de chaque impôt avec son assiette.</h2>
 </div>
-<div id="outline-container-orge5e8359" class="outline-2">
-<h2 id="orge5e8359"><span class="todo TODO">TODO</span> Impact de la compétition ficale et de l'impot sur les sociétés</h2>
+<div id="outline-container-org1497162" class="outline-2">
+<h2 id="org1497162"><span class="todo TODO">TODO</span> Impact de la compétition ficale et de l'impot sur les sociétés</h2>
 </div>
-<div id="outline-container-org223975f" class="outline-2">
-<h2 id="org223975f"><span class="todo TODO">TODO</span> Justifief <a href="20220105130000-les_impots_doivent_etre_progressif.html#ID-028b1697-48cc-473d-ae39-ee4d299e6270">Les impôts doivent être progressifs</a></h2>
-<div class="outline-text-2" id="text-org223975f">
+<div id="outline-container-orgf582ef2" class="outline-2">
+<h2 id="orgf582ef2"><span class="todo TODO">TODO</span> Justifief <a href="20220105130000-les_impots_doivent_etre_progressif.html#ID-028b1697-48cc-473d-ae39-ee4d299e6270">Les impôts doivent être progressifs</a></h2>
+<div class="outline-text-2" id="text-orgf582ef2">
 <ul class="org-ul">
 <li>Happiness increased continuously even after 75k <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.pnas.org/content/118/4/e2016976118">https://www.pnas.org/content/118/4/e2016976118</a></li>
 <li>Liberals see taxes as something taxed from property, while people like Rawls implicitly assume that no property before taxes and look at what's left afterwards.
@@ -259,33 +75,33 @@ Il conviendra donc de trouver une solution à ces deux points. Nous dresserons u
 </div>
 </div>
 
-<div id="outline-container-orgdc86871" class="outline-2">
-<h2 id="orgdc86871">Calculs globaux (Introduction)</h2>
-<div class="outline-text-2" id="text-orgdc86871">
+<div id="outline-container-orgc7c570b" class="outline-2">
+<h2 id="orgc7c570b">Calculs globaux (Introduction)</h2>
+<div class="outline-text-2" id="text-orgc7c570b">
 </div>
-<div id="outline-container-org8945f2b" class="outline-3">
-<h3 id="org8945f2b"><span class="todo TODO">TODO</span> calcul du revenu national par origine</h3>
+<div id="outline-container-org1a00b31" class="outline-3">
+<h3 id="org1a00b31"><span class="todo TODO">TODO</span> calcul du revenu national par origine</h3>
 </div>
-<div id="outline-container-org1945899" class="outline-3">
-<h3 id="org1945899"><span class="todo TODO">TODO</span> recettes fiscales par poste (IS, capital, travail, CSG, IRPP)</h3>
+<div id="outline-container-org2f0bcb4" class="outline-3">
+<h3 id="org2f0bcb4"><span class="todo TODO">TODO</span> recettes fiscales par poste (IS, capital, travail, CSG, IRPP)</h3>
 </div>
-<div id="outline-container-orgf4bae6d" class="outline-3">
-<h3 id="orgf4bae6d"><span class="todo TODO">TODO</span> perspective: la dépense publique</h3>
+<div id="outline-container-org8b591c8" class="outline-3">
+<h3 id="org8b591c8"><span class="todo TODO">TODO</span> perspective: la dépense publique</h3>
 </div>
-<div id="outline-container-org019afdb" class="outline-3">
-<h3 id="org019afdb"><span class="todo TODO">TODO</span> reproduire figure w/ revenus/tranche de revenus</h3>
+<div id="outline-container-org5a9da5e" class="outline-3">
+<h3 id="org5a9da5e"><span class="todo TODO">TODO</span> reproduire figure w/ revenus/tranche de revenus</h3>
 </div>
-<div id="outline-container-org5cbcc43" class="outline-3">
-<h3 id="org5cbcc43"><span class="todo TODO">TODO</span> montrer taux global d'imposition (ramené au revenu national) en fonction du temps</h3>
+<div id="outline-container-org1d16f52" class="outline-3">
+<h3 id="org1d16f52"><span class="todo TODO">TODO</span> montrer taux global d'imposition (ramené au revenu national) en fonction du temps</h3>
 </div>
-<div id="outline-container-org7eb559f" class="outline-3">
-<h3 id="org7eb559f"><span class="todo TODO">TODO</span> cout de la collecte de l'IRPP</h3>
+<div id="outline-container-org2dfacc7" class="outline-3">
+<h3 id="org2dfacc7"><span class="todo TODO">TODO</span> cout de la collecte de l'IRPP</h3>
 </div>
 </div>
 
-<div id="outline-container-org6251340" class="outline-2">
-<h2 id="org6251340">Calcul fin des nouveaux impôts</h2>
-<div class="outline-text-2" id="text-org6251340">
+<div id="outline-container-orgcd67615" class="outline-2">
+<h2 id="orgcd67615">Calcul fin des nouveaux impôts</h2>
+<div class="outline-text-2" id="text-orgcd67615">
 <p>
 Pour calculer les effets d'une réforme fiscale il faut se reposer sur des données plus fines que celles à l'échelle globale; il faut revenir à chaque situation particulière pour pouvoir à la fois calculer le nouvel impôt et le comparer avec l'ancien!
 </p>
@@ -296,27 +112,27 @@ Camille Landais m'a dit que les fichiers qui ont servi de base à leurs calculs 
 </div>
 </div>
 
-<div id="outline-container-org1e22f4b" class="outline-2">
-<h2 id="org1e22f4b">Impots</h2>
-<div class="outline-text-2" id="text-org1e22f4b">
+<div id="outline-container-orgd7441b8" class="outline-2">
+<h2 id="orgd7441b8">Impots</h2>
+<div class="outline-text-2" id="text-orgd7441b8">
 <ul class="org-ul">
 <li><a href="20210514103526-impot_sur_les_successions.html#ID-c4dedbfd-5d5a-45bf-943c-d75106063cfa">Impôt sur les successions</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org029df3e" class="outline-2">
-<h2 id="org029df3e">Reformes</h2>
-<div class="outline-text-2" id="text-org029df3e">
+<div id="outline-container-org8e322b8" class="outline-2">
+<h2 id="org8e322b8">Reformes</h2>
+<div class="outline-text-2" id="text-org8e322b8">
 <p>
 <a href="20210513210933-reforme_2017_de_l_isf.html#ID-308ee9f7-c727-4b41-b0c5-a1ade15b2d96">Reforme 2017 de l'ISF</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org9e08f4c" class="outline-2">
-<h2 id="org9e08f4c">Credits</h2>
-<div class="outline-text-2" id="text-org9e08f4c">
+<div id="outline-container-orgb948c05" class="outline-2">
+<h2 id="orgb948c05">Credits</h2>
+<div class="outline-text-2" id="text-orgb948c05">
 <p>
 <a href="20210513211639-credit_d_impot_pour_la_competitivite_economique_cice.html#ID-0e7c0139-8571-4098-8b01-245a711ec905">Crédit d'impôt pour la compétitivité économique (CICE)</a>
 <a href="20210428073612-credit_impot_recherche_cir.html#ID-4ee03a30-c1c7-4df1-84fb-fcf56a43717a">Crédit Impôt Recherche (CIR)</a>
@@ -324,9 +140,9 @@ Camille Landais m'a dit que les fichiers qui ont servi de base à leurs calculs 
 </div>
 </div>
 
-<div id="outline-container-orgbcc6bdb" class="outline-2">
-<h2 id="orgbcc6bdb">Taxation et inégalités</h2>
-<div class="outline-text-2" id="text-orgbcc6bdb">
+<div id="outline-container-org678c8f2" class="outline-2">
+<h2 id="org678c8f2">Taxation et inégalités</h2>
+<div class="outline-text-2" id="text-org678c8f2">
 <p>
 cite:landais2011,maurin2021
 </p>
@@ -337,9 +153,9 @@ cite:landais2011,maurin2021
 </div>
 </div>
 
-<div id="outline-container-org86ea29a" class="outline-2">
-<h2 id="org86ea29a">Mécanismes de taxation (sous-routines)</h2>
-<div class="outline-text-2" id="text-org86ea29a">
+<div id="outline-container-org3fed9e1" class="outline-2">
+<h2 id="org3fed9e1">Mécanismes de taxation (sous-routines)</h2>
+<div class="outline-text-2" id="text-org3fed9e1">
 <p>
 cite:landais2011,saez2021,saez2019
 </p>
@@ -350,18 +166,18 @@ cite:landais2011,saez2021,saez2019
 </div>
 </div>
 
-<div id="outline-container-orge3d495a" class="outline-2">
-<h2 id="orge3d495a">L'évasion</h2>
-<div class="outline-text-2" id="text-orge3d495a">
+<div id="outline-container-org985c9e9" class="outline-2">
+<h2 id="org985c9e9">L'évasion</h2>
+<div class="outline-text-2" id="text-org985c9e9">
 <p>
 cite:young2020
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgc65dc12" class="outline-2">
-<h2 id="orgc65dc12">Links to this note</h2>
-<div class="outline-text-2" id="text-orgc65dc12">
+<div id="outline-container-org029b0c1" class="outline-2">
+<h2 id="org029b0c1">Links to this note</h2>
+<div class="outline-text-2" id="text-org029b0c1">
 <ul class="org-ul">
 <li><a href="./20211127-refonte-fiscalite.html">Refonte de la fiscalite</a></li>
 </ul>

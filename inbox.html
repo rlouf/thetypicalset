@@ -3,217 +3,33 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:04 -->
+<!-- 2022-08-22 Mon 17:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Writing inbox</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
-<style>
-  #content { max-width: 60em; margin: auto; }
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
-  .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
-  .tag    { background-color: #eee; font-family: monospace;
-            padding: 2px; font-size: 80%; font-weight: normal; }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
-  .underline { text-decoration: underline; }
-  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
-  p.verse { margin-left: 3%; }
-  pre {
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background-color: #f2f2f2;
-    padding: 8pt;
-    font-family: monospace;
-    overflow: auto;
-    margin: 1.2em;
-  }
-  pre.src {
-    position: relative;
-    overflow: auto;
-  }
-  pre.src:before {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    padding: 3px;
-    color: #555;
-    background-color: #f2f2f299;
-  }
-  pre.src:hover:before { display: inline; margin-top: 14px;}
-  /* Languages per Org manual */
-  pre.src-asymptote:before { content: 'Asymptote'; }
-  pre.src-awk:before { content: 'Awk'; }
-  pre.src-authinfo::before { content: 'Authinfo'; }
-  pre.src-C:before { content: 'C'; }
-  /* pre.src-C++ doesn't work in CSS */
-  pre.src-clojure:before { content: 'Clojure'; }
-  pre.src-css:before { content: 'CSS'; }
-  pre.src-D:before { content: 'D'; }
-  pre.src-ditaa:before { content: 'ditaa'; }
-  pre.src-dot:before { content: 'Graphviz'; }
-  pre.src-calc:before { content: 'Emacs Calc'; }
-  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-fortran:before { content: 'Fortran'; }
-  pre.src-gnuplot:before { content: 'gnuplot'; }
-  pre.src-haskell:before { content: 'Haskell'; }
-  pre.src-hledger:before { content: 'hledger'; }
-  pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
-  pre.src-latex:before { content: 'LaTeX'; }
-  pre.src-ledger:before { content: 'Ledger'; }
-  pre.src-lisp:before { content: 'Lisp'; }
-  pre.src-lilypond:before { content: 'Lilypond'; }
-  pre.src-lua:before { content: 'Lua'; }
-  pre.src-matlab:before { content: 'MATLAB'; }
-  pre.src-mscgen:before { content: 'Mscgen'; }
-  pre.src-ocaml:before { content: 'Objective Caml'; }
-  pre.src-octave:before { content: 'Octave'; }
-  pre.src-org:before { content: 'Org mode'; }
-  pre.src-oz:before { content: 'OZ'; }
-  pre.src-plantuml:before { content: 'Plantuml'; }
-  pre.src-processing:before { content: 'Processing.js'; }
-  pre.src-python:before { content: 'Python'; }
-  pre.src-R:before { content: 'R'; }
-  pre.src-ruby:before { content: 'Ruby'; }
-  pre.src-sass:before { content: 'Sass'; }
-  pre.src-scheme:before { content: 'Scheme'; }
-  pre.src-screen:before { content: 'Gnu Screen'; }
-  pre.src-sed:before { content: 'Sed'; }
-  pre.src-sh:before { content: 'shell'; }
-  pre.src-sql:before { content: 'SQL'; }
-  pre.src-sqlite:before { content: 'SQLite'; }
-  /* additional languages in org.el's org-babel-load-languages alist */
-  pre.src-forth:before { content: 'Forth'; }
-  pre.src-io:before { content: 'IO'; }
-  pre.src-J:before { content: 'J'; }
-  pre.src-makefile:before { content: 'Makefile'; }
-  pre.src-maxima:before { content: 'Maxima'; }
-  pre.src-perl:before { content: 'Perl'; }
-  pre.src-picolisp:before { content: 'Pico Lisp'; }
-  pre.src-scala:before { content: 'Scala'; }
-  pre.src-shell:before { content: 'Shell Script'; }
-  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
-  /* additional language identifiers per "defun org-babel-execute"
-       in ob-*.el */
-  pre.src-cpp:before  { content: 'C++'; }
-  pre.src-abc:before  { content: 'ABC'; }
-  pre.src-coq:before  { content: 'Coq'; }
-  pre.src-groovy:before  { content: 'Groovy'; }
-  /* additional language identifiers from org-babel-shell-names in
-     ob-shell.el: ob-shell is the only babel language using a lambda to put
-     the execution function name together. */
-  pre.src-bash:before  { content: 'bash'; }
-  pre.src-csh:before  { content: 'csh'; }
-  pre.src-ash:before  { content: 'ash'; }
-  pre.src-dash:before  { content: 'dash'; }
-  pre.src-ksh:before  { content: 'ksh'; }
-  pre.src-mksh:before  { content: 'mksh'; }
-  pre.src-posh:before  { content: 'posh'; }
-  /* Additional Emacs modes also supported by the LaTeX listings package */
-  pre.src-ada:before { content: 'Ada'; }
-  pre.src-asm:before { content: 'Assembler'; }
-  pre.src-caml:before { content: 'Caml'; }
-  pre.src-delphi:before { content: 'Delphi'; }
-  pre.src-html:before { content: 'HTML'; }
-  pre.src-idl:before { content: 'IDL'; }
-  pre.src-mercury:before { content: 'Mercury'; }
-  pre.src-metapost:before { content: 'MetaPost'; }
-  pre.src-modula-2:before { content: 'Modula-2'; }
-  pre.src-pascal:before { content: 'Pascal'; }
-  pre.src-ps:before { content: 'PostScript'; }
-  pre.src-prolog:before { content: 'Prolog'; }
-  pre.src-simula:before { content: 'Simula'; }
-  pre.src-tcl:before { content: 'tcl'; }
-  pre.src-tex:before { content: 'TeX'; }
-  pre.src-plain-tex:before { content: 'Plain TeX'; }
-  pre.src-verilog:before { content: 'Verilog'; }
-  pre.src-vhdl:before { content: 'VHDL'; }
-  pre.src-xml:before { content: 'XML'; }
-  pre.src-nxml:before { content: 'XML'; }
-  /* add a generic configuration mode; LaTeX export needs an additional
-     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
-  pre.src-conf:before { content: 'Configuration File'; }
-
-  table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
-  td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
-  dt { font-weight: bold; }
-  .footpara { display: inline; }
-  .footdef  { margin-bottom: 1em; }
-  .figure { padding: 1em; }
-  .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
-  .inlinetask {
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 10px;
-    background: #ffffcc;
-  }
-  #org-div-home-and-up
-   { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x: auto; }
-  .linenr { font-size: smaller }
-  .code-highlighted { background-color: #ffff00; }
-  .org-info-js_info-navigation { border-style: none; }
-  #org-info-js_console-label
-    { font-size: 10px; font-weight: bold; white-space: nowrap; }
-  .org-info-js_search-highlight
-    { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { }
-</style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">Writing inbox</h1>
 
-<div id="outline-container-orgcb931c0" class="outline-2">
-<h2 id="orgcb931c0">Statistics</h2>
-<div class="outline-text-2" id="text-orgcb931c0">
+<div id="outline-container-org16ac104" class="outline-2">
+<h2 id="org16ac104">Statistics</h2>
+<div class="outline-text-2" id="text-org16ac104">
 </div>
-<div id="outline-container-org713a235" class="outline-3">
-<h3 id="org713a235"><a href="20220728171643-gibbs_sampling.html#ID-fb76fc82-2653-4aa7-bb62-cd5ec749531a">Gibbs sampling</a></h3>
+<div id="outline-container-org21f256d" class="outline-3">
+<h3 id="org21f256d"><a href="20220728171643-gibbs_sampling.html#ID-fb76fc82-2653-4aa7-bb62-cd5ec749531a">Gibbs sampling</a></h3>
 </div>
-<div id="outline-container-orgee5c184" class="outline-3">
-<h3 id="orgee5c184"><a href="20220728151132-polya_gamma_augmentation.html#ID-16338bc2-222c-4acf-aa28-38b951dfcb89">Polya-Gamma augmentation</a></h3>
+<div id="outline-container-org94ea715" class="outline-3">
+<h3 id="org94ea715"><a href="20220728151132-polya_gamma_augmentation.html#ID-16338bc2-222c-4acf-aa28-38b951dfcb89">Polya-Gamma augmentation</a></h3>
 </div>
 </div>
 
-<div id="outline-container-org77b3d85" class="outline-2">
-<h2 id="org77b3d85">Aesara</h2>
-<div class="outline-text-2" id="text-org77b3d85">
+<div id="outline-container-orgaf66dcd" class="outline-2">
+<h2 id="orgaf66dcd">Aesara</h2>
+<div class="outline-text-2" id="text-orgaf66dcd">
 <ul class="org-ul">
 <li><a href="20220802094127-random_variables_in_aesara.html#ID-2e41e200-be7a-482b-8cfe-d0d67df26920">Random Variables in Aesara</a>
 Don't forget to talk about the caveats linked to the use of shared variables, or in-graph random variable update.</li>
@@ -225,102 +41,102 @@ Don't forget to talk about the caveats linked to the use of shared variables, or
 </div>
 </div>
 
-<div id="outline-container-orga7296ee" class="outline-2">
-<h2 id="orga7296ee">NOW</h2>
-<div class="outline-text-2" id="text-orga7296ee">
+<div id="outline-container-orgb1e20b1" class="outline-2">
+<h2 id="orgb1e20b1">NOW</h2>
+<div class="outline-text-2" id="text-orgb1e20b1">
 </div>
-<div id="outline-container-org2ff81ee" class="outline-3">
-<h3 id="org2ff81ee"><span class="todo TODO">TODO</span> <a href="20220108211402-consumer_price_index.html#ID-b5f5e019-e22f-49b6-bfb5-ef03c8b0c41b">Consumer Price Index</a></h3>
-<div class="outline-text-3" id="text-org2ff81ee">
+<div id="outline-container-org0d8e0f9" class="outline-3">
+<h3 id="org0d8e0f9"><span class="todo TODO">TODO</span> <a href="20220108211402-consumer_price_index.html#ID-b5f5e019-e22f-49b6-bfb5-ef03c8b0c41b">Consumer Price Index</a></h3>
+<div class="outline-text-3" id="text-org0d8e0f9">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">[2022-01-16 Sun]</span></span>
 </p>
 </div>
 </div>
-<div id="outline-container-orgd97bb54" class="outline-3">
-<h3 id="orgd97bb54"><span class="todo TODO">TODO</span> <a href="20220111122011-renewables_are_intermittent.html#ID-fd1e5e7f-587f-4028-8f47-78cc4845aae0">Renewables are intermittent, nuclear is not</a></h3>
+<div id="outline-container-org6ea1aae" class="outline-3">
+<h3 id="org6ea1aae"><span class="todo TODO">TODO</span> <a href="20220111122011-renewables_are_intermittent.html#ID-fd1e5e7f-587f-4028-8f47-78cc4845aae0">Renewables are intermittent, nuclear is not</a></h3>
 </div>
-<div id="outline-container-orge46c765" class="outline-3">
-<h3 id="orge46c765"><span class="todo TODO">TODO</span> <a href="20220111124312-predicted_consumption_vs_actual_consumption_on_the_electric_grid.html#ID-58e9b33a-a49b-4277-b613-cca4271acbc4">Predicted consumption vs actual consumption on the electric grid</a></h3>
+<div id="outline-container-orgc6b8f6f" class="outline-3">
+<h3 id="orgc6b8f6f"><span class="todo TODO">TODO</span> <a href="20220111124312-predicted_consumption_vs_actual_consumption_on_the_electric_grid.html#ID-58e9b33a-a49b-4277-b613-cca4271acbc4">Predicted consumption vs actual consumption on the electric grid</a></h3>
 </div>
-<div id="outline-container-orgcd95a76" class="outline-3">
-<h3 id="orgcd95a76"><span class="todo TODO">TODO</span> <a href="20210816194348-conference_api_quicksign.html#ID-7b01dae4-472a-4758-9c1c-80d9c734ec8a">API design</a></h3>
+<div id="outline-container-org65b8bbb" class="outline-3">
+<h3 id="org65b8bbb"><span class="todo TODO">TODO</span> <a href="20210816194348-conference_api_quicksign.html#ID-7b01dae4-472a-4758-9c1c-80d9c734ec8a">API design</a></h3>
 </div>
-<div id="outline-container-org9d8598a" class="outline-3">
-<h3 id="org9d8598a"><span class="todo TODO">TODO</span> The mythical "moderate" voter</h3>
-<div class="outline-text-3" id="text-org9d8598a">
+<div id="outline-container-orgdfd0558" class="outline-3">
+<h3 id="orgdfd0558"><span class="todo TODO">TODO</span> The mythical "moderate" voter</h3>
+<div class="outline-text-3" id="text-orgdfd0558">
 <p>
 cf <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/MattAlhonte/status/1500730223943467010?s=20&amp;t=JlKGF7Ay9uCPmIxa7JmgGw">this article in 538</a> and <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/remilouf/status/1500726190369349634?s=20&amp;t=JlKGF7Ay9uCPmIxa7JmgGw">this one in Vox</a>
 </p>
 </div>
 </div>
-<div id="outline-container-orgca52429" class="outline-3">
-<h3 id="orgca52429"><span class="todo TODO">TODO</span> Defining cities from road network</h3>
-<div class="outline-text-3" id="text-orgca52429">
+<div id="outline-container-org63e7ea8" class="outline-3">
+<h3 id="org63e7ea8"><span class="todo TODO">TODO</span> Defining cities from road network</h3>
+<div class="outline-text-3" id="text-org63e7ea8">
 <p>
 Distribution of distance between intersections as d increases on a street network.
 This makes me think that we have several distributions at play: <img src="https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41598-018-22969-4/MediaObjects/41598_2018_22969_Fig1_HTML.jpg" alt="41598_2018_22969_Fig1_HTML.jpg" />
 </p>
 </div>
 </div>
-<div id="outline-container-orgcc964ac" class="outline-3">
-<h3 id="orgcc964ac"><span class="todo TODO">TODO</span> Redefining density</h3>
-<div class="outline-text-3" id="text-orgcc964ac">
+<div id="outline-container-org0f7d922" class="outline-3">
+<h3 id="org0f7d922"><span class="todo TODO">TODO</span> Redefining density</h3>
+<div class="outline-text-3" id="text-org0f7d922">
 <p>
 Density is a messed up measure as it requires the introduction of an intermediater
 </p>
 </div>
 </div>
-<div id="outline-container-org9d5e6f9" class="outline-3">
-<h3 id="org9d5e6f9"><span class="todo TODO">TODO</span> The modifiable areal unit problem is an uncertainty problem</h3>
+<div id="outline-container-org89891cf" class="outline-3">
+<h3 id="org89891cf"><span class="todo TODO">TODO</span> The modifiable areal unit problem is an uncertainty problem</h3>
 </div>
-<div id="outline-container-orgca2ee49" class="outline-3">
-<h3 id="orgca2ee49"><span class="todo TODO">TODO</span> </h3>
+<div id="outline-container-orgf1445fb" class="outline-3">
+<h3 id="orgf1445fb"><span class="todo TODO">TODO</span> </h3>
 </div>
-<div id="outline-container-org29fec25" class="outline-3">
-<h3 id="org29fec25"><span class="todo TODO">TODO</span> <a href="20211203143110-approximate_bayesian_computation.html#ID-0eefdc2c-544a-47b7-8e3b-05a3c196d2b3">Simulation-based inference</a></h3>
+<div id="outline-container-orgb8b31b3" class="outline-3">
+<h3 id="orgb8b31b3"><span class="todo TODO">TODO</span> <a href="20211203143110-approximate_bayesian_computation.html#ID-0eefdc2c-544a-47b7-8e3b-05a3c196d2b3">Simulation-based inference</a></h3>
 </div>
-<div id="outline-container-org39b143e" class="outline-3">
-<h3 id="org39b143e"><span class="todo TODO">TODO</span> Plot interest rates of treasuries vs maturity over time (transparency for curve)</h3>
+<div id="outline-container-org2bef74c" class="outline-3">
+<h3 id="org2bef74c"><span class="todo TODO">TODO</span> Plot interest rates of treasuries vs maturity over time (transparency for curve)</h3>
 </div>
 </div>
-<div id="outline-container-orga7b2656" class="outline-2">
-<h2 id="orga7b2656">Workflow</h2>
-<div class="outline-text-2" id="text-orga7b2656">
+<div id="outline-container-orgcf16872" class="outline-2">
+<h2 id="orgcf16872">Workflow</h2>
+<div class="outline-text-2" id="text-orgcf16872">
 </div>
-<div id="outline-container-org80de8c5" class="outline-3">
-<h3 id="org80de8c5"><span class="todo TODO">TODO</span> Publish a small orientation blog post on my setup</h3>
-<div class="outline-text-3" id="text-org80de8c5">
+<div id="outline-container-org5568c37" class="outline-3">
+<h3 id="org5568c37"><span class="todo TODO">TODO</span> Publish a small orientation blog post on my setup</h3>
+<div class="outline-text-3" id="text-org5568c37">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-01-11 Tue&gt;</span></span>
 </p>
 </div>
 </div>
-<div id="outline-container-org773222d" class="outline-3">
-<h3 id="org773222d">TODO</h3>
+<div id="outline-container-orgf2271a1" class="outline-3">
+<h3 id="orgf2271a1">TODO</h3>
 </div>
-<div id="outline-container-org4f5b817" class="outline-3">
-<h3 id="org4f5b817"><span class="todo TODO">TODO</span> Doing things with org-mode</h3>
+<div id="outline-container-org995ad22" class="outline-3">
+<h3 id="org995ad22"><span class="todo TODO">TODO</span> Doing things with org-mode</h3>
 </div>
-<div id="outline-container-org0c47a62" class="outline-3">
-<h3 id="org0c47a62"><span class="todo TODO">TODO</span> Org-mode for fun and profit</h3>
+<div id="outline-container-org1bbba1d" class="outline-3">
+<h3 id="org1bbba1d"><span class="todo TODO">TODO</span> Org-mode for fun and profit</h3>
 </div>
 </div>
-<div id="outline-container-org8f80450" class="outline-2">
-<h2 id="org8f80450">Economics</h2>
-<div class="outline-text-2" id="text-org8f80450">
+<div id="outline-container-org9b330ac" class="outline-2">
+<h2 id="org9b330ac">Economics</h2>
+<div class="outline-text-2" id="text-org9b330ac">
 </div>
-<div id="outline-container-org6f9683b" class="outline-3">
-<h3 id="org6f9683b"><span class="todo TODO">TODO</span> Chomage vs revenus</h3>
-<div class="outline-text-3" id="text-org6f9683b">
+<div id="outline-container-org80049fd" class="outline-3">
+<h3 id="org80049fd"><span class="todo TODO">TODO</span> Chomage vs revenus</h3>
+<div class="outline-text-3" id="text-org80049fd">
 <p>
 Comparer les courbes de revenus de la population et anciens revenus pour personnes touchant le chomage.
 </p>
 </div>
 </div>
-<div id="outline-container-orgaf3add4" class="outline-3">
-<h3 id="orgaf3add4"><span class="todo TODO">TODO</span> Finance is an inurance business</h3>
-<div class="outline-text-3" id="text-orgaf3add4">
+<div id="outline-container-orga7c9c37" class="outline-3">
+<h3 id="orga7c9c37"><span class="todo TODO">TODO</span> Finance is an inurance business</h3>
+<div class="outline-text-3" id="text-orga7c9c37">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-01-09 Sun&gt;</span></span>
 </p>
@@ -331,9 +147,9 @@ They take all the risk for us, and benefit from other stuff to insure against. L
 </div>
 </div>
 
-<div id="outline-container-org76d9add" class="outline-3">
-<h3 id="org76d9add"><span class="todo TODO">TODO</span> Taux d'intérêts</h3>
-<div class="outline-text-3" id="text-org76d9add">
+<div id="outline-container-orgcd28774" class="outline-3">
+<h3 id="orgcd28774"><span class="todo TODO">TODO</span> Taux d'intérêts</h3>
+<div class="outline-text-3" id="text-orgcd28774">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-01-09 Sun&gt;</span></span>
 </p>
@@ -344,9 +160,9 @@ ENTERED: <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-01-09 
 </ul>
 </div>
 </div>
-<div id="outline-container-org1cf1024" class="outline-3">
-<h3 id="org1cf1024"><span class="todo TODO">TODO</span> Unemployment: relationship with inflation &amp; salaries</h3>
-<div class="outline-text-3" id="text-org1cf1024">
+<div id="outline-container-org9c37917" class="outline-3">
+<h3 id="org9c37917"><span class="todo TODO">TODO</span> Unemployment: relationship with inflation &amp; salaries</h3>
+<div class="outline-text-3" id="text-org9c37917">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-01-09 Sun&gt;</span></span>
 </p>
@@ -357,13 +173,13 @@ And instead of doing a cross-sectional curve use an auto-regressive model with t
 </div>
 </div>
 </div>
-<div id="outline-container-org8b2d7d8" class="outline-2">
-<h2 id="org8b2d7d8">Politics</h2>
-<div class="outline-text-2" id="text-org8b2d7d8">
+<div id="outline-container-org638f6b5" class="outline-2">
+<h2 id="org638f6b5">Politics</h2>
+<div class="outline-text-2" id="text-org638f6b5">
 </div>
-<div id="outline-container-org717116f" class="outline-3">
-<h3 id="org717116f"><span class="todo TODO">TODO</span> L'individualisme est une impasse</h3>
-<div class="outline-text-3" id="text-org717116f">
+<div id="outline-container-orgf5ae51b" class="outline-3">
+<h3 id="orgf5ae51b"><span class="todo TODO">TODO</span> L'individualisme est une impasse</h3>
+<div class="outline-text-3" id="text-orgf5ae51b">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-01-09 Sun&gt;</span></span>
 </p>
@@ -375,9 +191,9 @@ Le nous, l’autre, c’est celui qui aurait pu être. Celui qui traverse des é
 </p>
 </div>
 </div>
-<div id="outline-container-org483c761" class="outline-3">
-<h3 id="org483c761"><span class="todo TODO">TODO</span> Write on hartley measure</h3>
-<div class="outline-text-3" id="text-org483c761">
+<div id="outline-container-orged8e9b0" class="outline-3">
+<h3 id="orged8e9b0"><span class="todo TODO">TODO</span> Write on hartley measure</h3>
+<div class="outline-text-3" id="text-orged8e9b0">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">[2022-01-16 Sun]</span></span>
 </p>
@@ -388,9 +204,9 @@ ENTERED: <span class="timestamp-wrapper"><span class="timestamp">[2022-01-16 Sun
 </ul>
 </div>
 </div>
-<div id="outline-container-org12a835a" class="outline-3">
-<h3 id="org12a835a"><span class="todo TODO">TODO</span> On information transfer</h3>
-<div class="outline-text-3" id="text-org12a835a">
+<div id="outline-container-orgff61050" class="outline-3">
+<h3 id="orgff61050"><span class="todo TODO">TODO</span> On information transfer</h3>
+<div class="outline-text-3" id="text-orgff61050">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">[2022-01-16 Sun]</span></span>
 </p>
@@ -400,9 +216,9 @@ ENTERED: <span class="timestamp-wrapper"><span class="timestamp">[2022-01-16 Sun
 </ul>
 </div>
 </div>
-<div id="outline-container-orgbaa3988" class="outline-3">
-<h3 id="orgbaa3988"><span class="todo TODO">TODO</span> Analyze micro data about prices and look into the sticky price stuff </h3>
-<div class="outline-text-3" id="text-orgbaa3988">
+<div id="outline-container-org2b37cb3" class="outline-3">
+<h3 id="org2b37cb3"><span class="todo TODO">TODO</span> Analyze micro data about prices and look into the sticky price stuff </h3>
+<div class="outline-text-3" id="text-org2b37cb3">
 <p>
 ENTERED: <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-01-16 Sun&gt;</span></span>
 </p>
@@ -410,9 +226,9 @@ ENTERED: <span class="timestamp-wrapper"><span class="timestamp">&lt;2022-01-16 
 </div>
 </div>
 
-<div id="outline-container-org97107af" class="outline-2">
-<h2 id="org97107af">Links to this note</h2>
-<div class="outline-text-2" id="text-org97107af">
+<div id="outline-container-orgb442eb2" class="outline-2">
+<h2 id="orgb442eb2">Links to this note</h2>
+<div class="outline-text-2" id="text-orgb442eb2">
 <ul class="org-ul">
 <li><a href="./20220406085251-automate_decisions_about_what_to_work_on.html">Choose what to work on</a></li>
 </ul>

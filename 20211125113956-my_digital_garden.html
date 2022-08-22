@@ -3,196 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:04 -->
+<!-- 2022-08-22 Mon 17:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Navigate linked notes</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
-<style>
-  #content { max-width: 60em; margin: auto; }
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
-  .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
-  .tag    { background-color: #eee; font-family: monospace;
-            padding: 2px; font-size: 80%; font-weight: normal; }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
-  .underline { text-decoration: underline; }
-  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
-  p.verse { margin-left: 3%; }
-  pre {
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background-color: #f2f2f2;
-    padding: 8pt;
-    font-family: monospace;
-    overflow: auto;
-    margin: 1.2em;
-  }
-  pre.src {
-    position: relative;
-    overflow: auto;
-  }
-  pre.src:before {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    padding: 3px;
-    color: #555;
-    background-color: #f2f2f299;
-  }
-  pre.src:hover:before { display: inline; margin-top: 14px;}
-  /* Languages per Org manual */
-  pre.src-asymptote:before { content: 'Asymptote'; }
-  pre.src-awk:before { content: 'Awk'; }
-  pre.src-authinfo::before { content: 'Authinfo'; }
-  pre.src-C:before { content: 'C'; }
-  /* pre.src-C++ doesn't work in CSS */
-  pre.src-clojure:before { content: 'Clojure'; }
-  pre.src-css:before { content: 'CSS'; }
-  pre.src-D:before { content: 'D'; }
-  pre.src-ditaa:before { content: 'ditaa'; }
-  pre.src-dot:before { content: 'Graphviz'; }
-  pre.src-calc:before { content: 'Emacs Calc'; }
-  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-fortran:before { content: 'Fortran'; }
-  pre.src-gnuplot:before { content: 'gnuplot'; }
-  pre.src-haskell:before { content: 'Haskell'; }
-  pre.src-hledger:before { content: 'hledger'; }
-  pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
-  pre.src-latex:before { content: 'LaTeX'; }
-  pre.src-ledger:before { content: 'Ledger'; }
-  pre.src-lisp:before { content: 'Lisp'; }
-  pre.src-lilypond:before { content: 'Lilypond'; }
-  pre.src-lua:before { content: 'Lua'; }
-  pre.src-matlab:before { content: 'MATLAB'; }
-  pre.src-mscgen:before { content: 'Mscgen'; }
-  pre.src-ocaml:before { content: 'Objective Caml'; }
-  pre.src-octave:before { content: 'Octave'; }
-  pre.src-org:before { content: 'Org mode'; }
-  pre.src-oz:before { content: 'OZ'; }
-  pre.src-plantuml:before { content: 'Plantuml'; }
-  pre.src-processing:before { content: 'Processing.js'; }
-  pre.src-python:before { content: 'Python'; }
-  pre.src-R:before { content: 'R'; }
-  pre.src-ruby:before { content: 'Ruby'; }
-  pre.src-sass:before { content: 'Sass'; }
-  pre.src-scheme:before { content: 'Scheme'; }
-  pre.src-screen:before { content: 'Gnu Screen'; }
-  pre.src-sed:before { content: 'Sed'; }
-  pre.src-sh:before { content: 'shell'; }
-  pre.src-sql:before { content: 'SQL'; }
-  pre.src-sqlite:before { content: 'SQLite'; }
-  /* additional languages in org.el's org-babel-load-languages alist */
-  pre.src-forth:before { content: 'Forth'; }
-  pre.src-io:before { content: 'IO'; }
-  pre.src-J:before { content: 'J'; }
-  pre.src-makefile:before { content: 'Makefile'; }
-  pre.src-maxima:before { content: 'Maxima'; }
-  pre.src-perl:before { content: 'Perl'; }
-  pre.src-picolisp:before { content: 'Pico Lisp'; }
-  pre.src-scala:before { content: 'Scala'; }
-  pre.src-shell:before { content: 'Shell Script'; }
-  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
-  /* additional language identifiers per "defun org-babel-execute"
-       in ob-*.el */
-  pre.src-cpp:before  { content: 'C++'; }
-  pre.src-abc:before  { content: 'ABC'; }
-  pre.src-coq:before  { content: 'Coq'; }
-  pre.src-groovy:before  { content: 'Groovy'; }
-  /* additional language identifiers from org-babel-shell-names in
-     ob-shell.el: ob-shell is the only babel language using a lambda to put
-     the execution function name together. */
-  pre.src-bash:before  { content: 'bash'; }
-  pre.src-csh:before  { content: 'csh'; }
-  pre.src-ash:before  { content: 'ash'; }
-  pre.src-dash:before  { content: 'dash'; }
-  pre.src-ksh:before  { content: 'ksh'; }
-  pre.src-mksh:before  { content: 'mksh'; }
-  pre.src-posh:before  { content: 'posh'; }
-  /* Additional Emacs modes also supported by the LaTeX listings package */
-  pre.src-ada:before { content: 'Ada'; }
-  pre.src-asm:before { content: 'Assembler'; }
-  pre.src-caml:before { content: 'Caml'; }
-  pre.src-delphi:before { content: 'Delphi'; }
-  pre.src-html:before { content: 'HTML'; }
-  pre.src-idl:before { content: 'IDL'; }
-  pre.src-mercury:before { content: 'Mercury'; }
-  pre.src-metapost:before { content: 'MetaPost'; }
-  pre.src-modula-2:before { content: 'Modula-2'; }
-  pre.src-pascal:before { content: 'Pascal'; }
-  pre.src-ps:before { content: 'PostScript'; }
-  pre.src-prolog:before { content: 'Prolog'; }
-  pre.src-simula:before { content: 'Simula'; }
-  pre.src-tcl:before { content: 'tcl'; }
-  pre.src-tex:before { content: 'TeX'; }
-  pre.src-plain-tex:before { content: 'Plain TeX'; }
-  pre.src-verilog:before { content: 'Verilog'; }
-  pre.src-vhdl:before { content: 'VHDL'; }
-  pre.src-xml:before { content: 'XML'; }
-  pre.src-nxml:before { content: 'XML'; }
-  /* add a generic configuration mode; LaTeX export needs an additional
-     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
-  pre.src-conf:before { content: 'Configuration File'; }
-
-  table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
-  td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
-  dt { font-weight: bold; }
-  .footpara { display: inline; }
-  .footdef  { margin-bottom: 1em; }
-  .figure { padding: 1em; }
-  .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
-  .inlinetask {
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 10px;
-    background: #ffffcc;
-  }
-  #org-div-home-and-up
-   { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x: auto; }
-  .linenr { font-size: smaller }
-  .code-highlighted { background-color: #ffff00; }
-  .org-info-js_info-navigation { border-style: none; }
-  #org-info-js_console-label
-    { font-size: 10px; font-weight: bold; white-space: nowrap; }
-  .org-info-js_search-highlight
-    { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { }
-</style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -211,15 +27,15 @@ While navigating in a densely linked cluster of notes almost feels cozy, I bump 
 I believe these difficulties can be solved elegantly using representations of the notes' graph structure. The way we link notes to one another contains enough information to help us navigate: it can tell us which nodes are important (centrality), which nodes are related (community) and which give context (neighborhood).
 </p>
 
-<div id="outline-container-org65fb2c0" class="outline-2">
-<h2 id="org65fb2c0">Use the full graph as a map</h2>
-<div class="outline-text-2" id="text-org65fb2c0">
+<div id="outline-container-org869f8a6" class="outline-2">
+<h2 id="org869f8a6">Use the full graph as a map</h2>
+<div class="outline-text-2" id="text-org869f8a6">
 <p>
 Wherever we are in the garden we should be able to pull its map, the network of notes, and be able to jump to another location should we want to.
 </p>
 
 
-<div id="org6e8320f" class="figure">
+<div id="org18e170b" class="figure">
 <p><img src="img/explore-notes-global.svg" alt="explore-notes-global.svg" class="org-svg" />
 </p>
 </div>
@@ -234,15 +50,15 @@ Instead of using tags to infer topics we can use a <i>community detection algori
 </div>
 </div>
 
-<div id="outline-container-orga34360b" class="outline-2">
-<h2 id="orga34360b">Show a map of local neighbours in each note</h2>
-<div class="outline-text-2" id="text-orga34360b">
+<div id="outline-container-orgb7b30fe" class="outline-2">
+<h2 id="orgb7b30fe">Show a map of local neighbours in each note</h2>
+<div class="outline-text-2" id="text-orgb7b30fe">
 <p>
 The backlinks at the end of each note are useful, but we can take one step further and show the local neighborhood of the note instead:
 </p>
 
 
-<div id="org0dca7a5" class="figure">
+<div id="org6125fca" class="figure">
 <p><img src="img/explore-notes-local.svg" alt="explore-notes-local.svg" class="org-svg" />
 </p>
 </div>
@@ -263,27 +79,27 @@ See <a target='_blank' rel='noopener noreferrer' class='external' href="https://
 </div>
 
 
-<div id="outline-container-org6bbdb2a" class="outline-2">
-<h2 id="org6bbdb2a">Navigation through the notes</h2>
-<div class="outline-text-2" id="text-org6bbdb2a">
+<div id="outline-container-orgf5d4dae" class="outline-2">
+<h2 id="orgf5d4dae">Navigation through the notes</h2>
+<div class="outline-text-2" id="text-orgf5d4dae">
 <p>
 We can use <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jethrokuan/cortex/blob/5e5fd537bed363d12fa297a4b1603ff56dbf397b/assets/js/page.js">Jethro Kuan's theme</a> for hugo but the navigation is completely backwards and unintuitive. Clicking on a backlink appends a new note to the right. Instead we should probably act as if all the open notes are steps in a walk. A bit like what <a target='_blank' rel='noopener noreferrer' class='external' href="https://notes.andymatuschak.org/z6bci25mVUBNFdVWSrQNKr6u7AZ1jFzfTVbMF?stackedNotes=z6UDDkom8Aifg6mLdjT1sPtbMBweCmpyTwmJT&amp;stackedNotes=z3SjnvsB5aR2ddsycyXofbYR7fCxo7RmKW2be&amp;stackedNotes=z6cFzJWgj9vZpnrQsjrZ8yCNREzCTgyFeVZTb&amp;stackedNotes=z2HUE4ABbQjUNjrNemvkTCsLa1LPDRuwh1tXC&amp;stackedNotes=z68tVM68dEAuH4acs7HY6K76tTVzBdoBGKMZB&amp;stackedNotes=z3RzQhmjeRxXVAAy81aUSKARwJL8dikdJG4VG&amp;stackedNotes=z28QkpK3vRKQTacjFDfGYBhCXHqHuVWJzny9&amp;stackedNotes=z3x7AvJgYzmgEY4kcKdSY2aYxdqWYpTyPqRs8">Andy Matuschak</a> does.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org18b5a76" class="outline-2">
-<h2 id="org18b5a76">More</h2>
-<div class="outline-text-2" id="text-org18b5a76">
+<div id="outline-container-orgcc1c2a5" class="outline-2">
+<h2 id="orgcc1c2a5">More</h2>
+<div class="outline-text-2" id="text-orgcc1c2a5">
 <p>
 Using the graph and its <i>properties</i> to navigate through the notes opens new possibilities. For instance we could design and display a "creativity" score that measures to what extent a note references notes on different topics.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org5086de8" class="outline-2">
-<h2 id="org5086de8">Links to this note</h2>
-<div class="outline-text-2" id="text-org5086de8">
+<div id="outline-container-org0d222e8" class="outline-2">
+<h2 id="org0d222e8">Links to this note</h2>
+<div class="outline-text-2" id="text-org0d222e8">
 <ul class="org-ul">
 <li><a href="./20220523173149-build_a_collective_brain.html">Build a collective brain</a></li>
 <li><a href="./20220108203624-my_online_universe.html">My online universe</a></li>

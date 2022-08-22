@@ -3,205 +3,21 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:04 -->
+<!-- 2022-08-22 Mon 17:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>API design</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
-<style>
-  #content { max-width: 60em; margin: auto; }
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
-  .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
-  .tag    { background-color: #eee; font-family: monospace;
-            padding: 2px; font-size: 80%; font-weight: normal; }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
-  .underline { text-decoration: underline; }
-  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
-  p.verse { margin-left: 3%; }
-  pre {
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    background-color: #f2f2f2;
-    padding: 8pt;
-    font-family: monospace;
-    overflow: auto;
-    margin: 1.2em;
-  }
-  pre.src {
-    position: relative;
-    overflow: auto;
-  }
-  pre.src:before {
-    display: none;
-    position: absolute;
-    top: -8px;
-    right: 12px;
-    padding: 3px;
-    color: #555;
-    background-color: #f2f2f299;
-  }
-  pre.src:hover:before { display: inline; margin-top: 14px;}
-  /* Languages per Org manual */
-  pre.src-asymptote:before { content: 'Asymptote'; }
-  pre.src-awk:before { content: 'Awk'; }
-  pre.src-authinfo::before { content: 'Authinfo'; }
-  pre.src-C:before { content: 'C'; }
-  /* pre.src-C++ doesn't work in CSS */
-  pre.src-clojure:before { content: 'Clojure'; }
-  pre.src-css:before { content: 'CSS'; }
-  pre.src-D:before { content: 'D'; }
-  pre.src-ditaa:before { content: 'ditaa'; }
-  pre.src-dot:before { content: 'Graphviz'; }
-  pre.src-calc:before { content: 'Emacs Calc'; }
-  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-fortran:before { content: 'Fortran'; }
-  pre.src-gnuplot:before { content: 'gnuplot'; }
-  pre.src-haskell:before { content: 'Haskell'; }
-  pre.src-hledger:before { content: 'hledger'; }
-  pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
-  pre.src-latex:before { content: 'LaTeX'; }
-  pre.src-ledger:before { content: 'Ledger'; }
-  pre.src-lisp:before { content: 'Lisp'; }
-  pre.src-lilypond:before { content: 'Lilypond'; }
-  pre.src-lua:before { content: 'Lua'; }
-  pre.src-matlab:before { content: 'MATLAB'; }
-  pre.src-mscgen:before { content: 'Mscgen'; }
-  pre.src-ocaml:before { content: 'Objective Caml'; }
-  pre.src-octave:before { content: 'Octave'; }
-  pre.src-org:before { content: 'Org mode'; }
-  pre.src-oz:before { content: 'OZ'; }
-  pre.src-plantuml:before { content: 'Plantuml'; }
-  pre.src-processing:before { content: 'Processing.js'; }
-  pre.src-python:before { content: 'Python'; }
-  pre.src-R:before { content: 'R'; }
-  pre.src-ruby:before { content: 'Ruby'; }
-  pre.src-sass:before { content: 'Sass'; }
-  pre.src-scheme:before { content: 'Scheme'; }
-  pre.src-screen:before { content: 'Gnu Screen'; }
-  pre.src-sed:before { content: 'Sed'; }
-  pre.src-sh:before { content: 'shell'; }
-  pre.src-sql:before { content: 'SQL'; }
-  pre.src-sqlite:before { content: 'SQLite'; }
-  /* additional languages in org.el's org-babel-load-languages alist */
-  pre.src-forth:before { content: 'Forth'; }
-  pre.src-io:before { content: 'IO'; }
-  pre.src-J:before { content: 'J'; }
-  pre.src-makefile:before { content: 'Makefile'; }
-  pre.src-maxima:before { content: 'Maxima'; }
-  pre.src-perl:before { content: 'Perl'; }
-  pre.src-picolisp:before { content: 'Pico Lisp'; }
-  pre.src-scala:before { content: 'Scala'; }
-  pre.src-shell:before { content: 'Shell Script'; }
-  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
-  /* additional language identifiers per "defun org-babel-execute"
-       in ob-*.el */
-  pre.src-cpp:before  { content: 'C++'; }
-  pre.src-abc:before  { content: 'ABC'; }
-  pre.src-coq:before  { content: 'Coq'; }
-  pre.src-groovy:before  { content: 'Groovy'; }
-  /* additional language identifiers from org-babel-shell-names in
-     ob-shell.el: ob-shell is the only babel language using a lambda to put
-     the execution function name together. */
-  pre.src-bash:before  { content: 'bash'; }
-  pre.src-csh:before  { content: 'csh'; }
-  pre.src-ash:before  { content: 'ash'; }
-  pre.src-dash:before  { content: 'dash'; }
-  pre.src-ksh:before  { content: 'ksh'; }
-  pre.src-mksh:before  { content: 'mksh'; }
-  pre.src-posh:before  { content: 'posh'; }
-  /* Additional Emacs modes also supported by the LaTeX listings package */
-  pre.src-ada:before { content: 'Ada'; }
-  pre.src-asm:before { content: 'Assembler'; }
-  pre.src-caml:before { content: 'Caml'; }
-  pre.src-delphi:before { content: 'Delphi'; }
-  pre.src-html:before { content: 'HTML'; }
-  pre.src-idl:before { content: 'IDL'; }
-  pre.src-mercury:before { content: 'Mercury'; }
-  pre.src-metapost:before { content: 'MetaPost'; }
-  pre.src-modula-2:before { content: 'Modula-2'; }
-  pre.src-pascal:before { content: 'Pascal'; }
-  pre.src-ps:before { content: 'PostScript'; }
-  pre.src-prolog:before { content: 'Prolog'; }
-  pre.src-simula:before { content: 'Simula'; }
-  pre.src-tcl:before { content: 'tcl'; }
-  pre.src-tex:before { content: 'TeX'; }
-  pre.src-plain-tex:before { content: 'Plain TeX'; }
-  pre.src-verilog:before { content: 'Verilog'; }
-  pre.src-vhdl:before { content: 'VHDL'; }
-  pre.src-xml:before { content: 'XML'; }
-  pre.src-nxml:before { content: 'XML'; }
-  /* add a generic configuration mode; LaTeX export needs an additional
-     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
-  pre.src-conf:before { content: 'Configuration File'; }
-
-  table { border-collapse:collapse; }
-  caption.t-above { caption-side: top; }
-  caption.t-bottom { caption-side: bottom; }
-  td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
-  dt { font-weight: bold; }
-  .footpara { display: inline; }
-  .footdef  { margin-bottom: 1em; }
-  .figure { padding: 1em; }
-  .figure p { text-align: center; }
-  .equation-container {
-    display: table;
-    text-align: center;
-    width: 100%;
-  }
-  .equation {
-    vertical-align: middle;
-  }
-  .equation-label {
-    display: table-cell;
-    text-align: right;
-    vertical-align: middle;
-  }
-  .inlinetask {
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 10px;
-    background: #ffffcc;
-  }
-  #org-div-home-and-up
-   { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x: auto; }
-  .linenr { font-size: smaller }
-  .code-highlighted { background-color: #ffff00; }
-  .org-info-js_info-navigation { border-style: none; }
-  #org-info-js_console-label
-    { font-size: 10px; font-weight: bold; white-space: nowrap; }
-  .org-info-js_search-highlight
-    { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { }
-</style>
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">API design</h1>
 
-<div id="outline-container-org009246e" class="outline-2">
-<h2 id="org009246e">A little friction in your design is good.</h2>
-<div class="outline-text-2" id="text-org009246e">
+<div id="outline-container-orgf63f79b" class="outline-2">
+<h2 id="orgf63f79b">A little friction in your design is good.</h2>
+<div class="outline-text-2" id="text-orgf63f79b">
 <p>
 In python there are two ways to enforce this. First with keyword-only arguments:
 </p>
@@ -232,18 +48,18 @@ Then with namedtuples or dataclasses:
 </div>
 </div>
 
-<div id="outline-container-orgf81aa9b" class="outline-2">
-<h2 id="orgf81aa9b">Avoid **kwargs at all cost</h2>
-<div class="outline-text-2" id="text-orgf81aa9b">
+<div id="outline-container-orged86248" class="outline-2">
+<h2 id="orged86248">Avoid **kwargs at all cost</h2>
+<div class="outline-text-2" id="text-orged86248">
 <p>
 They are hard to document. Use dataclasses or namedtuples instead (similar to the Go way of doing things). This also has the advantage of putting the emphasis on your data structure, the interface with the outside world. A way to control the data (can add validation when initializing a dataclass for instance)
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgbce2707" class="outline-2">
-<h2 id="orgbce2707">Difference between a framework and a library</h2>
-<div class="outline-text-2" id="text-orgbce2707">
+<div id="outline-container-org368c20b" class="outline-2">
+<h2 id="org368c20b">Difference between a framework and a library</h2>
+<div class="outline-text-2" id="text-org368c20b">
 <ul class="org-ul">
 <li>Designed to do specific things</li>
 <li>Composes with other libraries (composability)</li>
@@ -253,57 +69,57 @@ They are hard to document. Use dataclasses or namedtuples instead (similar to th
 </div>
 </div>
 
-<div id="outline-container-org1095633" class="outline-2">
-<h2 id="org1095633">Build the conceptually right thing first, the abstraction later</h2>
+<div id="outline-container-orgca6ac54" class="outline-2">
+<h2 id="orgca6ac54">Build the conceptually right thing first, the abstraction later</h2>
 </div>
-<div id="outline-container-orga59d7a3" class="outline-2">
-<h2 id="orga59d7a3">Naming is 90% of the work</h2>
-<div class="outline-text-2" id="text-orga59d7a3">
+<div id="outline-container-orgd4654ef" class="outline-2">
+<h2 id="orgd4654ef">Naming is 90% of the work</h2>
+<div class="outline-text-2" id="text-orgd4654ef">
 <p>
 Take it seriously.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgddd156c" class="outline-2">
-<h2 id="orgddd156c">Always be thinking "How much documentation am I going to have to write for this?"</h2>
-<div class="outline-text-2" id="text-orgddd156c">
+<div id="outline-container-org0545844" class="outline-2">
+<h2 id="org0545844">Always be thinking "How much documentation am I going to have to write for this?"</h2>
+<div class="outline-text-2" id="text-org0545844">
 <p>
 This is linked to naming. Ideally function name and name of the arguments should suffice.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgc3e8c09" class="outline-2">
-<h2 id="orgc3e8c09">Writig the function is only 50% of the work</h2>
-<div class="outline-text-2" id="text-orgc3e8c09">
+<div id="outline-container-org6f0c29d" class="outline-2">
+<h2 id="org6f0c29d">Writig the function is only 50% of the work</h2>
+<div class="outline-text-2" id="text-org6f0c29d">
 <p>
 This is junior's most frequent error. Once the code has been written they consider their job done. But you need to keep re-writing the code until it makes sense to someone else.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgd6bf015" class="outline-2">
-<h2 id="orgd6bf015">Programming is <i>writing</i></h2>
-<div class="outline-text-2" id="text-orgd6bf015">
+<div id="outline-container-org6caad8e" class="outline-2">
+<h2 id="org6caad8e">Programming is <i>writing</i></h2>
+<div class="outline-text-2" id="text-org6caad8e">
 <p>
 Hunmanities students make better programmers. Stop thinking of programming as a scientific discipline (I mean it slightly is for machine learning). You are <i>writing</i>.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org84f92d3" class="outline-2">
-<h2 id="org84f92d3">But mostly <i>reading</i></h2>
-<div class="outline-text-2" id="text-org84f92d3">
+<div id="outline-container-org2afeaf2" class="outline-2">
+<h2 id="org2afeaf2">But mostly <i>reading</i></h2>
+<div class="outline-text-2" id="text-org2afeaf2">
 <p>
 Code is read more often than written.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org938d228" class="outline-2">
-<h2 id="org938d228">OOP is usually the path to broken abstractions</h2>
-<div class="outline-text-2" id="text-org938d228">
+<div id="outline-container-orgae83b7a" class="outline-2">
+<h2 id="orgae83b7a">OOP is usually the path to broken abstractions</h2>
+<div class="outline-text-2" id="text-orgae83b7a">
 <p>
 When you create objects, you are populating a world. Bad APIs create a fantasy world, a collections of objects that have no bearing on reality.
 </p>
@@ -322,36 +138,36 @@ Sometimes combinations of transformations are useful and we give them a name: a 
 </div>
 </div>
 
-<div id="outline-container-org20e79d3" class="outline-2">
-<h2 id="org20e79d3">What are you preventing your users from doing?</h2>
-<div class="outline-text-2" id="text-org20e79d3">
+<div id="outline-container-org29bd332" class="outline-2">
+<h2 id="org29bd332">What are you preventing your users from doing?</h2>
+<div class="outline-text-2" id="text-org29bd332">
 <p>
 We are often thinking in terms of what our API allows users to do, less in terms about what it prevents them from doing. In some cases creating a sandbox is good (framework), but sometimes it is frustrating (library).
 </p>
 </div>
 </div>
-<div id="outline-container-org9e8eb99" class="outline-2">
-<h2 id="org9e8eb99">You need to have trap doors, way to escape your leaky abstractions</h2>
-<div class="outline-text-2" id="text-org9e8eb99">
+<div id="outline-container-org8871c50" class="outline-2">
+<h2 id="org8871c50">You need to have trap doors, way to escape your leaky abstractions</h2>
+<div class="outline-text-2" id="text-org8871c50">
 <p>
 The Julia language is great with that. You can always act on the abstraction layer below.
 </p>
 </div>
 </div>
-<div id="outline-container-orgd50793d" class="outline-2">
-<h2 id="orgd50793d">A model is a combination of arrays and operations on arrays.</h2>
-<div class="outline-text-2" id="text-orgd50793d">
+<div id="outline-container-orga60c640" class="outline-2">
+<h2 id="orga60c640">A model is a combination of arrays and operations on arrays.</h2>
+<div class="outline-text-2" id="text-orga60c640">
 <p>
 Write that first.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb93ed7b" class="outline-2">
-<h2 id="orgb93ed7b">API = abstraction. All abstractions suck.</h2>
+<div id="outline-container-org904e62f" class="outline-2">
+<h2 id="org904e62f">API = abstraction. All abstractions suck.</h2>
 </div>
-<div id="outline-container-org955401e" class="outline-2">
-<h2 id="org955401e">Naming</h2>
-<div class="outline-text-2" id="text-org955401e">
+<div id="outline-container-org218bf72" class="outline-2">
+<h2 id="org218bf72">Naming</h2>
+<div class="outline-text-2" id="text-org218bf72">
 <p>
 There is a joke in CS that naming is the hardest thing in programming along with cache invalidation. Except it is not a joke. Naming is hard, and good names go a loooong way.
 </p>
@@ -362,9 +178,9 @@ Why do poiticians use vague terms? Allow people to project whatever people want 
 </div>
 </div>
 
-<div id="outline-container-orge7fc057" class="outline-2">
-<h2 id="orge7fc057">Favorite APIs</h2>
-<div class="outline-text-2" id="text-orge7fc057">
+<div id="outline-container-orgac6954b" class="outline-2">
+<h2 id="orgac6954b">Favorite APIs</h2>
+<div class="outline-text-2" id="text-orgac6954b">
 <ul class="org-ul">
 <li><code>numpy</code>, I rarely have any surprises with functions I discover for the first time;</li>
 <li><code>schedule</code></li>
@@ -373,15 +189,15 @@ Why do poiticians use vague terms? Allow people to project whatever people want 
 </div>
 </div>
 
-<div id="outline-container-orga528515" class="outline-2">
-<h2 id="orga528515">Choose COMPOSITION OVER CONFIGURATION</h2>
+<div id="outline-container-org02e4724" class="outline-2">
+<h2 id="org02e4724">Choose COMPOSITION OVER CONFIGURATION</h2>
 </div>
-<div id="outline-container-orge6ee424" class="outline-2">
-<h2 id="orge6ee424">Interchangeable elements should have the same signature</h2>
+<div id="outline-container-orge9b4e59" class="outline-2">
+<h2 id="orge9b4e59">Interchangeable elements should have the same signature</h2>
 </div>
-<div id="outline-container-orgcee6c9e" class="outline-2">
-<h2 id="orgcee6c9e">Please do not reinvent the wheel!</h2>
-<div class="outline-text-2" id="text-orgcee6c9e">
+<div id="outline-container-orgae82c2a" class="outline-2">
+<h2 id="orgae82c2a">Please do not reinvent the wheel!</h2>
+<div class="outline-text-2" id="text-orgae82c2a">
 <p>
 In doubt do like numpy. Example of theano is partially hard to use because it uses different naming and type casting conventions.
 </p>
@@ -412,13 +228,13 @@ JAX feels like the natural extension of numpy to which it adds:
 </div>
 </div>
 
-<div id="outline-container-org120338b" class="outline-2">
-<h2 id="org120338b">Modular internals may not make a difference to end users, but it does to maintainer. Do not only think about the user!</h2>
+<div id="outline-container-org01e60a1" class="outline-2">
+<h2 id="org01e60a1">Modular internals may not make a difference to end users, but it does to maintainer. Do not only think about the user!</h2>
 </div>
 
-<div id="outline-container-org224c6fc" class="outline-2">
-<h2 id="org224c6fc">Links to this note</h2>
-<div class="outline-text-2" id="text-org224c6fc">
+<div id="outline-container-org52aa9fb" class="outline-2">
+<h2 id="org52aa9fb">Links to this note</h2>
+<div class="outline-text-2" id="text-org52aa9fb">
 <ul class="org-ul">
 <li><a href="./inbox.html">Writing inbox</a></li>
 </ul>
