@@ -49,7 +49,9 @@
           :html-postamble nil
           :section-numbers nil
           :htmlized-source t
-          :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" /><script data-goatcounter=\"https://thetypicalset.goatcounter.com/count\" async src=\"//gc.zgo.at/count.js\"></script>"
+          :html-head-include-scripts nil
+          :html-head-include-default-style nil
+          :html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" /><script data-goatcounter=\"https://thetypicalset.goatcounter.com/count\" async src=\"//gc.zgo.at/count.js\"></script>"
           :auto-sitemap nil ;; Recent changes
           :sitemap-title "The typical set"
           :sitemap-filename "recent.org"
@@ -69,7 +71,9 @@
          :publishing-directory "_public/blog"
          :recursive nil
          :publishing-function org-html-publish-to-html
-         :html-head-extra "<link rel=\"stylesheet\" type=\"text/css\" href=\"../style.css\" /><script data-goatcounter=\"https://thetypicalset.goatcounter.com/count\" async src=\"//gc.zgo.at/count.js\"></script>"
+         :html-head-include-scripts nil
+         :html-head-include-default-style nil
+         :html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" /><script data-goatcounter=\"https://thetypicalset.goatcounter.com/count\" async src=\"//gc.zgo.at/count.js\"></script>"
          :section-numbers nil
          :htmlized-source t
          :with-toc nil
