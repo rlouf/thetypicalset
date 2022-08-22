@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:40 -->
+<!-- 2022-08-22 Mon 17:50 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
@@ -39,9 +39,9 @@
 <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> has shape semantics for random variables: the shape of random tensors is partitionned in semantically different pieces.
 </p>
 
-<div id="outline-container-org27ade74" class="outline-2">
-<h2 id="org27ade74">TL; DR</h2>
-<div class="outline-text-2" id="text-org27ade74">
+<div id="outline-container-org36d16e1" class="outline-2">
+<h2 id="org36d16e1">TL; DR</h2>
+<div class="outline-text-2" id="text-org36d16e1">
 <ul class="org-ul">
 <li>The <i>support shape</i> is the shape of one draw;</li>
 <li>The <i>batch shape</i> determines the number of independent draws we want from the random variable;</li>
@@ -51,9 +51,9 @@
 </div>
 </div>
 
-<div id="outline-container-org4682034" class="outline-2">
-<h2 id="org4682034">Support shape</h2>
-<div class="outline-text-2" id="text-org4682034">
+<div id="outline-container-org2ade52e" class="outline-2">
+<h2 id="org2ade52e">Support shape</h2>
+<div class="outline-text-2" id="text-org2ade52e">
 <p>
 Let us forget everything we said about the batch shape above.
 </p>
@@ -159,9 +159,9 @@ Finally, distributions can be defined on a space with an arbitrary number of dim
 </p>
 </div>
 
-<div id="outline-container-orgbb300ea" class="outline-3">
-<h3 id="orgbb300ea">Broadcasting</h3>
-<div class="outline-text-3" id="text-orgbb300ea">
+<div id="outline-container-orgb942191" class="outline-3">
+<h3 id="orgb942191">Broadcasting</h3>
+<div class="outline-text-3" id="text-orgb942191">
 <p>
 When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
 </p>
@@ -208,9 +208,9 @@ batch shape: 2
 </div>
 
 
-<div id="outline-container-orge4b2f6d" class="outline-2">
-<h2 id="orge4b2f6d">Batch shape</h2>
-<div class="outline-text-2" id="text-orge4b2f6d">
+<div id="outline-container-orgaa26a78" class="outline-2">
+<h2 id="orgaa26a78">Batch shape</h2>
+<div class="outline-text-2" id="text-orgaa26a78">
 <p>
 In the following we will only consider scalar (univariate) distributions.
 </p>
@@ -237,9 +237,9 @@ sample shape: ()
 </pre>
 </div>
 
-<div id="outline-container-orgf5633ae" class="outline-3">
-<h3 id="orgf5633ae">Batching</h3>
-<div class="outline-text-3" id="text-orgf5633ae">
+<div id="outline-container-orga6f29a3" class="outline-3">
+<h3 id="orga6f29a3">Batching</h3>
+<div class="outline-text-3" id="text-orga6f29a3">
 <p>
 If we want to take \(3\) independent and indentically distributed samples from this distribution we can use the <code>size</code> keyword argument:
 </p>
@@ -295,9 +295,9 @@ We will say that <code>size</code> explicits the <i>batch shape</i>, which is th
 </div>
 </div>
 
-<div id="outline-container-orgabf1711" class="outline-3">
-<h3 id="orgabf1711">Vectorizing</h3>
-<div class="outline-text-3" id="text-orgabf1711">
+<div id="outline-container-org2e63b49" class="outline-3">
+<h3 id="org2e63b49">Vectorizing</h3>
+<div class="outline-text-3" id="text-org2e63b49">
 <p>
 Say we want a sample from three normal distributions with a \(0\), \(3\) and \(5\) mean value respectively. One (cumbersome) way to achieve this is:
 </p>
@@ -373,7 +373,7 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </pre>
 </div>
 
-<pre class="example" id="org3e68c2d">
+<pre class="example" id="org6f856f1">
 shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F8DCB881A80&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -453,9 +453,9 @@ batch shape: (3,)
 </div>
 </div>
 
-<div id="outline-container-org265e6e5" class="outline-3">
-<h3 id="org265e6e5">Vectorizing + Batching</h3>
-<div class="outline-text-3" id="text-org265e6e5">
+<div id="outline-container-org6122a6b" class="outline-3">
+<h3 id="org6122a6b">Vectorizing + Batching</h3>
+<div class="outline-text-3" id="text-org6122a6b">
 <p>
 It is possible to vectorize and batch at the same time. Note that <code>size</code> and that vectorized shape must be broadcastable
 </p>
@@ -497,9 +497,9 @@ where <code>np.broadcast(mean, sigma).shape</code> must correspond to the last d
 </div>
 </div>
 
-<div id="outline-container-orgab94b6f" class="outline-2">
-<h2 id="orgab94b6f">All together</h2>
-<div class="outline-text-2" id="text-orgab94b6f">
+<div id="outline-container-org2c22c9c" class="outline-2">
+<h2 id="org2c22c9c">All together</h2>
+<div class="outline-text-2" id="text-org2c22c9c">
 <p>
 Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> will raise an exception if this is not correctly set.
 </p>
@@ -522,7 +522,7 @@ Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> w
 </pre>
 </div>
 
-<pre class="example" id="org5ac4e09">
+<pre class="example" id="orgd8abb4e">
 sample value: [[[6 2 2]
   [4 0 5]]
 
@@ -542,7 +542,7 @@ batch shape: (3, 2)
 <p class="date">Date: 2022-08-17 Wed 00:00</p>
 <p class="author">Author: Rémi Louf</p>
 <p class="email">Email: <a href="mailto:remi@thetypicalset.com">remi@thetypicalset.com</a></p>
-<p class="date">Created: 2022-08-22 Mon 17:40</p>
+<p class="date">Created: 2022-08-22 Mon 17:50</p>
 </div>
 </body>
 </html>
