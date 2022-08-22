@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-22 Mon 17:32 -->
+<!-- 2022-08-22 Mon 17:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Walk Rosenbluth-Metropolis-Hastings in Aesara</title>
@@ -34,9 +34,9 @@ Of course I can just use the normal</li>
 <li class="off"><code>[&#xa0;]</code> What's missing &amp; how we're going to get there</li>
 </ul>
 
-<div id="outline-container-orgf7a577c" class="outline-2">
-<h2 id="orgf7a577c">Mixture model</h2>
-<div class="outline-text-2" id="text-orgf7a577c">
+<div id="outline-container-orge2069dc" class="outline-2">
+<h2 id="orge2069dc">Mixture model</h2>
+<div class="outline-text-2" id="text-orge2069dc">
 <p>
 <a href="file:///home/runner/projects/thetypicalset/org/blog/jax-parallel-mcmc.html">In the original blog post</a> I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in <code>Aesara</code> is straightforward. No need for a <code>Mixture</code> distribution (like in e.g. PyMC), you just write it like it is:
 </p>
@@ -122,9 +122,9 @@ Here we do not really care about the values that <code>I_rv</code> takes, so we 
 </div>
 </div>
 
-<div id="outline-container-org08b74a4" class="outline-2">
-<h2 id="org08b74a4">Implement the algorithm</h2>
-<div class="outline-text-2" id="text-org08b74a4">
+<div id="outline-container-orgb72705d" class="outline-2">
+<h2 id="orgb72705d">Implement the algorithm</h2>
+<div class="outline-text-2" id="text-orgb72705d">
 <p>
 The random walk Rosenbluth-Metropolis-Hasting algorithm is also straightforward to implement:
 </p>
@@ -171,17 +171,17 @@ Syntactically, <code>aesara.tensor</code> looks like a drop-in replacement to <c
 </div>
 
 
-<div id="outline-container-org678bf3a" class="outline-2">
-<h2 id="org678bf3a">So, does it work?</h2>
+<div id="outline-container-orgfde16d3" class="outline-2">
+<h2 id="orgfde16d3">So, does it work?</h2>
 </div>
 
-<div id="outline-container-org4594bbf" class="outline-2">
-<h2 id="org4594bbf">Perspectives</h2>
-<div class="outline-text-2" id="text-org4594bbf">
+<div id="outline-container-org77cbd03" class="outline-2">
+<h2 id="org77cbd03">Perspectives</h2>
+<div class="outline-text-2" id="text-org77cbd03">
 </div>
-<div id="outline-container-org031a85b" class="outline-3">
-<h3 id="org031a85b"><span class="todo TODO">TODO</span> Automatic marginalization of the <code>Categorical</code> RV</h3>
-<div class="outline-text-3" id="text-org031a85b">
+<div id="outline-container-org78c1cf0" class="outline-3">
+<h3 id="org78c1cf0"><span class="todo TODO">TODO</span> Automatic marginalization of the <code>Categorical</code> RV</h3>
+<div class="outline-text-3" id="text-org78c1cf0">
 <p>
 Here we manually marginalized over the values of <code>Y_rv</code>, but it would be nice if we could automatically marginalize over discrete variables.
 </p>
@@ -192,17 +192,17 @@ Here we manually marginalized over the values of <code>Y_rv</code>, but it would
 </div>
 </div>
 
-<div id="outline-container-orgd1ac9df" class="outline-3">
-<h3 id="orgd1ac9df"><span class="todo TODO">TODO</span> Multiple backend</h3>
-<div class="outline-text-3" id="text-orgd1ac9df">
+<div id="outline-container-orgc94fc4c" class="outline-3">
+<h3 id="orgc94fc4c"><span class="todo TODO">TODO</span> Multiple backend</h3>
+<div class="outline-text-3" id="text-orgc94fc4c">
 <p>
 Having multiple backends means that you can interact with different ecosystems / hardware with the same model expression in Python. You can also decide to leverage the strengths of XLA (JAX) or LLVM (Numba) depending on your application.
 </p>
 </div>
 
-<div id="outline-container-org6da628c" class="outline-4">
-<h4 id="org6da628c"><span class="todo TODO">TODO</span> Compile to Numba</h4>
-<div class="outline-text-4" id="text-org6da628c">
+<div id="outline-container-orgf8b7d7f" class="outline-4">
+<h4 id="orgf8b7d7f"><span class="todo TODO">TODO</span> Compile to Numba</h4>
+<div class="outline-text-4" id="text-orgf8b7d7f">
 <p>
 When nothing is specified <code>Aesara</code> compiles functions to C. We have however introduced a new Numba backend to <code>Aesara</code>.
 </p>
@@ -214,9 +214,9 @@ When nothing is specified <code>Aesara</code> compiles functions to C. We have h
 </div>
 </div>
 
-<div id="outline-container-org5f6f956" class="outline-4">
-<h4 id="org5f6f956"><span class="todo TODO">TODO</span> Compile to JAX</h4>
-<div class="outline-text-4" id="text-org5f6f956">
+<div id="outline-container-orga82916c" class="outline-4">
+<h4 id="orga82916c"><span class="todo TODO">TODO</span> Compile to JAX</h4>
+<div class="outline-text-4" id="text-orga82916c">
 <p>
 We can also compile functions to JAX so they can play nice with JAX ecosystems.
 </p>
@@ -230,9 +230,9 @@ We can also compile functions to JAX so they can play nice with JAX ecosystems.
 </div>
 
 
-<div id="outline-container-org9830f81" class="outline-3">
-<h3 id="org9830f81"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h3>
-<div class="outline-text-3" id="text-org9830f81">
+<div id="outline-container-org5ffb297" class="outline-3">
+<h3 id="org5ffb297"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h3>
+<div class="outline-text-3" id="text-org5ffb297">
 <p>
 We cannot vectorize the execution the same we can in <code>JAX</code> with <code>vmap</code>, but we should be able to. How?
 </p>
