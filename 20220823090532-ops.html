@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-08-23 Tue 17:18 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ops</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Ops</h1>
+<p>
+Ops in Aesara define your ontology, i.e. the (mathematical) objects that exist in your problem space and that can be linked to one another.
+</p>
+
+<p>
+In Theano, from which Aesara was forked, <code>Ops</code> represented simple mathematical expressions: <code>at.log</code>, <code>at.exp</code>, etc. Aesara added the concept of random variables to that.
+</p>
+
+<p>
+<i>Why is it important?</i>
+</p>
+
+<div id="outline-container-orgb509c89" class="outline-2">
+<h2 id="orgb509c89">Expressivity</h2>
+<div class="outline-text-2" id="text-orgb509c89">
+<p>
+<b>Expressivity</b> Higher-level Ops allow you to express your problem at the level of abstraction that matters to you. Take speculations around a deep learning library that we shall name <a href="20220822151156-kaeras.html#ID-ee2b16f2-0d64-4172-90bb-fa3f6dab3eac">Kaeras</a> for now:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">model</span> = al.Sequential(
+    al.Conv2D(32, kernel_size=(3, 3)),
+    al.ReLu(),
+    al.MaxPooling2D(pool_size=(2, 2)),
+    layers.Conv2D(64, kernel_size=(3, 3)),
+    al.ReLu(),
+    al.MaxPooling2D(pool_size=(2, 2)),
+    al.Flatten(),
+    al.Dropout(0.5),
+    al.Dense(num_classes),
+    al.Softmax(),
+)
+</pre>
+</div>
+
+<p>
+Your ontology is not made only of <i>tensors</i> but also of <i>layers</i>: they perform an operation, have a well-defined gradient, and we can reason about them. In the same way, an entire model can become an Ops as well. And this simplifies the graph a lot. Note that in lieu of Ops we could use a function that returns a graph. But that would not allow us to do the following:
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org576a956" class="outline-2">
+<h2 id="org576a956">Reasoning and rewriting</h2>
+<div class="outline-text-2" id="text-org576a956">
+<p>
+<b>Reasoning</b> Higher-level Ops allow you to implement <i>rewrites</i> that operate at a given level of abstraction. Take random variables. It is well known that the sum of two normally distributed random variables is a normally-distributed random variable:
+</p>
+
+\begin{align*}
+   X &\sim \operatorname{N}(\mu_X, \sigma_X^2)\\
+   Y &\sim \operatorname{N}(\mu_Y, \sigma_Y^2)\\
+   Z &= X + Y
+\end{align*}
+
+<p>
+Then:
+</p>
+
+\begin{equation*}
+   Z \sim \operatorname{N}(\mu_X + \mu_Y, \sigma_X^2 + \sigma_Y^2)
+\end{equation*}
+
+<p>
+That is something you could infer from the probability density functions, but it would be the result of a series of rewrites. <a href="20220823093551-rewrites_implement_facts.html#ID-79c1a501-0f26-4761-81fd-2611f3340bc3">Rewrites implement facts</a> at different levels of abstractions, and it is better to do rewrites at a the highest possible level of abstraction, and then go down the hierarchy. We could imagine do the rewrites on the higher-order graph (the one we implemented) until <a href="20220823093740-equality_saturation.html#ID-0b7fb1c2-f54d-4556-9bae-695143227bda">Equality saturation</a>, then expand the <code>OpsFromGraph</code> and saturate again, then expand, etc. until we've expanded the <code>OpsFromGraph</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8b95def" class="outline-2">
+<h2 id="org8b95def">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>
