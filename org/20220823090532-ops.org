@@ -1,0 +1,50 @@
+:PROPERTIES:
+:ID:       40dbd2ba-fd7e-416f-8dd7-515cdc050340
+:END:
+#+title: Ops
+
+Ops in Aesara define your ontology, i.e. the (mathematical) objects that exist in your problem space and that can be linked to one another.
+
+In Theano, from which Aesara was forked, =Ops= represented simple mathematical expressions: =at.log=, =at.exp=, etc. Aesara added the concept of random variables to that.
+
+/Why is it important?/
+
+* Expressivity
+
+*Expressivity* Higher-level Ops allow you to express your problem at the level of abstraction that matters to you. Take speculations around a deep learning library that we shall name [[id:ee2b16f2-0d64-4172-90bb-fa3f6dab3eac][Kaeras]] for now:
+
+  #+begin_src python
+model = al.Sequential(
+    al.Conv2D(32, kernel_size=(3, 3)),
+    al.ReLu(),
+    al.MaxPooling2D(pool_size=(2, 2)),
+    layers.Conv2D(64, kernel_size=(3, 3)),
+    al.ReLu(),
+    al.MaxPooling2D(pool_size=(2, 2)),
+    al.Flatten(),
+    al.Dropout(0.5),
+    al.Dense(num_classes),
+    al.Softmax(),
+)
+  #+end_src
+
+  Your ontology is not made only of /tensors/ but also of /layers/: they perform an operation, have a well-defined gradient, and we can reason about them. In the same way, an entire model can become an Ops as well. And this simplifies the graph a lot. Note that in lieu of Ops we could use a function that returns a graph. But that would not allow us to do the following:
+
+
+* Reasoning and rewriting
+
+*Reasoning* Higher-level Ops allow you to implement /rewrites/ that operate at a given level of abstraction. Take random variables. It is well known that the sum of two normally distributed random variables is a normally-distributed random variable:
+
+  \begin{align*}
+     X &\sim \operatorname{N}(\mu_X, \sigma_X^2)\\
+     Y &\sim \operatorname{N}(\mu_Y, \sigma_Y^2)\\
+     Z &= X + Y
+  \end{align*}
+
+  Then:
+
+  \begin{equation*}
+     Z \sim \operatorname{N}(\mu_X + \mu_Y, \sigma_X^2 + \sigma_Y^2)
+  \end{equation*}
+
+That is something you could infer from the probability density functions, but it would be the result of a series of rewrites. [[id:79c1a501-0f26-4761-81fd-2611f3340bc3][Rewrites implement facts]] at different levels of abstractions, and it is better to do rewrites at a the highest possible level of abstraction, and then go down the hierarchy. We could imagine do the rewrites on the higher-order graph (the one we implemented) until [[id:0b7fb1c2-f54d-4556-9bae-695143227bda][Equality saturation]], then expand the =OpsFromGraph= and saturate again, then expand, etc. until we've expanded the =OpsFromGraph=.

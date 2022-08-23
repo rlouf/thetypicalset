@@ -1,0 +1,39 @@
+:PROPERTIES:
+:ID:       af4507f1-68a7-4ad4-9b2d-6bf0afaf91b2
+:END:
+#+title: Debug an Aesara graph (advanced)
+
+* The graph compiles, I get an ugly stack trace!
+
+#+begin_src python
+E   IndexError: index out of bounds
+E   Apply node that caused the error: Subtensor{int64, ::, int64}(BroadcastTo.0, ScalarConstant{0}, ScalarConstant{39})
+E   Toposort index: 492
+E   Inputs types: [TensorType(float64, (None, None, None)), ScalarType(int64), ScalarType(int64)]
+E   Inputs shapes: [(2401, 2, 2), (), ()]
+E   Inputs strides: [(32, 16, 8), (), ()]
+E   Inputs values: ['not shown', 0, 39]
+E   Outputs clients: [[InplaceDimShuffle{x,0}(Subtensor{int64, ::, int64}.0)]]
+#+end_src
+
+1. Re-run in a debugger
+2. Go up (=u=) the stack trace
+3. =fgraph= (the function graph where the error occurs) should be avaible in the name space.
+4. In the error message you should see indications such as =Toposort index: 492=, and this means that you can access the node via =node = fgraph.toposort()[492]=
+5. You can then inspect the resulting node, and see who created it by inspecting the tag =node.tag=.
+
+* Clear the cache
+
+Sometimes it can be useful to clear the cache manually between different runs
+
+#+begin_src bash
+aesara-cache clear
+#+end_src
+
+* Disable optimizations
+
+** mode=Mode(optimizer="None")
+** FAST_RUN.excluding("<name>")
+** If this is the inner-graph of a =Scan=
+
+Then we need to use the global aesara.config state.
