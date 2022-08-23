@@ -77,6 +77,7 @@
          :section-numbers nil
          :htmlized-source t
          :with-toc nil
+         :html-postamble nil
          :auto-sitemap t
          :sitemap-title "Timestamped thoughts ⌛"
          :sitemap-filename "index.org"
