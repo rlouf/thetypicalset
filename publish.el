@@ -89,7 +89,7 @@
         ; All figures, javascript scipts, etc linked to posts
         ("static"
         :base-directory "org"
-        :base-extension "css\\|js\\|png\\|jpg\\|gif\\|svg\\|pdf\\|mp3\\|ogg\\|swf"
+        :base-extension "css\\|js\\|png\\|jpg\\|jpeg\\|gif\\|svg\\|pdf\\|mp3\\|ogg\\|swf"
         :publishing-directory "_public/"
         :recursive t
         :publishing-function org-publish-attachment
