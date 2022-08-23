@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-23 Tue 17:23 -->
+<!-- 2022-08-23 Tue 22:35 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>miniKanren</title>
@@ -39,38 +39,38 @@
 <a target='_blank' rel='noopener noreferrer' class='external' href="http://minikanren.org">miniKanren</a> is a DSL for <a href="20220306194641-relational_programming.html#ID-f9dc079d-0b83-4ab5-afc4-c3a7045fb6a9">relational programming</a>. It can be used to <i>declare</i> the relations between the parameters of a problem, and let the computer find the values of the parameters that satisfy these relations. While the original implementation is in Scheme, I will be focusing in these notes on <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren">an implementation</a> in <a href="20220811152635-python.html#ID-5cbd01f8-88bb-4826-b82d-125ad3c759eb">Python</a>.
 </p>
 
-<div id="outline-container-org2398cc3" class="outline-2">
-<h2 id="org2398cc3">Learn</h2>
-<div class="outline-text-2" id="text-org2398cc3">
+<div id="outline-container-org10d3a30" class="outline-2">
+<h2 id="org10d3a30">Learn</h2>
+<div class="outline-text-2" id="text-org10d3a30">
 <p>
 The goal is to fully understand the python implementation. Here's a diagram that roughly summarizes what I need to understand:
 </p>
 
 
-<div id="org15c2448" class="figure">
+<div id="org48710f4" class="figure">
 <p><img src="img/kanren-learning.png" alt="kanren-learning.png" width="100%" />
 </p>
 </div>
 </div>
 
-<div id="outline-container-org78318bf" class="outline-3">
-<h3 id="org78318bf"><span class="todo TODO">TODO</span> <a href="20220811204152-unification.html#ID-5458738d-44ab-4976-87cd-d668905fbb96">Unification</a></h3>
+<div id="outline-container-org98159f5" class="outline-3">
+<h3 id="org98159f5"><span class="todo TODO">TODO</span> <a href="20220811204152-unification.html#ID-5458738d-44ab-4976-87cd-d668905fbb96">Unification</a></h3>
 </div>
-<div id="outline-container-orgae6d1a1" class="outline-3">
-<h3 id="orgae6d1a1"><span class="todo TODO">TODO</span> <a href="20220811171306-walko.html#ID-f81ea2e9-76e9-4e6a-954d-eea005a18f96">walko</a></h3>
+<div id="outline-container-org6dd42f2" class="outline-3">
+<h3 id="org6dd42f2"><span class="todo TODO">TODO</span> <a href="20220811171306-walko.html#ID-f81ea2e9-76e9-4e6a-954d-eea005a18f96">walko</a></h3>
 </div>
-<div id="outline-container-orgf70ae5b" class="outline-3">
-<h3 id="orgf70ae5b"><span class="todo TODO">TODO</span> <a href="20220809112203-condp.html#ID-833af8d8-dc08-49f3-8ed9-cd12aa5c57bb">condp</a></h3>
+<div id="outline-container-org1bc65a2" class="outline-3">
+<h3 id="org1bc65a2"><span class="todo TODO">TODO</span> <a href="20220809112203-condp.html#ID-833af8d8-dc08-49f3-8ed9-cd12aa5c57bb">condp</a></h3>
 </div>
 </div>
 
-<div id="outline-container-orgd35d8ed" class="outline-2">
-<h2 id="orgd35d8ed">Projects</h2>
-<div class="outline-text-2" id="text-orgd35d8ed">
+<div id="outline-container-org169da24" class="outline-2">
+<h2 id="org169da24">Projects</h2>
+<div class="outline-text-2" id="text-org169da24">
 </div>
-<div id="outline-container-orgbd711e6" class="outline-3">
-<h3 id="orgbd711e6">Term rewriting</h3>
-<div class="outline-text-3" id="text-orgbd711e6">
+<div id="outline-container-orgbc57900" class="outline-3">
+<h3 id="orgbc57900">Term rewriting</h3>
+<div class="outline-text-3" id="text-orgbc57900">
 <p>
 I am using miniKanren in the following contexts/projects:
 </p>
@@ -81,9 +81,9 @@ I am using miniKanren in the following contexts/projects:
 </div>
 </div>
 
-<div id="outline-container-org4a76064" class="outline-3">
-<h3 id="org4a76064">Solving puzzles</h3>
-<div class="outline-text-3" id="text-org4a76064">
+<div id="outline-container-org557adfb" class="outline-3">
+<h3 id="org557adfb">Solving puzzles</h3>
+<div class="outline-text-3" id="text-org557adfb">
 <p>
 Puzzles are a good introduction to relational programming: they have a fixed number of rules, were designed to be solved by humans.
 </p>
@@ -104,9 +104,9 @@ Puzzles are a good introduction to relational programming: they have a fixed num
 </div>
 </div>
 
-<div id="outline-container-org4dd1d2d" class="outline-3">
-<h3 id="org4dd1d2d">Bitmaps generation</h3>
-<div class="outline-text-3" id="text-org4dd1d2d">
+<div id="outline-container-orgcb0ed20" class="outline-3">
+<h3 id="orgcb0ed20">Bitmaps generation</h3>
+<div class="outline-text-3" id="text-orgcb0ed20">
 <ul class="org-ul">
 <li>To connect two points with a line (e.g. Brownian bridge)</li>
 <li>To implement a declarative version of the <a href="20220811160111-wavefunctioncollapse_algorithm.html#ID-b35260a8-8ef4-4f08-ad22-dc477c6311f0">WaveFunctionCollapse algorithm</a>
@@ -124,9 +124,9 @@ Puzzles are a good introduction to relational programming: they have a fixed num
 </div>
 </div>
 
-<div id="outline-container-orgfd17fcb" class="outline-3">
-<h3 id="orgfd17fcb">Gardening</h3>
-<div class="outline-text-3" id="text-orgfd17fcb">
+<div id="outline-container-org170b944" class="outline-3">
+<h3 id="org170b944">Gardening</h3>
+<div class="outline-text-3" id="text-org170b944">
 <p>
 Gardening is typically an area where we are trying to find solutions that satisfy some constraints. We could definitely use miniKanren to plan garden if the search scaled : we can enter informations about the different plants in a database, then some information about the garden we are trying to design, and look at the combinations that come out of it.
 </p>
@@ -134,9 +134,9 @@ Gardening is typically an area where we are trying to find solutions that satisf
 </div>
 </div>
 
-<div id="outline-container-org962ef1d" class="outline-2">
-<h2 id="org962ef1d">References</h2>
-<div class="outline-text-2" id="text-org962ef1d">
+<div id="outline-container-org520523d" class="outline-2">
+<h2 id="org520523d">References</h2>
+<div class="outline-text-2" id="text-org520523d">
 <ul class="org-ul">
 <li>The Reasoned Schemer (2nd ed.)</li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://dash.harvard.edu/bitstream/handle/1/41307116/tr-02-19.pdf?sequence=1&amp;isAllowed=y#page=5">Proceedings of the 2019 Workshop on miniKanren and relational programming</a>
@@ -156,9 +156,9 @@ The authors starts from the logic programming language Picat and ends up suggest
 </div>
 </div>
 
-<div id="outline-container-orgcf781bb" class="outline-2">
-<h2 id="orgcf781bb">Links to this note</h2>
-<div class="outline-text-2" id="text-orgcf781bb">
+<div id="outline-container-org458a569" class="outline-2">
+<h2 id="org458a569">Links to this note</h2>
+<div class="outline-text-2" id="text-org458a569">
 <ul class="org-ul">
 <li><a href="./20211202104804-what_i_am_working_on.html">💻 Working on now</a></li>
 <li><a href="./20220816110327-garden_design.html">Garden design</a></li>
