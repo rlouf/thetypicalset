@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-23 Tue 22:42 -->
+<!-- 2022-08-23 Tue 22:45 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sparse regression with Aesara</title>
@@ -57,9 +57,9 @@ We will first import <code>aesara</code> and initialize our RandomStream (TODO: 
 </pre>
 </div>
 
-<div id="outline-container-orgb9cb0cc" class="outline-2">
-<h2 id="orgb9cb0cc">Horseshoe prior</h2>
-<div class="outline-text-2" id="text-orgb9cb0cc">
+<div id="outline-container-orgfe05361" class="outline-2">
+<h2 id="orgfe05361">Horseshoe prior</h2>
+<div class="outline-text-2" id="text-orgfe05361">
 <p>
 Now we can define a simple horsehoe prior:
 </p>
@@ -107,15 +107,15 @@ Note that every time <code>.eval()</code> is called aesara returns a different v
 </div>
 </div>
 
-<div id="outline-container-org30dcd6c" class="outline-3">
-<h3 id="org30dcd6c"><span class="todo TODO">TODO</span> What can we do with this graph?</h3>
+<div id="outline-container-orgc03beec" class="outline-3">
+<h3 id="orgc03beec"><span class="todo TODO">TODO</span> What can we do with this graph?</h3>
 </div>
-<div id="outline-container-org13c8f50" class="outline-3">
-<h3 id="org13c8f50"><span class="todo TODO">TODO</span> Why is it great compared to e.g. PyMC3?</h3>
+<div id="outline-container-org4d92807" class="outline-3">
+<h3 id="org4d92807"><span class="todo TODO">TODO</span> Why is it great compared to e.g. PyMC3?</h3>
 </div>
-<div id="outline-container-orgd196b0c" class="outline-3">
-<h3 id="orgd196b0c">Prior predictive sampling</h3>
-<div class="outline-text-3" id="text-orgd196b0c">
+<div id="outline-container-orgee2f02f" class="outline-3">
+<h3 id="orgee2f02f">Prior predictive sampling</h3>
+<div class="outline-text-3" id="text-orgee2f02f">
 <p>
 The graph indeed carries the random number generator state with it. We can sample more of these quickly using aesara's <code>scan</code> operator. Lets take the following example that works:
 </p>
@@ -151,9 +151,9 @@ sampling_fn(10)
 </div>
 
 
-<div id="outline-container-org44c3f9b" class="outline-3">
-<h3 id="org44c3f9b">Log-probability density function</h3>
-<div class="outline-text-3" id="text-org44c3f9b">
+<div id="outline-container-org4033155" class="outline-3">
+<h3 id="org4033155">Log-probability density function</h3>
+<div class="outline-text-3" id="text-org4033155">
 <p>
 Even though we won't need it in this blog post, we expect any PPL to be able to give the the log-probability density function (logpdf) of any model it has defined. For that we will use <code>aeppl</code>.
 </p>
@@ -183,9 +183,9 @@ Amazing!
 </div>
 </div>
 
-<div id="outline-container-org58f45f0" class="outline-2">
-<h2 id="org58f45f0">Negative Binomial regression</h2>
-<div class="outline-text-2" id="text-org58f45f0">
+<div id="outline-container-org24cbced" class="outline-2">
+<h2 id="org24cbced">Negative Binomial regression</h2>
+<div class="outline-text-2" id="text-org24cbced">
 <p>
 We will now come back to the original topic, performing a /negative binomial sparse regression
 </p>
@@ -210,17 +210,17 @@ Y_rv.<span style="font-weight: bold;">eval</span>()
 </div>
 </div>
 
-<div id="outline-container-org7d55a74" class="outline-2">
-<h2 id="org7d55a74"><span class="todo TODO">TODO</span> New progression</h2>
-<div class="outline-text-2" id="text-org7d55a74">
+<div id="outline-container-org929638b" class="outline-2">
+<h2 id="org929638b"><span class="todo TODO">TODO</span> New progression</h2>
+<div class="outline-text-2" id="text-org929638b">
 <p>
 Show the whole model first, and show that we can actually sample from the prior of \(\beta\) to perform intermediate checks. Something we cannot do otherwise.
 </p>
 </div>
 </div>
-<div id="outline-container-orgde8d860" class="outline-2">
-<h2 id="orgde8d860"><span class="todo TODO">TODO</span> Sampling from the posterior</h2>
-<div class="outline-text-2" id="text-orgde8d860">
+<div id="outline-container-orgc976c7d" class="outline-2">
+<h2 id="orgc976c7d"><span class="todo TODO">TODO</span> Sampling from the posterior</h2>
+<div class="outline-text-2" id="text-orgc976c7d">
 <p>
 Sampling with <code>aemcmc</code> is great!
 </p>
@@ -248,14 +248,14 @@ Of course this interfaces easily with <code>ArviZ</code>
 </p>
 </div>
 
-<div id="outline-container-org8d45c60" class="outline-3">
-<h3 id="org8d45c60"><span class="todo TODO">TODO</span> Show trace and posterior distributions with arviz</h3>
+<div id="outline-container-org57f6ec4" class="outline-3">
+<h3 id="org57f6ec4"><span class="todo TODO">TODO</span> Show trace and posterior distributions with arviz</h3>
 </div>
 </div>
 
-<div id="outline-container-org445234d" class="outline-2">
-<h2 id="org445234d"><span class="todo TODO">TODO</span> Posterior predictive sampling</h2>
-<div class="outline-text-2" id="text-org445234d">
+<div id="outline-container-org8d000fc" class="outline-2">
+<h2 id="org8d000fc"><span class="todo TODO">TODO</span> Posterior predictive sampling</h2>
+<div class="outline-text-2" id="text-org8d000fc">
 <p>
 Posterior predictive sampling is simply that the variables are no longer random variables but have a value. Here it is enough to specify the value of \(\beta\).
 </p>
