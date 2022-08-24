@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-24 Wed 05:01 -->
+<!-- 2022-08-24 Wed 20:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Solve sudokus with miniKanren</title>
@@ -51,9 +51,9 @@ The following represents a (partially filled) grid with one row, one column, and
 Peter's solution is <i>imperative</i>: we implement a series of procedures that will give us the missing values in a Sudoku puzzle. The <i>nature</i> of the Sudoku, the rules, are hidden in this code. Here we will instead implement the rules of the Sudoku, i.e. the <i>relations</i> that the units must respect and let miniKanren search for the grids that respect these rules (given some hints) for us. Sounds too good to be true?
 </p>
 
-<div id="outline-container-org841e2ed" class="outline-2">
-<h2 id="org841e2ed">Solving sudoku rows</h2>
-<div class="outline-text-2" id="text-org841e2ed">
+<div id="outline-container-orge88652a" class="outline-2">
+<h2 id="orge88652a">Solving sudoku rows</h2>
+<div class="outline-text-2" id="text-orge88652a">
 <p>
 Let us work on a simpler problem first: a sudoku row. We assume that we have a vector with 9 spaces already filled with a few hints. To represent a valid sudoku row the vector must be the permutation of the digits from 1 to 9. Let us consider the following puzzle as an example:
 </p>
@@ -209,9 +209,9 @@ As you can see, once we have described the relations, <code>kanren</code> does a
 </div>
 </div>
 
-<div id="outline-container-orgc532435" class="outline-2">
-<h2 id="orgc532435">Solving sudoku grids</h2>
-<div class="outline-text-2" id="text-orgc532435">
+<div id="outline-container-org15819f5" class="outline-2">
+<h2 id="org15819f5">Solving sudoku grids</h2>
+<div class="outline-text-2" id="text-org15819f5">
 <p>
 We store the sudoku grid as a 81-element list. Since constraints are defined on rows, columns and squares we need to be able to extract those units from a grid:
 </p>
@@ -330,9 +330,9 @@ This actually works! And since miniKanren does the search for us our solution is
 </div>
 </div>
 
-<div id="outline-container-org336ffa0" class="outline-2">
-<h2 id="org336ffa0">Limitation</h2>
-<div class="outline-text-2" id="text-org336ffa0">
+<div id="outline-container-orgbb5648d" class="outline-2">
+<h2 id="orgbb5648d">Limitation</h2>
+<div class="outline-text-2" id="text-orgbb5648d">
 <p>
 While <code>kanren</code> could find the solution for a ridiculously easy grid, the computation hangs on the following (supposedly easy) problem:
 </p>
@@ -359,9 +359,9 @@ While <code>kanren</code> could find the solution for a ridiculously easy grid, 
 </div>
 </div>
 
-<div id="outline-container-org861ea7f" class="outline-2">
-<h2 id="org861ea7f">Conclusion</h2>
-<div class="outline-text-2" id="text-org861ea7f">
+<div id="outline-container-org9eb0ace" class="outline-2">
+<h2 id="org9eb0ace">Conclusion</h2>
+<div class="outline-text-2" id="text-org9eb0ace">
 <p>
 This is a toy example, and miniKanren can be used for much more than solving sudoku puzzles. In <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc">Aemcmc</a> we use miniKanren extensively for several purposes, such as:
 </p>
@@ -377,11 +377,11 @@ The possibilities are endless, and to my knowledge haven't been explored much in
 </div>
 </div>
 
-<div id="outline-container-org7ff34b2" class="outline-2">
-<h2 id="org7ff34b2"><span class="todo TODO">TODO</span> Improve the solver's performance</h2>
+<div id="outline-container-org2b2cf5f" class="outline-2">
+<h2 id="org2b2cf5f"><span class="todo TODO">TODO</span> Improve the solver's performance</h2>
 </div>
-<div id="outline-container-org66fcca5" class="outline-2">
-<h2 id="org66fcca5"><span class="todo TODO">TODO</span> Generate valid sudoku puzzle using an empty grid as an input</h2>
+<div id="outline-container-orge620a44" class="outline-2">
+<h2 id="orge620a44"><span class="todo TODO">TODO</span> Generate valid sudoku puzzle using an empty grid as an input</h2>
 </div>
 </div>
 </body>
