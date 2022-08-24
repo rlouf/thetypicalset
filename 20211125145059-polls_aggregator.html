@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-24 Wed 20:25 -->
+<!-- 2022-08-24 Wed 22:24 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Predict the result of French elections</title>
@@ -43,16 +43,16 @@ Sorry but this is a very rough draft written for myself.
 See <a href="20211207101052-forecasting_elections_in_multiparty_systems_a_bayesian_approach_combining_polls_and_fundamentals.html#ID-4fd036f0-8812-411d-bd25-acd1ebefb7d9">Forecasting elections in multiparty systems: a Bayesian approach combining polls and fundamentals</a>
 </p>
 
-<div id="outline-container-orgd67890c" class="outline-2">
-<h2 id="orgd67890c"><span class="todo TODO">TODO</span> Link Gaussian process to stochastic processes</h2>
+<div id="outline-container-org8a2deb1" class="outline-2">
+<h2 id="org8a2deb1"><span class="todo TODO">TODO</span> Link Gaussian process to stochastic processes</h2>
 </div>
-<div id="outline-container-org3de4e07" class="outline-2">
-<h2 id="org3de4e07"><span class="todo TODO">TODO</span> Make the gaussian process work with a non-diagonal covariance matrix</h2>
+<div id="outline-container-orga77b2f9" class="outline-2">
+<h2 id="orga77b2f9"><span class="todo TODO">TODO</span> Make the gaussian process work with a non-diagonal covariance matrix</h2>
 </div>
 
-<div id="outline-container-org67128c8" class="outline-2">
-<h2 id="org67128c8">Introduction</h2>
-<div class="outline-text-2" id="text-org67128c8">
+<div id="outline-container-orgb0405f9" class="outline-2">
+<h2 id="orgb0405f9">Introduction</h2>
+<div class="outline-text-2" id="text-orgb0405f9">
 <p>
 Dimensions:
 </p>
@@ -97,9 +97,9 @@ We use Gaussian processes to model the time evolution of the different parameter
 </div>
 
 
-<div id="outline-container-org99e1bbb" class="outline-2">
-<h2 id="org99e1bbb">Intercepts</h2>
-<div class="outline-text-2" id="text-org99e1bbb">
+<div id="outline-container-orgd26c2c8" class="outline-2">
+<h2 id="orgd26c2c8">Intercepts</h2>
+<div class="outline-text-2" id="text-orgd26c2c8">
 \begin{align*}
   \sigma_{\iota} &\sim \operatorname{HalfNormal}(0.5)\\
  \iota_{e,p} &\sim \operatorname{ZeroSumNormal}(0, \sigma_{\iota})
@@ -112,9 +112,9 @@ We use Gaussian processes to model the time evolution of the different parameter
 </div>
 </div>
 
-<div id="outline-container-orgc6b6113" class="outline-2">
-<h2 id="orgc6b6113">House effect</h2>
-<div class="outline-text-2" id="text-orgc6b6113">
+<div id="outline-container-org58a36d2" class="outline-2">
+<h2 id="org58a36d2">House effect</h2>
+<div class="outline-text-2" id="text-org58a36d2">
 <p>
 The systemic poll biais shared by every pollster for each political party:
 </p>
@@ -142,9 +142,9 @@ And the house effect per (election, party)
 </div>
 </div>
 
-<div id="outline-container-orgdcd793c" class="outline-2">
-<h2 id="orgdcd793c">Fundamental data</h2>
-<div class="outline-text-2" id="text-orgdcd793c">
+<div id="outline-container-org1c21219" class="outline-2">
+<h2 id="org1c21219">Fundamental data</h2>
+<div class="outline-text-2" id="text-org1c21219">
 <p>
 Idea that elections are simple to predict using fundamental data. Here we model the unemployment effect \(\nu_u\):
 </p>
@@ -155,22 +155,22 @@ Idea that elections are simple to predict using fundamental data. Here we model 
 </div>
 </div>
 
-<div id="outline-container-org1d85212" class="outline-2">
-<h2 id="org1d85212">Time evolution</h2>
-<div class="outline-text-2" id="text-org1d85212">
+<div id="outline-container-org6e7ed59" class="outline-2">
+<h2 id="org6e7ed59">Time evolution</h2>
+<div class="outline-text-2" id="text-org6e7ed59">
 <p>
 We model the time evolution of parties' latent popularity with 3 gaussian processes with different length scales to catch the different time scales of the process.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgac647eb" class="outline-2">
-<h2 id="orgac647eb">Combine the factors</h2>
-<div class="outline-text-2" id="text-orgac647eb">
+<div id="outline-container-org6f1ba24" class="outline-2">
+<h2 id="org6f1ba24">Combine the factors</h2>
+<div class="outline-text-2" id="text-org6f1ba24">
 </div>
-<div id="outline-container-orga9948e0" class="outline-3">
-<h3 id="orga9948e0">Poll aggregator</h3>
-<div class="outline-text-3" id="text-orga9948e0">
+<div id="outline-container-org900d1da" class="outline-3">
+<h3 id="org900d1da">Poll aggregator</h3>
+<div class="outline-text-3" id="text-org900d1da">
 \begin{equation}
  \lambda_{h, t, e, p} = \tilde{\iota}_{p} + \iota_{e,p} + \mu_{t,p} + \tilde{\mu}_{t,e,p} + \zeta_{u} \; U_{t} + \zeta_{p} + \epsilon_{h,p} + \tilde{\epsilon}_{h,p,e}
 \end{equation}
@@ -194,9 +194,9 @@ The latent popularity is given by removing the house effects &amp; poll biases:
 </div>
 
 
-<div id="outline-container-org977b754" class="outline-3">
-<h3 id="org977b754">Fundamentals model</h3>
-<div class="outline-text-3" id="text-org977b754">
+<div id="outline-container-orgf06e542" class="outline-3">
+<h3 id="orgf06e542">Fundamentals model</h3>
+<div class="outline-text-3" id="text-orgf06e542">
 \begin{equation}
  \tilde{p}_{h, t, e, p} = \operatorname{Softmax}\left(\tilde{\iota}_{p} + \iota_{e,p} + \mu_{t_0,p} + \tilde{\mu}_{t_0,e,p} + \nu_{u} \; U_{t_0}\right)
 \end{equation}
@@ -205,9 +205,9 @@ The latent popularity is given by removing the house effects &amp; poll biases:
 </div>
 
 
-<div id="outline-container-org2b35467" class="outline-2">
-<h2 id="org2b35467">Connect to poll results and election results</h2>
-<div class="outline-text-2" id="text-org2b35467">
+<div id="outline-container-orge913fbd" class="outline-2">
+<h2 id="orge913fbd">Connect to poll results and election results</h2>
+<div class="outline-text-2" id="text-orge913fbd">
 <p>
 The concentration parametrer:
 </p>
@@ -238,8 +238,8 @@ Q: <i>What if there are several polls in one day?</i>
 </div>
 </div>
 
-<div id="outline-container-org4588174" class="outline-2">
-<h2 id="org4588174">Links to this note</h2>
+<div id="outline-container-orge521f96" class="outline-2">
+<h2 id="orge521f96">Links to this note</h2>
 </div>
 </div>
 </body>
