@@ -4,22 +4,22 @@
 #+title: Publish your notes instantly
 #+filetags: :public:
 
-There should be as little friction as possible between the act of writing and the act of publishing. Publishing almost instantly is paramout for several reasons:
+There should be as little friction as possible between the act of writing and the act of publishing. Notational velocity is essential, publicational velocity is paramout:
 
 - You cannot hide clutter on a web browser;
 - Publishing gives you a broader perspective. Being able to navigate through one's notes in a browser gives a perspective that you cannot get in a text editor. This is not just about finding typos or adding a few links, but about breaking down notes, merging some ideas, and sometimes gettings new ideas. It helps you [[id:d4b6bab5-96f2-417f-902d-c78e7b7d1dca][write better notes]].
 - Publishing is rewarding. It helps create a habit: the more you publish the more you will want to write.
+- [[id:b035cb34-015c-4be2-a822-85b59a92c020][Progress is better measured in small chunks]], and published notes are proofs of your thinking evolving.
 
-These are rewards you reap whenever you get something out there. But self-contained notes do not need any extra work, they can be published as is. [[id:b035cb34-015c-4be2-a822-85b59a92c020][Progress is better measured in small chunks]], and published notes are proofs of your thinking evolving [[cite:&ahrens2017]]
+* Publishing the typical set
 
-* My current setup
+Here are the steps that I will follow after I am done typing these words:
 
-There are currently too many steps between my fingers typing and you seeing this on the internet:
+- Save the file =:wq=
+- Open Magit =<SPC> g g=
+- Stage the changes =S=
+- Commit the changes =c c=
+- Enter a commit message
+- Push the commit to Github =p p=
 
-- Save the org file
-- Go to the directory where the files for the website are located
-- =make build= to re-build the modified pages
-- =git add && git commit=  to add the new files to the repo
-- =git push= (and the site is automatically built and publish)
-
-I need to reduce the number of keystrokes. [[https://github.com/org-roam/org-roam-ui][org-roam-ui]] is graphical frontend that can be used locally to visualize one's notes. You are made conscious of the clutter, get a broader perspective, /but/ publishing online is more rewarding.
+That's all! Github then [[https://github.com/rlouf/thetypicalset/blob/main/.github/workflows/deploy.yml][builds the website]] from the org files automatically. I use git only to be able to publish the website easily, and prevent conflicts. The commits do not mean anything as units; I could write some =elisp= to commit and push automatically but I do like a little friction in the process.
