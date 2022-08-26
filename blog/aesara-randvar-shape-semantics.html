@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-24 Wed 22:34 -->
+<!-- 2022-08-26 Fri 03:08 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
@@ -36,45 +36,39 @@
 <div id="content" class="content">
 <h1 class="title">Shape semantics for random variables in Aesara</h1>
 <p>
-<a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> has shape semantics for random variables: the shape of random tensors is partitionned in semantically different pieces.
+The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> is partitioned in semantically different pieces:
 </p>
-
-<div id="outline-container-org013b64e" class="outline-2">
-<h2 id="org013b64e">TL; DR</h2>
-<div class="outline-text-2" id="text-org013b64e">
 <ul class="org-ul">
-<li>The <i>support shape</i> is the shape of one draw;</li>
-<li>The <i>batch shape</i> determines the number of independent draws we want from the random variable;</li>
-<li>The <i>batch shape</i> can be infered using broadcasting rules for the distribution parameters, and broadcasting shapes with the <code>size</code> keyword argument;</li>
+<li>The <b>support shape</b> is the shape of one draw from the base distribution;</li>
+<li>The <b>batch shape</b> is the number of independent draws we want from the distribution;</li>
+<li>The <b>batch shape</b> can be infered using broadcasting rules for the distribution parameters, and broadcasting shapes with the <code>size</code> keyword argument;</li>
 <li>The shape of samples is given by <code>sample_shape = batch_shape + support_shape</code></li>
 </ul>
-</div>
-</div>
 
-<div id="outline-container-org3782424" class="outline-2">
-<h2 id="org3782424">Support shape</h2>
-<div class="outline-text-2" id="text-org3782424">
-<p>
-Let us forget everything we said about the batch shape above.
-</p>
-
-<p>
-Here we have
-</p>
-<ul class="org-ul">
-<li>Scalar</li>
-<li>Vectors (1 dimension)</li>
-<li>Matrices (2 dimensions)</li>
-</ul>
-
+<div id="outline-container-orgbc65310" class="outline-2">
+<h2 id="orgbc65310">Support shape</h2>
+<div class="outline-text-2" id="text-orgbc65310">
 <p>
 The first distinction we must make is based on the <i>support</i> of the distributions. Simply put, the support of a distribution is the domain over which the probability density (mass) function of the distribution is defined.
 </p>
 
 <p>
-The support shape is the shape of one draw.
+The length of the <i>support shape</i> is the equal to the dimensionality of the distribution's support.
 </p>
+<ul class="org-ul">
+<li>0 for distributions defined in 1 dimension (normal distribution, etc.)</li>
+<li>Vectors (1 dimension)</li>
+<li>Matrices (2 dimensions)</li>
+</ul>
 
+<p>
+<b>The support shape is the shape of one draw.</b>
+</p>
+</div>
+
+<div id="outline-container-org813a2b4" class="outline-3">
+<h3 id="org813a2b4">Distributions over scalar values</h3>
+<div class="outline-text-3" id="text-org813a2b4">
 <p>
 The support of the normal distribution, for instance, is the real line: every sample drawn from that distribution will be a real number. The support of the bernoulli distribution, on the other hand, is the set of integers $\left\{0, 1\right\}. These distributions are <i>scalar distributions</i>, in the sense that their support has 0 dimension (in <i>array</i> terms). Their support shape is <i>always</i> <code>(,)</code>.
 </p>
@@ -95,8 +89,12 @@ The support of the normal distribution, for instance, is the real line: every sa
 sample value: 1.4436909546981256
 support shape: ()
 </pre>
+</div>
+</div>
 
-
+<div id="outline-container-org97f5749" class="outline-3">
+<h3 id="org97f5749">Distributions over vectors</h3>
+<div class="outline-text-3" id="text-org97f5749">
 <p>
 Other distributions are defined on more complex spaces. The multivariate normal distribution, for instance, is 1-dimentsional and can be defined for an arbitrary number of components \(k\). In this case the support shape is of length 1 and equal to <code>(k,)</code>.
 </p>
@@ -153,70 +151,25 @@ support shape: (1,)
 <p>
 Example of distributions with 1-dimensional support: <code>multivariate_normal</code>, <code>categorical</code>, <code>multinomial</code>, <code>dirichlet</code>.
 </p>
+</div>
+</div>
 
+<div id="outline-container-orgc0be07d" class="outline-3">
+<h3 id="orgc0be07d">Distributions over matrices, etc.</h3>
+<div class="outline-text-3" id="text-orgc0be07d">
 <p>
 Finally, distributions can be defined on a space with an arbitrary number of dimensions. The <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart distribution</a> for instance is 2-dimensional: a sample from this distribution is a matrix.
 </p>
 </div>
-
-<div id="outline-container-org1a6bc58" class="outline-3">
-<h3 id="org1a6bc58">Broadcasting</h3>
-<div class="outline-text-3" id="text-org1a6bc58">
-<p>
-When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
-</p>
-<ol class="org-ol">
-<li>The support shape</li>
-<li>The batch shape</li>
-</ol>
-
-<p>
-In the case of the multinomial distribution, the size of the last dimension of \(p\) determines the support shape. Then the formula applies:
-</p>
-
-<p>
-<code>sample_shape = batch_shape + support_shape</code>
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
-
-<span style="font-weight: bold; font-style: italic;">n</span> = np.array([10, 9])
-<span style="font-weight: bold; font-style: italic;">p</span> = np.array([[.8, .1, .1], [.4, .1, .5]])
-
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.multinomial(n, p)
-
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample shape: {sample.shape}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"support shape: {sample.shape[-1:]}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"batch shape: {sample.shape[0]}"</span>)
-</pre>
-</div>
-
-<pre class="example">
-sample value: [[6 2 2]
- [4 0 5]]
-sample shape: (2, 3)
-support shape: (3,)
-batch shape: 2
-</pre>
-</div>
 </div>
 </div>
 
 
-<div id="outline-container-org3b40e85" class="outline-2">
-<h2 id="org3b40e85">Batch shape</h2>
-<div class="outline-text-2" id="text-org3b40e85">
+<div id="outline-container-orgc8669f6" class="outline-2">
+<h2 id="orgc8669f6">Batch shape</h2>
+<div class="outline-text-2" id="text-orgc8669f6">
 <p>
-In the following we will only consider scalar (univariate) distributions.
-</p>
-
-<p>
-These are the distributions whose support is 1-dimensional; samples from these distribution are scalar values. Let's draw a sample from the normal distribution with Aesara to illustrate this:
+Let us only consider distributions over scalar values for now.
 </p>
 
 <div class="org-src-container">
@@ -235,11 +188,20 @@ These are the distributions whose support is 1-dimensional; samples from these d
 sample value: 1.4436909546981256
 sample shape: ()
 </pre>
+
+
+<p>
+The <code>batch shape</code> encompasses one reality: the number of independent, identically distributed samples we want to draw from the probability distribution. There are two ways to arrive at the same batch shape:
+</p>
+<ul class="org-ul">
+<li>Setting the shape explicitly;</li>
+<li>Broadcasting of parameter arrays.</li>
+</ul>
 </div>
 
-<div id="outline-container-org1ef7e91" class="outline-3">
-<h3 id="org1ef7e91">Batching</h3>
-<div class="outline-text-3" id="text-org1ef7e91">
+<div id="outline-container-orgc372b4e" class="outline-3">
+<h3 id="orgc372b4e">Batching</h3>
+<div class="outline-text-3" id="text-orgc372b4e">
 <p>
 If we want to take \(3\) independent and indentically distributed samples from this distribution we can use the <code>size</code> keyword argument:
 </p>
@@ -295,9 +257,16 @@ We will say that <code>size</code> explicits the <i>batch shape</i>, which is th
 </div>
 </div>
 
-<div id="outline-container-orgaffef56" class="outline-3">
-<h3 id="orgaffef56">Vectorizing</h3>
-<div class="outline-text-3" id="text-orgaffef56">
+<div id="outline-container-org8b05cb6" class="outline-3">
+<h3 id="org8b05cb6">Vectorizing</h3>
+<div class="outline-text-3" id="text-org8b05cb6">
+<blockquote>
+<p>
+<b>tldr;</b> Random Variables are `Blockwise` operators
+</p>
+</blockquote>
+
+
 <p>
 Say we want a sample from three normal distributions with a \(0\), \(3\) and \(5\) mean value respectively. One (cumbersome) way to achieve this is:
 </p>
@@ -324,7 +293,7 @@ sample shape: (3,)
 
 
 <p>
-To simplify this common operation we can use pass arrays as parameters:
+To simplify this common operation we can use pass arrays as parameters, and the random variable uses common NumPy broadcasting rules.
 </p>
 
 <div class="org-src-container">
@@ -373,7 +342,7 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </pre>
 </div>
 
-<pre class="example" id="orgf12fa46">
+<pre class="example" id="orgf8e2081">
 shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F8DCB881A80&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -450,12 +419,24 @@ Indeed:
 sample values: [1.44369095 1.20810805 7.20786701]
 batch shape: (3,)
 </pre>
+
+
+<blockquote>
+<p>
+Broadcasting rules can be a bit obscure for distributions, since the operations they are performing to draw samples or compute the value of the log-probability density (mass) function are unknown.
+</p>
+
+<p>
+We should specify these broadcasting rules as `gufunc` signatures in the docstrings.
+</p>
+</blockquote>
 </div>
 </div>
 
-<div id="outline-container-orgd231017" class="outline-3">
-<h3 id="orgd231017">Vectorizing + Batching</h3>
-<div class="outline-text-3" id="text-orgd231017">
+
+<div id="outline-container-orgee516aa" class="outline-3">
+<h3 id="orgee516aa">Vectorizing + Batching</h3>
+<div class="outline-text-3" id="text-orgee516aa">
 <p>
 It is possible to vectorize and batch at the same time. Note that <code>size</code> and that vectorized shape must be broadcastable
 </p>
@@ -491,15 +472,20 @@ where <code>np.broadcast(mean, sigma).shape</code> must correspond to the last d
 </p>
 
 <p>
+It IS really simple:
+</p>
+
+<p>
 <code>sample_shape = np.broadcast_shapes(np.broadcast(*args), size)</code>
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org4085b68" class="outline-2">
-<h2 id="org4085b68">All together</h2>
-<div class="outline-text-2" id="text-org4085b68">
+
+<div id="outline-container-org58e2db0" class="outline-2">
+<h2 id="org58e2db0">All together</h2>
+<div class="outline-text-2" id="text-org58e2db0">
 <p>
 Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> will raise an exception if this is not correctly set.
 </p>
@@ -522,7 +508,7 @@ Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> w
 </pre>
 </div>
 
-<pre class="example" id="orga1b83c0">
+<pre class="example" id="orgb64900b">
 sample value: [[[6 2 2]
   [4 0 5]]
 
@@ -535,6 +521,53 @@ sample shape: (3, 2, 3)
 support shape: (3,)
 batch shape: (3, 2)
 </pre>
+</div>
+
+<div id="outline-container-org60d8545" class="outline-3">
+<h3 id="org60d8545">Broadcasting</h3>
+<div class="outline-text-3" id="text-org60d8545">
+<p>
+When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
+</p>
+<ol class="org-ol">
+<li>The support shape</li>
+<li>The batch shape</li>
+</ol>
+
+<p>
+In the case of the multinomial distribution, the size of the last dimension of \(p\) determines the support shape. Then the formula applies:
+</p>
+
+<p>
+<code>sample_shape = batch_shape + support_shape</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+
+<span style="font-weight: bold; font-style: italic;">n</span> = np.array([10, 9])
+<span style="font-weight: bold; font-style: italic;">p</span> = np.array([[.8, .1, .1], [.4, .1, .5]])
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">rv</span> = srng.multinomial(n, p)
+
+<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
+<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
+<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample shape: {sample.shape}"</span>)
+<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"support shape: {sample.shape[-1:]}"</span>)
+<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"batch shape: {sample.shape[0]}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample value: [[6 2 2]
+ [4 0 5]]
+sample shape: (2, 3)
+support shape: (3,)
+batch shape: 2
+</pre>
+</div>
 </div>
 </div>
 </div>

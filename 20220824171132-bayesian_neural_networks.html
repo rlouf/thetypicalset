@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-08-26 Fri 03:07 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bayesian Neural networks</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Bayesian Neural networks</h1>
+
+
+<div id="outline-container-org57b8ce0" class="outline-2">
+<h2 id="org57b8ce0">Classification</h2>
+<div class="outline-text-2" id="text-org57b8ce0">
+<p>
+Classification task consists in predicting the class \(c\) to which an input fully described by the array \(X\) belongs. In order to do this, we "learn" a function \(\tilde{f}\) from examples \((X_i, y_i)\quad \forall i \in [1..N]\). In the case of classification with neural networks
+</p>
+</div>
+
+<div id="outline-container-org6aabddd" class="outline-3">
+<h3 id="org6aabddd">Classical model</h3>
+<div class="outline-text-3" id="text-org6aabddd">
+<p>
+Let us start with a few definitions. We will note \(f\) the neural network used for classification (but it could be any function) so that for each sample input \(X_i\) the predicted class \(\hat{y_i}\) is computed in the following way:
+</p>
+
+\begin{align*}
+\boldsymbol{\omega}_i &= f(X_i)\\
+\hat{y}_i &= \operatorname{argmax}\left(\boldsymbol{\omega}_i\right)
+\end{align*}
+
+<p>
+This prediction is deterministic: give a function \(NN\), this model will always return the same result.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge863c64" class="outline-3">
+<h3 id="orge863c64">Bayesian model</h3>
+<div class="outline-text-3" id="text-orge863c64">
+<p>
+The bayesian case is different: the neural network \(f\) is sampled from a distribution on the space of functions \(\operatorname{NN}\). The \(\operatorname{\omega}_i\) and \(y_i\) become <i>random variables</i>:
+</p>
+
+\begin{align*}
+f &\sim \operatorname{NN}\\
+\boldsymbol{\omega}_i &= \operatorname{f}(X_i)\\
+y_i &\sim \operatorname{Categorical}(\boldsymbol{\omega}_i)
+\end{align*}
+
+<p>
+$$
+</p>
+
+<p>
+You can see that the answer is slightly more complicated than "the output of the sotfmax". This is what you ask it to do, evaluate the proability of an outcome given an image. How can we calibrate this?
+</p>
+
+<p>
+Well it is calibrated if it is indeed right X% of the time for the images for which it predicts a X%chance to be right.
+</p>
+
+<p>
+No, because this is not what you have asked the network to do while training. You have tried to find the function that gives a vector \(\bolsymbol{p}\) such that \(i = \operatorname{argmax} \boldsymbol{p}\) is the correct category.
+</p>
+
+<p>
+\[
+\omega_i = \operatorname{argmax}\left( \operatorname{Softmax}(f(X_i)) \right)
+\]
+</p>
+
+<p>
+&#x2013; What you have to do is go back to how your networks are trained, i.e. what you ask them to do. What does the training loss correspond to?
+</p>
+
+<p>
+I think it is the Kullback-Leibler divergence loss except there is only one valid solution. So
+</p>
+
+<p>
+\[
+L_i = -\log \left( p_[i==c] \right)
+\]
+</p>
+
+<p>
+So that if \(p_c=1\) the loss is null (predicted with over-confidence), non-null otherwise. We've just asked it to predict the labels with the most confidence possible, i.e. to find the function that will maximize this. We are not asking it to compute probabilities.
+</p>
+
+
+<p>
+In what I will call traditional machine learning, to train a classifier we need to compute the loss \(L_i\) associated with each training point \(i\):
+</p>
+
+\begin{align*}
+\boldsymbol{\omega}^i &= \left(\omega^i_1, \dots, \omega^i_C\right) = f(X_i)\\
+L_i &= - \log \left(\omega_{c[i]}\right)
+\end{align*}
+
+<p>
+What we are trying to do is minimizing the total loss \(\sum_i L_i\), we are certainly not trying to estimate probabilities. You will notice that I used \(\omega\) and not \(p\) for the output of the classifier.
+</p>
+
+<p>
+The output is then chosen as
+</p>
+
+<p>
+\[
+\hat{y}_i = \operatorname{argmax}(\omega^i)
+\]
+</p>
+
+
+<hr />
+
+<p>
+You must ask yourselves: what does it mean that the output of the softmax function is a probability simplex?
+</p>
+
+\begin{align*}
+\boldsymbol{p}_i &\sim \operatorname{NN}(X_i)\\
+y_i &\sim \operatorname{Categorical}(\boldsymbol{p}_i)
+\end{align*}
+
+<p>
+\(y_i\) the class to which the example \(i\) belongs is a random variable.
+</p>
+
+<p>
+Posterior predictive distribution using <i>Bayesian model averaging</i>.
+</p>
+
+<p>
+I think you're trying really hard to interpret something that is not a probability distribution as something that is. What you are trying to do with a neural net is to learn an approximate function \(\tilde{f}\) such that \(\tilde{f}(X_i)\) <i>predicts</i> the correct class \(y_i=c_i\). The "probability" linguo is merely here to build the loss function ("true" distribution is when there's only a "1"). You do that with optimization methods.
+</p>
+
+\begin{align*}
+f &\sim \operatorname{NN}\\
+\boldsymbol{p}_i &= \operatorname{f}(X_i)\\
+y_i &\sim \operatorname{Categorical}(\boldsymbol{p}_i)
+\end{align*}
+
+<p>
+Let us assume that we were able to take thousands of samples from the parameters' posterior distributions, i.e. that we have sampled thousands of functions \(f_i\). Given an input example \(X_i\) you would like to know what the probability to belong to either category is. You take your thousands of functions, and pass \(X_i\) through them to get a new vector \(\tilde{p}_i\).
+</p>
+
+<p>
+\[
+P(p_i=x) = \int f(X_i) P(f)\mathrm{d}f
+\]
+</p>
+
+<p>
+That is, we average over all the functions that can "reasonably" explain the results.
+</p>
+
+
+<p>
+The architecture of the network encodes some a-priori information about the kind of functions that can help us classify images. CNNs, for instance, encapsulate knowledge about translation equivariance. This inductive bias helps us find the "right" function faster. When we "use distribution for parameters" we are in fact building priors in the space of possible classifying functions. To each prior sample from every weight's distribution corresponds a prior function.
+</p>
+
+<p>
+I think the only sense in which the output of the net's sotfmax function is a probability distributions is that the output of a softmax function can define a probability simplex: \(0 \leq p_i \leq 1\) and \(\sum_i p_i = 1\). What does it mean in your example that these numbers are probb
+</p>
+
+<p>
+The "probability is not ones. \(p\) is an estimator for this distribution; it is a bad one since it based on a few examples only. Most of the inputs are unique or rare in the training set.
+</p>
+
+<p>
+BNNs are not about "using distributions as weights", it is about learning random functions.
+p is given by a random function. Let us assume that there is such a thing as a function that allows us to classify all the images in the world into different categories. Here we try to infer this function from data. However our model can
+</p>
+
+<p>
+\(p\) in this context is not a probability; we are always choosing the maximum. The models are <i>overconfident</i>; they give you a given number.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orge99c053" class="outline-2">
+<h2 id="orge99c053">What we're trying to compute</h2>
+<div class="outline-text-2" id="text-orge99c053">
+<p>
+This answer is a little longer than I originally expected; I realised my own thinking was a bit confused.
+</p>
+
+<p>
+It is important to define exactly what it is we are trying to compute. There are two subjects involved in the question: the difference between the predictions of bayesian and non-bayesian nets, and how to measure the confidence of neural net's prediction.
+</p>
+</div>
+
+<div id="outline-container-org5cf5781" class="outline-4">
+<h4 id="org5cf5781">Bayesian NNs are NN ensembles</h4>
+<div class="outline-text-4" id="text-org5cf5781">
+<p>
+We train classifiers because we are interested in the probability that an item indexed by \(i\) belongs to a category \(c\) given a model and a dataset on which we have "trained" the model:
+</p>
+
+\begin{align*}
+P\left(\hat{y}_i = c | \mathcal{D}\right) = \int P(\hat{y}_i=c|\theta) P(\theta|\mathcal{D})\; \mathrm{d}\theta
+\end{align*}
+
+<p>
+Where \(\theta\) is a vector that contains the model's weights, \(\mathcal{D} = \left\{x_i, y_i \right\}\) the training data. We can interpret the <i>predictive distribution</i> as the expection of the likelihood for a single network \(P(\hat{y}_i=c|\theta)\) under the <i>posterior distribution</i> \(P(\theta|\mathcal{D})\). The predictive distribution can therefore be interpreted as an ensemble of neural networks.
+</p>
+
+<p>
+In practice, inference for Bayesian Neural Networks consists in drawing samples from the posterior distribution \(P(\theta|\mathcal{D})\) to be able to approximate \(P\left(\hat{y}_i = c | \mathcal{D}\right)\). Therefore in finding many networks (values of the parameters) that can plausibly explain the observations in \(\mathcal{D}\).
+</p>
+
+<p>
+Inference for non-Bayesian neural networks consists in finding the network (with weights \(\theta^*\)) that minimizes a given loss function.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1700b50" class="outline-4">
+<h4 id="org1700b50">How confident can by model be?</h4>
+<div class="outline-text-4" id="text-org1700b50">
+<p>
+Now we can go back to what I understood as your question: how to estimate how "confused" the model is?
+</p>
+
+<p>
+I take it that you consider the value of \(p^* = \operatorname{max}_c P(\hat{y}_i=c)\) as an estimator. The closer to 1 the more confident the neural net in its predictions.
+</p>
+
+<p>
+Ok, but in which of the following situations would you estimate your net is more confident. This one?
+</p>
+
+<p>
+```
+   x
+   x
+   x
+   x   x   x
+   x   x   x   x
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+<td class="org-right">4</td>
+</tr>
+</tbody>
+</table>
+<p>
+```
+</p>
+
+<p>
+Or this one?
+</p>
+
+<p>
+```
+   x   x
+   x   x
+   x   x
+   x   x
+   x   x
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+<td class="org-right">4</td>
+</tr>
+</tbody>
+</table>
+<p>
+```
+</p>
+
+<p>
+I think most people would say that the result is more certain in the first situation. If I were to work with non-bayesian nets, and without any other information about the downstream requirements, I would use the entropy of the instogram as a measure instead.
+</p>
+
+<p>
+I explained earlier how to compute this histogram with a bayesian net, and we could indeed apply the same entropy measure. But you can do something <b>much better</b>. Often, when we ask how confident the model is, we are worried about the <i>consequences</i> of misclassification. If mis-classification costed us nothing we would just go with the highest-proability class all the time.
+</p>
+
+<p>
+Let's assume we can quantify the consequences of a poor choice, and we restrict the decision space to:
+</p>
+<ol class="org-ol">
+<li>Choosing the highest-probability class;</li>
+<li>Not choosing</li>
+</ol>
+
+<p>
+<i>We have samples so we can do better!</i> <b>Average the loss function over the posterior</b>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org571e20c" class="outline-2">
+<h2 id="org571e20c">References</h2>
+<div class="outline-text-2" id="text-org571e20c">
+<ul class="org-ul">
+<li><i>Why the softmax?</i> <a target='_blank' rel='noopener noreferrer' class='external' href="https://crazyoscarchang.github.io/2018/08/29/why-the-softmax-function/">https://crazyoscarchang.github.io/2018/08/29/why-the-softmax-function/</a></li>
+<li>Dropout as a Bayesian approximation: representing uncertainty in Deep Learning (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1506.02142">ArXiV</a>)</li>
+<li>Weight Uncertainty in Neural Networks (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1505.05424">ArXiV</a>)</li>
+<li>"Bayesian Neural Networks" (<a target='_blank' rel='noopener noreferrer' class='external' href="https://www.cs.toronto.edu/~duvenaud/distill_bayes_net/public/">David Duvenaud</a>)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org7bba885" class="outline-2">
+<h2 id="org7bba885">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>
