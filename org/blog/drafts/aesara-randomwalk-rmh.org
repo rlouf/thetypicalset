@@ -1,15 +1,9 @@
 #+title: Random Walk Rosenbluth-Metropolis-Hastings in Aesara
 
-
 Right before I started working on [[file:~/projects/thetypicalset/org/blog/introducing-mcx.org][MCX]] I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, when I started working with a PPL based on [[https://github.com/aesara-devs/aesara][Aesara]]. So let me revisit this simple example using Aeasara!
 
 The full code was added to the [[https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py][repository]].
 
-- [x] Implement a mixture model with =Aesara=
-- [x] We can implement the Rosenbluth-Metropolis-Hastings algorithm in =Aesara=
-- [ ] Run on several chains
-  It is not clear how we can do this using =aeppl='s =joint_logprob=.
-  Of course I can just use the normal
 - [ ] Performance comparison with JAX on a single chain.
 - [ ] Compile to JAX
 - [ ] Compile to Numba
@@ -143,7 +137,6 @@ def rw_metropolis_kernel(srng, logprob_fn):
 #+end_src
 
 Syntactically, =aesara.tensor= looks like a drop-in replacement to =numpy=. Remember, however, that these functions do not act on numbers but add an operation to an existing graph of computation. In particular, =logprob_fn= is a function that takes a graph (possibly a single variable), and returns the graph that computes the value of the log-probability density function.
-
 
 * So, does it work?
 
