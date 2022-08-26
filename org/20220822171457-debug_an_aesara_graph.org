@@ -78,3 +78,11 @@ We're looking for the =optimizer_excluding= flag.
 ** TODO Rich for graph folding project
 ** TODO Add rewrite trajectory to a node's =tag= in the fully rewritten graph
 Funny, isn't that something that we could easily deduct if the rewrites were described in an e-graph?
+
+* Profile Aesara code
+
+#+begin_src python
+# Enable profiling for compilation of the outer-function
+f_doubling = aesara.function([A, B, tol, max_iter], gamma[-1], profile=True)
+f_doubling.profile.summary()
+#+end_src
