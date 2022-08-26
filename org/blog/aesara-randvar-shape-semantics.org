@@ -2,27 +2,24 @@
 #+date: <2022-08-17 Wed>
 #+PROPERTY: header-args :results output :eval never-export :exports both
 
-[[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] has shape semantics for random variables: the shape of random tensors is partitionned in semantically different pieces.
-
-* TL; DR
-
-- The /support shape/ is the shape of one draw;
-- The /batch shape/ determines the number of independent draws we want from the random variable;
-- The /batch shape/ can be infered using broadcasting rules for the distribution parameters, and broadcasting shapes with the =size= keyword argument;
+The shape of random tensors in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] is partitioned in semantically different pieces:
+- The *support shape* is the shape of one draw from the base distribution;
+- The *batch shape* is the number of independent draws we want from the distribution;
+- The *batch shape* can be infered using broadcasting rules for the distribution parameters, and broadcasting shapes with the =size= keyword argument;
 - The shape of samples is given by =sample_shape = batch_shape + support_shape=
 
 * Support shape
 
-Let us forget everything we said about the batch shape above.
+The first distinction we must make is based on the /support/ of the distributions. Simply put, the support of a distribution is the domain over which the probability density (mass) function of the distribution is defined.
 
-Here we have
-- Scalar
+The length of the /support shape/ is the equal to the dimensionality of the distribution's support.
+- 0 for distributions defined in 1 dimension (normal distribution, etc.)
 - Vectors (1 dimension)
 - Matrices (2 dimensions)
 
-The first distinction we must make is based on the /support/ of the distributions. Simply put, the support of a distribution is the domain over which the probability density (mass) function of the distribution is defined.
+*The support shape is the shape of one draw.*
 
-The support shape is the shape of one draw.
+** Distributions over scalar values
 
 The support of the normal distribution, for instance, is the real line: every sample drawn from that distribution will be a real number. The support of the bernoulli distribution, on the other hand, is the set of integers $\left\{0, 1\right\}. These distributions are /scalar distributions/, in the sense that their support has 0 dimension (in /array/ terms). Their support shape is /always/ =(,)=.
 
@@ -40,6 +37,8 @@ print(f"support shape: {sample.shape}")
 #+RESULTS:
 : sample value: 1.4436909546981256
 : support shape: ()
+
+** Distributions over vectors
 
 Other distributions are defined on more complex spaces. The multivariate normal distribution, for instance, is 1-dimentsional and can be defined for an arbitrary number of components $k$. In this case the support shape is of length 1 and equal to =(k,)=.
 
@@ -86,48 +85,14 @@ print(f"support shape: {sample.shape}")
 
 Example of distributions with 1-dimensional support: =multivariate_normal=, =categorical=, =multinomial=, =dirichlet=.
 
+** Distributions over matrices, etc.
+
 Finally, distributions can be defined on a space with an arbitrary number of dimensions. The [[https://en.wikipedia.org/wiki/Wishart_distribution][Wishart distribution]] for instance is 2-dimensional: a sample from this distribution is a matrix.
-
-** Broadcasting
-
-When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
-1. The support shape
-2. The batch shape
-
-In the case of the multinomial distribution, the size of the last dimension of $p$ determines the support shape. Then the formula applies:
-
-=sample_shape = batch_shape + support_shape=
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-n = np.array([10, 9])
-p = np.array([[.8, .1, .1], [.4, .1, .5]])
-
-srng = at.random.RandomStream(0)
-rv = srng.multinomial(n, p)
-
-sample = rv.eval()
-print(f"sample value: {sample}")
-print(f"sample shape: {sample.shape}")
-print(f"support shape: {sample.shape[-1:]}")
-print(f"batch shape: {sample.shape[0]}")
-#+end_src
-
-#+RESULTS:
-: sample value: [[6 2 2]
-:  [4 0 5]]
-: sample shape: (2, 3)
-: support shape: (3,)
-: batch shape: 2
 
 
 * Batch shape
 
-In the following we will only consider scalar (univariate) distributions.
-
-These are the distributions whose support is 1-dimensional; samples from these distribution are scalar values. Let's draw a sample from the normal distribution with Aesara to illustrate this:
+Let us only consider distributions over scalar values for now.
 
 #+begin_src python
 import aesara.tensor as at
@@ -143,6 +108,10 @@ print(f"sample shape: {sample.shape}")
 #+RESULTS:
 : sample value: 1.4436909546981256
 : sample shape: ()
+
+The =batch shape= encompasses one reality: the number of independent, identically distributed samples we want to draw from the probability distribution. There are two ways to arrive at the same batch shape:
+- Setting the shape explicitly;
+- Broadcasting of parameter arrays.
 
 ** Batching
 
@@ -189,6 +158,11 @@ We will say that =size= explicits the /batch shape/, which is the shape of the t
 
 ** Vectorizing
 
+#+begin_quote
+*tldr;* Random Variables are `Blockwise` operators
+#+end_quote
+
+
 Say we want a sample from three normal distributions with a $0$, $3$ and $5$ mean value respectively. One (cumbersome) way to achieve this is:
 
 #+begin_src python
@@ -209,7 +183,7 @@ print(f"sample shape: {sample.shape}")
 : sample value: [-0.41520246  1.92093324  6.74827434]
 : sample shape: (3,)
 
-To simplify this common operation we can use pass arrays as parameters:
+To simplify this common operation we can use pass arrays as parameters, and the random variable uses common NumPy broadcasting rules.
 
 #+begin_src python
 import aesara.tensor as at
@@ -314,6 +288,13 @@ print(f"batch shape: {sample.shape}")
 : sample values: [1.44369095 1.20810805 7.20786701]
 : batch shape: (3,)
 
+#+begin_quote
+Broadcasting rules can be a bit obscure for distributions, since the operations they are performing to draw samples or compute the value of the log-probability density (mass) function are unknown.
+
+We should specify these broadcasting rules as `gufunc` signatures in the docstrings.
+#+end_quote
+
+
 ** Vectorizing + Batching
 
 It is possible to vectorize and batch at the same time. Note that =size= and that vectorized shape must be broadcastable
@@ -343,7 +324,10 @@ print(f"batch shape: {sample.shape}")
 
 where =np.broadcast(mean, sigma).shape= must correspond to the last dimensions of =size=. Or in other words, the sample shape is =np.broadcast_shapes(np.broadcast(mean, sigma).shape, size)= if this does not raise an error.
 
+It IS really simple:
+
 =sample_shape = np.broadcast_shapes(np.broadcast(*args), size)=
+
 
 * All together
 
@@ -380,3 +364,37 @@ sample shape: (3, 2, 3)
 support shape: (3,)
 batch shape: (3, 2)
 #+end_example
+
+** Broadcasting
+
+When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
+1. The support shape
+2. The batch shape
+
+In the case of the multinomial distribution, the size of the last dimension of $p$ determines the support shape. Then the formula applies:
+
+=sample_shape = batch_shape + support_shape=
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+n = np.array([10, 9])
+p = np.array([[.8, .1, .1], [.4, .1, .5]])
+
+srng = at.random.RandomStream(0)
+rv = srng.multinomial(n, p)
+
+sample = rv.eval()
+print(f"sample value: {sample}")
+print(f"sample shape: {sample.shape}")
+print(f"support shape: {sample.shape[-1:]}")
+print(f"batch shape: {sample.shape[0]}")
+#+end_src
+
+#+RESULTS:
+: sample value: [[6 2 2]
+:  [4 0 5]]
+: sample shape: (2, 3)
+: support shape: (3,)
+: batch shape: 2
