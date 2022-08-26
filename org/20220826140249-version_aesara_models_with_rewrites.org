@@ -1,0 +1,12 @@
+:PROPERTIES:
+:ID:       5f787d63-7955-4d44-a682-ca0be7629e7c
+:END:
+#+title: Version Aesara models with rewrites
+
+- tags :: [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]]
+
+Hear me out: when we build models we usually progress iteratively by /rewriting/ the model. Since we have a computation graph we could totally write the model's evolution as a series of graph rewrites and thus have a diff of the model. We can also perform graph *diffs* to understand exactly what is different between two versions of a graph.
+
+Now if you do that it is funny, because we can explore performance of the model in the space of possible rewrites, and /infer/ rewrites that might improve your model's performance even further. We could even have /neural guided search/ in the space of possible rewrites to find the ideal model.
+
+This *doesn't* sound so crazy. If we have a neural network we can define a few possible relations and let [[id:f4cf39be-6c6a-4a9d-804a-3879a98177bc][miniKanren]] provide different versions of the same model.
