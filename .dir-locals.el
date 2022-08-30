@@ -1,4 +1,4 @@
-((nil . ((projectile-project-compilation-cmd . "make publish")
-         (org-download-image-dir . "~/projects/thetypicalset/org/img")
-         (org-roam-directory . "~/projects/thetypicalset/org")
-         (org-roam-db-location . "~/projects/thetypicalset/org/org-roam.db"))))
+((nil . ((eval . (set (make-local-variable 'project-path) (locate-dominating-file default-directory ".dir-locals.el")))
+         (eval . (setq org-roam-directory (concat project-path "org/")))
+         (eval . (setq org-download-image-dir (concat project-path "img")))
+         (eval . (setq org-roam-db-location (concat project-path "org-roam.db"))))))
