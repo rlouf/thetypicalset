@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-08-30 Tue 20:30 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Binary Neural Networks</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Binary Neural Networks</h1>
+<p>
+These are neural networks where each weight can only take two values: $&theta;<sub>i</sub> &isin; \left\{-1, 1\right\}. This not only decreases memory usage (we only need 1 bit instead of the usual 32 or 64), but also performance improvements as some CPU/GPU instructions can be used to speed up computations on binary variables.
+</p>
+
+<p>
+Here are a few questions to start:
+</p>
+<ul class="org-ul">
+<li>Can I <i>binarize</i> training weights? If so, is there a universal recipe?</li>
+<li>How is performance (in terms of accuracy, etc) affected by binarization?
+I would like to binarize the weights for <a href="20220830092955-stable_diffusion.html#ID-8d3a1dcf-33de-4b7a-9de1-b72edcc3cf94">Stable Diffusion</a> for insta.ce</li>
+</ul>
+
+
+<p>
+Computers only operate using logic operations: AND, OR, XOR, etc. so <i>any</i> neural network (even with continous weights) can be interpreted as a series of logic gates. This is <b>trivially</b> true, and not very interesting. <i>But</i> can't binary neural networks be represented as logic gates?
+</p>
+
+<div id="outline-container-org0fdf2f3" class="outline-2">
+<h2 id="org0fdf2f3">References</h2>
+<div class="outline-text-2" id="text-org0fdf2f3">
+<ul class="org-ul">
+<li><p>
+Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1 (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1602.02830">ArXiv</a>) (<a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/MatthieuCourbariaux/BinaryNet">Github</a>, Theano) (<a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/itayhubara/BinaryNet">Github</a>, Torch)
+</p>
+
+<blockquote>
+<p>
+We introduce a method to train Binarized Neural Networks (BNNs) - neural networks with binary weights and activations at run-time. At training-time the binary weights and activations are used for computing the parameters gradients. During the forward pass, BNNs drastically reduce memory size and accesses, and replace most arithmetic operations with bit-wise operations, which is expected to substantially improve power-efficiency. To validate the effectiveness of BNNs we conduct two sets of experiments on the Torch7 and Theano frameworks. On both, BNNs achieved nearly state-of-the-art results over the MNIST, CIFAR-10 and SVHN datasets. Last but not least, we wrote a binary matrix multiplication GPU kernel with which it is possible to run our MNIST BNN 7 times faster than with an unoptimized GPU kernel, without suffering any loss in classification accuracy. The code for training and running our BNNs is available on-line.
+</p>
+</blockquote></li>
+
+<li>Training Binary Neural Networks using the Bayesian Learning Rule (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/2002.10778">ArXiv</a>) (<a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/team-approx-bayes/BayesBiNN">Github</a>)</li>
+</ul>
+
+<blockquote>
+<p>
+Neural networks with binary weights are computation-efficient and hardware-friendly, but their training is challenging because it involves a discrete optimization problem. Surprisingly, ignoring the discrete nature of the problem and using gradient-based methods, such as the Straight-Through Estimator, still works well in practice. This raises the question: are there principled approaches which justify such methods? In this paper, we propose such an approach using the Bayesian learning rule. The rule, when applied to estimate a Bernoulli distribution over the binary weights, results in an algorithm which justifies some of the algorithmic choices made by the previous approaches. The algorithm not only obtains state-of-the-art performance, but also enables uncertainty estimation for continual learning to avoid catastrophic forgetting. Our work provides a principled approach for training binary neural networks which justifies and extends existing approaches.
+</p>
+</blockquote>
+
+
+<ul class="org-ul">
+<li><p>
+Interpretable neural networks based on continuous-valued logic and multicriteria decision operators (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1910.02486">ArXiV</a>)
+</p>
+
+<blockquote>
+<p>
+Combining neural networks with continuous logic and multicriteria decision making tools can reduce the black box nature of neural models. In this study, we show that nilpotent logical systems offer an appropriate mathematical framework for a hybridization of continuous nilpotent logic and neural models, helping to improve the interpretability and safety of machine learning. In our concept, perceptrons model soft inequalities; namely membership functions and continuous logical operators. We design the network architecture before training, using continuous logical operators and multicriteria decision tools with given weights working in the hidden layers. Designing the structure appropriately leads to a drastic reduction in the number of parameters to be learned. The theoretical basis offers a straightforward choice of activation functions (the cutting function or its differentiable approximation, the squashing function), and also suggests an explanation to the great success of the rectified linear unit (ReLU). In this study, we focus on the architecture of a hybrid model and introduce the building blocks for future application in deep neural networks. The concept is illustrated with some toy examples taken from an extended version of the tensorflow playground.
+</p>
+</blockquote></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org473b0c1" class="outline-2">
+<h2 id="org473b0c1">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>
