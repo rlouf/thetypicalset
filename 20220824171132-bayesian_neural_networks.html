@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-08-30 Tue 20:50 -->
+<!-- 2022-08-30 Tue 21:02 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bayesian Neural networks</title>
@@ -37,17 +37,17 @@
 <h1 class="title">Bayesian Neural networks</h1>
 
 
-<div id="outline-container-org3c01dfb" class="outline-2">
-<h2 id="org3c01dfb">Classification</h2>
-<div class="outline-text-2" id="text-org3c01dfb">
+<div id="outline-container-orgd365d27" class="outline-2">
+<h2 id="orgd365d27">Classification</h2>
+<div class="outline-text-2" id="text-orgd365d27">
 <p>
 Classification task consists in predicting the class \(c\) to which an input fully described by the array \(X\) belongs. In order to do this, we "learn" a function \(\tilde{f}\) from examples \((X_i, y_i)\quad \forall i \in [1..N]\). In the case of classification with neural networks
 </p>
 </div>
 
-<div id="outline-container-org55937ca" class="outline-3">
-<h3 id="org55937ca">Classical model</h3>
-<div class="outline-text-3" id="text-org55937ca">
+<div id="outline-container-org312220c" class="outline-3">
+<h3 id="org312220c">Classical model</h3>
+<div class="outline-text-3" id="text-org312220c">
 <p>
 Let us start with a few definitions. We will note \(f\) the neural network used for classification (but it could be any function) so that for each sample input \(X_i\) the predicted class \(\hat{y_i}\) is computed in the following way:
 </p>
@@ -63,9 +63,9 @@ This prediction is deterministic: give a function \(NN\), this model will always
 </div>
 </div>
 
-<div id="outline-container-orgfb2b9e4" class="outline-3">
-<h3 id="orgfb2b9e4">Bayesian model</h3>
-<div class="outline-text-3" id="text-orgfb2b9e4">
+<div id="outline-container-orgfd7874e" class="outline-3">
+<h3 id="orgfd7874e">Bayesian model</h3>
+<div class="outline-text-3" id="text-orgfd7874e">
 <p>
 The bayesian case is different: the neural network \(f\) is sampled from a distribution on the space of functions \(\operatorname{NN}\). The \(\operatorname{\omega}_i\) and \(y_i\) become <i>random variables</i>:
 </p>
@@ -210,9 +210,9 @@ p is given by a random function. Let us assume that there is such a thing as a f
 </div>
 
 
-<div id="outline-container-orgeb58961" class="outline-2">
-<h2 id="orgeb58961">What we're trying to compute</h2>
-<div class="outline-text-2" id="text-orgeb58961">
+<div id="outline-container-org85586b4" class="outline-2">
+<h2 id="org85586b4">What we're trying to compute</h2>
+<div class="outline-text-2" id="text-org85586b4">
 <p>
 This answer is a little longer than I originally expected; I realised my own thinking was a bit confused.
 </p>
@@ -222,9 +222,9 @@ It is important to define exactly what it is we are trying to compute. There are
 </p>
 </div>
 
-<div id="outline-container-orga5a40f0" class="outline-4">
-<h4 id="orga5a40f0">Bayesian NNs are NN ensembles</h4>
-<div class="outline-text-4" id="text-orga5a40f0">
+<div id="outline-container-org2e2c824" class="outline-4">
+<h4 id="org2e2c824">Bayesian NNs are NN ensembles</h4>
+<div class="outline-text-4" id="text-org2e2c824">
 <p>
 We train classifiers because we are interested in the probability that an item indexed by \(i\) belongs to a category \(c\) given a model and a dataset on which we have "trained" the model:
 </p>
@@ -247,19 +247,19 @@ Inference for non-Bayesian neural networks consists in finding the network (with
 </div>
 </div>
 
-<div id="outline-container-org7639008" class="outline-4">
-<h4 id="org7639008">How confident can by model be?</h4>
-<div class="outline-text-4" id="text-org7639008">
+<div id="outline-container-org1faa458" class="outline-4">
+<h4 id="org1faa458">How confident can by model be?</h4>
+<div class="outline-text-4" id="text-org1faa458">
 <p>
 Now we can go back to what I understood as your question: how to estimate how "confused" the model is?
 </p>
 
 <p>
-I take it that you consider the value of \(p^* = \operatorname{max}_c P(\hat{y}_i=c)\) as an estimator. The closer to 1 the more confident the neural net in its predictions.
+I take it that you consider the value of \(p^* = \operatorname{max}_c P(\hat{y}_i=c)\) as an estimator. The closer to 1 the more confident the neural net in its predictions. Ok, but in which of the following situations would you estimate your net is more confident:
 </p>
 
 <p>
-Ok, but in which of the following situations would you estimate your net is more confident. This one?
+This one?
 </p>
 
 <p>
@@ -333,31 +333,24 @@ Or this one?
 </p>
 
 <p>
-I think most people would say that the result is more certain in the first situation. If I were to work with non-bayesian nets, and without any other information about the downstream requirements, I would use the entropy of the instogram as a measure instead.
+I think most people would say that the result is more certain in the first situation. If I were to work with non-bayesian nets, and without any other information about the downstream requirements, I would use the entropy of the instogram as a measure instead. I explained earlier how to compute this histogram with a bayesian net, and we could indeed apply the same entropy measure in the bayesian case. The difference being that this histogram is supposedly more representative of the "true" probability of belonging to either category.
 </p>
 
 <p>
-I explained earlier how to compute this histogram with a bayesian net, and we could indeed apply the same entropy measure. But you can do something <b>much better</b>. Often, when we ask how confident the model is, we are worried about the <i>consequences</i> of misclassification. If mis-classification costed us nothing we would just go with the highest-proability class all the time.
+This may sound disappointing so far. But you can do something <b>much better</b> with Bayesian nets. We often ask how confident the model is because we are worried about the <i>consequences</i> of misclassification. If mis-classification costed us nothing we would just go with the highest-proability class all the time and not think too much about it.
 </p>
 
 <p>
-Let's assume we can quantify the consequences of a poor choice, and we restrict the decision space to:
-</p>
-<ol class="org-ol">
-<li>Choosing the highest-probability class;</li>
-<li>Not choosing</li>
-</ol>
-
-<p>
-<i>We have samples so we can do better!</i> <b>Average the loss function over the posterior</b>
+Let's take for example a neural net that takes pictures of machine parts and marks them as
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org92164ee" class="outline-2">
-<h2 id="org92164ee">References</h2>
-<div class="outline-text-2" id="text-org92164ee">
+
+<div id="outline-container-org2b4ff7a" class="outline-2">
+<h2 id="org2b4ff7a">References</h2>
+<div class="outline-text-2" id="text-org2b4ff7a">
 <ul class="org-ul">
 <li><i>Why the softmax?</i> <a target='_blank' rel='noopener noreferrer' class='external' href="https://crazyoscarchang.github.io/2018/08/29/why-the-softmax-function/">https://crazyoscarchang.github.io/2018/08/29/why-the-softmax-function/</a></li>
 <li>Dropout as a Bayesian approximation: representing uncertainty in Deep Learning (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1506.02142">ArXiV</a>)</li>
@@ -367,8 +360,8 @@ Let's assume we can quantify the consequences of a poor choice, and we restrict 
 </div>
 </div>
 
-<div id="outline-container-orgc853091" class="outline-2">
-<h2 id="orgc853091">Links to this note</h2>
+<div id="outline-container-org7d11353" class="outline-2">
+<h2 id="org7d11353">Links to this note</h2>
 </div>
 </div>
 </body>
