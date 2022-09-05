@@ -1,13 +1,9 @@
 #+title: Random Walk Rosenbluth-Metropolis-Hastings in Aesara
+#+date: <2022-09-05 Mon>
 
 Right before I started working on [[file:~/projects/thetypicalset/org/blog/introducing-mcx.org][MCX]] I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, when I started working with a PPL based on [[https://github.com/aesara-devs/aesara][Aesara]]. So let me revisit this simple example using Aeasara!
 
 The full code was added to the [[https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py][repository]].
-
-- [ ] Performance comparison with JAX on a single chain.
-- [ ] Compile to JAX
-- [ ] Compile to Numba
-- [ ] What's missing & how we're going to get there
 
 * Mixture model
 
@@ -36,11 +32,11 @@ import aesara
 sample_fn = aesara.function((), Y_rv)
 samples = [sample_fn() for _ in range(10000)]
 
-print(samples[:100])
+print(samples[:10])
 #+end_src
 
 #+RESULTS:
-: [array(2.51645571), array(0.16094803), array(4.16173818), array(-0.75365736), array(0.91897138), array(-1.96086176), array(2.60226408), array(2.28198192), array(-1.05260784), array(1.38469404), array(5.98739744), array(7.37274208), array(-2.15961733), array(8.43786623), array(-1.528235), array(-2.56085612), array(-1.49792648), array(-0.54058883), array(-1.73614481), array(2.68343646), array(-0.74588224), array(5.81172156), array(2.63622568), array(-1.52262747), array(-3.17441886), array(-0.83029964), array(2.57077231), array(-0.68490254), array(1.49112131), array(4.51531186), array(1.26036493), array(2.8718194), array(0.42948448), array(6.96430393), array(-1.41820233), array(-0.48159976), array(6.46244479), array(7.17495802), array(4.62729473), array(3.75983318), array(1.35390152), array(0.72638649), array(7.83843779), array(-1.93741605), array(-0.97753687), array(-2.6341784), array(-0.80476746), array(2.65904953), array(0.89057595), array(4.85358388), array(-0.30544774), array(-1.71254491), array(1.53838811), array(2.4976651), array(-4.49094492), array(-3.10530498), array(1.14952679), array(-2.0286298), array(-1.54603067), array(-2.27386863), array(-0.51537537), array(0.72265698), array(2.98239204), array(3.03497124), array(2.88541305), array(-0.79794257), array(-2.91166205), array(-1.14063909), array(-1.46864571), array(10.10318879), array(1.37147168), array(1.33971956), array(1.10113552), array(-1.23877521), array(0.35713318), array(1.36438476), array(-2.02780756), array(3.95659427), array(0.00671702), array(0.7383008), array(0.11008148), array(1.4652128), array(7.25069105), array(0.93955977), array(-0.07202498), array(-3.55905252), array(1.63349073), array(0.57912606), array(0.33508746), array(6.45579571), array(-0.14630237), array(-3.94949758), array(-1.6464691), array(0.50124777), array(-0.58339942), array(0.64205155), array(-4.46255652), array(1.17787744), array(-0.74443437), array(3.70892789)]
+: [array(2.51645571), array(0.16094803), array(4.16173818), array(-0.75365736), array(0.91897138), array(-1.96086176), array(2.60226408), array(2.28198192), array(-1.05260784), array(1.38469404)]
 
 If you are not familiar with Theano/Aesara, the =aesara.function= may surprise you. What does it do exactly? When you manipulate Aesara tensors, you are not manipulating numbers, but rather you are /describing the computation to perform on the inputs/. As a result, the result of an Aesara operation is a graph:
 
@@ -52,14 +48,14 @@ aesara.dprint(Y_rv)
 #+begin_example
 Subtensor{int64} [id A]
  |normal_rv{0, (0, 0), floatX, False}.1 [id B] 'N'
- | |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F83CD6F7220>) [id C]
+ | |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FBAB334F680>) [id C]
  | |TensorConstant{[]} [id D]
  | |TensorConstant{11} [id E]
  | |TensorConstant{[-2.   0. .. 3.2  2.5]} [id F]
  | |TensorConstant{[1.2 1.  5.  2.8]} [id G]
  |ScalarFromTensor [id H]
    |categorical_rv{0, (1,), int64, False}.1 [id I] 'I'
-     |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F83CD7444A0>) [id J]
+     |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FBAB17AE7A0>) [id J]
      |TensorConstant{[]} [id K]
      |TensorConstant{4} [id L]
      |TensorConstant{[0.2 0.3 0.1 0.4]} [id M]
@@ -82,7 +78,7 @@ print(logprob.eval({y_vv: 10., i_vv: 3}))
 #+RESULTS:
 : -6.452221131239579
 
-Here we do not really care about the values that =I_rv= takes, so we marginalize the log-probability density function:
+Here we do not really care about the values that =I_rv= takes, so we marginalize the log-probability density function over =I_rv=:
 
 #+begin_src python :session :results output
 logprob = []
@@ -102,7 +98,7 @@ print(total_logprob.eval({y_vv: 10.}))
 
 The random walk Rosenbluth-Metropolis-Hasting algorithm is also straightforward to implement:
 
-#+begin_src python
+#+begin_src python :results silent
 def rw_metropolis_kernel(srng, logprob_fn):
     """Build the random walk Rosenbluth-Metropolis-Hastings (RNH) kernel."""
 
@@ -140,35 +136,39 @@ Syntactically, =aesara.tensor= looks like a drop-in replacement to =numpy=. Reme
 
 * So, does it work?
 
+Let us sample 1000 chains concurrently for an increasing number of samples and compare the running time to NumPy's and JAX's:
+
+#+begin_src python
+import matplotlib.pylab as plt
+
+n_chains = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]
+
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111)
+for key, values in chains_results.items():
+    ax.plot(n_chains, values, label=key)
+ax.set_xlabel("Number of chains", fontsize=22, fontname="Source Code Pro")
+ax.set_ylabel("Time (s)", fontsize=22, fontname="Source Code Pro")
+fig.suptitle("Sampling 1,000 samples from a 4 components Gaussian mixture", fontsize=18, fontname="Source Code Pro")
+
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.spines['right'].set_visible(False)
+ax.spines['top'].set_visible(False)
+ax.yaxis.set_ticks_position('left')
+ax.xaxis.set_ticks_position('bottom')
+
+ax.legend(frameon=False)
+#+end_src
+
 * Perspectives
 
-** TODO Automatic marginalization of the =Categorical= RV
+Aesara is still young and holds many promises for the future, [[https://github.com/aesara-devs/aesara/issues][come help us]]! Here is what you can expect to change with this example in the near future:
 
-Here we manually marginalized over the values of =Y_rv=, but it would be nice if we could automatically marginalize over discrete variables.
+**Maginalize automatically.**  =AePPL= will soon allow to automatically marginalize over discrete random variable (see [[https://github.com/aesara-devs/aeppl/issues/21][related issue]]).
 
-[Link to the issue]
+**Vectorize computation.** The implementation for the multiple chain sampler is currently close to NumPy's for performance reasons, but you should soon be able to write the kernel for a single chain, and use the equivalent of =np.vectorize= or =jax.vmap= to vectorize the computation (see [[https://github.com/aesara-devs/aesara/issues/695][related issue]]).
 
-** TODO Multiple backend
+**Work with different backends.** You will soon be able to compile this example using Aesara's JAX backend and Numba backend ([[https://github.com/aesara-devs/aesara/tree/main/aesara/link][work in progress, you can already try it!]]). This means you will be able to interact with different ecosystems and leverage the strengths of different compilers / hardware devices with the /same model expression/ in python. This also means that your model code is more future-proof as you can make the backend move under it.
 
-Having multiple backends means that you can interact with different ecosystems / hardware with the same model expression in Python. You can also decide to leverage the strengths of XLA (JAX) or LLVM (Numba) depending on your application.
-
-*** TODO Compile to Numba
-
-When nothing is specified =Aesara= compiles functions to C. We have however introduced a new Numba backend to =Aesara=.
-
-[Example]
-[Link to the documentation]
-
-*** TODO Compile to JAX
-
-We can also compile functions to JAX so they can play nice with JAX ecosystems.
-
-[Example]
-[Link to the documentation]
-
-
-** TODO Vectorize the execution (several chains)
-
-We cannot vectorize the execution the same we can in =JAX= with =vmap=, but we should be able to. How?
-
-[Link to the relevant issues]
+**Build samplers automatically.** [[https://github.com/aesara-devs/aemcmc][AeMCMC]] analyzes your model graph and builds an efficient sampler for it.
