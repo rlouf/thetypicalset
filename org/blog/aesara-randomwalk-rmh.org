@@ -1,13 +1,15 @@
 #+title: Random Walk Rosenbluth-Metropolis-Hastings in Aesara
 #+date: <2022-09-05 Mon>
+#+PROPERTY: header-args :results output :eval never-export :exports both
+
 
 Right before I started working on [[file:~/projects/thetypicalset/org/blog/introducing-mcx.org][MCX]] I wrote a simple benchmarks for PyTorch, Tensorflow and JAX on a very simple problem: using the random walk Rosenbluth-Metropolis-Hastings algorithm to sample from a mixture distribution. MCX was discontinued a bit more than a year ago, when I started working with a PPL based on [[https://github.com/aesara-devs/aesara][Aesara]]. So let me revisit this simple example using Aeasara!
 
-The full code was added to the [[https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py][repository]].
+The full code was added to the [[https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py][repository]]. For this example we use the /C backend/, though Aesara also offers a Numba and a JAX backend.
 
 * Mixture model
 
-[[file:~/projects/thetypicalset/org/blog/jax-parallel-mcmc.org][In the original blog post]] I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in =Aesara= is straightforward. No need for a =Mixture= distribution (like in e.g. PyMC), you just write it like it is:
+[[file:jax-parallel-mcmc.org][In the original blog post]] I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in =Aesara= is straightforward. No need for a =Mixture= distribution (like in e.g. PyMC), you just write it like it is:
 
 #+begin_src python :session :results silent :exports code
 import aesara.tensor as at
@@ -138,18 +140,23 @@ Syntactically, =aesara.tensor= looks like a drop-in replacement to =numpy=. Reme
 
 Let us sample 1000 chains concurrently for an increasing number of samples and compare the running time to NumPy's and JAX's:
 
-#+begin_src python
+#+begin_src python :results file :exports results :session
 import matplotlib.pylab as plt
 
-n_chains = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]
+n_samples = [100, 1_000, 10_000, 100_000]
+samples_results = {
+    'Aesara': [2.9, 2.9, 4.4, 19.4],
+    'Numpy': [0.4, 0.7, 5.2, 50.4],
+    'JAX': [1.2, 1.2, 3.1, 19.9],
+}
 
 fig = plt.figure(figsize=(12, 8))
 ax = fig.add_subplot(111)
-for key, values in chains_results.items():
-    ax.plot(n_chains, values, label=key)
-ax.set_xlabel("Number of chains", fontsize=22, fontname="Source Code Pro")
+for key, values in samples_results.items():
+    ax.plot(n_samples, values, label=key)
+ax.set_xlabel("Number of samples", fontsize=22, fontname="Source Code Pro")
 ax.set_ylabel("Time (s)", fontsize=22, fontname="Source Code Pro")
-fig.suptitle("Sampling 1,000 samples from a 4 components Gaussian mixture", fontsize=18, fontname="Source Code Pro")
+fig.suptitle("Sampling with 1,000 chains from a 4 components Gaussian mixture", fontsize=18, fontname="Source Code Pro")
 
 ax.set_xscale('log')
 ax.set_yscale('log')
@@ -158,8 +165,16 @@ ax.spines['top'].set_visible(False)
 ax.yaxis.set_ticks_position('left')
 ax.xaxis.set_ticks_position('bottom')
 
+filename = "img/rmh-aesara-comparison.png"
 ax.legend(frameon=False)
+plt.savefig(filename, bbox_inches="tight")
+filename
 #+end_src
+#+attr_html: :width 100%
+#+RESULTS:
+[[file:img/rmh-aesara-comparison.png]]
+
+For small number of samples, Aesara (C backend) and JAX spend most of their time compiling the kernel and NumPy is faster. Past $10^4$ samples NumPy lags behind, with Aesara catching up with JAX around $10^5$ samples.
 
 * Perspectives
 
@@ -172,3 +187,5 @@ Aesara is still young and holds many promises for the future, [[https://github.c
 **Work with different backends.** You will soon be able to compile this example using Aesara's JAX backend and Numba backend ([[https://github.com/aesara-devs/aesara/tree/main/aesara/link][work in progress, you can already try it!]]). This means you will be able to interact with different ecosystems and leverage the strengths of different compilers / hardware devices with the /same model expression/ in python. This also means that your model code is more future-proof as you can make the backend move under it.
 
 **Build samplers automatically.** [[https://github.com/aesara-devs/aemcmc][AeMCMC]] analyzes your model graph and builds an efficient sampler for it.
+
+Still not sure what Aesara is about? Read [[https://github.com/aesara-devs/aesara/discussions/879#discussioncomment-2472927][Brandon Willard's explanation]].

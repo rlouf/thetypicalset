@@ -19,6 +19,26 @@ The [[id:5c34d536-2644-4386-ab72-509a274e1378][Gamma distribution]] is a conjuga
 - Exponential
 - Lognormal
 - Poisson
+
+  #+begin_src latex :results raw
+\begin{align*}
+  P(\lambda | Y=y) &= \frac{P(Y=y|\lambda) P(\lambda | \alpha, \beta)}{Z}\\
+                   &= \frac{1}{Z} \frac{\lambda^y e^{-\lambda}}{y!} \frac{1}{\Gamma(\alpha)} \beta^\alpha \lambda^{\alpha-1} e^{-\beta \lambda} \\
+                   &= \frac{1}{Z} \frac{1}{y! \Gamma(\alpha)} \beta^\alpha \lambda^{(\alpha+y)-1} e^{-(\beta+1) \lambda} \\
+                   &= \frac{\lambda^{(\alpha+y)-1} e^{-(\beta+1) \lambda}}{Z'}\\
+\end{align*}
+  #+end_src
+
+  #+RESULTS:
+  \begin{align*}
+    P(\lambda | Y=y) &= \frac{P(Y=y|\lambda) P(\lambda | \alpha, \beta)}{Z}\\
+                     &= \frac{1}{Z} \frac{\lambda^y e^{-\lambda}}{y!} \frac{1}{\Gamma(\alpha)} \beta^\alpha \lambda^{\alpha-1} e^{-\beta \lambda} \\
+                     &= \frac{1}{Z} \frac{1}{y! \Gamma(\alpha)} \beta^\alpha \lambda^{(\alpha+y)-1} e^{-(\beta+1) \lambda} \\
+                     &= \frac{\lambda^{(\alpha+y)-1} e^{-(\beta+1) \lambda}}{Z'}\\
+  \end{align*}
+
+Where $Z'$ is the integral over $\lambda$ of the numerator; we recognize $\operatorname{Gamma(\alpha+y, \beta+1)}$.
+
 - Normal
 - Gamma
 
