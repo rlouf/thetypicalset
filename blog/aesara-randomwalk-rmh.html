@@ -3,13 +3,34 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-09-05 Mon 18:22 -->
+<!-- 2022-09-05 Mon 20:14 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Walk Rosenbluth-Metropolis-Hastings in Aesara</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content" class="content">
@@ -19,14 +40,14 @@ Right before I started working on <a href="file:///home/runner/projects/thetypic
 </p>
 
 <p>
-The full code was added to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py">repository</a>.
+The full code was added to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py">repository</a>. For this example we use the <i>C backend</i>, though Aesara also offers a Numba and a JAX backend.
 </p>
 
-<div id="outline-container-orgb344614" class="outline-2">
-<h2 id="orgb344614">Mixture model</h2>
-<div class="outline-text-2" id="text-orgb344614">
+<div id="outline-container-orge40667d" class="outline-2">
+<h2 id="orge40667d">Mixture model</h2>
+<div class="outline-text-2" id="text-orge40667d">
 <p>
-<a href="file:///home/runner/projects/thetypicalset/org/blog/jax-parallel-mcmc.html">In the original blog post</a> I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in <code>Aesara</code> is straightforward. No need for a <code>Mixture</code> distribution (like in e.g. PyMC), you just write it like it is:
+<a href="jax-parallel-mcmc.html">In the original blog post</a> I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in <code>Aesara</code> is straightforward. No need for a <code>Mixture</code> distribution (like in e.g. PyMC), you just write it like it is:
 </p>
 
 <div class="org-src-container">
@@ -59,6 +80,11 @@ We can generate forward samples from this model by compiling the model graph cho
 </pre>
 </div>
 
+<pre class="example">
+[array(2.51645571), array(0.16094803), array(4.16173818), array(-0.75365736), array(0.91897138), array(-1.96086176), array(2.60226408), array(2.28198192), array(-1.05260784), array(1.38469404)]
+</pre>
+
+
 <p>
 If you are not familiar with Theano/Aesara, the <code>aesara.function</code> may surprise you. What does it do exactly? When you manipulate Aesara tensors, you are not manipulating numbers, but rather you are <i>describing the computation to perform on the inputs</i>. As a result, the result of an Aesara operation is a graph:
 </p>
@@ -67,6 +93,22 @@ If you are not familiar with Theano/Aesara, the <code>aesara.function</code> may
 <pre class="src src-python">aesara.dprint(Y_rv)
 </pre>
 </div>
+
+<pre class="example" id="org2490eb5">
+Subtensor{int64} [id A]
+ |normal_rv{0, (0, 0), floatX, False}.1 [id B] 'N'
+ | |RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FBAB334F680&gt;) [id C]
+ | |TensorConstant{[]} [id D]
+ | |TensorConstant{11} [id E]
+ | |TensorConstant{[-2.   0. .. 3.2  2.5]} [id F]
+ | |TensorConstant{[1.2 1.  5.  2.8]} [id G]
+ |ScalarFromTensor [id H]
+   |categorical_rv{0, (1,), int64, False}.1 [id I] 'I'
+     |RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FBAB17AE7A0&gt;) [id J]
+     |TensorConstant{[]} [id K]
+     |TensorConstant{4} [id L]
+     |TensorConstant{[0.2 0.3 0.1 0.4]} [id M]
+</pre>
 
 <p>
 <code>aesara.function</code> is therefore used to <i>compile</i> the graph into a function that can be executed. For that, we need to specify the inputs and outputs of the function. In this case there are no outputs, and the value of <code>Y_rv</code> is the output.
@@ -107,12 +149,16 @@ Here we do not really care about the values that <code>I_rv</code> takes, so we 
 <span style="font-weight: bold;">print</span>(total_logprob.<span style="font-weight: bold;">eval</span>({y_vv: 10.}))
 </pre>
 </div>
+
+<pre class="example">
+-6.961941398089025
+</pre>
 </div>
 </div>
 
-<div id="outline-container-orgfd7e403" class="outline-2">
-<h2 id="orgfd7e403">Implement the algorithm</h2>
-<div class="outline-text-2" id="text-orgfd7e403">
+<div id="outline-container-orgc31d36c" class="outline-2">
+<h2 id="orgc31d36c">Implement the algorithm</h2>
+<div class="outline-text-2" id="text-orgc31d36c">
 <p>
 The random walk Rosenbluth-Metropolis-Hasting algorithm is also straightforward to implement:
 </p>
@@ -158,42 +204,28 @@ Syntactically, <code>aesara.tensor</code> looks like a drop-in replacement to <c
 </div>
 </div>
 
-<div id="outline-container-orga9a6459" class="outline-2">
-<h2 id="orga9a6459">So, does it work?</h2>
-<div class="outline-text-2" id="text-orga9a6459">
+<div id="outline-container-org726308c" class="outline-2">
+<h2 id="org726308c">So, does it work?</h2>
+<div class="outline-text-2" id="text-org726308c">
 <p>
 Let us sample 1000 chains concurrently for an increasing number of samples and compare the running time to NumPy's and JAX's:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> matplotlib.pylab <span style="font-weight: bold;">as</span> plt
 
-<span style="font-weight: bold; font-style: italic;">n_chains</span> = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]
-
-<span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure(figsize=(12, 8))
-<span style="font-weight: bold; font-style: italic;">ax</span> = fig.add_subplot(111)
-<span style="font-weight: bold;">for</span> key, values <span style="font-weight: bold;">in</span> chains_results.items():
-    ax.plot(n_chains, values, label=key)
-ax.set_xlabel(<span style="font-style: italic;">"Number of chains"</span>, fontsize=22, fontname=<span style="font-style: italic;">"Source Code Pro"</span>)
-ax.set_ylabel(<span style="font-style: italic;">"Time (s)"</span>, fontsize=22, fontname=<span style="font-style: italic;">"Source Code Pro"</span>)
-fig.suptitle(<span style="font-style: italic;">"Sampling 1,000 samples from a 4 components Gaussian mixture"</span>, fontsize=18, fontname=<span style="font-style: italic;">"Source Code Pro"</span>)
-
-ax.set_xscale(<span style="font-style: italic;">'log'</span>)
-ax.set_yscale(<span style="font-style: italic;">'log'</span>)
-ax.spines[<span style="font-style: italic;">'right'</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
-ax.spines[<span style="font-style: italic;">'top'</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
-ax.yaxis.set_ticks_position(<span style="font-style: italic;">'left'</span>)
-ax.xaxis.set_ticks_position(<span style="font-style: italic;">'bottom'</span>)
-
-ax.legend(frameon=<span style="font-weight: bold; text-decoration: underline;">False</span>)
-</pre>
+<div id="org0da30e8" class="figure">
+<p><img src="img/rmh-aesara-comparison.png" alt="rmh-aesara-comparison.png" width="100%" />
+</p>
 </div>
+
+<p>
+For small number of samples, Aesara (C backend) and JAX spend most of their time compiling the kernel and NumPy is faster. Past \(10^4\) samples NumPy lags behind, with Aesara catching up with JAX around \(10^5\) samples.
+</p>
 </div>
 </div>
 
-<div id="outline-container-org2dabe4d" class="outline-2">
-<h2 id="org2dabe4d">Perspectives</h2>
-<div class="outline-text-2" id="text-org2dabe4d">
+<div id="outline-container-org6d48c60" class="outline-2">
+<h2 id="org6d48c60">Perspectives</h2>
+<div class="outline-text-2" id="text-org6d48c60">
 <p>
 Aesara is still young and holds many promises for the future, <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/issues">come help us</a>! Here is what you can expect to change with this example in the near future:
 </p>
@@ -212,6 +244,10 @@ Aesara is still young and holds many promises for the future, <a target='_blank'
 
 <p>
 <b><b>Build samplers automatically.</b></b> <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc">AeMCMC</a> analyzes your model graph and builds an efficient sampler for it.
+</p>
+
+<p>
+Still not sure what Aesara is about? Read <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/discussions/879#discussioncomment-2472927">Brandon Willard's explanation</a>.
 </p>
 </div>
 </div>
