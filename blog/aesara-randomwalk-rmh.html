@@ -3,13 +3,13 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-09-02 Fri 07:43 -->
+<!-- 2022-09-05 Mon 18:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Walk Rosenbluth-Metropolis-Hastings in Aesara</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
-<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div id="content" class="content">
@@ -22,16 +22,9 @@ Right before I started working on <a href="file:///home/runner/projects/thetypic
 The full code was added to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py">repository</a>.
 </p>
 
-<ul class="org-ul">
-<li class="off"><code>[&#xa0;]</code> Performance comparison with JAX on a single chain.</li>
-<li class="off"><code>[&#xa0;]</code> Compile to JAX</li>
-<li class="off"><code>[&#xa0;]</code> Compile to Numba</li>
-<li class="off"><code>[&#xa0;]</code> What's missing &amp; how we're going to get there</li>
-</ul>
-
-<div id="outline-container-orgf5e481c" class="outline-2">
-<h2 id="orgf5e481c">Mixture model</h2>
-<div class="outline-text-2" id="text-orgf5e481c">
+<div id="outline-container-orgb344614" class="outline-2">
+<h2 id="orgb344614">Mixture model</h2>
+<div class="outline-text-2" id="text-orgb344614">
 <p>
 <a href="file:///home/runner/projects/thetypicalset/org/blog/jax-parallel-mcmc.html">In the original blog post</a> I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in <code>Aesara</code> is straightforward. No need for a <code>Mixture</code> distribution (like in e.g. PyMC), you just write it like it is:
 </p>
@@ -62,7 +55,7 @@ We can generate forward samples from this model by compiling the model graph cho
 <span style="font-weight: bold; font-style: italic;">sample_fn</span> = aesara.function((), Y_rv)
 <span style="font-weight: bold; font-style: italic;">samples</span> = [sample_fn() <span style="font-weight: bold;">for</span> _ <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(10000)]
 
-<span style="font-weight: bold;">print</span>(samples[:100])
+<span style="font-weight: bold;">print</span>(samples[:10])
 </pre>
 </div>
 
@@ -100,7 +93,7 @@ To compute the log-probability density function we can use <a target='_blank' re
 
 
 <p>
-Here we do not really care about the values that <code>I_rv</code> takes, so we marginalize the log-probability density function:
+Here we do not really care about the values that <code>I_rv</code> takes, so we marginalize the log-probability density function over <code>I_rv</code>:
 </p>
 
 <div class="org-src-container">
@@ -117,9 +110,9 @@ Here we do not really care about the values that <code>I_rv</code> takes, so we 
 </div>
 </div>
 
-<div id="outline-container-org062c229" class="outline-2">
-<h2 id="org062c229">Implement the algorithm</h2>
-<div class="outline-text-2" id="text-org062c229">
+<div id="outline-container-orgfd7e403" class="outline-2">
+<h2 id="orgfd7e403">Implement the algorithm</h2>
+<div class="outline-text-2" id="text-orgfd7e403">
 <p>
 The random walk Rosenbluth-Metropolis-Hasting algorithm is also straightforward to implement:
 </p>
@@ -165,76 +158,61 @@ Syntactically, <code>aesara.tensor</code> looks like a drop-in replacement to <c
 </div>
 </div>
 
-<div id="outline-container-orgdcb08bc" class="outline-2">
-<h2 id="orgdcb08bc">So, does it work?</h2>
+<div id="outline-container-orga9a6459" class="outline-2">
+<h2 id="orga9a6459">So, does it work?</h2>
+<div class="outline-text-2" id="text-orga9a6459">
+<p>
+Let us sample 1000 chains concurrently for an increasing number of samples and compare the running time to NumPy's and JAX's:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> matplotlib.pylab <span style="font-weight: bold;">as</span> plt
+
+<span style="font-weight: bold; font-style: italic;">n_chains</span> = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]
+
+<span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure(figsize=(12, 8))
+<span style="font-weight: bold; font-style: italic;">ax</span> = fig.add_subplot(111)
+<span style="font-weight: bold;">for</span> key, values <span style="font-weight: bold;">in</span> chains_results.items():
+    ax.plot(n_chains, values, label=key)
+ax.set_xlabel(<span style="font-style: italic;">"Number of chains"</span>, fontsize=22, fontname=<span style="font-style: italic;">"Source Code Pro"</span>)
+ax.set_ylabel(<span style="font-style: italic;">"Time (s)"</span>, fontsize=22, fontname=<span style="font-style: italic;">"Source Code Pro"</span>)
+fig.suptitle(<span style="font-style: italic;">"Sampling 1,000 samples from a 4 components Gaussian mixture"</span>, fontsize=18, fontname=<span style="font-style: italic;">"Source Code Pro"</span>)
+
+ax.set_xscale(<span style="font-style: italic;">'log'</span>)
+ax.set_yscale(<span style="font-style: italic;">'log'</span>)
+ax.spines[<span style="font-style: italic;">'right'</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
+ax.spines[<span style="font-style: italic;">'top'</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
+ax.yaxis.set_ticks_position(<span style="font-style: italic;">'left'</span>)
+ax.xaxis.set_ticks_position(<span style="font-style: italic;">'bottom'</span>)
+
+ax.legend(frameon=<span style="font-weight: bold; text-decoration: underline;">False</span>)
+</pre>
+</div>
+</div>
 </div>
 
-<div id="outline-container-org6597dfd" class="outline-2">
-<h2 id="org6597dfd">Perspectives</h2>
-<div class="outline-text-2" id="text-org6597dfd">
-</div>
-<div id="outline-container-orgba915a5" class="outline-3">
-<h3 id="orgba915a5"><span class="todo TODO">TODO</span> Automatic marginalization of the <code>Categorical</code> RV</h3>
-<div class="outline-text-3" id="text-orgba915a5">
+<div id="outline-container-org2dabe4d" class="outline-2">
+<h2 id="org2dabe4d">Perspectives</h2>
+<div class="outline-text-2" id="text-org2dabe4d">
 <p>
-Here we manually marginalized over the values of <code>Y_rv</code>, but it would be nice if we could automatically marginalize over discrete variables.
+Aesara is still young and holds many promises for the future, <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/issues">come help us</a>! Here is what you can expect to change with this example in the near future:
 </p>
 
 <p>
-[Link to the issue]
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgeed7ecb" class="outline-3">
-<h3 id="orgeed7ecb"><span class="todo TODO">TODO</span> Multiple backend</h3>
-<div class="outline-text-3" id="text-orgeed7ecb">
-<p>
-Having multiple backends means that you can interact with different ecosystems / hardware with the same model expression in Python. You can also decide to leverage the strengths of XLA (JAX) or LLVM (Numba) depending on your application.
-</p>
-</div>
-
-<div id="outline-container-org31ad872" class="outline-4">
-<h4 id="org31ad872"><span class="todo TODO">TODO</span> Compile to Numba</h4>
-<div class="outline-text-4" id="text-org31ad872">
-<p>
-When nothing is specified <code>Aesara</code> compiles functions to C. We have however introduced a new Numba backend to <code>Aesara</code>.
+<b><b>Maginalize automatically.</b></b>  <code>AePPL</code> will soon allow to automatically marginalize over discrete random variable (see <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aeppl/issues/21">related issue</a>).
 </p>
 
 <p>
-[Example]
-[Link to the documentation]
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgdbdc23e" class="outline-4">
-<h4 id="orgdbdc23e"><span class="todo TODO">TODO</span> Compile to JAX</h4>
-<div class="outline-text-4" id="text-orgdbdc23e">
-<p>
-We can also compile functions to JAX so they can play nice with JAX ecosystems.
+<b><b>Vectorize computation.</b></b> The implementation for the multiple chain sampler is currently close to NumPy's for performance reasons, but you should soon be able to write the kernel for a single chain, and use the equivalent of <code>np.vectorize</code> or <code>jax.vmap</code> to vectorize the computation (see <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/issues/695">related issue</a>).
 </p>
 
 <p>
-[Example]
-[Link to the documentation]
-</p>
-</div>
-</div>
-</div>
-
-
-<div id="outline-container-orge4c6144" class="outline-3">
-<h3 id="orge4c6144"><span class="todo TODO">TODO</span> Vectorize the execution (several chains)</h3>
-<div class="outline-text-3" id="text-orge4c6144">
-<p>
-We cannot vectorize the execution the same we can in <code>JAX</code> with <code>vmap</code>, but we should be able to. How?
+<b><b>Work with different backends.</b></b> You will soon be able to compile this example using Aesara's JAX backend and Numba backend (<a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/tree/main/aesara/link">work in progress, you can already try it!</a>). This means you will be able to interact with different ecosystems and leverage the strengths of different compilers / hardware devices with the <i>same model expression</i> in python. This also means that your model code is more future-proof as you can make the backend move under it.
 </p>
 
 <p>
-[Link to the relevant issues]
+<b><b>Build samplers automatically.</b></b> <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc">AeMCMC</a> analyzes your model graph and builds an efficient sampler for it.
 </p>
-</div>
 </div>
 </div>
 </div>
