@@ -34,3 +34,14 @@ Which requires the implementation of the following:
 - layers.MaxPooling2D
 - layers.Dropout
 - layers.Flatten
+
+* Graph rewriting
+
+We can perform rewriting at the layer semantic level. For instance, the [[https://github.com/uwplse/tensat][TENSAT]] library adds equality saturation to the [[https://github.com/jiazhihao/TASO][TASO]] library. There are a list of rewrites that operate on a so-called /layer algebra/. Here are a few examples:
+
+#+begin_src ascii
+matmul(matmul(input_1,input_4),input_5)==matmul(input_1,matmul(input_4,input_5))
+conv2d(1,1,0,2,ewadd(input_12,ewadd(input_10,input_11)),ewadd(input_12,ewadd(input_10,input_11)))==conv2d(1,1,0,2,ewadd(input_11,ewadd(input_10,input_12)),ewadd(input_11,ewadd(input_10,input_12)))
+poolavg(3,3,1,1,0,input_8)==conv2d(1,1,0,0,input_8,Cpool(3,3))
+relu(input_8)==conv2d(1,1,0,2,input_8,Iconv(3,3))
+#+end_src

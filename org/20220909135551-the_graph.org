@@ -1,0 +1,187 @@
+:PROPERTIES:
+:ID:       01947a54-3513-485f-9361-f978fd6eb0bf
+:END:
+#+title: The Graph
+
+
+* How the graph is built
+
+The core elements are the =Op=\s. =Op=\s are objects that have different purposes in Aesara:
+
+- =Op.make_node(*args, **kwargs)= instantiate =Apply= nodes, which refer to the =Op=, the =inputs= and =outputs= of the computation. The =aesara.compile.compile= function uses =Apply.inputs= and =Variable.owner= to determine which inputs are necessary to compute the function's outputs. For instance =RandomVariable=s:
+
+  #+begin_src python
+class RandomVariable(Op):
+
+    def make_node(self, rng, size, dtype, *dist_params):
+        """Create a random variable node.
+
+        Parameters
+        ----------
+        rng: RandomGeneratorType or RandomStateType
+            Existing Aesara `Generator` or `RandomState` object to be used.  Creates a
+            new one, if `None`.
+        size: int or Sequence
+            NumPy-like size parameter.
+        dtype: str
+            The dtype of the sampled output.  If the value ``"floatX"`` is
+            given, then `dtype` is set to ``aesara.config.floatX``.  This value is
+            only used when ``self.dtype`` isn't set.
+        dist_params: list
+            Distribution parameters.
+
+        Results
+        -------
+        out: Apply
+            A node with inputs ``(rng, size, dtype) + dist_args`` and outputs
+            ``(rng_var, out_var)``.
+
+        """
+        size = normalize_size_param(size)
+
+        dist_params = tuple(
+            as_tensor_variable(p) if not isinstance(p, Variable) else p
+            for p in dist_params
+        )
+
+        if rng is None:
+            rng = aesara.shared(np.random.default_rng())
+        elif not isinstance(rng.type, RandomType):
+            raise TypeError(
+                "The type of rng should be an instance of either RandomGeneratorType or RandomStateType"
+            )
+
+        shape = self._infer_shape(size, dist_params)
+        _, bcast = infer_broadcastable(shape)
+        dtype = self.dtype or dtype
+
+        if dtype == "floatX":
+            dtype = config.floatX
+        elif dtype is None or (isinstance(dtype, str) and dtype not in all_dtypes):
+            raise TypeError("dtype is unspecified")
+
+        if isinstance(dtype, str):
+            dtype_idx = constant(all_dtypes.index(dtype), dtype="int64")
+        else:
+            dtype_idx = constant(dtype, dtype="int64")
+            dtype = all_dtypes[dtype_idx.data]
+
+        outtype = TensorType(dtype=dtype, shape=bcast)
+        out_var = outtype()
+        inputs = (rng, size, dtype_idx) + dist_params
+        outputs = (rng.type(), out_var)
+
+        return Apply(self, inputs, outputs)
+
+  #+end_src
+
+- =Op.__call__= defers to =Op.make_node= to create the =Apply= node and /then/ is responsible for returning the output variables.
+
+There is a subtility here in that =__call__= does not need to return /all/ the output variables. Indeed, some may be needed for computation in =Op.perform= (of equivalent) but do not need to be /exposed/ to those who build the graph. Random Variables come to mind, where the =__call__= function can be:
+
+#+begin_src python
+class RandomVariable(Op):
+
+    def __call__(self, *inputs: Any, **kwargs) -> Union[Variable, List[Variable]]:
+        node = self.make_node(*inputs, **kwargs)
+        rval = node.outputs[1]
+        return rval
+#+end_src
+
+You then have single output =Op=\s, for which Aesara returns a single element instead of a one-item list:
+
+#+begin_src python
+class SingleOutputOp(Op):
+    def __call__(self, *inputs: Any, **kwargs) -> Union[Variable, List[Variable]]:
+        node = self.make_node(*inputs, **kwargs)
+        rval = node.outputs[0]
+        return rval
+#+end_src
+
+And =MultipleOutputOp=\s for which Aesara returns the list of outputs:
+
+#+begin_src python
+class SingleOutputOp(Op):
+    def __call__(self, *inputs: Any, **kwargs) -> Union[Variable, List[Variable]]:
+        node = self.make_node(*inputs, **kwargs)
+        return node.outputs
+#+end_src
+
+A first issue with this is conceptual: it is all in the code (in =__call__=) and that the selection of multiple outputs is not part of the intermediate representation, the graph. And this conceptual issue creates other issues downstream. For instance when trying to get a etuple-representation of the graph. We can work at the level of the =Apply= node so that the etuplization of the following:
+
+#+begin_src python
+z_rv = at.random.normal(0, 1)
+#+end_src
+
+gives
+
+#+begin_src python
+z_et = OpExpressionTuple(ExpressionTuple(RandomVariable, name, ndim_supp, ndim_params, dtype), rng, size, dtype, *dist_params)
+#+end_src
+
+which when evaluated returns the outputs:
+
+#+begin_src python
+z_rv = z_et.evaled_obj
+#+end_src
+
+But that requires to write custom code for each "special case" where =default_output= is different from 1. However, we would like the =etuplization= code to remain general so we can easily unify down the line.
+
+Even worse are =MultipleOutputOp=\s
+
+#+begin_src python :results output
+import aesara.tensor as at
+from etuples import etuple, etuplize
+
+a = at.matrix('a')
+u, v, w = at.nlinalg.svd(a)
+u_et = etuplize(u)
+print(u_et)
+
+# reset the saved evaled obj
+u_et._evaled_obj = u_et.null
+print(u_et.evaled_obj)
+#+end_src
+
+#+RESULTS:
+: oExpressionTuple((ExpressionTuple((<class 'aesara.tensor.nlinalg.SVD'>, 1, 1)), a))
+: [SVD{full_matrices=1, compute_uv=1}.0, SVD{full_matrices=1, compute_uv=1}.1, SVD{full_matrices=1, compute_uv=1}.2]
+
+#+begin_src python :results output
+import aesara.tensor as at
+from etuples import etuple, etuplize
+
+u_rv = at.random.normal(0, 1)
+u_et = etuplize(u_rv)
+print(u_et)
+
+# reset the saved evaled obj
+u_et._evaled_obj = u_et.null
+print(u_et.evaled_obj)
+#+end_src
+
+#+RESULTS:
+: oExpressionTuple((ExpressionTuple((<class 'aesara.tensor.random.ba...ormalRV'>, 'normal', 0, (0, 0), 'floatX', False)), RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FA6605E5EE0>), TensorConstant{[]}, TensorConstant{11}, TensorConstant{0}, TensorConstant{1}))
+: [normal_rv{0, (0, 0), floatX, False}.0, normal_rv{0, (0, 0), floatX, False}.out]
+
+
+=__call__= can also be used when we want an API that is slightly different that the API in the =perform= functions (also the case with some RVs), which must correspond to the order of the inputs in the graph.
+
+
+- A =Linker= uses the =Op= associated with the =Apply= node to compute the numeric values for the output variables. Linkers will ask for a function that converts the =Op= into a callable.
+- =Op.perform= is the Python implementation of the =Op=. It takes the numeric values of the inputs and returns the computed numeric values of the outputs. It is useful for debugging.
+- =COp.c_code= is the C implementation of the =Op=. **Why don't we have everything in the C Linker?**
+
+#+begin_src python
+
+#+end_src
+
+    This class is typically instantiated by a `Op.make_node` method, which
+    is called by `Op.__call__`.
+
+    The function `aesara.compile.function.function` uses `Apply.inputs`
+    together with `Variable.owner` to search the expression graph and determine
+    which inputs are necessary to compute the function's outputs.
+
+    A `Linker` uses the `Apply` instance's `op` field to compute numeric values
+    for the output variables.

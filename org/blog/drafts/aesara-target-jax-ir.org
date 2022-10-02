@@ -1,0 +1,204 @@
+#+title: Target JAX's intermediate representation with Aesara
+
+There are several questions we need to answer:
+1. Is it helping with anything? (example )
+2. Can we implement loops directly in Jaxprs?
+3. Can we JIT the resulting functions?
+4. Can we =vmap= the resulting functions?
+5. Can we =grad= the following functions?
+
+* Issues we'd like to solve
+
+The following fails even though it has static shape:
+
+#+begin_src python
+import functools
+
+import jax
+import jax.numpy as jnp
+from jax import make_jaxpr
+
+def d(y, z):
+    return jnp.shape(y)[z]
+
+def c(y, z):
+    return jnp.where(d(y, 0) / z > 0, d(y, 0) / z, 0)
+
+def b(y):
+    return [c(y, 2), c(y, 3)]
+
+def a(y):
+    return jnp.reshape(y, b(y))
+
+a_jaxpr = make_jaxpr(a)(jnp.array([1., 1.]))
+a_jaxpr
+# TypeError: Shapes must be 1D sequences of concrete values of integer type, got [Traced<ShapedArray(float32[], weak_type=True)>with<DynamicJaxprTrace(level=1/0)>, Traced<ShapedArray(float32[], weak_type=True)>with<DynamicJaxprTrace(level=1/0)>].
+# If using `jit`, try using `static_argnums` or applying `jit` to smaller subfunctions.
+#+end_src
+
+#+begin_src python :results output
+import jax.numpy as jnp
+from jax import make_jaxpr
+
+def a(x, y):
+    return jnp.reshape(x, y)
+
+def b(x):
+    return jnp.reshape(x, (1,2))
+
+try:
+    a_jaxpr = make_jaxpr(a)(jnp.array([1., 1.]), [0, 1])
+except Exception as e:
+    print(e)
+
+try:
+    b_jaxpr = make_jaxpr(b)(jnp.array([1., 1.]))
+    print(b_jaxpr)
+except Exception as e:
+    print(e)
+#+end_src
+
+#+RESULTS:
+: Shapes must be 1D sequences of concrete values of integer type, got [Traced<ShapedArray(int32[], weak_type=True)>with<DynamicJaxprTrace(level=1/0)>, Traced<ShapedArray(int32[], weak_type=True)>with<DynamicJaxprTrace(level=1/0)>].
+: If using `jit`, try using `static_argnums` or applying `jit` to smaller subfunctions.
+: { lambda ; a:f32[2]. let
+:     b:f32[1,2] = reshape[dimensions=None new_sizes=(1, 2)] a
+:   in (b,) }
+
+
+#+begin_src python :results output
+import functools as ft
+import jax
+import jax.numpy as jnp
+from jax import make_jaxpr
+
+def ex1(x):
+  size = jnp.prod(jnp.array(x.shape))
+  return x.reshape((size,))
+
+try:
+    a_jaxpr = make_jaxpr(ex1)(jnp.array([1., 1.]))
+except Exception as e:
+    print(e)
+#+end_src
+
+#+RESULTS:
+: Shapes must be 1D sequences of concrete values of integer type, got (Traced<ShapedArray(int32[])>with<DynamicJaxprTrace(level=1/0)>,).
+: If using `jit`, try using `static_argnums` or applying `jit` to smaller subfunctions.
+
+* TODO Can we use dyanic values as arguments to =reshape= in the JAXprs?
+
+Take this one:
+
+#+begin_src python :results output :session
+import jax.numpy as jnp
+from jax import make_jaxpr
+
+def b(x):
+    return jnp.reshape(x, (1,2))
+
+b_jaxpr = make_jaxpr(b)(jnp.array([1., 1.]))
+print(b_jaxpr)
+print(b_jaxpr.eqns[0])
+print(b_jaxpr.eqns[0].primitive)
+print(b_jaxpr.eqns[0].invars)
+print(b_jaxpr.eqns[0].params)
+#+end_src
+
+#+RESULTS:
+: { lambda ; a:f32[2]. let
+:     b:f32[1,2] = reshape[dimensions=None new_sizes=(1, 2)] a
+:   in (b,) }
+: a:f32[1,2] = reshape[dimensions=None new_sizes=(1, 2)] b
+: reshape
+: [a]
+: {'new_sizes': (1, 2), 'dimensions': None}
+
+
+* JIT-ing functions built from JAXprs
+
+#+begin_src python :results output :session
+import jax
+from jax import lax
+from jax import make_jaxpr
+
+
+def add_fn(a, b):
+    return lax.add(a, b)
+
+add_jaxpr = jax.make_jaxpr(add_fn)(1., 1.)
+print(add_jaxpr)
+# { lambda ; a:f32[] b:f32[]. let c:f32[] = add a b in (c,) }
+
+from jax.core import jaxpr_as_fun
+add_1d = jaxpr_as_fun(add_jaxpr)
+jitted_add_1d = jax.jit(add_1d)
+print(jitted_add_1d)
+# <CompiledFunction of functools.partial(<function jaxpr_as_fun at 0x7fa8e7551990>, { lambda ; a:f32[] b:f32[]. let c:f32[] = add a b in (c,) })>
+
+jitted_add_1d_jaxpr = make_jaxpr(jitted_add_1d)(1., 1.)
+print(jitted_add_1d_jaxpr)
+#+end_src
+
+#+RESULTS:
+: { lambda ; a:f32[] b:f32[]. let c:f32[] = add a b in (c,) }
+: <CompiledFunction of functools.partial(<function jaxpr_as_fun at 0x7fa8e7551990>, { lambda ; a:f32[] b:f32[]. let c:f32[] = add a b in (c,) })>
+: { lambda ; a:f32[] b:f32[]. let
+:     c:f32[] = xla_call[
+:       call_jaxpr={ lambda ; d:f32[] e:f32[]. let f:f32[] = add d e in (f,) }
+:       name=<unnamed wrapped function>
+:     ] a b
+:   in (c,) }
+
+- What is the definition of =jaxpr_as_fun=?
+- What is a =CompiledFunction=?
+
+* VMAP-ing functions built from JAXprs
+
+We can vmap the function produced by =jaxpr_as_fun=, /but/ we cannot indicate vmapped in Jaxpr
+
+#+begin_src python :session :results output
+import jax.numpy as jnp
+
+vmapped_add_1d = jax.vmap(add_1d, in_axes=(0, 0))
+print(vmapped_add_1d)
+
+vmapped_add_1d_jaxpr = make_jaxpr(vmapped_add_1d)(jnp.array([1., 1.]), jnp.array([1., 1.]))
+print(vmapped_add_1d_jaxpr)
+
+
+def my_func(a):
+    b = jax.vmap(add_fn, in_axes=(1, 1))(a, a)
+    return b
+
+print(make_jaxpr(my_func)(jnp.array([[1., 2., 3.], [1., 2., 3.]])))
+#+end_src
+
+#+RESULTS:
+: <function <unnamed function> at 0x7fa76dd23a30>
+: { lambda ; a:f32[2] b:f32[2]. let c:f32[2] = add a b in (c,) }
+: { lambda ; a:f32[2,3]. let
+:     b:f32[2,3] = add a a
+:     c:f32[3,2] = transpose[permutation=(1, 0)] b
+:   in (c,) }
+
+- Can we indicate vmapping operation in the JAxpr?
+- Is it because XLA automatically SIMD runs this stuff, and `vmap` is simply a way to "box" it, i.e. encode in code the rules that lead to SIMD execution?
+
+* Grad-ing functions built from Jaxprs
+
+This one is interesting, but less critical since Aesara can compile gradient graphs.
+
+#+begin_src python :session :results output
+grad_add_1d = jax.grad(add_1d)
+print(grad_add_1_d)
+
+try:
+    grad_add_1d_jaxpr = make_jaxpr(grad_add_1d)(1., 1.)
+except Exception as e:
+    print(e)
+#+end_src
+
+#+RESULTS:
+: <function <unnamed function> at 0x7fa76dd23640>
+: Gradient only defined for scalar-output functions. Output was [Traced<ShapedArray(float32[], weak_type=True)>with<DynamicJaxprTrace(level=1/0)>].

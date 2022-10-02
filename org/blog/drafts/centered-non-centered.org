@@ -1,0 +1,167 @@
+#+title: Centered-non centered parametrization in Aesara
+
+* Centered-non centered
+
+#+begin_src python :results output
+# Define a model in Aesara
+import aesara
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+mu_rv = srng.normal(0, 1)
+sigma_rv = srng.halfnormal(1)
+Y_rv = srng.normal(mu_rv, sigma_rv)
+
+# Tell Aesara that `Y_rv` is the output variable
+from aesara.graph.fg import FunctionGraph
+
+fgraph = FunctionGraph(outputs=[Y_rv], clone=False)
+aesara.dprint(fgraph)  # prints the Aesara graph
+# Graph in the centered parametrization
+#
+# Y_rv ~ Normal(Normal(0, 1), HalfNormal(1))
+#
+# normal_rv{0, (0, 0), floatX, False}.1 [id A] 2
+#  |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FE81981C2E0>) [id B]
+#  |TensorConstant{[]} [id C]
+#  |TensorConstant{11} [id D]
+#  |normal_rv{0, (0, 0), floatX, False}.1 [id E] 1
+#  | |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FE819893680>) [id F]
+#  | |TensorConstant{[]} [id G]
+#  | |TensorConstant{11} [id H]
+#  | |TensorConstant{0} [id I]
+#  | |TensorConstant{1} [id J]
+#  |halfnormal_rv{0, (0, 0), floatX, False}.1 [id K] 0
+#    |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FE819893CA0>) [id L]
+#    |TensorConstant{[]} [id M]
+#    |TensorConstant{11} [id N]
+#    |TensorConstant{1} [id O]
+#    |TensorConstant{1.0} [id P]
+
+# Transform the graph using the location-scale transform
+from aesara.graph.kanren import KanrenRelationSub
+from aemcmc.transforms import location_scale_transform
+
+transformed_fgraph = KanrenRelationSub(location_scale_transform).transform(
+    fgraph, fgraph.outputs[0].owner
+)[0]
+aesara.dprint(transformed_fgraph)
+# Graph in the non-centered parametrization
+#
+# Y_rv ~ Normal(0, 1) +  HalfNormal(1) * Normal(0, 1)
+#
+# Elemwise{add,no_inplace} [id A]
+#  |normal_rv{0, (0, 0), floatX, False}.1 [id B]
+#  | |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FF308A03680>) [id C]
+#  | |TensorConstant{[]} [id D]
+#  | |TensorConstant{11} [id E]
+#  | |TensorConstant{0} [id F]
+#  | |TensorConstant{1} [id G]
+#  |Elemwise{mul,no_inplace} [id H]
+#    |halfnormal_rv{0, (0, 0), floatX, False}.1 [id I]
+#    | |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FF308A03CA0>) [id J]
+#    | |TensorConstant{[]} [id K]
+#    | |TensorConstant{11} [id L]
+#    | |TensorConstant{1} [id M]
+#    | |TensorConstant{1.0} [id N]
+#    |normal_rv{0, (0, 0), floatX, False}.1 [id O]
+#      |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FF30878C2E0>) [id P]
+#      |TensorConstant{[]} [id Q]
+#      |TensorConstant{11} [id R]
+#      |TensorConstant{0} [id S]
+#      |TensorConstant{1} [id T]
+#+end_src
+
+
+* Conjugates
+
+#+begin_src python :results output
+
+import aesara
+import aesara.tensor as at
+
+# Define the model in Aesara
+#
+# p_rv ~ Beta(a, b)
+# Y_rv ~ Binomial(n, p_rv)
+
+alpha_tt = at.scalar("alpha")
+beta_tt = at.scalar("beta")
+n_tt = at.scalar("n")
+
+srng = at.random.RandomStream(0)
+p_rv = srng.beta(alpha_tt, beta_tt, name="p")
+Y_rv = srng.binomial(n_tt, p_rv, name="y")
+
+aesara.dprint(Y_rv)
+# The Aesara model graph:
+#
+# binomial_rv{0, (0, 0), int64, False}.1 [id A] 'y'
+#  |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F1AB14E5620>) [id B]
+#  |TensorConstant{[]} [id C]
+#  |TensorConstant{4} [id D]
+#  |n [id E]
+#  |beta_rv{0, (0, 0), floatX, False}.1 [id F] 'p'
+#    |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F1AB14E50E0>) [id G]
+#    |TensorConstant{[]} [id H]
+#    |TensorConstant{11} [id I]
+#    |alpha [id J]
+#    |beta [id K]
+
+# Transform the graph using beta-binomial conjugacy
+from kanren import run, var
+from aesara.graph.rewriting.unify import eval_if_etuple
+from aemcmc.conjugates import beta_binomial_conjugateo
+
+y_vv = Y_rv.clone()
+y_vv.name = "y"
+
+q_lv = var()
+(posterior_expr,) = run(1, q_lv, beta_binomial_conjugateo(y_vv, Y_rv, q_lv))
+posterior = eval_if_etuple(posterior_expr)
+
+aesara.dprint(posterior)
+# The transformed graph represents p_rv's posterior distribution:
+#
+# p_rv ~ Beta(a + y, b + n - y)
+#
+# beta_rv{0, (0, 0), floatX, False}.1 [id A]
+#  |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F1AB14E50E0>) [id B]
+#  |TensorConstant{[]} [id C]
+#  |TensorConstant{11} [id D]
+#  |Elemwise{add,no_inplace} [id E]
+#  | |alpha [id F]
+#  | |y [id G]
+#  |Elemwise{sub,no_inplace} [id H]
+#    |Elemwise{add,no_inplace} [id I]
+#    | |beta [id J]
+#    | |n [id K]
+#    |y [id G]
+#+end_src
+
+#+RESULTS:
+#+begin_example
+binomial_rv{0, (0, 0), int64, False}.1 [id A] 'y'
+ |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F1AB14E5620>) [id B]
+ |TensorConstant{[]} [id C]
+ |TensorConstant{4} [id D]
+ |n [id E]
+ |beta_rv{0, (0, 0), floatX, False}.1 [id F] 'p'
+   |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F1AB14E50E0>) [id G]
+   |TensorConstant{[]} [id H]
+   |TensorConstant{11} [id I]
+   |alpha [id J]
+   |beta [id K]
+beta_rv{0, (0, 0), floatX, False}.1 [id A]
+ |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F1AB14E50E0>) [id B]
+ |TensorConstant{[]} [id C]
+ |TensorConstant{11} [id D]
+ |Elemwise{add,no_inplace} [id E]
+ | |alpha [id F]
+ | |y [id G]
+ |Elemwise{sub,no_inplace} [id H]
+   |Elemwise{add,no_inplace} [id I]
+   | |beta [id J]
+   | |n [id K]
+   |y [id G]
+#+end_example

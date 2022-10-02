@@ -7,6 +7,107 @@
 - =RandomState=
 - =RandomStream=
 
+
+* Guidelines
+
+A good PRNG design satisfies the following conditions:
+1. It is **expressive**: the behavior of the system is **predictable** by the caller, and allows them to expression any probabilistic program they want;
+2. Makes it possible to build **reproducible** programs;
+3. It enables **vectorization** with generalized universal functions;
+4. It does not add sequencing constraints between function calls that have no data dependence;
+5. It can be transpiled to any backend, past present and future;
+6. It **fits in with Aesara's rewrite system**;
+7. It **fits in Aesara's IR**
+
+While we need to keep the transpilation backends in mind, we should not let their own constraints propagate to Aesara.
+
+The following functional model threads the RNG state through all the functions that generate random values. Sequencing is made explicit. This is basically what happens if we set =default_output= to =None= (do it).
+
+#+begin_src python
+def sequential(rng):
+    x, rng_1 = call(rng)
+    y, rng_2 = call(rng_1)
+    return x + y, rng_2  # We need to return the random state
+
+def call(rng):
+    val, new_rng = rand(rng, size=(2,3))
+    return val, new_rng
+#+end_src
+
+But this design is somewhat inconvenient to work with (as a user). Also, there is no way =sequential= can call into =call= and conserve its own RNG state. Everything is sequential, and as the =sequential= function shows, it does add sequencing constraints between function calls that are not due to data dependence but are an artifact of this design.
+
+#+begin_src md
+   +----sequential---+
+   |                 |
+x = call()        y = call()
+   |                 |
+   +----> x + y <----+
+#+end_src
+
+With the RNG dependence:
+
+#+begin_src md
+sequential
+   |
+x = call()
+   |
+y = call()
+   |
+ x + y
+#+end_src
+
+Same with gufuncs: we do not want to introduce rng-dependence between the different function calls. We want to be able to give each dimension (give example) a rng and let it run with it. No collision:
+
+And finally this is not enought for the one-to-many problem in rewrites.
+
+Only the caller knows how the random state should be managed as called functions are unaware of the context. The solution is very simple, it is to give the caller the responsibility of advancing the rng state. So functions do not need to return RNG state.
+
+/Note:/ Well, some function have to return the RNG state in JAX and it's the body function of while loops. Still goes to show how broken of an abstraction it is. There needs to pass RNG state because there /is/ a data dependence between the two.
+
+#+begin_src python
+def sequential(rng):
+    rng_y, rng_z = at.random.split(rng, 2)
+    return call(rng_y) + call(rng_z)
+
+sequential_et = etuple(
+    etuplize(at.add),
+    etuple(
+        call,
+        etuple(
+            nth,
+            0,
+            etuple(
+                etuplize(at.random.split),
+                rng,
+                2
+            )
+        )
+    ),
+    etuple(
+        call,
+        etuple(
+            nth,
+            1,
+            etuple(
+                etuplize(at.random.split),
+                rng,
+                2
+            )
+        )
+    )
+)
+#+end_src
+
+Counter based approach: [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][Parallel Random Numbers: As easy as 1, 2, 3]]
+
+
+* Transpilation
+
+** JAX
+** Numba
+
+Numba has primitive support for NumPy's Generator.
+
 * RandomVariable Ops
 
 We have a =default_rng= function, but the result does not behave as a generator in =numpy=.
@@ -86,6 +187,7 @@ Elemwise{mul,no_inplace} [id A]
    |TensorConstant{0} [id R]
    |TensorConstant{1} [id S]
 #+end_example
+
 
 How does =RandomGeneratorType= work? It looks like it has internal state.
 
@@ -369,9 +471,45 @@ print(a_rv.eval().shape)
 
 See [[https://ericmjl.github.io/blog/2019/5/29/reasoning-about-shapes-and-probability-distributions/][Eric Ma's blog post on the topic]].
 
+* Problems with =RandomStream=
+
+https://github.com/aesara-devs/aesara/pull/1211#discussion_r985057882
 
 * Proposal
 
 #+begin_src python
-from aesara.tensor.random import RandomState
+import aesara.tensor as at
+
+rng = at.random.RandomState()
+
+# RandomVariables divide the rng
+a_rv, rng = at.random.normal(rng, 0, 1)
+b_rv, _ = at.random.normal(rng, 0, 1)
+
+# We have to update the rng manually
+a_rv = at.random.normal(rng, 0, 1)
+rng = at.random.update(rng)
+b_rv = at.random.normal(rng, 0, 1)
+
+rng_a, rng_b = at.random.split(rng)
+a_rv = at.random.normal(rng_a, 0, 1)
+b_rv = at.random.normal(rng_b, 0, 1)
+
+rngs = at.random.split(rng, 10)
+rvs = []
+for rng in rngs:
+    rvs.append(at.random.normal(rng, 0, 1))
+#+end_src
+
+How does that solve the previous issues?
+
+1. Monkey patching to specialize the RV =Op=\s
+2. RVs in S-expressions and rewrites
+
+What does that complicate?
+
+#+begin_src python
+
+def standard_normal():
+
 #+end_src
