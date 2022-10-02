@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-10-02 Sun 19:16 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aesara's Intermediate representation</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Aesara's Intermediate representation</h1>
+
+<div id="outline-container-org3937fce" class="outline-2">
+<h2 id="org3937fce">Requirements</h2>
+<div class="outline-text-2" id="text-org3937fce">
+</div>
+<div id="outline-container-org4d97100" class="outline-3">
+<h3 id="org4d97100">Graph introspection</h3>
+<div class="outline-text-3" id="text-org4d97100">
+</div>
+<div id="outline-container-org12fb435" class="outline-4">
+<h4 id="org12fb435">At different levels of abstraction</h4>
+</div>
+</div>
+<div id="outline-container-org45c509e" class="outline-3">
+<h3 id="org45c509e">Graph rewrites</h3>
+<div class="outline-text-3" id="text-org45c509e">
+</div>
+<div id="outline-container-org9185c8e" class="outline-4">
+<h4 id="org9185c8e">At different levels of abstraction</h4>
+</div>
+</div>
+<div id="outline-container-orgad338eb" class="outline-3">
+<h3 id="orgad338eb">Automatic differentiation through control flow</h3>
+<div class="outline-text-3" id="text-orgad338eb">
+<p>
+Which means breaking from the quasi-static assumption.
+</p>
+</div>
+</div>
+<div id="outline-container-org62bfeeb" class="outline-3">
+<h3 id="org62bfeeb">Transpilation to different backends</h3>
+</div>
+</div>
+<div id="outline-container-org9783b8a" class="outline-2">
+<h2 id="org9783b8a">Elements of representation</h2>
+<div class="outline-text-2" id="text-org9783b8a">
+</div>
+<div id="outline-container-org7c41a2b" class="outline-3">
+<h3 id="org7c41a2b"><code>Scalar</code></h3>
+</div>
+<div id="outline-container-org839bffd" class="outline-3">
+<h3 id="org839bffd"><code>TensorVariable</code></h3>
+</div>
+<div id="outline-container-orgbe21e62" class="outline-3">
+<h3 id="orgbe21e62"><code>Op</code>\s</h3>
+</div>
+<div id="outline-container-org0f27dee" class="outline-3">
+<h3 id="org0f27dee"><code>OpFromGraph</code>\s</h3>
+</div>
+<div id="outline-container-orga006c36" class="outline-3">
+<h3 id="orga006c36"><code>FunctionGraph</code></h3>
+</div>
+<div id="outline-container-org8ce0b6e" class="outline-3">
+<h3 id="org8ce0b6e">Loops</h3>
+<div class="outline-text-3" id="text-org8ce0b6e">
+<p>
+The difficulty of differentiating through loops and the necessity to model them in a better IR is motivated by?
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc93589e" class="outline-3">
+<h3 id="orgc93589e">Conditionals</h3>
+<div class="outline-text-3" id="text-orgc93589e">
+<p>
+A motivation for implementation a new control flow IR in Aesara comes from the desire to differentiate through expressions like:
+</p>
+
+\begin{equation*}
+    f(x) =
+        \begin{cases}
+            0 & \text{if}\; x \geq 0\\
+            x^2 & \text{otherwise}\\
+        \end{cases}
+\end{equation*}
+
+<p>
+JAX can already take the gradient of control flow:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">f</span>(x):
+    <span style="font-weight: bold;">if</span> x &gt;= 0:
+        <span style="font-weight: bold;">return</span> 0.
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span> x**2
+
+<span style="font-weight: bold;">print</span>(jax.grad(f)(-10.))
+</pre>
+</div>
+
+<p>
+And so can Aesara:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">from</span> aesara.ifelse <span style="font-weight: bold;">import</span> ifelse
+
+<span style="font-weight: bold; font-style: italic;">x</span> = at.scalar(<span style="font-style: italic;">'x'</span>)
+<span style="font-weight: bold; font-style: italic;">y</span> = ifelse(at.gt(x,0), at.as_tensor(0., dtype=<span style="font-style: italic;">'float64'</span>), x**2)
+<span style="font-weight: bold; font-style: italic;">y_grad</span> = at.grad(y, wrt=x)
+
+<span style="font-weight: bold;">print</span>(y_grad.<span style="font-weight: bold;">eval</span>({x: -10.}))
+</pre>
+</div>
+
+<p>
+What is the fundamental different between <code>ifelse</code> and a <code>phi</code> node?
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org1db404d" class="outline-2">
+<h2 id="org1db404d">The pitfalls</h2>
+<div class="outline-text-2" id="text-org1db404d">
+<p>
+We need to balance relational programming and differentiation. Note that the papers below complain about "black-box operators", and point at JAX's `while<sub>loop</sub>`. Aesara operators are different though, as they allow us to translate concepts people are used to to a flexible IR. We could achieve the same thing that Julia does by parsing the AST, but providing `switch`, `cond`, `while`, `fori` etc operators is as efficient, if not more in python (parsing the AST is possible but tedious)
+</p>
+
+<ul class="org-ul">
+<li>`Scan` requires a fixed number of steps. It can be a variable, but `while` loops should not require such input;</li>
+<li>We need to be able to do relational programming + use e-graphs through control flow;</li>
+<li>We need to be able to differentiate through stuff like ODE solvers.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf838b92" class="outline-2">
+<h2 id="orgf838b92">References</h2>
+<div class="outline-text-2" id="text-orgf838b92">
+<ul class="org-ul">
+<li><p>
+"Don't unroll adjoint: differentiating SSA-form programs" (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1810.07951">paper</a>)
+</p>
+
+<p>
+Use a SSA representation to be able to differentiate through control flow.
+</p></li>
+
+<li><p>
+"Equality saturation: A new Approach to optimization" (<a target='_blank' rel='noopener noreferrer' class='external' href="https://web.archive.org/web/20110614052534id_/http://cseweb.ucsd.edu/~lerner/papers/popl09.pdf">paper</a>)
+</p>
+
+<p>
+Introduces PEG, a SSA intermediate representation that allows to do equality saturation on graphs with control flow. Introduces \(\theta\) and \(\Phi\) nodes as well as a few other, less fundamental, primitives to represent loops.
+</p></li>
+
+<li><p>
+"Useful algorithms that are not optimized by JAX or PyTorch" (<a target='_blank' rel='noopener noreferrer' class='external' href="http://www.stochasticlifestyle.com/useful-algorithms-that-are-not-optimized-by-jax-pytorch-or-tensorflow/">blog post</a>)
+</p>
+
+<blockquote>
+<p>
+If you pull up your standard methods like convolutional neural networks, that's a fixed function kernel call with a good derivative defined, or a recurrent neural network, that's a fixed size for loop. If you want to break this assumption, you have to go to a space that is fundamentally about an algorithm where you cannot know "the amount of computation" until you know the specific values in the problem, and equation solvers are something of this form.
+</p>
+
+<p>
+How many steps does it take for Newton's method to converge? How many steps does an adaptive ODE solver take? This is not questions that can be answered a priori: they are fundamentally questions which require knowing:
+</p>
+
+<p>
+What equation are we solving?
+What is the initial condition?
+Over what time span?
+With what solver tolerance?
+</p>
+</blockquote>
+
+<p>
+Machine learning framework in Python make quasi-static assumptions about the program, the fact that the size of the loops is fixed. <b>But</b> there are non quasi-static problems that are really useful for Machine Learning, like the neural ODE solver in the paper listed below.
+</p></li>
+</ul>
+
+
+
+<ul class="org-ul">
+<li>"Opening the Blackbox: Accelerating Neural Differential Equations By Regularizing Internal Solver Heuristics" (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/2105.03918">ArXiV</a>)</li>
+<li><p>
+"Machine Learning Systems are stuck in a rut" (<a target='_blank' rel='noopener noreferrer' class='external' href="https://dl.acm.org/doi/abs/10.1145/3317550.3321441">paper</a>)
+</p>
+
+<p>
+The problem is that current frameworks "work".
+</p>
+
+<blockquote>
+<p>
+On the other hand, there is little incentive to build high quality back ends that support other features, because all the front ends currently work in terms of monolithic
+</p>
+</blockquote></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf1f3020" class="outline-2">
+<h2 id="orgf1f3020">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>

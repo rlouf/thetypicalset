@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-10-02 Sun 19:16 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Graph</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">The Graph</h1>
+
+
+<div id="outline-container-orga47042d" class="outline-2">
+<h2 id="orga47042d">How the graph is built</h2>
+<div class="outline-text-2" id="text-orga47042d">
+<p>
+The core elements are the <code>Op</code>\s. <code>Op</code>\s are objects that have different purposes in Aesara:
+</p>
+
+<ul class="org-ul">
+<li><p>
+<code>Op.make_node(*args, **kwargs)</code> instantiate <code>Apply</code> nodes, which refer to the <code>Op</code>, the <code>inputs</code> and <code>outputs</code> of the computation. The <code>aesara.compile.compile</code> function uses <code>Apply.inputs</code> and <code>Variable.owner</code> to determine which inputs are necessary to compute the function's outputs. For instance =RandomVariable=s:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">RandomVariable</span>(Op):
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">make_node</span>(<span style="font-weight: bold;">self</span>, rng, size, dtype, *dist_params):
+        <span style="font-style: italic;">"""Create a random variable node.</span>
+
+<span style="font-style: italic;">        Parameters</span>
+<span style="font-style: italic;">        ----------</span>
+<span style="font-style: italic;">        rng: RandomGeneratorType or RandomStateType</span>
+<span style="font-style: italic;">            Existing Aesara `Generator` or `RandomState` object to be used.  Creates a</span>
+<span style="font-style: italic;">            new one, if `None`.</span>
+<span style="font-style: italic;">        size: int or Sequence</span>
+<span style="font-style: italic;">            NumPy-like size parameter.</span>
+<span style="font-style: italic;">        dtype: str</span>
+<span style="font-style: italic;">            The dtype of the sampled output.  If the value ``"floatX"`` is</span>
+<span style="font-style: italic;">            given, then `dtype` is set to ``aesara.config.floatX``.  This value is</span>
+<span style="font-style: italic;">            only used when ``self.dtype`` isn't set.</span>
+<span style="font-style: italic;">        dist_params: list</span>
+<span style="font-style: italic;">            Distribution parameters.</span>
+
+<span style="font-style: italic;">        Results</span>
+<span style="font-style: italic;">        -------</span>
+<span style="font-style: italic;">        out: Apply</span>
+<span style="font-style: italic;">            A node with inputs ``(rng, size, dtype) + dist_args`` and outputs</span>
+<span style="font-style: italic;">            ``(rng_var, out_var)``.</span>
+
+<span style="font-style: italic;">        """</span>
+        <span style="font-weight: bold; font-style: italic;">size</span> = normalize_size_param(size)
+
+        <span style="font-weight: bold; font-style: italic;">dist_params</span> = <span style="font-weight: bold;">tuple</span>(
+            as_tensor_variable(p) <span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(p, Variable) <span style="font-weight: bold;">else</span> p
+            <span style="font-weight: bold;">for</span> p <span style="font-weight: bold;">in</span> dist_params
+        )
+
+        <span style="font-weight: bold;">if</span> rng <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span>:
+            <span style="font-weight: bold; font-style: italic;">rng</span> = aesara.shared(np.random.default_rng())
+        <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(rng.<span style="font-weight: bold;">type</span>, RandomType):
+            <span style="font-weight: bold;">raise</span> <span style="font-weight: bold; text-decoration: underline;">TypeError</span>(
+                <span style="font-style: italic;">"The type of rng should be an instance of either RandomGeneratorType or RandomStateType"</span>
+            )
+
+        <span style="font-weight: bold; font-style: italic;">shape</span> = <span style="font-weight: bold;">self</span>._infer_shape(size, dist_params)
+        <span style="font-weight: bold; font-style: italic;">_</span>, <span style="font-weight: bold; font-style: italic;">bcast</span> = infer_broadcastable(shape)
+        <span style="font-weight: bold; font-style: italic;">dtype</span> = <span style="font-weight: bold;">self</span>.dtype <span style="font-weight: bold;">or</span> dtype
+
+        <span style="font-weight: bold;">if</span> dtype == <span style="font-style: italic;">"floatX"</span>:
+            <span style="font-weight: bold; font-style: italic;">dtype</span> = config.floatX
+        <span style="font-weight: bold;">elif</span> dtype <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> (<span style="font-weight: bold;">isinstance</span>(dtype, <span style="font-weight: bold;">str</span>) <span style="font-weight: bold;">and</span> dtype <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">in</span> all_dtypes):
+            <span style="font-weight: bold;">raise</span> <span style="font-weight: bold; text-decoration: underline;">TypeError</span>(<span style="font-style: italic;">"dtype is unspecified"</span>)
+
+        <span style="font-weight: bold;">if</span> <span style="font-weight: bold;">isinstance</span>(dtype, <span style="font-weight: bold;">str</span>):
+            <span style="font-weight: bold; font-style: italic;">dtype_idx</span> = constant(all_dtypes.index(dtype), dtype=<span style="font-style: italic;">"int64"</span>)
+        <span style="font-weight: bold;">else</span>:
+            <span style="font-weight: bold; font-style: italic;">dtype_idx</span> = constant(dtype, dtype=<span style="font-style: italic;">"int64"</span>)
+            <span style="font-weight: bold; font-style: italic;">dtype</span> = all_dtypes[dtype_idx.data]
+
+        <span style="font-weight: bold; font-style: italic;">outtype</span> = TensorType(dtype=dtype, shape=bcast)
+        <span style="font-weight: bold; font-style: italic;">out_var</span> = outtype()
+        <span style="font-weight: bold; font-style: italic;">inputs</span> = (rng, size, dtype_idx) + dist_params
+        <span style="font-weight: bold; font-style: italic;">outputs</span> = (rng.<span style="font-weight: bold;">type</span>(), out_var)
+
+        <span style="font-weight: bold;">return</span> Apply(<span style="font-weight: bold;">self</span>, inputs, outputs)
+
+</pre>
+</div></li>
+
+<li><code>Op.__call__</code> defers to <code>Op.make_node</code> to create the <code>Apply</code> node and <i>then</i> is responsible for returning the output variables.</li>
+</ul>
+
+<p>
+There is a subtility here in that <code>__call__</code> does not need to return <i>all</i> the output variables. Indeed, some may be needed for computation in <code>Op.perform</code> (of equivalent) but do not need to be <i>exposed</i> to those who build the graph. Random Variables come to mind, where the <code>__call__</code> function can be:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">RandomVariable</span>(Op):
+
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__call__</span>(<span style="font-weight: bold;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
+        <span style="font-weight: bold; font-style: italic;">node</span> = <span style="font-weight: bold;">self</span>.make_node(*inputs, **kwargs)
+        <span style="font-weight: bold; font-style: italic;">rval</span> = node.outputs[1]
+        <span style="font-weight: bold;">return</span> rval
+</pre>
+</div>
+
+<p>
+You then have single output <code>Op</code>\s, for which Aesara returns a single element instead of a one-item list:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">SingleOutputOp</span>(Op):
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__call__</span>(<span style="font-weight: bold;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
+        <span style="font-weight: bold; font-style: italic;">node</span> = <span style="font-weight: bold;">self</span>.make_node(*inputs, **kwargs)
+        <span style="font-weight: bold; font-style: italic;">rval</span> = node.outputs[0]
+        <span style="font-weight: bold;">return</span> rval
+</pre>
+</div>
+
+<p>
+And <code>MultipleOutputOp</code>\s for which Aesara returns the list of outputs:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">SingleOutputOp</span>(Op):
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__call__</span>(<span style="font-weight: bold;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
+        <span style="font-weight: bold; font-style: italic;">node</span> = <span style="font-weight: bold;">self</span>.make_node(*inputs, **kwargs)
+        <span style="font-weight: bold;">return</span> node.outputs
+</pre>
+</div>
+
+<p>
+A first issue with this is conceptual: it is all in the code (in <code>__call__</code>) and that the selection of multiple outputs is not part of the intermediate representation, the graph. And this conceptual issue creates other issues downstream. For instance when trying to get a etuple-representation of the graph. We can work at the level of the <code>Apply</code> node so that the etuplization of the following:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_rv</span> = at.random.normal(0, 1)
+</pre>
+</div>
+
+<p>
+gives
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_et</span> = OpExpressionTuple(ExpressionTuple(RandomVariable, name, ndim_supp, ndim_params, dtype), rng, size, dtype, *dist_params)
+</pre>
+</div>
+
+<p>
+which when evaluated returns the outputs:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_rv</span> = z_et.evaled_obj
+</pre>
+</div>
+
+<p>
+But that requires to write custom code for each "special case" where <code>default_output</code> is different from 1. However, we would like the <code>etuplization</code> code to remain general so we can easily unify down the line.
+</p>
+
+<p>
+Even worse are <code>MultipleOutputOp</code>\s
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+
+<span style="font-weight: bold; font-style: italic;">a</span> = at.matrix(<span style="font-style: italic;">'a'</span>)
+<span style="font-weight: bold; font-style: italic;">u</span>, <span style="font-weight: bold; font-style: italic;">v</span>, <span style="font-weight: bold; font-style: italic;">w</span> = at.nlinalg.svd(a)
+<span style="font-weight: bold; font-style: italic;">u_et</span> = etuplize(u)
+<span style="font-weight: bold;">print</span>(u_et)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">reset the saved evaled obj</span>
+<span style="font-weight: bold; font-style: italic;">u_et._evaled_obj</span> = u_et.null
+<span style="font-weight: bold;">print</span>(u_et.evaled_obj)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+
+<span style="font-weight: bold; font-style: italic;">u_rv</span> = at.random.normal(0, 1)
+<span style="font-weight: bold; font-style: italic;">u_et</span> = etuplize(u_rv)
+<span style="font-weight: bold;">print</span>(u_et)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">reset the saved evaled obj</span>
+<span style="font-weight: bold; font-style: italic;">u_et._evaled_obj</span> = u_et.null
+<span style="font-weight: bold;">print</span>(u_et.evaled_obj)
+</pre>
+</div>
+
+
+<p>
+<code>__call__</code> can also be used when we want an API that is slightly different that the API in the <code>perform</code> functions (also the case with some RVs), which must correspond to the order of the inputs in the graph.
+</p>
+
+
+<ul class="org-ul">
+<li>A <code>Linker</code> uses the <code>Op</code> associated with the <code>Apply</code> node to compute the numeric values for the output variables. Linkers will ask for a function that converts the <code>Op</code> into a callable.</li>
+<li><code>Op.perform</code> is the Python implementation of the <code>Op</code>. It takes the numeric values of the inputs and returns the computed numeric values of the outputs. It is useful for debugging.</li>
+<li><code>COp.c_code</code> is the C implementation of the <code>Op</code>. <b><b>Why don't we have everything in the C Linker?</b></b></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-python">
+</pre>
+</div>
+
+<p>
+This class is typically instantiated by a `Op.make<sub>node</sub>` method, which
+is called by `Op._<sub>call</sub>__`.
+</p>
+
+<p>
+The function `aesara.compile.function.function` uses `Apply.inputs`
+together with `Variable.owner` to search the expression graph and determine
+which inputs are necessary to compute the function's outputs.
+</p>
+
+<p>
+A `Linker` uses the `Apply` instance's `op` field to compute numeric values
+for the output variables.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc9c6131" class="outline-2">
+<h2 id="orgc9c6131">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>

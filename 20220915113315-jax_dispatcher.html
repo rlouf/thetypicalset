@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-10-02 Sun 19:16 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JAX dispatcher</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">JAX dispatcher</h1>
+
+<div id="outline-container-org21762d9" class="outline-2">
+<h2 id="org21762d9">Static arguments</h2>
+<div class="outline-text-2" id="text-org21762d9">
+</div>
+<div id="outline-container-orgd484d6b" class="outline-3">
+<h3 id="orgd484d6b">Where they are needed</h3>
+<div class="outline-text-3" id="text-orgd484d6b">
+<ul class="org-ul">
+<li><code>shape</code> parameters</li>
+<li>Scan's <code>length</code> parameter</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdd4c4a9" class="outline-2">
+<h2 id="orgdd4c4a9">Hashable static arguments to JIT compiled function</h2>
+<div class="outline-text-2" id="text-orgdd4c4a9">
+<p>
+i.e. no list, numpy array.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbbb3c4f" class="outline-2">
+<h2 id="orgbbb3c4f">TypeError: Shape</h2>
+<div class="outline-text-2" id="text-orgbbb3c4f">
+<p>
+Related issues:
+</p>
+<ul class="org-ul">
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/issues/702">https://github.com/aesara-devs/aesara/issues/702</a></li>
+</ul>
+
+
+<p>
+There are two underlying issues:
+</p>
+<ul class="org-ul">
+<li>JAX needs shapes to be determined at tracing time.</li>
+<li><p>
+Random variables need size specified as tuples (see <a target='_blank' rel='noopener noreferrer' class='external' href="https://jax.readthedocs.io/en/latest/_autosummary/jax.random.dirichlet.html#jax.random.dirichlet">docstring of the dirichlet distribution</a>)
+</p>
+
+<p>
+Let's reproduce the example exactly:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+
+<span style="font-weight: bold; font-style: italic;">shape</span> = jax.numpy.array([1000])
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">jax_funcified</span>(prng_key):
+    <span style="font-weight: bold;">return</span> jax.random.normal(prng_key, shape)
+
+<span style="font-weight: bold; font-style: italic;">key</span> = jax.random.PRNGKey(0)
+<span style="font-weight: bold;">try</span>:
+    jax.jit(jax_funcified)(key)
+<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
+    <span style="font-weight: bold;">print</span>(e)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+
+<span style="font-weight: bold; font-style: italic;">shape</span> = np.array([10])
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">jax_funcified</span>(prng_key):
+    <span style="font-weight: bold;">return</span> jax.random.normal(prng_key, shape)
+
+<span style="font-weight: bold; font-style: italic;">key</span> = jax.random.PRNGKey(0)
+<span style="font-weight: bold;">print</span>(jax.jit(jax_funcified)(key))
+</pre>
+</div></li>
+</ul>
+
+
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+
+<span style="font-weight: bold; font-style: italic;">rng_key</span> = jax.random.PRNGKey(0)
+<span style="font-weight: bold;">try</span>:
+    <span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=10))
+<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
+    <span style="font-weight: bold;">print</span>(e)
+<span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=[3]))
+<span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=(3,)))
+<span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=np.array([3])))
+<span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=jax.numpy.array([3])))
+
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">fun</span>(x):
+    <span style="font-weight: bold; font-style: italic;">rng_key</span> = jax.random.PRNGKey(0)
+    <span style="font-weight: bold;">return</span> jax.random.normal(rng_key, shape=x)
+
+<span style="font-weight: bold;">try</span>:
+    jax.jit(fun)(1)
+<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
+    <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as int: {e}"</span>)
+
+<span style="font-weight: bold;">try</span>:
+    jax.jit(fun)([1, 2])
+<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
+    <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as list: {e}"</span>)
+
+<span style="font-weight: bold;">try</span>:
+    jax.jit(fun)((1, 2))
+<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
+    <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as tuple: {e}"</span>)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">using static_argnums</span>
+<span style="font-weight: bold; font-style: italic;">res</span> = jax.jit(fun, static_argnums=(0,))((1, 2))
+<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as tuple (static argnum): {res}"</span>)
+
+<span style="font-weight: bold;">try</span>:
+    <span style="font-weight: bold; font-style: italic;">res</span> = jax.jit(fun, static_argnums=(0,))([1, 2])
+<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
+    <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as list (static_argnums): {e}"</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org627cf1e" class="outline-2">
+<h2 id="org627cf1e">Links to this note</h2>
+<div class="outline-text-2" id="text-org627cf1e">
+<ul class="org-ul">
+<li><a href="./20220729163627-aesara.html">Aesara</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

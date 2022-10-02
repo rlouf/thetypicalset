@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-10-02 Sun 19:16 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Centered-non centered parametrization in Aesara</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Centered-non centered parametrization in Aesara</h1>
+
+<div id="outline-container-org12e4a5e" class="outline-2">
+<h2 id="org12e4a5e">Centered-non centered</h2>
+<div class="outline-text-2" id="text-org12e4a5e">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Define a model in Aesara</span>
+<span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">mu_rv</span> = srng.normal(0, 1)
+<span style="font-weight: bold; font-style: italic;">sigma_rv</span> = srng.halfnormal(1)
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.normal(mu_rv, sigma_rv)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Tell Aesara that `Y_rv` is the output variable</span>
+<span style="font-weight: bold;">from</span> aesara.graph.fg <span style="font-weight: bold;">import</span> FunctionGraph
+
+<span style="font-weight: bold; font-style: italic;">fgraph</span> = FunctionGraph(outputs=[Y_rv], clone=<span style="font-weight: bold; text-decoration: underline;">False</span>)
+aesara.dprint(fgraph)  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">prints the Aesara graph</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Graph in the centered parametrization</span>
+<span style="font-weight: bold; font-style: italic;">#</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Y_rv ~ Normal(Normal(0, 1), HalfNormal(1))</span>
+<span style="font-weight: bold; font-style: italic;">#</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">normal_rv{0, (0, 0), floatX, False}.1 [id A] 2</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FE81981C2E0&gt;) [id B]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{[]} [id C]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{11} [id D]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|normal_rv{0, (0, 0), floatX, False}.1 [id E] 1</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FE819893680&gt;) [id F]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{[]} [id G]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{11} [id H]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{0} [id I]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{1} [id J]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|halfnormal_rv{0, (0, 0), floatX, False}.1 [id K] 0</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FE819893CA0&gt;) [id L]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{[]} [id M]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{11} [id N]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{1} [id O]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{1.0} [id P]</span>
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Transform the graph using the location-scale transform</span>
+<span style="font-weight: bold;">from</span> aesara.graph.kanren <span style="font-weight: bold;">import</span> KanrenRelationSub
+<span style="font-weight: bold;">from</span> aemcmc.transforms <span style="font-weight: bold;">import</span> location_scale_transform
+
+<span style="font-weight: bold; font-style: italic;">transformed_fgraph</span> = KanrenRelationSub(location_scale_transform).transform(
+    fgraph, fgraph.outputs[0].owner
+)[0]
+aesara.dprint(transformed_fgraph)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Graph in the non-centered parametrization</span>
+<span style="font-weight: bold; font-style: italic;">#</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Y_rv ~ Normal(0, 1) +  HalfNormal(1) * Normal(0, 1)</span>
+<span style="font-weight: bold; font-style: italic;">#</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Elemwise{add,no_inplace} [id A]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|normal_rv{0, (0, 0), floatX, False}.1 [id B]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FF308A03680&gt;) [id C]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{[]} [id D]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{11} [id E]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{0} [id F]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{1} [id G]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|Elemwise{mul,no_inplace} [id H]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|halfnormal_rv{0, (0, 0), floatX, False}.1 [id I]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">| |RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FF308A03CA0&gt;) [id J]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{[]} [id K]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{11} [id L]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{1} [id M]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">| |TensorConstant{1.0} [id N]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|normal_rv{0, (0, 0), floatX, False}.1 [id O]</span>
+<span style="font-weight: bold; font-style: italic;">#      </span><span style="font-weight: bold; font-style: italic;">|RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FF30878C2E0&gt;) [id P]</span>
+<span style="font-weight: bold; font-style: italic;">#      </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{[]} [id Q]</span>
+<span style="font-weight: bold; font-style: italic;">#      </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{11} [id R]</span>
+<span style="font-weight: bold; font-style: italic;">#      </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{0} [id S]</span>
+<span style="font-weight: bold; font-style: italic;">#      </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{1} [id T]</span>
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc6a66fa" class="outline-2">
+<h2 id="orgc6a66fa">Conjugates</h2>
+<div class="outline-text-2" id="text-orgc6a66fa">
+<div class="org-src-container">
+<pre class="src src-python">
+<span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Define the model in Aesara</span>
+<span style="font-weight: bold; font-style: italic;">#</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">p_rv ~ Beta(a, b)</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Y_rv ~ Binomial(n, p_rv)</span>
+
+<span style="font-weight: bold; font-style: italic;">alpha_tt</span> = at.scalar(<span style="font-style: italic;">"alpha"</span>)
+<span style="font-weight: bold; font-style: italic;">beta_tt</span> = at.scalar(<span style="font-style: italic;">"beta"</span>)
+<span style="font-weight: bold; font-style: italic;">n_tt</span> = at.scalar(<span style="font-style: italic;">"n"</span>)
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">p_rv</span> = srng.beta(alpha_tt, beta_tt, name=<span style="font-style: italic;">"p"</span>)
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.binomial(n_tt, p_rv, name=<span style="font-style: italic;">"y"</span>)
+
+aesara.dprint(Y_rv)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">The Aesara model graph:</span>
+<span style="font-weight: bold; font-style: italic;">#</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">binomial_rv{0, (0, 0), int64, False}.1 [id A] 'y'</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F1AB14E5620&gt;) [id B]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{[]} [id C]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{4} [id D]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|n [id E]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|beta_rv{0, (0, 0), floatX, False}.1 [id F] 'p'</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F1AB14E50E0&gt;) [id G]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{[]} [id H]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{11} [id I]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|alpha [id J]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|beta [id K]</span>
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Transform the graph using beta-binomial conjugacy</span>
+<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> run, var
+<span style="font-weight: bold;">from</span> aesara.graph.rewriting.unify <span style="font-weight: bold;">import</span> eval_if_etuple
+<span style="font-weight: bold;">from</span> aemcmc.conjugates <span style="font-weight: bold;">import</span> beta_binomial_conjugateo
+
+<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
+<span style="font-weight: bold; font-style: italic;">y_vv.name</span> = <span style="font-style: italic;">"y"</span>
+
+<span style="font-weight: bold; font-style: italic;">q_lv</span> = var()
+(posterior_expr,) = run(1, q_lv, beta_binomial_conjugateo(y_vv, Y_rv, q_lv))
+<span style="font-weight: bold; font-style: italic;">posterior</span> = eval_if_etuple(posterior_expr)
+
+aesara.dprint(posterior)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">The transformed graph represents p_rv's posterior distribution:</span>
+<span style="font-weight: bold; font-style: italic;">#</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">p_rv ~ Beta(a + y, b + n - y)</span>
+<span style="font-weight: bold; font-style: italic;">#</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">beta_rv{0, (0, 0), floatX, False}.1 [id A]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F1AB14E50E0&gt;) [id B]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{[]} [id C]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|TensorConstant{11} [id D]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|Elemwise{add,no_inplace} [id E]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |alpha [id F]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">| |y [id G]</span>
+<span style="font-weight: bold; font-style: italic;">#  </span><span style="font-weight: bold; font-style: italic;">|Elemwise{sub,no_inplace} [id H]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|Elemwise{add,no_inplace} [id I]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">| |beta [id J]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">| |n [id K]</span>
+<span style="font-weight: bold; font-style: italic;">#    </span><span style="font-weight: bold; font-style: italic;">|y [id G]</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
