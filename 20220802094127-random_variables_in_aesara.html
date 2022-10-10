@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-10-10 Mon 08:52 -->
+<!-- 2022-10-10 Mon 16:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Variables in Aesara</title>
@@ -41,73 +41,78 @@
 <li><code>RandomStream</code></li>
 </ul>
 
-
-<div id="outline-container-org92cd475" class="outline-2">
-<h2 id="org92cd475">Guidelines</h2>
-<div class="outline-text-2" id="text-org92cd475">
+<div id="outline-container-org13f6011" class="outline-2">
+<h2 id="org13f6011">AeP (Aesara Enhancement Propoal)</h2>
+<div class="outline-text-2" id="text-org13f6011">
+</div>
+<div id="outline-container-orgf68c9d8" class="outline-3">
+<h3 id="orgf68c9d8">Guidelines</h3>
+<div class="outline-text-3" id="text-orgf68c9d8">
 <p>
 A good PRNG design satisfies the following conditions:
 </p>
 <ol class="org-ol">
 <li>It is <b><b>expressive</b></b>: the behavior of the system is <b><b>predictable</b></b> by the caller, and allows them to expression any probabilistic program they want;</li>
-<li>Makes it possible to build <b><b>reproducible</b></b> programs;</li>
+<li>Makes it possible to build <b><b>reproducible</b></b> programs ("seeding");</li>
 <li>It enables <b><b>vectorization</b></b> with generalized universal functions;</li>
-<li>It does not add sequencing constraints between function calls that have no data dependence;</li>
+<li>It leaves the IR uncluttered, in particular it does not add sequencing constraints between function calls that have no data dependence;</li>
 <li>It can be transpiled to any backend, past present and future;</li>
 <li>It <b><b>fits in with Aesara's rewrite system</b></b>;</li>
-<li>It <b><b>fits in Aesara's IR</b></b></li>
+<li>It <b><b>is explicit in Aesara's IR</b></b></li>
 </ol>
+</div>
+</div>
 
+<div id="outline-container-org80db55b" class="outline-3">
+<h3 id="org80db55b">Limits of the current design</h3>
+<div class="outline-text-3" id="text-org80db55b">
 <p>
-While we need to keep the transpilation backends in mind, we should not let their own constraints propagate to Aesara.
-</p>
-
-<p>
-The following functional model threads the RNG state through all the functions that generate random values. Sequencing is made explicit. This is basically what happens if we set <code>default_output</code> to <code>None</code> (do it).
+The current <code>RandomState</code> model threads the RNG state through all the functions that generate random values. This is how the <code>RandomState</code> API would look like with <code>default_output</code> set to <code>None</code>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">sequential</span>(rng):
-    <span style="font-weight: bold; font-style: italic;">x</span>, <span style="font-weight: bold; font-style: italic;">rng_1</span> = call(rng)
-    <span style="font-weight: bold; font-style: italic;">y</span>, <span style="font-weight: bold; font-style: italic;">rng_2</span> = call(rng_1)
-    <span style="font-weight: bold;">return</span> x + y, rng_2  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">We need to return the random state</span>
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">call</span>(rng):
-    <span style="font-weight: bold; font-style: italic;">val</span>, <span style="font-weight: bold; font-style: italic;">new_rng</span> = rand(rng, size=(2,3))
-    <span style="font-weight: bold;">return</span> val, new_rng
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">sample</span>(rng):
+
+<span style="font-weight: bold; font-style: italic;">rng</span> = np.random.default_rng(12)
+<span style="font-weight: bold; font-style: italic;">rng_x</span>, <span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(0, 1, rng=rng)
+<span style="font-weight: bold; font-style: italic;">rng_y</span>, <span style="font-weight: bold; font-style: italic;">y_rv</span> = at.random.normal(0, 1, rng=rng_x)
+<span style="font-weight: bold; font-style: italic;">z_at</span> = x_rv + y_rv
 </pre>
 </div>
 
 <p>
-But this design is somewhat inconvenient to work with (as a user). Also, there is no way <code>sequential</code> can call into <code>call</code> and conserve its own RNG state. Everything is sequential, and as the <code>sequential</code> function shows, it does add sequencing constraints between function calls that are not due to data dependence but are an artifact of this design.
+This design is inconvenient to work with.
 </p>
-
-<div class="org-src-container">
-<pre class="src src-md">   +----sequential---+
-   |                 |
-x = call()        y = call()
-   |                 |
-   +----&gt; x + y &lt;----+
-</pre>
 </div>
 
+<ul class="org-ul">
+<li><a id="org816d04e"></a>Error-prone and cumbersome<br />
+<div class="outline-text-5" id="text-org816d04e">
 <p>
-With the RNG dependence:
+<b>For users</b> having to explictly thread the <code>rng</code> states is both error-prone and cumbersome. I believe this is why the RNG output is hidden by setting <code>default_output</code> to <code>1</code>, and one of the motivations behind the <code>RandomStream</code> interface.
 </p>
-
-<div class="org-src-container">
-<pre class="src src-md">sequential
-   |
-x = call()
-   |
-y = call()
-   |
- x + y
-</pre>
 </div>
+</li>
+
+<li><a id="org1172dbd"></a>Adds sequencing constraints between functions that have no data dependence<br />
+<div class="outline-text-5" id="text-org1172dbd">
+<p>
+<b>For the Aesara IR</b> the threading of RNGs adds sequencing constraints between functions that have no data dependence otherwise. In theory, the two calls to <code>at.random.normal</code> are independent and could be made in parallel. In practice, one has to wait for the first call to complete to be able to make the second all.
+</p>
 
 <p>
 Same with gufuncs: we do not want to introduce rng-dependence between the different function calls. We want to be able to give each dimension (give example) a rng and let it run with it. No collision:
+</p>
+</div>
+</li>
+
+<li><a id="org092fa64"></a>Lack of a clear symbolic representation<br />
+<div class="outline-text-5" id="text-org092fa64">
+<p>
+<b>For the Aesara IR</b> we don't have distinct operators that updates the random state and generate a pseudo-random number from a random state.
 </p>
 
 <p>
@@ -166,73 +171,360 @@ Only the caller knows how the random state should be managed as called functions
 Counter based approach: <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.thesalmons.org/john/random123/papers/random123sc11.pdf">Parallel Random Numbers: As easy as 1, 2, 3</a>
 </p>
 </div>
+</li>
+</ul>
+</div>
 
-<div id="outline-container-orgd670692" class="outline-3">
-<h3 id="orgd670692">Assume we have <code>rand</code>, <code>next</code>, <code>split</code> (<code>splitn</code>)</h3>
-<div class="outline-text-3" id="text-orgd670692">
+<div id="outline-container-org06db93c" class="outline-3">
+<h3 id="org06db93c">Proposal: A Haskell-like design</h3>
+<div class="outline-text-3" id="text-org06db93c">
 <p>
-<code>rand</code> is used inside random variables so that:
+In the following we will first focus on <i>the symbolic representation of RNGs in Aesara's IR</i>. We leave discussions about compilation of this representation for the end.
+</p>
+
+<p>
+To begin with we need to distinguish between two objects that are conflated in Aesara:
+</p>
+<ul class="org-ul">
+<li>The <code>RandomState</code> which is the current state of the random number generator;</li>
+<li>The <code>RandomVariable</code>, which takes a <code>RandomState</code> and returns a pseudo-random number <code>Bit</code></li>
+</ul>
+
+<p>
+The current design of <code>RandomVariable</code>\s in Aesara can be summarized by the following operator signature:
+</p>
+
+<p>
+If we represent the internal state of the PRNG by the type <code>RandState</code>, the current design of <code>RandomVariable</code>\s can be summarized by the following simplified signature:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">rng_1</span>, <span style="font-weight: bold; font-style: italic;">rng_2</span> = at.random.split(rng)
-<span style="font-weight: bold; font-style: italic;">a_rv</span> = at.random.normal(rng_1, 0, 1)
-<span style="font-weight: bold; font-style: italic;">b_rv</span> = at.random.normal(rng_2, 0, 1)
+<pre class="src src-haskell">RandomVariable :: RandState -&gt; (RandState, TensorVariable)
 </pre>
 </div>
 
 <p>
-We need a graph manipulation that converts this to:
+In other words, <code>RandomVariable</code>\s are responsible for advancing the state of the PRNG, and produce a random value. This double responsibility is what creates graph dependencies between nodes that have otherwise no dependency i.e. that wouldn't be linked had they not needed the PRNG.
+</p>
+</div>
+
+<div id="outline-container-orgbc457fe" class="outline-4">
+<h4 id="orgbc457fe">New operators</h4>
+<div class="outline-text-4" id="text-orgbc457fe">
+<p>
+A natural idea is to simplify the design of <code>RandomVariable</code>\s so that it is only responsible for one thing: create a random value from a PRNG state. The <code>Op</code> thus creates an <code>Apply</code> node that takes a <code>RandomState</code> as input and outputs a (random) <code>Variable</code>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">a_rv</span>, <span style="font-weight: bold; font-style: italic;">rng_1</span> = at.random.normal(rng, 0, 1)
-<span style="font-weight: bold; font-style: italic;">b_rv</span>, <span style="font-weight: bold; font-style: italic;">rng_2</span> = at.random.normal(rng_1, 0, 1)
+<pre class="src src-haskell">RandomVariable :: RandomState -&gt; Variable
 </pre>
 </div>
 
 <p>
-To re-introduce linearity for some backends <code>to_linear_prng</code>, <code>to_counter_prng</code>. Note that this can be used as an optimization in some cases, since linear execution is said to be faster in that Haskell paper.
-</p>
-</div>
-
-<div id="outline-container-orga2925f6" class="outline-4">
-<h4 id="orga2925f6">How does it solve the <code>etuplize</code> issues?</h4>
-<div class="outline-text-4" id="text-orga2925f6">
-<p>
-RV Ops only return a variable. They consume a rng key and parameters, return a variable. <code>default_output</code> does not need to be.
+We can now make the <code>RandState</code> output explicit (1) by making <code>rng</code> an explicit input of the <code>RandomVariable</code>'s <code>__call__</code> method. And we can verify in the following that the sequential dependency between <code>x_rv</code> and <code>y_rv</code> disappears:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python">etuplize(at.random.normal(0, 1))
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">etuple(&lt;Random Normal&gt;, rng, type, size, 0, 1)</span>
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">rng_x and rng_y are created before that.</span>
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(rng_x, 0, 1)
+<span style="font-weight: bold; font-style: italic;">y_rv</span> = at.random.normal(rng_y, 0, 1)
+</pre>
+</div>
+
+<p>
+This interface presupposes the existence of an operator that creates an updated <code>RandomState</code> from a <code>RandomState</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell">next :: RandomState -&gt; RandomState
+</pre>
+</div>
+
+<p>
+To be able to build reproducible programs (2), we also need an operator that creates a <code>RandomState</code> from a seed:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell">default_rng :: Seed -&gt; RandomState
+</pre>
+</div>
+
+<p>
+We can thus fill in the blanks in the previous code snippet:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">rng</span> = at.random.default_rng(0)
+
+<span style="font-weight: bold; font-style: italic;">rng_x</span> = at.random.<span style="font-weight: bold;">next</span>(rng)
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(rng_x, 0, 1)
+
+<span style="font-weight: bold; font-style: italic;">rng_y</span> = at.random.<span style="font-weight: bold;">next</span>(rng_x)
+<span style="font-weight: bold; font-style: italic;">y_rv</span> = at.random.normal(rng_y, 0, 1)
+
+<span style="font-weight: bold; font-style: italic;">z_at</span> = x_rv + y_rv
+</pre>
+</div>
+
+<p>
+This code generates Aesara graphs that are very similar to the ones generated by <code>RandomStream</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream()
+
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = srng.normal(0, 1)
+<span style="font-weight: bold; font-style: italic;">y_rv</span> = srng.normal(0, 1)
+<span style="font-weight: bold; font-style: italic;">z_at</span> = x_rv + y_rv
+</pre>
+</div>
+
+<p>
+Roughly speaking, <code>RandomStream</code> moves this "next" mechanism to the <i>updates</i> graph, while this symbolic representation of the state of the PRNG makes it explicit in the same graph. The graph between <code>RandomState</code>\s in the proposed scheme is a concretization of the updates graph for the <code>RandomStream</code>.
+</p>
+
+<p>
+Let us now consider a more complex situation, when <code>call_x</code> and <code>call_y</code> are two functions that require a <code>RandomState</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">rng</span> = at.random.default_rng(0)
+
+<span style="font-weight: bold; font-style: italic;">rng_x</span> = at.random.<span style="font-weight: bold;">next</span>(rng)
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = call_x(rng_x)
+
+<span style="font-weight: bold; font-style: italic;">rng_y</span> = at.random.<span style="font-weight: bold;">next</span>(rng_x)
+<span style="font-weight: bold; font-style: italic;">y_rv</span> = call_y(rng_y)
+
+<span style="font-weight: bold; font-style: italic;">z_at</span> = x_rv + y_rv
+</pre>
+</div>
+
+<p>
+We can easily make the previous code generate a collision:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">call_x</span>(rng_a):
+    <span style="font-weight: bold; font-style: italic;">a_rv</span> = at.random.normal(rng_a, 0, 1)
+    <span style="font-weight: bold; font-style: italic;">rng_b</span> = at.random.<span style="font-weight: bold;">next</span>(rng_a)
+    <span style="font-weight: bold; font-style: italic;">b_rv</span> = at.random.normal(rng_b, 0, 1)
+    <span style="font-weight: bold;">return</span> a_rv * b_rv
+</pre>
+</div>
+
+<p>
+The issue arises because our symbolic structure is <i>linear</i>: each <code>RandState</code> has one and only one ancestor. What we need instead is to allow <code>RandState</code>\s to have several ancestors; We thus define the <code>at.random.op.Split</code> operator:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell">split :: RandState -&gt; (RandState, RandState)
+</pre>
+</div>
+
+<p>
+This can be easily implemented: if <code>RandState</code> is a binary number &lt;..&gt; then the leftmost key is obtained by appending <code>0</code>, the rightmost <code>1</code>. Any succession of splitting operations builds a binary tree. If <code>Rand</code> is a deterministic function of this value, then the computations are fully reproducible. This binary tree structure is encoded directly in the graph IR:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">rng</span> = at.random.default_rng(0)
+<span style="font-weight: bold; font-style: italic;">rng_x</span>, <span style="font-weight: bold; font-style: italic;">rng_y</span> = at.random.split(rng)
+
+etuplize(rng_x)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">etuple(nth, 0, etuple(at.random.split, etuple(at.random.default_rng, 0)))</span>
+
+etuplize(rng_y)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">etuple(nth, 1, etuple(at.random.split, etuple(at.random.default_rng, 0)))</span>
+</pre>
+</div>
+
+<p>
+Although it may be possible to keep <code>Next</code> within this representation, its interaction with the <code>Split</code> operator requires careful thought. We forget it for now, as <code>Split</code> is expressive enough. The original program becomes:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">rng</span> = at.random.default_rng()
+<span style="font-weight: bold; font-style: italic;">rng_x</span>, <span style="font-weight: bold; font-style: italic;">rng_y</span> = at.random.split(rng)
+
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(rng_x, 0, 1)
+<span style="font-weight: bold; font-style: italic;">y_rv</span> = at.random.normal(rng_y, 0, 1)
+<span style="font-weight: bold; font-style: italic;">z_at</span> = x_rv + y_rv
+</pre>
+</div>
+
+<p>
+It is also natural to implement the <code>at.random.op.SplitN</code> operator represented by:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell">splitn :: RandState -&gt; Int -&gt; (RandState, ..., RandState)
+</pre>
+</div>
+
+<p>
+So we can write the following code:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">at.random.split</span> = at.random.Split()
+
+<span style="font-weight: bold; font-style: italic;">rng</span> = at.random.default_rng()
+<span style="font-weight: bold; font-style: italic;">rng_v</span>, <span style="font-weight: bold; font-style: italic;">rng_w</span>, <span style="font-weight: bold; font-style: italic;">rng_x</span>, <span style="font-weight: bold; font-style: italic;">rng_y</span> = at.random.splitn(rng, 4)
+
+<span style="font-weight: bold; font-style: italic;">v_rv</span> = at.random.normal(rng_y, 0, 1)
+<span style="font-weight: bold; font-style: italic;">w_rv</span> = at.random.normal(rng_x, 0, 1)
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(rng_x, 0, 1)
+<span style="font-weight: bold; font-style: italic;">y_rv</span> = at.random.normal(rng_y, 0, 1)
+<span style="font-weight: bold; font-style: italic;">z_at</span> = v_rv + w_rv + x_rv + z_rv
+</pre>
+</div>
+
+<p>
+This will prove useful e.g. for use with generalized universal functions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1abd71b" class="outline-4">
+<h4 id="org1abd71b">Etuplization</h4>
+<div class="outline-text-4" id="text-org1abd71b">
+<p>
+These new operators simplify greatly the work with etuplized versions of graphs with random variables. Assuming we have a <code>Nth</code> operator in Aesara as well:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> ExpressionTuple, etuplize
+<span style="font-weight: bold;">from</span> aesara.graph.rewriting.unify <span style="font-weight: bold;">import</span> OpExpressionTuple
+
+<span style="font-weight: bold; font-style: italic;">rng</span> = at.random.default_rng()
+<span style="font-weight: bold; font-style: italic;">rng_x</span>, <span style="font-weight: bold; font-style: italic;">rng_y</span> = at.random.split(rng)
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(rng_x, 0, 1)
+<span style="font-weight: bold; font-style: italic;">y_rv</span> = at.random.normal(rng_y, 0, 1)
+<span style="font-weight: bold; font-style: italic;">z_at</span> = x_rv + y_rv
+
+<span style="font-weight: bold; font-style: italic;">z_et</span> = OpExpressionTuple(
+    etuplize(at.add),
+    OpExpressionTuple(
+        etuplize(at.random.normal),
+        ExpressionTuple(
+           etuplize(aesara.graph.nth),
+           1,
+           OpExpressionTuple(
+               etuplize(at.random.split)
+               rng
+           )
+        ),
+        0,
+        1,
+        size,
+        dtype,
+    ),
+    OpExpressionTuple(
+        etuplize(at.random.normal),
+        ExpressionTuple(
+           etuplize(aesara.graph.nth),
+           0,
+           OpExpressionTuple(
+               etuplize(at.random.split)
+               rng
+           )
+        ),
+        0,
+        1,
+        size,
+        dtype,
+    ),
+)
+</pre>
+</div>
+
+<p>
+This solves the one-to-many problem we had for mixtures. If we have a relation between a single random variable and two we can now write:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_et</span> = etuple(etuplize(at.random.normal), rng_lv, size_lv, dtype_lv, at.as_tensor(1.), at.as_tensor(2.))
+
+<span style="font-weight: bold; font-style: italic;">sum_et</span> = etuple(
+    etuplize(at.add),
+    etuple(
+        etuplize(at.random.normal),
+        etuple(
+            etuplize(at.graph.nth),
+            0,
+            etuple(
+                etuplize(at.random.split),
+                rng_lv,
+            )
+        )
+        size_lv,
+        dtype_lv,
+        at.as_tensor(0.),
+        at.as_tensor(1.),
+    ),
+    etuple(
+        etuplize(at.random.normal),
+        etuple(
+            etuplize(at.graph.nth),
+            1,
+            etuple(
+                etuplize(at.random.split),
+                rng_lv,
+            )
+        )
+        size_lv,
+        dtype_lv,
+        at.as_tensor(0.),
+        at.as_tensor(1.),
+    )
+)
 </pre>
 </div>
 </div>
 </div>
-</div>
-</div>
 
-<div id="outline-container-orgcfad469" class="outline-2">
-<h2 id="orgcfad469">Transpilation</h2>
-<div class="outline-text-2" id="text-orgcfad469">
+<div id="outline-container-orge517654" class="outline-4">
+<h4 id="orge517654">Behavior under transpilation</h4>
+<div class="outline-text-4" id="text-orge517654">
 </div>
-<div id="outline-container-org5384597" class="outline-3">
-<h3 id="org5384597">JAX</h3>
+<ul class="org-ul">
+<li><a id="org7146d3e"></a>JAX<br />
+<div class="outline-text-5" id="text-org7146d3e">
+<p>
+Straightforward, the behavior is similar.
+</p>
 </div>
-<div id="outline-container-org825c623" class="outline-3">
-<h3 id="org825c623">Numba</h3>
-<div class="outline-text-3" id="text-org825c623">
+</li>
+
+<li><a id="org3573635"></a>Numba<br />
+<div class="outline-text-5" id="text-org3573635">
 <p>
 Numba has primitive support for NumPy's Generator.
 </p>
 </div>
+</li>
+</ul>
+</div>
 </div>
 </div>
 
-<div id="outline-container-orgd4fa681" class="outline-2">
-<h2 id="orgd4fa681">RandomVariable Ops</h2>
-<div class="outline-text-2" id="text-orgd4fa681">
+
+
+<div id="outline-container-org48b17c9" class="outline-2">
+<h2 id="org48b17c9">RandomVariable Ops</h2>
+<div class="outline-text-2" id="text-org48b17c9">
 <p>
 We have a <code>default_rng</code> function, but the result does not behave as a generator in <code>numpy</code>.
 </p>
@@ -294,9 +586,9 @@ How does <code>RandomGeneratorType</code> work? It looks like it has internal st
 </div>
 </div>
 
-<div id="outline-container-org8c64cb9" class="outline-2">
-<h2 id="org8c64cb9">Define custom random variables</h2>
-<div class="outline-text-2" id="text-org8c64cb9">
+<div id="outline-container-org1a326ab" class="outline-2">
+<h2 id="org1a326ab">Define custom random variables</h2>
+<div class="outline-text-2" id="text-org1a326ab">
 <p>
 It is fairly simple as <code>srng.gen(RV, *args)</code> will call <code>RV()(random_state, *args)</code>.
 </p>
@@ -514,18 +806,18 @@ Note that you can also define this random variables' logprob dispatching <code>_
 </div>
 </div>
 
-<div id="outline-container-org8be1cd2" class="outline-2">
-<h2 id="org8be1cd2">Sampling vs Logprobability <code>aeppl</code></h2>
-<div class="outline-text-2" id="text-org8be1cd2">
+<div id="outline-container-org2254326" class="outline-2">
+<h2 id="org2254326">Sampling vs Logprobability <code>aeppl</code></h2>
+<div class="outline-text-2" id="text-org2254326">
 <ul class="org-ul">
 <li>How define the logprob of a custom distribution?</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org1104eec" class="outline-2">
-<h2 id="org1104eec">Shapes</h2>
-<div class="outline-text-2" id="text-org1104eec">
+<div id="outline-container-orgce19e8c" class="outline-2">
+<h2 id="orgce19e8c">Shapes</h2>
+<div class="outline-text-2" id="text-orgce19e8c">
 <p>
 Shapes are always a mess when it comes to random variables. In <code>aesara</code> we note two distinct shapes:
 </p>
@@ -599,18 +891,18 @@ See <a target='_blank' rel='noopener noreferrer' class='external' href="https://
 </div>
 </div>
 
-<div id="outline-container-org72c7733" class="outline-2">
-<h2 id="org72c7733">Problems with <code>RandomStream</code></h2>
-<div class="outline-text-2" id="text-org72c7733">
+<div id="outline-container-orge9bfdac" class="outline-2">
+<h2 id="orge9bfdac">Problems with <code>RandomStream</code></h2>
+<div class="outline-text-2" id="text-orge9bfdac">
 <p>
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/pull/1211#discussion_r985057882">https://github.com/aesara-devs/aesara/pull/1211#discussion_r985057882</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1b196b1" class="outline-2">
-<h2 id="org1b196b1">Proposal</h2>
-<div class="outline-text-2" id="text-org1b196b1">
+<div id="outline-container-org13604d8" class="outline-2">
+<h2 id="org13604d8">Proposal</h2>
+<div class="outline-text-2" id="text-org13604d8">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
@@ -658,9 +950,9 @@ What does that complicate?
 </div>
 </div>
 
-<div id="outline-container-org651736c" class="outline-2">
-<h2 id="org651736c">Links to this note</h2>
-<div class="outline-text-2" id="text-org651736c">
+<div id="outline-container-orge9888bb" class="outline-2">
+<h2 id="orge9888bb">Links to this note</h2>
+<div class="outline-text-2" id="text-orge9888bb">
 <ul class="org-ul">
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
 <li><a href="./inbox.html">Writing inbox</a></li>
