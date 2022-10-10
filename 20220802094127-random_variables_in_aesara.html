@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-10-02 Sun 19:16 -->
+<!-- 2022-10-10 Mon 08:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Variables in Aesara</title>
@@ -42,9 +42,9 @@
 </ul>
 
 
-<div id="outline-container-org26ca534" class="outline-2">
-<h2 id="org26ca534">Guidelines</h2>
-<div class="outline-text-2" id="text-org26ca534">
+<div id="outline-container-org92cd475" class="outline-2">
+<h2 id="org92cd475">Guidelines</h2>
+<div class="outline-text-2" id="text-org92cd475">
 <p>
 A good PRNG design satisfies the following conditions:
 </p>
@@ -158,22 +158,71 @@ Only the caller knows how the random state should be managed as called functions
 </div>
 
 <p>
+<b>First</b> justify the <code>split</code>, <code>rand</code> symbolic interface (reference Haskell)
+</p>
+
+
+<p>
 Counter based approach: <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.thesalmons.org/john/random123/papers/random123sc11.pdf">Parallel Random Numbers: As easy as 1, 2, 3</a>
 </p>
 </div>
+
+<div id="outline-container-orgd670692" class="outline-3">
+<h3 id="orgd670692">Assume we have <code>rand</code>, <code>next</code>, <code>split</code> (<code>splitn</code>)</h3>
+<div class="outline-text-3" id="text-orgd670692">
+<p>
+<code>rand</code> is used inside random variables so that:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">rng_1</span>, <span style="font-weight: bold; font-style: italic;">rng_2</span> = at.random.split(rng)
+<span style="font-weight: bold; font-style: italic;">a_rv</span> = at.random.normal(rng_1, 0, 1)
+<span style="font-weight: bold; font-style: italic;">b_rv</span> = at.random.normal(rng_2, 0, 1)
+</pre>
 </div>
 
+<p>
+We need a graph manipulation that converts this to:
+</p>
 
-<div id="outline-container-org1862c79" class="outline-2">
-<h2 id="org1862c79">Transpilation</h2>
-<div class="outline-text-2" id="text-org1862c79">
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">a_rv</span>, <span style="font-weight: bold; font-style: italic;">rng_1</span> = at.random.normal(rng, 0, 1)
+<span style="font-weight: bold; font-style: italic;">b_rv</span>, <span style="font-weight: bold; font-style: italic;">rng_2</span> = at.random.normal(rng_1, 0, 1)
+</pre>
 </div>
-<div id="outline-container-org002e21f" class="outline-3">
-<h3 id="org002e21f">JAX</h3>
+
+<p>
+To re-introduce linearity for some backends <code>to_linear_prng</code>, <code>to_counter_prng</code>. Note that this can be used as an optimization in some cases, since linear execution is said to be faster in that Haskell paper.
+</p>
 </div>
-<div id="outline-container-orgc08d74d" class="outline-3">
-<h3 id="orgc08d74d">Numba</h3>
-<div class="outline-text-3" id="text-orgc08d74d">
+
+<div id="outline-container-orga2925f6" class="outline-4">
+<h4 id="orga2925f6">How does it solve the <code>etuplize</code> issues?</h4>
+<div class="outline-text-4" id="text-orga2925f6">
+<p>
+RV Ops only return a variable. They consume a rng key and parameters, return a variable. <code>default_output</code> does not need to be.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">etuplize(at.random.normal(0, 1))
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">etuple(&lt;Random Normal&gt;, rng, type, size, 0, 1)</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcfad469" class="outline-2">
+<h2 id="orgcfad469">Transpilation</h2>
+<div class="outline-text-2" id="text-orgcfad469">
+</div>
+<div id="outline-container-org5384597" class="outline-3">
+<h3 id="org5384597">JAX</h3>
+</div>
+<div id="outline-container-org825c623" class="outline-3">
+<h3 id="org825c623">Numba</h3>
+<div class="outline-text-3" id="text-org825c623">
 <p>
 Numba has primitive support for NumPy's Generator.
 </p>
@@ -181,9 +230,9 @@ Numba has primitive support for NumPy's Generator.
 </div>
 </div>
 
-<div id="outline-container-orgf1957b7" class="outline-2">
-<h2 id="orgf1957b7">RandomVariable Ops</h2>
-<div class="outline-text-2" id="text-orgf1957b7">
+<div id="outline-container-orgd4fa681" class="outline-2">
+<h2 id="orgd4fa681">RandomVariable Ops</h2>
+<div class="outline-text-2" id="text-orgd4fa681">
 <p>
 We have a <code>default_rng</code> function, but the result does not behave as a generator in <code>numpy</code>.
 </p>
@@ -245,9 +294,9 @@ How does <code>RandomGeneratorType</code> work? It looks like it has internal st
 </div>
 </div>
 
-<div id="outline-container-orge5c8b33" class="outline-2">
-<h2 id="orge5c8b33">Define custom random variables</h2>
-<div class="outline-text-2" id="text-orge5c8b33">
+<div id="outline-container-org8c64cb9" class="outline-2">
+<h2 id="org8c64cb9">Define custom random variables</h2>
+<div class="outline-text-2" id="text-org8c64cb9">
 <p>
 It is fairly simple as <code>srng.gen(RV, *args)</code> will call <code>RV()(random_state, *args)</code>.
 </p>
@@ -465,18 +514,18 @@ Note that you can also define this random variables' logprob dispatching <code>_
 </div>
 </div>
 
-<div id="outline-container-org12a5c83" class="outline-2">
-<h2 id="org12a5c83">Sampling vs Logprobability <code>aeppl</code></h2>
-<div class="outline-text-2" id="text-org12a5c83">
+<div id="outline-container-org8be1cd2" class="outline-2">
+<h2 id="org8be1cd2">Sampling vs Logprobability <code>aeppl</code></h2>
+<div class="outline-text-2" id="text-org8be1cd2">
 <ul class="org-ul">
 <li>How define the logprob of a custom distribution?</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org8e5669f" class="outline-2">
-<h2 id="org8e5669f">Shapes</h2>
-<div class="outline-text-2" id="text-org8e5669f">
+<div id="outline-container-org1104eec" class="outline-2">
+<h2 id="org1104eec">Shapes</h2>
+<div class="outline-text-2" id="text-org1104eec">
 <p>
 Shapes are always a mess when it comes to random variables. In <code>aesara</code> we note two distinct shapes:
 </p>
@@ -550,18 +599,18 @@ See <a target='_blank' rel='noopener noreferrer' class='external' href="https://
 </div>
 </div>
 
-<div id="outline-container-orgb235fd4" class="outline-2">
-<h2 id="orgb235fd4">Problems with <code>RandomStream</code></h2>
-<div class="outline-text-2" id="text-orgb235fd4">
+<div id="outline-container-org72c7733" class="outline-2">
+<h2 id="org72c7733">Problems with <code>RandomStream</code></h2>
+<div class="outline-text-2" id="text-org72c7733">
 <p>
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/pull/1211#discussion_r985057882">https://github.com/aesara-devs/aesara/pull/1211#discussion_r985057882</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org4a3e085" class="outline-2">
-<h2 id="org4a3e085">Proposal</h2>
-<div class="outline-text-2" id="text-org4a3e085">
+<div id="outline-container-org1b196b1" class="outline-2">
+<h2 id="org1b196b1">Proposal</h2>
+<div class="outline-text-2" id="text-org1b196b1">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
@@ -609,9 +658,9 @@ What does that complicate?
 </div>
 </div>
 
-<div id="outline-container-orgc331aaa" class="outline-2">
-<h2 id="orgc331aaa">Links to this note</h2>
-<div class="outline-text-2" id="text-orgc331aaa">
+<div id="outline-container-org651736c" class="outline-2">
+<h2 id="org651736c">Links to this note</h2>
+<div class="outline-text-2" id="text-org651736c">
 <ul class="org-ul">
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
 <li><a href="./inbox.html">Writing inbox</a></li>

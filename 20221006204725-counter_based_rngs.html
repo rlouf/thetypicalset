@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-10-10 Mon 08:52 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Counter-based RNGS</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Counter-based RNGS</h1>
+<p>
+<a target='_blank' rel='noopener noreferrer' class='external' href="http://www.thesalmons.org/john/random123/papers/random123sc11.pdf">http://www.thesalmons.org/john/random123/papers/random123sc11.pdf</a>
+</p>
+
+<p>
+Traditional algorithms for RNGs are inherently sequential:
+</p>
+
+<p>
+\[
+s_{n+1} = f(s_n)
+\]
+</p>
+
+<p>
+Different ways of parallelizing an algorithm:
+</p>
+<ul class="org-ul">
+<li><i>Multistream:</i> PRNG algorithm is initiated in parallel with different parameters so each instance products a distrinct stream of random numbers;</li>
+<li><i>Substream:</i> A stream of parameters is subdivided into disjoint substreams</li>
+</ul>
+
+<p>
+The approach is different, the sequence is
+</p>
+
+<p>
+\[
+s_n = b(n)
+\]
+</p>
+
+<p>
+the \(n^{th}\) random number is obtained by some function applied to \(n\). No incentive to generate values in a particular order.
+</p>
+
+<p>
+Cryptographic block ciphers are keyed function:
+</p>
+
+<p>
+\[
+s_n = b_k(n)
+\]
+</p>
+
+<p>
+Where \(k\) is an  element of a key space and \(b_k\) member of a family of bijections. Algorithms in this paper are of period $$2<sup>128</sup>$ and \(2^{64}\) parallel streams.
+</p>
+
+<div id="outline-container-orga44e6db" class="outline-2">
+<h2 id="orga44e6db">The API</h2>
+<div class="outline-text-2" id="text-orga44e6db">
+<p>
+In the <i>multistream</i> approach we assign a unique key \(k\) to each unit, and then the units generate their own set of random numbers in parallel.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ascii">k = 1 | b_1(1) | b_1(2) | ..... | b_1(N)
+k = 2 | b_2(1) | b_2(2) | ..... | b_2(N)
+k = 3 | b_3(1) | b_3(2) | ..... | b_3(N)
+</pre>
+</div>
+
+<p>
+A natural API for a counter-based PRNG provides the bijection \(b_k\) but leaves the application in control of \(k\) and \(n\).
+</p>
+
+<p>
+For <i>seeding</i> one can easily reserve 32 bits in the key or counter.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2de6b84" class="outline-2">
+<h2 id="org2de6b84">The splitting mechanism</h2>
+<div class="outline-text-2" id="text-org2de6b84">
+<p>
+<a target='_blank' rel='noopener noreferrer' class='external' href="https://www.tweag.io/blog/2020-06-29-prng-test/">https://www.tweag.io/blog/2020-06-29-prng-test/</a>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell">type Rand = (seed, [bit])
+hashStep :: Rand -&gt; Rand
+split    :: Rand -&gt; (Rand, Rand)
+rand     :: Rand -&gt; Word32
+</pre>
+</div>
+
+<p>
+This is what currently exists:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-haskell">next :: Rand -&gt; (Word32, Rand)
+</pre>
+</div>
+
+<p>
+There is nothing special about <code>next</code> as it can be implemented as:
+</p>
+
+<p>
+#+begin<sub>src</sub> haskell
+next g = (rand g1, g2)
+where
+(g1, g2) = split g
+#+end<sub>src</sub> haskell
+</p>
+
+<p>
+We can then recurse on this to obtain a new <code>rng</code> value and use the current one for application.
+</p>
+
+<p>
+<a target='_blank' rel='noopener noreferrer' class='external' href="https://sci-hub.hkvisa.net/10.1145/2503778.2503784">https://sci-hub.hkvisa.net/10.1145/2503778.2503784</a>
+</p>
+
+<p>
+Attempting to generalize a linear PRNG into splittable one is problematic:
+</p>
+<ol class="org-ol">
+<li>Split in half.</li>
+<li>Jump to a random place in the linear sequence.</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org8287989" class="outline-2">
+<h2 id="org8287989">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>
