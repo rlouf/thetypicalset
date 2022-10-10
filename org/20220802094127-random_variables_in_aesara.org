@@ -98,8 +98,38 @@ sequential_et = etuple(
 )
 #+end_src
 
+*First* justify the =split=, =rand= symbolic interface (reference Haskell)
+
+
 Counter based approach: [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][Parallel Random Numbers: As easy as 1, 2, 3]]
 
+** Assume we have =rand=, =next=, =split= (=splitn=)
+
+=rand= is used inside random variables so that:
+
+#+begin_src python
+rng_1, rng_2 = at.random.split(rng)
+a_rv = at.random.normal(rng_1, 0, 1)
+b_rv = at.random.normal(rng_2, 0, 1)
+#+end_src
+
+We need a graph manipulation that converts this to:
+
+#+begin_src python
+a_rv, rng_1 = at.random.normal(rng, 0, 1)
+b_rv, rng_2 = at.random.normal(rng_1, 0, 1)
+#+end_src
+
+To re-introduce linearity for some backends =to_linear_prng=, =to_counter_prng=. Note that this can be used as an optimization in some cases, since linear execution is said to be faster in that Haskell paper.
+
+*** How does it solve the =etuplize= issues?
+
+RV Ops only return a variable. They consume a rng key and parameters, return a variable. =default_output= does not need to be.
+
+#+begin_src python
+etuplize(at.random.normal(0, 1))
+# etuple(<Random Normal>, rng, type, size, 0, 1)
+#+end_src
 
 * Transpilation
 

@@ -1,0 +1,95 @@
+:PROPERTIES:
+:ID:       eed92f50-a63f-499b-b80f-a07b34c094a2
+:END:
+#+title: Counter-based RNGS
+
+http://www.thesalmons.org/john/random123/papers/random123sc11.pdf
+
+Traditional algorithms for RNGs are inherently sequential:
+
+$$
+s_{n+1} = f(s_n)
+$$
+
+Different ways of parallelizing an algorithm:
+- /Multistream:/ PRNG algorithm is initiated in parallel with different parameters so each instance products a distrinct stream of random numbers;
+- /Substream:/ A stream of parameters is subdivided into disjoint substreams
+
+The approach is different, the sequence is
+
+$$
+s_n = b(n)
+$$
+
+the $n^{th}$ random number is obtained by some function applied to $n$. No incentive to generate values in a particular order.
+
+Cryptographic block ciphers are keyed function:
+
+$$
+s_n = b_k(n)
+$$
+
+Where $k$ is an  element of a key space and $b_k$ member of a family of bijections. Algorithms in this paper are of period $$2^{128}$ and $2^{64}$ parallel streams.
+
+#+begin_comment
+If we have a symbolic representation of the counter-based generator we can map different PRNG implementation to this scheme (/Threefy/ said to be fastest on CPU, /Philox/ on GPU).
+#+end_comment
+
+#+begin_comment
+We need to make sure that we can map the counter-based RNGs to their sequential version:
+- Numba uses xoroshiro
+- JAX uses Threefry
+- XLA has =rng_three_fry= and =rng_philox=
+- Torch as =csprng= (custom?) which runs =AES=
+#+end_comment
+
+#+begin_comment
+This can do /redundant/ computation in parallel which can otherwise be hard to perform.
+#+end_comment
+
+* The API
+
+In the /multistream/ approach we assign a unique key $k$ to each unit, and then the units generate their own set of random numbers in parallel.
+
+#+begin_src ascii
+k = 1 | b_1(1) | b_1(2) | ..... | b_1(N)
+k = 2 | b_2(1) | b_2(2) | ..... | b_2(N)
+k = 3 | b_3(1) | b_3(2) | ..... | b_3(N)
+#+end_src
+
+A natural API for a counter-based PRNG provides the bijection $b_k$ but leaves the application in control of $k$ and $n$.
+
+For /seeding/ one can easily reserve 32 bits in the key or counter.
+
+* The splitting mechanism
+
+https://www.tweag.io/blog/2020-06-29-prng-test/
+
+#+begin_src haskell
+type Rand = (seed, [bit])
+hashStep :: Rand -> Rand
+split    :: Rand -> (Rand, Rand)
+rand     :: Rand -> Word32
+#+end_src
+
+This is what currently exists:
+
+#+begin_src haskell
+next :: Rand -> (Word32, Rand)
+#+end_src
+
+There is nothing special about =next= as it can be implemented as:
+
+#+begin_src haskell
+next g = (rand g1, g2)
+where
+(g1, g2) = split g
+#+end_src haskell
+
+We can then recurse on this to obtain a new =rng= value and use the current one for application.
+
+https://sci-hub.hkvisa.net/10.1145/2503778.2503784
+
+Attempting to generalize a linear PRNG into splittable one is problematic:
+1. Split in half.
+2. Jump to a random place in the linear sequence.
