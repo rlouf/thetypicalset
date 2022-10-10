@@ -7,56 +7,49 @@
 - =RandomState=
 - =RandomStream=
 
-
-* Guidelines
+* AeP (Aesara Enhancement Propoal)
+** Guidelines
 
 A good PRNG design satisfies the following conditions:
 1. It is **expressive**: the behavior of the system is **predictable** by the caller, and allows them to expression any probabilistic program they want;
-2. Makes it possible to build **reproducible** programs;
+2. Makes it possible to build **reproducible** programs ("seeding");
 3. It enables **vectorization** with generalized universal functions;
-4. It does not add sequencing constraints between function calls that have no data dependence;
+4. It leaves the IR uncluttered, in particular it does not add sequencing constraints between function calls that have no data dependence;
 5. It can be transpiled to any backend, past present and future;
 6. It **fits in with Aesara's rewrite system**;
-7. It **fits in Aesara's IR**
+7. It **is explicit in Aesara's IR**
 
-While we need to keep the transpilation backends in mind, we should not let their own constraints propagate to Aesara.
+** Limits of the current design
 
-The following functional model threads the RNG state through all the functions that generate random values. Sequencing is made explicit. This is basically what happens if we set =default_output= to =None= (do it).
+The current =RandomState= model threads the RNG state through all the functions that generate random values. This is how the =RandomState= API would look like with =default_output= set to =None=:
 
 #+begin_src python
-def sequential(rng):
-    x, rng_1 = call(rng)
-    y, rng_2 = call(rng_1)
-    return x + y, rng_2  # We need to return the random state
+import aesara.tensor as at
+import numpy as np
 
-def call(rng):
-    val, new_rng = rand(rng, size=(2,3))
-    return val, new_rng
+def sample(rng):
+
+rng = np.random.default_rng(12)
+rng_x, x_rv = at.random.normal(0, 1, rng=rng)
+rng_y, y_rv = at.random.normal(0, 1, rng=rng_x)
+z_at = x_rv + y_rv
 #+end_src
 
-But this design is somewhat inconvenient to work with (as a user). Also, there is no way =sequential= can call into =call= and conserve its own RNG state. Everything is sequential, and as the =sequential= function shows, it does add sequencing constraints between function calls that are not due to data dependence but are an artifact of this design.
+This design is inconvenient to work with.
 
-#+begin_src md
-   +----sequential---+
-   |                 |
-x = call()        y = call()
-   |                 |
-   +----> x + y <----+
-#+end_src
+**** Error-prone and cumbersome
 
-With the RNG dependence:
+*For users* having to explictly thread the =rng= states is both error-prone and cumbersome. I believe this is why the RNG output is hidden by setting =default_output= to =1=, and one of the motivations behind the =RandomStream= interface.
 
-#+begin_src md
-sequential
-   |
-x = call()
-   |
-y = call()
-   |
- x + y
-#+end_src
+**** Adds sequencing constraints between functions that have no data dependence
+
+*For the Aesara IR* the threading of RNGs adds sequencing constraints between functions that have no data dependence otherwise. In theory, the two calls to =at.random.normal= are independent and could be made in parallel. In practice, one has to wait for the first call to complete to be able to make the second all.
 
 Same with gufuncs: we do not want to introduce rng-dependence between the different function calls. We want to be able to give each dimension (give example) a rng and let it run with it. No collision:
+
+**** Lack of a clear symbolic representation
+
+*For the Aesara IR* we don't have distinct operators that updates the random state and generate a pseudo-random number from a random state.
 
 And finally this is not enought for the one-to-many problem in rewrites.
 
@@ -103,40 +96,267 @@ sequential_et = etuple(
 
 Counter based approach: [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][Parallel Random Numbers: As easy as 1, 2, 3]]
 
-** Assume we have =rand=, =next=, =split= (=splitn=)
+** Proposal: A Haskell-like design
 
-=rand= is used inside random variables so that:
+In the following we will first focus on /the symbolic representation of RNGs in Aesara's IR/. We leave discussions about compilation of this representation for the end.
 
-#+begin_src python
-rng_1, rng_2 = at.random.split(rng)
-a_rv = at.random.normal(rng_1, 0, 1)
-b_rv = at.random.normal(rng_2, 0, 1)
+To begin with we need to distinguish between two objects that are conflated in Aesara:
+- The =RandomState= which is the current state of the random number generator;
+- The =RandomVariable=, which takes a =RandomState= and returns a pseudo-random number =Bit=
+
+The current design of =RandomVariable=\s in Aesara can be summarized by the following operator signature:
+
+If we represent the internal state of the PRNG by the type =RandState=, the current design of =RandomVariable=\s can be summarized by the following simplified signature:
+
+#+begin_src haskell
+RandomVariable :: RandState -> (RandState, TensorVariable)
 #+end_src
 
-We need a graph manipulation that converts this to:
+In other words, =RandomVariable=\s are responsible for advancing the state of the PRNG, and produce a random value. This double responsibility is what creates graph dependencies between nodes that have otherwise no dependency i.e. that wouldn't be linked had they not needed the PRNG.
 
-#+begin_src python
-a_rv, rng_1 = at.random.normal(rng, 0, 1)
-b_rv, rng_2 = at.random.normal(rng_1, 0, 1)
+*** New operators
+
+A natural idea is to simplify the design of =RandomVariable=\s so that it is only responsible for one thing: create a random value from a PRNG state. The =Op= thus creates an =Apply= node that takes a =RandomState= as input and outputs a (random) =Variable=:
+
+#+begin_src haskell
+RandomVariable :: RandomState -> Variable
 #+end_src
 
-To re-introduce linearity for some backends =to_linear_prng=, =to_counter_prng=. Note that this can be used as an optimization in some cases, since linear execution is said to be faster in that Haskell paper.
-
-*** How does it solve the =etuplize= issues?
-
-RV Ops only return a variable. They consume a rng key and parameters, return a variable. =default_output= does not need to be.
+We can now make the =RandState= output explicit (1) by making =rng= an explicit input of the =RandomVariable='s =__call__= method. And we can verify in the following that the sequential dependency between =x_rv= and =y_rv= disappears:
 
 #+begin_src python
-etuplize(at.random.normal(0, 1))
-# etuple(<Random Normal>, rng, type, size, 0, 1)
+import aesara.tensor as at
+
+# rng_x and rng_y are created before that.
+x_rv = at.random.normal(rng_x, 0, 1)
+y_rv = at.random.normal(rng_y, 0, 1)
 #+end_src
 
-* Transpilation
+This interface presupposes the existence of an operator that creates an updated =RandomState= from a =RandomState=:
 
-** JAX
-** Numba
+#+begin_src haskell
+next :: RandomState -> RandomState
+#+end_src
+
+To be able to build reproducible programs (2), we also need an operator that creates a =RandomState= from a seed:
+
+#+begin_src haskell
+default_rng :: Seed -> RandomState
+#+end_src
+
+We can thus fill in the blanks in the previous code snippet:
+
+#+begin_src python
+import aesara.tensor as at
+
+rng = at.random.default_rng(0)
+
+rng_x = at.random.next(rng)
+x_rv = at.random.normal(rng_x, 0, 1)
+
+rng_y = at.random.next(rng_x)
+y_rv = at.random.normal(rng_y, 0, 1)
+
+z_at = x_rv + y_rv
+#+end_src
+
+This code generates Aesara graphs that are very similar to the ones generated by =RandomStream=:
+
+#+begin_src python
+import aesara.tensor as at
+
+srng = at.random.RandomStream()
+
+x_rv = srng.normal(0, 1)
+y_rv = srng.normal(0, 1)
+z_at = x_rv + y_rv
+#+end_src
+
+Roughly speaking, =RandomStream= moves this "next" mechanism to the /updates/ graph, while this symbolic representation of the state of the PRNG makes it explicit in the same graph. The graph between =RandomState=\s in the proposed scheme is a concretization of the updates graph for the =RandomStream=.
+
+Let us now consider a more complex situation, when =call_x= and =call_y= are two functions that require a =RandomState=:
+
+#+begin_src python
+import aesara.tensor as at
+
+rng = at.random.default_rng(0)
+
+rng_x = at.random.next(rng)
+x_rv = call_x(rng_x)
+
+rng_y = at.random.next(rng_x)
+y_rv = call_y(rng_y)
+
+z_at = x_rv + y_rv
+#+end_src
+
+We can easily make the previous code generate a collision:
+
+#+begin_src python
+def call_x(rng_a):
+    a_rv = at.random.normal(rng_a, 0, 1)
+    rng_b = at.random.next(rng_a)
+    b_rv = at.random.normal(rng_b, 0, 1)
+    return a_rv * b_rv
+#+end_src
+
+The issue arises because our symbolic structure is /linear/: each =RandState= has one and only one ancestor. What we need instead is to allow =RandState=\s to have several ancestors; We thus define the =at.random.op.Split= operator:
+
+#+begin_src haskell
+split :: RandState -> (RandState, RandState)
+#+end_src
+
+This can be easily implemented: if =RandState= is a binary number <..> then the leftmost key is obtained by appending =0=, the rightmost =1=. Any succession of splitting operations builds a binary tree. If =Rand= is a deterministic function of this value, then the computations are fully reproducible. This binary tree structure is encoded directly in the graph IR:
+
+#+begin_src python
+import aesara.tensor as at
+
+rng = at.random.default_rng(0)
+rng_x, rng_y = at.random.split(rng)
+
+etuplize(rng_x)
+# etuple(nth, 0, etuple(at.random.split, etuple(at.random.default_rng, 0)))
+
+etuplize(rng_y)
+# etuple(nth, 1, etuple(at.random.split, etuple(at.random.default_rng, 0)))
+#+end_src
+
+Although it may be possible to keep =Next= within this representation, its interaction with the =Split= operator requires careful thought. We forget it for now, as =Split= is expressive enough. The original program becomes:
+
+#+begin_src python
+import aesara.tensor as at
+
+rng = at.random.default_rng()
+rng_x, rng_y = at.random.split(rng)
+
+x_rv = at.random.normal(rng_x, 0, 1)
+y_rv = at.random.normal(rng_y, 0, 1)
+z_at = x_rv + y_rv
+#+end_src
+
+It is also natural to implement the =at.random.op.SplitN= operator represented by:
+
+#+begin_src haskell
+splitn :: RandState -> Int -> (RandState, ..., RandState)
+#+end_src
+
+So we can write the following code:
+
+#+begin_src python
+at.random.split = at.random.Split()
+
+rng = at.random.default_rng()
+rng_v, rng_w, rng_x, rng_y = at.random.splitn(rng, 4)
+
+v_rv = at.random.normal(rng_y, 0, 1)
+w_rv = at.random.normal(rng_x, 0, 1)
+x_rv = at.random.normal(rng_x, 0, 1)
+y_rv = at.random.normal(rng_y, 0, 1)
+z_at = v_rv + w_rv + x_rv + z_rv
+#+end_src
+
+This will prove useful e.g. for use with generalized universal functions.
+
+*** Etuplization
+
+These new operators simplify greatly the work with etuplized versions of graphs with random variables. Assuming we have a =Nth= operator in Aesara as well:
+
+#+begin_src python
+from etuples import ExpressionTuple, etuplize
+from aesara.graph.rewriting.unify import OpExpressionTuple
+
+rng = at.random.default_rng()
+rng_x, rng_y = at.random.split(rng)
+x_rv = at.random.normal(rng_x, 0, 1)
+y_rv = at.random.normal(rng_y, 0, 1)
+z_at = x_rv + y_rv
+
+z_et = OpExpressionTuple(
+    etuplize(at.add),
+    OpExpressionTuple(
+        etuplize(at.random.normal),
+        ExpressionTuple(
+           etuplize(aesara.graph.nth),
+           1,
+           OpExpressionTuple(
+               etuplize(at.random.split)
+               rng
+           )
+        ),
+        0,
+        1,
+        size,
+        dtype,
+    ),
+    OpExpressionTuple(
+        etuplize(at.random.normal),
+        ExpressionTuple(
+           etuplize(aesara.graph.nth),
+           0,
+           OpExpressionTuple(
+               etuplize(at.random.split)
+               rng
+           )
+        ),
+        0,
+        1,
+        size,
+        dtype,
+    ),
+)
+#+end_src
+
+This solves the one-to-many problem we had for mixtures. If we have a relation between a single random variable and two we can now write:
+
+#+begin_src python
+z_et = etuple(etuplize(at.random.normal), rng_lv, size_lv, dtype_lv, at.as_tensor(1.), at.as_tensor(2.))
+
+sum_et = etuple(
+    etuplize(at.add),
+    etuple(
+        etuplize(at.random.normal),
+        etuple(
+            etuplize(at.graph.nth),
+            0,
+            etuple(
+                etuplize(at.random.split),
+                rng_lv,
+            )
+        )
+        size_lv,
+        dtype_lv,
+        at.as_tensor(0.),
+        at.as_tensor(1.),
+    ),
+    etuple(
+        etuplize(at.random.normal),
+        etuple(
+            etuplize(at.graph.nth),
+            1,
+            etuple(
+                etuplize(at.random.split),
+                rng_lv,
+            )
+        )
+        size_lv,
+        dtype_lv,
+        at.as_tensor(0.),
+        at.as_tensor(1.),
+    )
+)
+#+end_src
+
+*** Behavior under transpilation
+
+**** JAX
+
+Straightforward, the behavior is similar.
+
+**** Numba
 
 Numba has primitive support for NumPy's Generator.
+
+
 
 * RandomVariable Ops
 
