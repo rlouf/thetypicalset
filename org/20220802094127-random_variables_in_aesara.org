@@ -95,13 +95,66 @@ sequential_et = etuple(
 
 Counter based approach: [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][Parallel Random Numbers: As easy as 1, 2, 3]]
 
+** Why this proposal
+
+This proposal is motivated by two issues that illustrate the shortcomings of the current representation of =RandomVariable=\s and PRNG states in Aesara:
+
+- In [[https://github.com/aesara-devs/aesara/pull/1036][#1036]] the use of =default_output= to hide the PRNG state from the user is causing multiple headaches in the etuplization of =RandomVariable=\s and unification/reification of expressions with =RandomVariable=\s. This is the only =Op= in Aesara that makes use of this property, and to "special-casing" the etuplization logic for =RandomVariable=\s often appeared as the easiest solution.
+- In [[https://github.com/aesara-devs/aemcmc/pull/66#issuecomment-1258471312][#66]] in AeMCMC, expressing expansions like the following convolution of two normal variables is overly complex:
+
+  #+begin_src python
+from etuples import etuple
+from kanren import var
+
+mu_x, mu_y, sigma2_x, sigma2_y = var(), var(), var(), var()
+
+rng, size, dtype = var(), var(), var()
+X_et = etuple(
+    etuplize(at.random.normal),
+    rng,
+    size,
+    dtype,
+    etuple(
+        etuplize(at.add),
+        mu_x,
+        mu_y
+    ),
+    etuple(
+        etuplize(at.add),
+        sigma2_x,
+        sigma2_y,
+    )
+)
+
+rng_x, size_x, dtype_x = var(), var(), var()
+rng_y, size_y, dtype_y = var(), var(), var()
+Y_et = etuple(
+    etuplize(at.add),
+    etuple(
+        etuplize(at.random.normal),
+        rng_x,
+        size_x,
+        dtype_x,
+        mu_x,
+        sigma2_x
+    ),
+    etuple(
+        etuplize(at.random.normal),
+        rng_y,
+        size_y,
+        dtype_y,
+        mu_y,
+        sigma2_y
+    )
+)
+  #+end_src
+
+  It is indeed not clear what the values of =rng_x= and =rng_y= should be given the value of =rng=. We should have a way to be able to create two independant RNG states from a single one.
+
+
 ** Proposal: A Haskell-like design
 
-In the following we will first focus on /the symbolic representation of RNGs in Aesara's IR/. We leave discussions about compilation of this representation for the end.
-
-To begin with we need to distinguish between two objects that are conflated in Aesara:
-- The =RandomState= which is the current state of the random number generator;
-- The =RandomVariable=, which takes a =RandomState= and returns a pseudo-random number =Bit=
+In the following we focus on /the symbolic representation of random variables and PRNG states in Aesara's IR/. We leave discussions about compilation of this representation, and solution to the aforementionned issues for the end.
 
 If we represent the internal state of the PRNG by the type =RandState=, the current design of =RandomVariable=\s can be summarized by the following simplified signature:
 
@@ -109,7 +162,7 @@ If we represent the internal state of the PRNG by the type =RandState=, the curr
 RandomVariable :: RandState -> (RandState, TensorVariable)
 #+end_src
 
-In other words, =RandomVariable=\s are responsible for advancing the state of the PRNG, and produce a random value. This double responsibility is what creates graph dependencies between nodes that have otherwise no dependency i.e. that wouldn't be linked had they not needed the PRNG. We can see that on the following listing:
+In other words, =RandomVariable=\s are responsible for *both* advancing the state of the PRNG, and producing a random value. This double responsibility is what creates graph dependencies between nodes that have otherwise no data dependency. The following snippet illustrates this:
 
 #+begin_src python :session :results output
 import aesara
@@ -123,148 +176,110 @@ z_rv = at.random.normal(0, 1, rng=rng_y, name='z')
 w_at = x_rv + y_rv + z_rv
 
 aesara.dprint(w_at)
+# Elemwise{add,no_inplace} [id A]
+#  |Elemwise{add,no_inplace} [id B]
+#  | |normal_rv{0, (0, 0), floatX, False}.1 [id C] 'x'
+#  | | |rng [id D]
+#  | | |TensorConstant{[]} [id E]
+#  | | |TensorConstant{11} [id F]
+#  | | |TensorConstant{0} [id G]
+#  | | |TensorConstant{1} [id H]
+#  | |normal_rv{0, (0, 0), floatX, False}.1 [id I] 'y'
+#  |   |normal_rv{0, (0, 0), floatX, False}.0 [id C]
+#  |   |TensorConstant{[]} [id J]
+#  |   |TensorConstant{11} [id K]
+#  |   |TensorConstant{0} [id L]
+#  |   |TensorConstant{1} [id M]
+#  |normal_rv{0, (0, 0), floatX, False}.1 [id N] 'z'
+#    |normal_rv{0, (0, 0), floatX, False}.0 [id I]
+#    |TensorConstant{[]} [id O]
+#    |TensorConstant{11} [id P]
+#    |TensorConstant{0} [id Q]
+#    |TensorConstant{1} [id R]
 #+end_src
 
-#+RESULTS:
-#+begin_example
-Elemwise{add,no_inplace} [id A]
- |Elemwise{add,no_inplace} [id B]
- | |normal_rv{0, (0, 0), floatX, False}.1 [id C] 'x'
- | | |rng [id D]
- | | |TensorConstant{[]} [id E]
- | | |TensorConstant{11} [id F]
- | | |TensorConstant{0} [id G]
- | | |TensorConstant{1} [id H]
- | |normal_rv{0, (0, 0), floatX, False}.1 [id I] 'y'
- |   |normal_rv{0, (0, 0), floatX, False}.0 [id C]
- |   |TensorConstant{[]} [id J]
- |   |TensorConstant{11} [id K]
- |   |TensorConstant{0} [id L]
- |   |TensorConstant{1} [id M]
- |normal_rv{0, (0, 0), floatX, False}.1 [id N] 'z'
-   |normal_rv{0, (0, 0), floatX, False}.0 [id I]
-   |TensorConstant{[]} [id O]
-   |TensorConstant{11} [id P]
-   |TensorConstant{0} [id Q]
-   |TensorConstant{1} [id R]
-#+end_example
+As we can see in the graph representation, =rng_x= (id C) is being used as an input to =y= and =rng_y= (id I) is being used as an input to =z=. There is however no data dependency between =x=, =y= or =z=. The intuition that they should not be linked is probably what led to "hiding" these PRNG state outputs so they are not re-used, and the =RandomStream= interface.
 
-*** New operators
+Creating spurious sequential dependencies by threading PRNG states is indeed unsatisfactory from a representation perspective, and unnecessarily complicates the rewrites. It is also problematic for two other reasons:
 
-A natural idea is to simplify the design of =RandomVariable=\s so that it is only responsible for one thing: create a random value from a PRNG state. The =Op= thus creates an =Apply= node that takes a =RandomState= as input and outputs a (random) =Variable=:
+- /Parallelization and Vectorization:/ Using random variables in user-defined generalized universal functions is going to require a lot of compiler magic to make sure that the random state is updated properly, and the behavior will be completely opaque to the user;
+- The fact that callers cannot be intentional about what they do with the random state is limiting. This can be necessary in pratical applications, for instance to implement [[https://statisfaction.wordpress.com/2017/09/17/unbiased-hamiltonian-monte-carlo-with-couplings/][coupled sampling algorithms]] in which two algorithms share the same random state.
+
+A first idea is to simplify the design of =RandomVariable=\s so that it is only responsible for one thing: generate a random value from a PRNG state. The =Op= thus creates an =Apply= node that takes a =RandState= (using the above notation) as input and outputs a (random) =Variable=:
 
 #+begin_src haskell
-RandomVariable :: RandomState -> Variable
+RandomVariable :: RandState -> Variable
 #+end_src
 
-We can now make the =RandState= output explicit (1) by making =rng= an explicit input of the =RandomVariable='s =__call__= method. And we can verify in the following that the sequential dependency between =x_rv= and =y_rv= disappears:
+Providing a =RandState= to a =RandomVariable= needs to intentional, and this must be reflected in the user interface. We thus make =rng= an explicit input of the =RandomVariable='s =__call__= method. This way a user can write:
 
 #+begin_src python
 import aesara.tensor as at
 
-# rng_x and rng_y are created before that.
+# rng_x, rng_y and rng_z are created before that.
 x_rv = at.random.normal(rng_x, 0, 1)
 y_rv = at.random.normal(rng_y, 0, 1)
+z_rv = at.random.normal(rng_z, 0, 1)
 #+end_src
 
-This interface presupposes the existence of an operator that creates an updated =RandomState= from a =RandomState=:
+Or, if they want the PRNG state to be shared (silly example, but a legitimate need):
+
+#+begin_src python
+import aesara.tensor as at
+
+# rng_x, rng_y and rng_z are created before that.
+x_rv = at.random.normal(rng_x, 0, 1)
+y_rv = at.random.normal(rng_x, 0, 1)
+z_rv = at.random.normal(rng_x, 0, 1)
+#+end_src
+
+This interface presupposes the existence of two operators. First, to build reproducible programs, we need an operator that creates a =RandState= from a seed, which can be the constructor of =RandState= itself:
+
+#+begin_src haskell
+RandState.__init__ :: Seed -> RandState
+#+end_src
+
+And then, we need another operator that creates an updated =RandomState= from a =RandomState=, so that =RandomVariable=\s created with these two different states would output different numbers. Let's call it =next=:
 
 #+begin_src haskell
 next :: RandomState -> RandomState
 #+end_src
 
-To be able to build reproducible programs (2), we also need an operator that creates a =RandomState= from a seed:
-
-#+begin_src haskell
-default_rng :: Seed -> RandomState
-#+end_src
-
-We can thus fill in the blanks in the previous code snippet:
+We can thus fill in the blanks in the previous code examples:
 
 #+begin_src python
 import aesara.tensor as at
 
-rng = at.random.default_rng(0)
+rng = at.random.RandState(0)
+rng_y = at.random.next(rng_x)
+rng_z = at.random.next(rng_y)
 
-rng_x = at.random.next(rng)
 x_rv = at.random.normal(rng_x, 0, 1)
-
-rng_y = at.random.next(rng_x)
 y_rv = at.random.normal(rng_y, 0, 1)
+z_rv = at.random.normal(rng_z, 0, 1)
 
-z_at = x_rv + y_rv
+w_at = x_rv + y_rv + z_rv
 #+end_src
 
-#+begin_src python :session
-import aesara.tensor as at
-import numpy as np
+The code has been specifically formatted to illustrate what we gain from this approach. =x_rv=, =y_rv= and =z_rv= have lost their direct dependency; we could easily execute these three statements in parallel. What we have done implicitly is to create two graphs: the graph between random variables which reflects the dependencies (or lack thereof) on each other's values, and the graph of the updates of the PRNG states. These graphs almost evolve in parallel.
 
-rng = at.random.type.RandomGeneratorType()("rng")
+This is similat to what I understand the =RandomStream= interface does: moving the updates of the PRNG states to the =update= graphs generated by Aesara's shared variables.
 
-rng_x, x_rv = at.random.normal(0,1, rng=rng).owner.outputs
-rng_y, y_rv = at.random.normal(0,1, rng=rng_x).owner.outputs
-
-def next(rng):
-    bit_generator = rng.bit_generator.advance(1)
-    return np.random.Generator(bit_generator)
-
-#+end_src
-
-#+RESULTS:
-
-This code generates Aesara graphs that are very similar to the ones generated by =RandomStream=:
-
-#+begin_src python :session
-import aesara.tensor as at
-
-srng = at.random.RandomStream()
-
-x_rv = srng.normal(0, 1)
-y_rv = srng.normal(0, 1)
-z_at = x_rv + y_rv
-#+end_src
-
-#+RESULTS:
-
-Roughly speaking, =RandomStream= moves this "next" mechanism to the /updates/ graph, while this symbolic representation of the state of the PRNG makes it explicit in the same graph. The graph between =RandomState=\s in the proposed scheme is a concretization of the updates graph for the =RandomStream=.
-
-#+begin_src python :results output :session
-import aesara
-import aesara.tensor as at
-
-srng = at.random.RandomStream(seed=123)
-x_rv = srng.normal()
-y_rv = srng.normal()
-z_at = x_rv + y_rv
-
-aesara.dprint(y_rv.owner.inputs[0].default_update)
-#+end_src
-
-#+RESULTS:
-: normal_rv{0, (0, 0), floatX, False}.0 [id A]
-:  |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FE7411BCF20>) [id B]
-:  |TensorConstant{[]} [id C]
-:  |TensorConstant{11} [id D]
-:  |TensorConstant{0.0} [id E]
-:  |TensorConstant{1.0} [id F]
-
-Let us now consider a more complex situation, when =call_x= and =call_y= are two functions that require a =RandomState=:
+The =next= operator is however not completely satisfactory. Let us consider a more complex situation, where =call= is a function that requires a =RandomState=:
 
 #+begin_src python
 import aesara.tensor as at
 
-rng = at.random.default_rng(0)
-
+rng = at.random.RandState(0)
 rng_x = at.random.next(rng)
-x_rv = call_x(rng_x)
-
 rng_y = at.random.next(rng_x)
-y_rv = call_y(rng_y)
 
+x_rv = call_x(rng_x)
+y_rv = call_y(rng_y)
 z_at = x_rv + y_rv
 #+end_src
 
-We can easily make the previous code generate a collision:
+We can easily find an implementation of =call= that makes the previous code generate a random state collision:
 
 #+begin_src python
 def call_x(rng_a):
@@ -274,33 +289,49 @@ def call_x(rng_a):
     return a_rv * b_rv
 #+end_src
 
-The issue arises because our symbolic structure is /linear/: each =RandState= has one and only one ancestor. What we need instead is to allow =RandState=\s to have several ancestors; We thus define the =at.random.op.Split= operator:
+The issue arises because although we've separated PRNG state update and random value generation, our symbolic structure is still /sequential/: each =RandState= has one and only one ancestor. We can of course circumvent this issue knowing how many times =next= is called within the function, by "jumping" the same number of times to obtain =rng_y=, but this can quickly become complex (what if =call= is imported from somewhere else?).
+
+It would make things easier if =RandState=\s could have several children, and if each of these child led to separate streams of random number. Let us define the following =split= operator:
 
 #+begin_src haskell
 split :: RandState -> (RandState, RandState)
 #+end_src
 
-This can be easily implemented: if =RandState= is a binary number <..> then the leftmost key is obtained by appending =0=, the rightmost =1=. Any succession of splitting operations builds a binary tree. If =Rand= is a deterministic function of this value, then the computations are fully reproducible. This binary tree structure is encoded directly in the graph IR:
+So I can never get the same =RandState= by calling split any number of times on either the left or right returned state. In other words, if =split= implicitly defines a binary tree in which all the nodes are unique. This can be easily represented by letting =RandState= be a number in binary format. The leftmost child state is obtained by appending =0= to the parent's state and the rightmost child state by appending =1=:
 
-#+begin_src python
-import aesara.tensor as at
+#+begin_src python :results output
+from typing import NamedTuple
 
-rng = at.random.default_rng(0)
-rng_x, rng_y = at.random.split(rng)
 
-etuplize(rng_x)
-# etuple(nth, 0, etuple(at.random.split, etuple(at.random.default_rng, 0)))
+class RandState(NamedTuple):
+    key: int
+    node_id: int = 0b1
 
-etuplize(rng_y)
-# etuple(nth, 1, etuple(at.random.split, etuple(at.random.default_rng, 0)))
+
+def split(rng):
+    left = RandState(rng.key, rng.node_id << 2)
+    right = RandState(rng.key, (rng.node_id << 2) + 1)
+    return left, right
+
+
+rng = RandState(0)
+l, r = split(rng)
+ll, lr = split(l)
+
+print(rng, l, lr)
+# RandState(key=0, node_id=1) RandState(key=0, node_id=4) RandState(key=0, node_id=17)
 #+end_src
 
-Although it may be possible to keep =Next= within this representation, its interaction with the =Split= operator requires careful thought. We forget it for now, as =Split= is expressive enough. The original program becomes:
+#+RESULTS:
+
+If the generator called by =RandomVariable= can be made a deterministic function of this binary value, the computations are fully reproducible. We added a =key= attribute that can be specified by the user at initialization to seed the PRNG state. Note that the tree structure is explicit in our graph representation, since =l= and =r= would depend on =rng= via the split operator, but this internal state can nevertheless be incremented at runtime to be used at compilation time.
+
+The previous =next= operator becomes redundant within this representation, and its interaction with the =split= operator requires careful thought anyway. We forget it for now and our toy example becomes:
 
 #+begin_src python
 import aesara.tensor as at
 
-rng = at.random.default_rng()
+rng = at.random.RandState(0)
 rng_x, rng_y = at.random.split(rng)
 
 x_rv = at.random.normal(rng_x, 0, 1)
@@ -308,7 +339,7 @@ y_rv = at.random.normal(rng_y, 0, 1)
 z_at = x_rv + y_rv
 #+end_src
 
-It is also natural to implement the =at.random.op.SplitN= operator represented by:
+It is also natural to implement the =splitn= operator represented by:
 
 #+begin_src haskell
 splitn :: RandState -> Int -> (RandState, ..., RandState)
@@ -329,61 +360,24 @@ y_rv = at.random.normal(rng_y, 0, 1)
 z_at = v_rv + w_rv + x_rv + z_rv
 #+end_src
 
-This will prove useful e.g. for use with generalized universal functions.
-
-A nice consequence of this "splitting" design is that the graph that updates the =RandomState=\s is always neatly separated from the "main" graph that contains the =RandomVariable=\s. Does this help with rewrites?
-
-
-
-Counter-based RNGs are now ubiquitous, in NumPy, JAX, XLA, PyTorch, etc so we can mostly rely on their design for =RandomState=
+The "main" sub-graph and the PRNG sub-graph are still minimally connected. It also seems like it would be easy to re-construct the latter after performing rewrites on the former.
 
 *** Implementation
 
-Let us sketch an implementation in Aesara. First we need an implementation of =RandState=:
-
-#+begin_src python :session :results silent
-from typing import NamedTuple
-
-class RandState(NamedTuple):
-    key: int
-    path: int
-#+end_src
+When it comes to practical implementations, this representation is only convenient for counter-based PRNGs like =Philox= implemented in NumPy: we generate a pair of =(key, counter)= from our =RandState=\s and pass these as an input to the generator.
 
 
-Here =key= is the seed given by the user. If not provided, it will be chosen at random at compilation. =path= is the path to this RNG state in the RNG graph, and is represented as bits. A naive implementation of the =split= operator is thus:
+**** =RandState= and =split= implementation
 
-#+begin_src python :session :results output
-def split(rng):
-    left_rng = RandomState(rng.key, (rng.path << 1))
-    right_rng = RandomState(rng.key, (rng.path << 1) + 1)
-    return left_rng, right_rng
+The mock implementation of =RandState= and =split= above is naive in the sense that the counter space $\mathcal{S}$ of real PRNGs does not usually extend indefinitely. In practice we will need to compress the state using a hashing function that also increments the =key=.
 
-rng = RandomState(10, 0b011101)
-print(rng)
+To be immediately compatible with NumPy in the =perform= function we can use Philox's hash function to update the state as we build the graph. Since the hash is deterministic we can still walk the =RandState= tree in our representation and cheaply recompute the states should we need to.
 
-left, right = split(rng)
-print(left, right)
-#+end_src
+/Op and Variable implementations to come/
 
-#+RESULTS:
-: RandomState(key=10, path=29)
-: RandomState(key=10, path=58) RandomState(key=10, path=59)
+**** ==RandomVariable=
 
-It is naive in the sense that the counter space $\mathcal{S}$ of real PRNGs does not usually extend indefinitely ($128$ for Philox in NumPy). In practice we will need to walk the graph and compress the state by incrementing the =key= as well, but this can be done at compile time once information about the =BitGenerator= is known. However, we might need to use Philox' hash function as the state progresses to be immediately compatible with NumPy in the =perform= function. Since we can still walk the =RandState= tree in our representation this should not affect it too much.
-
-#+begin_src python :session :results output
-left = RandomState(10, 0b01)
-print(left)
-for _ in range(100):
-    left, _ = split(left)
-print(left)
-#+end_src
-
-#+RESULTS:
-: RandomState(key=10, path=1)
-: RandomState(key=10, path=1267650600228229401496703205376)
-
-This can easily be translated to an Aesara =Op=. The =RandomVariable= Ops are slightly changed, we need to modify their =__call__=, =make_node= and =perform= things:
+The modifications to =RandomVariable= Ops is minimal: we need to modify their =__call__=, =make_node= and =perform= methods. =default_output= is not needed as we do not return a =RandomState= anymore.
 
 #+begin_src python
 from aesara.graph.op import Op
@@ -493,7 +487,9 @@ class RandomVariable(Op)
         return getattr(rng, self.name)(*args, **kwargs)
 #+end_src
 
-We can keep the =RandomStream= API as follows by making it handle the splitting internally. It could even be an =OpFromGraph=?
+**** =RandomStream=
+
+We can keep the =RandomStream= API, use a shared variable to hold the =RandState= and handle the splitting internally. Note that this interface would not be as flexible as the explicit interface:
 
 #+begin_src python
 def gen(self, op: "RandomVariable", *args, **kwargs) -> TensorVariable:
@@ -534,6 +530,41 @@ def gen(self, op: "RandomVariable", *args, **kwargs) -> TensorVariable:
     rng.default_update = new_rng
 
     return out
+#+end_src
+
+
+*** Transpilation
+
+**** Numba
+
+After [[https://github.com/aesara-devs/aesara/pull/1245][#1245]] Aesara will support NumPy's Generator API. NumPy has support for [[https://numpy.org/doc/stable/reference/random/bit_generators/philox.html][Philox as a BitGenerator]]. Philox is a [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][counter-based PRNG]] which can easily accomodate [[https://publications.lib.chalmers.se/records/fulltext/183348/local_183348.pdf][splittable PRNG representations]]. Assuming we use Philox's hash function directly in the Aesara graph, the transpilation of =RandomStream=\s should be straighforward. For the explicit interface, we can directly translate the =RandomVariable=\s to NumPy =Generator=\s and seed these generators at compile time. So that:
+
+#+begin_src python
+at.random.normal(rng, 0, 1)
+#+end_src
+
+Becomes:
+
+#+begin_src python
+rng = np.random.Generator(np.random.Philox(counter=rng.counter, key=rng.key))
+rng.normal(0, 1)
+#+end_src
+
+Alternatively, we could interpret the structure of the RNG-Variables graph, initialize one =np.random.Generator= and use the =jumped= and =advance= methods of the Philox =BitGenerator=.
+
+**** JAX
+
+Transpilation to JAX would be straightforward, as JAX [[https://jax.readthedocs.io/en/latest/jep/263-prng.html][uses a splittable PRNG representation]]. We will simply need to perform the following substitutions:
+
+#+begin_src python
+rng = at.random.RandomState()
+rng_key = jax.random.PRNGKey()
+
+at.random.split(rng)
+jax.random.split(rng_key)
+
+at.random.splitn(rng, 10)
+jax.random.split(rng_key, 10)
 #+end_src
 
 *** Etuplization
@@ -624,40 +655,6 @@ sum_et = etuple(
     )
 )
 #+end_src
-
-*** Behavior under transpilation
-
-**** JAX
-
-Transpilation to JAX would be straightforward, as JAX [[https://jax.readthedocs.io/en/latest/jep/263-prng.html][uses a splittable PRNG representation]]. We will simply need to perform the following substitutions:
-
-#+begin_src python
-rng = at.random.RandomState()
-rng_key = jax.random.PRNGKey()
-
-at.random.split(rng)
-jax.random.split(rng_key)
-
-at.random.splitn(rng, 10)
-jax.random.split(rng_key, 10)
-#+end_src
-
-**** Numba
-
-After [[https://github.com/aesara-devs/aesara/pull/1245][#1245]] Aesara will support NumPy's Generator API. NumPy has support for [[https://numpy.org/doc/stable/reference/random/bit_generators/philox.html][Philox as a BitGenerator]]. Philox is a [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][counter-based PRNG]] which can easily accomodate [[https://publications.lib.chalmers.se/records/fulltext/183348/local_183348.pdf][splittable PRNG representations]]. We can directly translate the =RandomVariable=\s to NumPy =Generator=\s and seed these generators at compile time:
-
-#+begin_src python
-at.random.normal(rng, 0, 1)
-
-# This happens at compile time
-counter, key = rng_index_to_key_counter(rng)
-
-# Now we can seed the rng
-rng = np.random.Generator(np.random.Philox(counter=counter, key=key))
-rng.normal(0, 1)
-#+end_src
-
-Alternatively, we could interpret the structure of the RNG-Variables graph, initialize one =np.random.Generator= and use the =jumped= and =advance= methods of the Philox =BitGenerator=.
 
 * RandomVariable Ops
 
