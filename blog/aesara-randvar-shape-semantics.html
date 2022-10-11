@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-10-10 Mon 16:35 -->
+<!-- 2022-10-11 Tue 11:24 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
@@ -45,9 +45,9 @@ The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b
 <li>The shape of samples is given by <code>sample_shape = batch_shape + support_shape</code></li>
 </ul>
 
-<div id="outline-container-org2a65cf6" class="outline-2">
-<h2 id="org2a65cf6">Support shape</h2>
-<div class="outline-text-2" id="text-org2a65cf6">
+<div id="outline-container-org6809671" class="outline-2">
+<h2 id="org6809671">Support shape</h2>
+<div class="outline-text-2" id="text-org6809671">
 <p>
 The first distinction we must make is based on the <i>support</i> of the distributions. Simply put, the support of a distribution is the domain over which the probability density (mass) function of the distribution is defined.
 </p>
@@ -66,9 +66,9 @@ The length of the <i>support shape</i> is the equal to the dimensionality of the
 </p>
 </div>
 
-<div id="outline-container-org0a12b70" class="outline-3">
-<h3 id="org0a12b70">Distributions over scalar values</h3>
-<div class="outline-text-3" id="text-org0a12b70">
+<div id="outline-container-orgff91f09" class="outline-3">
+<h3 id="orgff91f09">Distributions over scalar values</h3>
+<div class="outline-text-3" id="text-orgff91f09">
 <p>
 The support of the normal distribution, for instance, is the real line: every sample drawn from that distribution will be a real number. The support of the bernoulli distribution, on the other hand, is the set of integers $\left\{0, 1\right\}. These distributions are <i>scalar distributions</i>, in the sense that their support has 0 dimension (in <i>array</i> terms). Their support shape is <i>always</i> <code>(,)</code>.
 </p>
@@ -92,9 +92,9 @@ support shape: ()
 </div>
 </div>
 
-<div id="outline-container-org02f261d" class="outline-3">
-<h3 id="org02f261d">Distributions over vectors</h3>
-<div class="outline-text-3" id="text-org02f261d">
+<div id="outline-container-org7b36346" class="outline-3">
+<h3 id="org7b36346">Distributions over vectors</h3>
+<div class="outline-text-3" id="text-org7b36346">
 <p>
 Other distributions are defined on more complex spaces. The multivariate normal distribution, for instance, is 1-dimentsional and can be defined for an arbitrary number of components \(k\). In this case the support shape is of length 1 and equal to <code>(k,)</code>.
 </p>
@@ -154,9 +154,9 @@ Example of distributions with 1-dimensional support: <code>multivariate_normal</
 </div>
 </div>
 
-<div id="outline-container-orgcf42b45" class="outline-3">
-<h3 id="orgcf42b45">Distributions over matrices, etc.</h3>
-<div class="outline-text-3" id="text-orgcf42b45">
+<div id="outline-container-org42d3b35" class="outline-3">
+<h3 id="org42d3b35">Distributions over matrices, etc.</h3>
+<div class="outline-text-3" id="text-org42d3b35">
 <p>
 Finally, distributions can be defined on a space with an arbitrary number of dimensions. The <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart distribution</a> for instance is 2-dimensional: a sample from this distribution is a matrix.
 </p>
@@ -165,9 +165,9 @@ Finally, distributions can be defined on a space with an arbitrary number of dim
 </div>
 
 
-<div id="outline-container-org3a72333" class="outline-2">
-<h2 id="org3a72333">Batch shape</h2>
-<div class="outline-text-2" id="text-org3a72333">
+<div id="outline-container-org6f2c92a" class="outline-2">
+<h2 id="org6f2c92a">Batch shape</h2>
+<div class="outline-text-2" id="text-org6f2c92a">
 <p>
 Let us only consider distributions over scalar values for now.
 </p>
@@ -199,9 +199,9 @@ The <code>batch shape</code> encompasses one reality: the number of independent,
 </ul>
 </div>
 
-<div id="outline-container-org6eae336" class="outline-3">
-<h3 id="org6eae336">Batching</h3>
-<div class="outline-text-3" id="text-org6eae336">
+<div id="outline-container-orgc52357f" class="outline-3">
+<h3 id="orgc52357f">Batching</h3>
+<div class="outline-text-3" id="text-orgc52357f">
 <p>
 If we want to take \(3\) independent and indentically distributed samples from this distribution we can use the <code>size</code> keyword argument:
 </p>
@@ -257,9 +257,9 @@ We will say that <code>size</code> explicits the <i>batch shape</i>, which is th
 </div>
 </div>
 
-<div id="outline-container-orge388196" class="outline-3">
-<h3 id="orge388196">Vectorizing</h3>
-<div class="outline-text-3" id="text-orge388196">
+<div id="outline-container-org6a433ce" class="outline-3">
+<h3 id="org6a433ce">Vectorizing</h3>
+<div class="outline-text-3" id="text-org6a433ce">
 <blockquote>
 <p>
 <b>tldr;</b> Random Variables are `Blockwise` operators
@@ -342,7 +342,7 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </pre>
 </div>
 
-<pre class="example" id="org3689a46">
+<pre class="example" id="orgee33482">
 shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F8DCB881A80&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -434,9 +434,9 @@ We should specify these broadcasting rules as `gufunc` signatures in the docstri
 </div>
 
 
-<div id="outline-container-org53a7572" class="outline-3">
-<h3 id="org53a7572">Vectorizing + Batching</h3>
-<div class="outline-text-3" id="text-org53a7572">
+<div id="outline-container-orgd25d445" class="outline-3">
+<h3 id="orgd25d445">Vectorizing + Batching</h3>
+<div class="outline-text-3" id="text-orgd25d445">
 <p>
 It is possible to vectorize and batch at the same time. Note that <code>size</code> and that vectorized shape must be broadcastable
 </p>
@@ -483,9 +483,9 @@ It IS really simple:
 </div>
 
 
-<div id="outline-container-orgd5d2b4e" class="outline-2">
-<h2 id="orgd5d2b4e">All together</h2>
-<div class="outline-text-2" id="text-orgd5d2b4e">
+<div id="outline-container-org41d5b5e" class="outline-2">
+<h2 id="org41d5b5e">All together</h2>
+<div class="outline-text-2" id="text-org41d5b5e">
 <p>
 Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> will raise an exception if this is not correctly set.
 </p>
@@ -508,7 +508,7 @@ Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> w
 </pre>
 </div>
 
-<pre class="example" id="org893d908">
+<pre class="example" id="orgb8c409d">
 sample value: [[[6 2 2]
   [4 0 5]]
 
@@ -523,9 +523,9 @@ batch shape: (3, 2)
 </pre>
 </div>
 
-<div id="outline-container-org673836c" class="outline-3">
-<h3 id="org673836c">Broadcasting</h3>
-<div class="outline-text-3" id="text-org673836c">
+<div id="outline-container-org4f7edb7" class="outline-3">
+<h3 id="org4f7edb7">Broadcasting</h3>
+<div class="outline-text-3" id="text-org4f7edb7">
 <p>
 When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
 </p>
