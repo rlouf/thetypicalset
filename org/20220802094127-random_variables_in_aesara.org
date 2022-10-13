@@ -7,95 +7,32 @@
 - =RandomState=
 - =RandomStream=
 
-* AeP (Aesara Enhancement Propoal)
-** Guidelines
+* AeP: PRNG and =RandomVariable= representation in Aesara
+
+** Summary
+
+I propose a new approach to represent =RandomVariable= and PRNG states in Aesara's IR, based on the design of splittable PRNGs. The representation introduces minimal change to the existing =RandomVariable= interface while being more expressive. It should be easy to transpile to Aesara's current compilation target, and is compatible with the higher-level =RandomStream= interface.
+
+** References
+
+On counter-based PRNGs:
+- [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][Parallel Random Numbers: As easy as 1, 2, 3]] (2011)
+
+On splittable PRNG design for functional programs:
+- [[https://www.cambridge.org/core/journals/journal-of-functional-programming/article/distributed-random-number-generation/6D10F1D0A2FB7E66D5F746F6D0822D78][Distributed Random Number Generation]] (2008)
+- [[https://publications.lib.chalmers.se/records/fulltext/183348/local_183348.pdf][Splittable PRNGs Using Cryptographic Hashing]] (2013)
+
+** Desiderata
 
 A good PRNG design satisfies the following conditions:
-1. It is **expressive**: the behavior of the system is **predictable** by the caller, and allows them to expression any probabilistic program;
-2. It makes it possible to build **reproducible** programs ("seeding");
-3. It is **explicit in Aesara's IR**
-4. It can be manipulated by **Aesara's rewrite system**;
-5. It can be *easily transpiled* to current backends;
-6. It enables **vectorization** with generalized universal functions;
+1. It is expressive: the behavior of the system is predictable by the caller, and allows them to expression any probabilistic program;
+2. It makes it possible to build reproducible programs ("seeding");
+3. It is embedded in in Aesara's IR;
+4. It can be manipulated by Aesara's rewrite system;
+5. It can be easily transpiled to current backends;
+6. It enables vectorization with generalized universal functions;
 
-** Limits of the current design
-
-The current =RandomState= model threads the RNG state through all the functions that generate random values. This is how the =RandomState= API would look like with =default_output= set to =None=:
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-def sample(rng):
-
-rng = np.random.default_rng(12)
-rng_x, x_rv = at.random.normal(0, 1, rng=rng)
-rng_y, y_rv = at.random.normal(0, 1, rng=rng_x)
-z_at = x_rv + y_rv
-#+end_src
-
-This design is inconvenient to work with.
-
-**** Error-prone and cumbersome
-
-*For users* having to explictly thread the =rng= states is both error-prone and cumbersome. I believe this is why the RNG output is hidden by setting =default_output= to =1=, and one of the motivations behind the =RandomStream= interface.
-
-**** Adds sequencing constraints between functions that have no data dependence
-
-*For the Aesara IR* the threading of RNGs adds sequencing constraints between functions that have no data dependence otherwise. In theory, the two calls to =at.random.normal= are independent and could be made in parallel. In practice, one has to wait for the first call to complete to be able to make the second all.
-
-Same with gufuncs: we do not want to introduce rng-dependence between the different function calls. We want to be able to give each dimension (give example) a rng and let it run with it. No collision:
-
-**** Lack of a clear symbolic representation
-
-*For the Aesara IR* we don't have distinct operators that updates the random state and generate a pseudo-random number from a random state.
-
-And finally this is not enought for the one-to-many problem in rewrites.
-
-Only the caller knows how the random state should be managed as called functions are unaware of the context. The solution is very simple, it is to give the caller the responsibility of advancing the rng state. So functions do not need to return RNG state.
-
-/Note:/ Well, some function have to return the RNG state in JAX and it's the body function of while loops. Still goes to show how broken of an abstraction it is. There needs to pass RNG state because there /is/ a data dependence between the two.
-
-#+begin_src python
-def sequential(rng):
-    rng_y, rng_z = at.random.split(rng, 2)
-    return call(rng_y) + call(rng_z)
-
-sequential_et = etuple(
-    etuplize(at.add),
-    etuple(
-        call,
-        etuple(
-            nth,
-            0,
-            etuple(
-                etuplize(at.random.split),
-                rng,
-                2
-            )
-        )
-    ),
-    etuple(
-        call,
-        etuple(
-            nth,
-            1,
-            etuple(
-                etuplize(at.random.split),
-                rng,
-                2
-            )
-        )
-    )
-)
-#+end_src
-
-*First* justify the =split=, =rand= symbolic interface (reference Haskell)
-
-
-Counter based approach: [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][Parallel Random Numbers: As easy as 1, 2, 3]]
-
-** Why this proposal
+** Motivation behind this proposal
 
 This proposal is motivated by two issues that illustrate the shortcomings of the current representation of =RandomVariable=\s and PRNG states in Aesara:
 
@@ -149,14 +86,13 @@ Y_et = etuple(
 )
   #+end_src
 
-  It is indeed not clear what the values of =rng_x= and =rng_y= should be given the value of =rng=. We should have a way to be able to create two independant RNG states from a single one.
+  It is indeed not clear what the values of =rng_x= and =rng_y= should be given the value of =rng=. A few other application-related shortcomings of the current representation will be given below.
 
+** Proposal
 
-** Proposal: A Haskell-like design
+In the following we focus on /the symbolic representation of random variables and PRNG states in Aesara's IR/. We leave discussions about compilation targets and solution to the previous issues for the end.
 
-In the following we focus on /the symbolic representation of random variables and PRNG states in Aesara's IR/. We leave discussions about compilation of this representation, and solution to the aforementionned issues for the end.
-
-If we represent the internal state of the PRNG by the type =RandState=, the current design of =RandomVariable=\s can be summarized by the following simplified signature:
+If we represent the internal state of the PRNG by the type =RandState= (short for =RandomStateType=), the current design of =RandomVariable=\s can be summarized by the following simplified signature:
 
 #+begin_src haskell
 RandomVariable :: RandState -> (RandState, TensorVariable)
@@ -205,7 +141,7 @@ Creating spurious sequential dependencies by threading PRNG states is indeed uns
 - /Parallelization and Vectorization:/ Using random variables in user-defined generalized universal functions is going to require a lot of compiler magic to make sure that the random state is updated properly, and the behavior will be completely opaque to the user;
 - The fact that callers cannot be intentional about what they do with the random state is limiting. This can be necessary in pratical applications, for instance to implement [[https://statisfaction.wordpress.com/2017/09/17/unbiased-hamiltonian-monte-carlo-with-couplings/][coupled sampling algorithms]] in which two algorithms share the same random state.
 
-A first idea is to simplify the design of =RandomVariable=\s so that it is only responsible for one thing: generate a random value from a PRNG state. The =Op= thus creates an =Apply= node that takes a =RandState= (using the above notation) as input and outputs a (random) =Variable=:
+A natural idea is to simplify the design of =RandomVariable=\s so that it is only responsible for one thing: generating a random value from a PRNG state. The =Op= thus creates an =Apply= node that takes a =RandState= (using the above notation) as input and outputs a (random) =Variable=:
 
 #+begin_src haskell
 RandomVariable :: RandState -> Variable
@@ -271,33 +207,50 @@ The =next= operator is however not completely satisfactory. Let us consider a mo
 import aesara.tensor as at
 
 rng = at.random.RandState(0)
-rng_x = at.random.next(rng)
-rng_y = at.random.next(rng_x)
+rng_y = at.random.next(rng)
 
-x_rv = call_x(rng_x)
-y_rv = call_y(rng_y)
+x_rv = call(rng_x)
+y_rv = call(rng_y)
 z_at = x_rv + y_rv
 #+end_src
 
 We can easily find an implementation of =call= that makes the previous code generate a random state collision:
 
 #+begin_src python
-def call_x(rng_a):
+def call(rng_a):
     a_rv = at.random.normal(rng_a, 0, 1)
     rng_b = at.random.next(rng_a)
     b_rv = at.random.normal(rng_b, 0, 1)
     return a_rv * b_rv
 #+end_src
 
-The issue arises because although we've separated PRNG state update and random value generation, our symbolic structure is still /sequential/: each =RandState= has one and only one ancestor. We can of course circumvent this issue knowing how many times =next= is called within the function, by "jumping" the same number of times to obtain =rng_y=, but this can quickly become complex (what if =call= is imported from somewhere else?).
+To avoid this kind of issues, we must thus require user-defined functions to return the last PRNG state along the result:
 
-It would make things easier if =RandState=\s could have several children, and if each of these child led to separate streams of random number. Let us define the following =split= operator:
+#+begin_src python
+import aesara.tensor as at
+
+def call(rng_a):
+    a_rv = at.random.normal(rng_a, 0, 1)
+    rng_b = at.random.next(rng_a)
+    b_rv = at.random.normal(rng_b, 0, 1)
+    return (a_rv * b_rv), at.random.next(rng_b)
+
+
+rng = at.random.RandState(0)
+x_rv, rng_x = call(rng)
+y_rv, rng_y = call(rng_x)
+z_at = x_rv + y_rv
+#+end_src
+
+Threading PRNG state is still necessary to guarantee correctness and the two =call= functions cannot be called in parallel. The issue arises because, even though we have separated PRNG state update and random value generation, our symbolic structure is still /sequential/: each =RandState= has one and only one ancestor. We can of course circumvent this issue knowing how many times =next= is called within the function, by "jumping" the same number of times to obtain =rng_y=, but this can quickly become complex (what if =call= is imported from somewhere else?).
+
+It would make things easier if a =RandState=\s could have several children, and if each of these child led to separate streams of random number. Let us define the following =split= operator:
 
 #+begin_src haskell
 split :: RandState -> (RandState, RandState)
 #+end_src
 
-So I can never get the same =RandState= by calling split any number of times on either the left or right returned state. In other words, if =split= implicitly defines a binary tree in which all the nodes are unique. This can be easily represented by letting =RandState= be a number in binary format. The leftmost child state is obtained by appending =0= to the parent's state and the rightmost child state by appending =1=:
+We require that we can never get the same =RandState= by calling =split= any number of times on either the left or right returned state. In other words, =split= should implicitly defines a binary tree in which all the nodes are unique. This can be easily represented by letting =RandState= holding a number in binary format. The leftmost child state is obtained by appending =0= to the parent's state and the rightmost child state by appending =1=:
 
 #+begin_src python :results output
 from typing import NamedTuple
@@ -324,9 +277,9 @@ print(rng, l, lr)
 
 #+RESULTS:
 
-If the generator called by =RandomVariable= can be made a deterministic function of this binary value, the computations are fully reproducible. We added a =key= attribute that can be specified by the user at initialization to seed the PRNG state. Note that the tree structure is explicit in our graph representation, since =l= and =r= would depend on =rng= via the split operator, but this internal state can nevertheless be incremented at runtime to be used at compilation time.
+If the generator called by =RandomVariable= can be made a deterministic function of this binary value, the computations are fully reproducible. We added a =key= attribute that can be specified by the user at initialization to seed the PRNG state. The tree structure is of course explicit in our graph representation, since =l= and =r= depend on =rng= via the =split= operator. Nevertheless, we can increment this internal state when building the graph in a way that allows us to compile without traversing the graph.
 
-The previous =next= operator becomes redundant within this representation, and its interaction with the =split= operator requires careful thought anyway. We forget it for now and our toy example becomes:
+The =next= operator we previously defined becomes redundant within this representation. Since its interaction with the =split= operator would require careful thought we leave it aside in the following. Using the new operator our toy example becomes:
 
 #+begin_src python
 import aesara.tensor as at
@@ -339,7 +292,9 @@ y_rv = at.random.normal(rng_y, 0, 1)
 z_at = x_rv + y_rv
 #+end_src
 
-It is also natural to implement the =splitn= operator represented by:
+Note that the "main" sub-graph that contains random variables, and the PRNG sub-graph are still minimally connected.
+
+Finally, it is also natural to implement the =splitn= operator represented by:
 
 #+begin_src haskell
 splitn :: RandState -> Int -> (RandState, ..., RandState)
@@ -359,9 +314,6 @@ x_rv = at.random.normal(rng_x, 0, 1)
 y_rv = at.random.normal(rng_y, 0, 1)
 z_at = v_rv + w_rv + x_rv + z_rv
 #+end_src
-
-The "main" sub-graph and the PRNG sub-graph are still minimally connected. It also seems like it would be easy to re-construct the latter after performing rewrites on the former.
-
 *** Implementation
 
 When it comes to practical implementations, this representation is only convenient for counter-based PRNGs like =Philox= implemented in NumPy: we generate a pair of =(key, counter)= from our =RandState=\s and pass these as an input to the generator.
@@ -369,175 +321,30 @@ When it comes to practical implementations, this representation is only convenie
 
 **** =RandState= and =split= implementation
 
-The mock implementation of =RandState= and =split= above is naive in the sense that the counter space $\mathcal{S}$ of real PRNGs does not usually extend indefinitely. In practice we will need to compress the state using a hashing function that also increments the =key=.
+The mock implementation of =RandState= and =split= above is naive in the sense that the counter space $\mathcal{S}$ of real PRNGs does not usually extend indefinitely. In practice we will need to compress the state using a hashing function that also increments the =key=. To be immediately compatible with NumPy in the =perform= function we can use Philox's hash function to update the state as we build the graph. Since the hash is deterministic we can still walk the =RandState= tree in our representation and cheaply recompute the states should we need to.
 
-To be immediately compatible with NumPy in the =perform= function we can use Philox's hash function to update the state as we build the graph. Since the hash is deterministic we can still walk the =RandState= tree in our representation and cheaply recompute the states should we need to.
-
-/Op and Variable implementations to come/
+/Op and Variable implementations to come./
 
 **** ==RandomVariable=
 
-The modifications to =RandomVariable= Ops is minimal: we need to modify their =__call__=, =make_node= and =perform= methods. =default_output= is not needed as we do not return a =RandomState= anymore.
+The modifications to =RandomVariable= Ops are minimal:
 
-#+begin_src python
-from aesara.graph.op import Op
-
-
-class RandomVariable(Op)
-    def __call__(self, rng, *args, size=None, name=None, dtype=None, **kwargs):
-        res = super().__call__(rng, size, dtype, *args, **kwargs)
-
-        if name is not None:
-            res.name = name
-
-        return res
-
-    def make_node(self, rng, size, dtype, *dist_params):
-        """Create a random variable node.
-
-        Parameters
-        ----------
-        rng: RandState
-        size: int or Sequence
-            NumPy-like size parameter.
-        dtype: str
-            The dtype of the sampled output.  If the value ``"floatX"`` is
-            given, then `dtype` is set to ``aesara.config.floatX``.  This value is
-            only used when ``self.dtype`` isn't set.
-        dist_params: list
-            Distribution parameters.
-
-        Results
-        -------
-        out: Apply
-            A node with inputs ``(rng, size, dtype) + dist_args`` and outputs
-            ``(out_var)``.
-
-        """
-        size = normalize_size_param(size)
-
-        dist_params = tuple(
-            as_tensor_variable(p) if not isinstance(p, Variable) else p
-            for p in dist_params
-        )
-
-        # `rng` needs to be explicitly provided.
-        # if rng is None:
-        #     rng = aesara.shared(np.random.default_rng())
-        # elif not isinstance(rng.type, RandomType):
-        #     raise TypeError(
-        #         "The type of rng should be an instance of either RandomGeneratorType or RandomStateType"
-        #     )
-
-        shape = self._infer_shape(size, dist_params)
-        _, bcast = infer_broadcastable(shape)
-        dtype = self.dtype or dtype
-
-        if dtype == "floatX":
-            dtype = config.floatX
-        elif dtype is None or (isinstance(dtype, str) and dtype not in all_dtypes):
-            raise TypeError("dtype is unspecified")
-
-        if isinstance(dtype, str):
-            dtype_idx = constant(all_dtypes.index(dtype), dtype="int64")
-        else:
-            dtype_idx = constant(dtype, dtype="int64")
-            dtype = all_dtypes[dtype_idx.data]
-
-        outtype = TensorType(dtype=dtype, shape=bcast)
-        out_var = outtype()
-        inputs = (rng, size, dtype_idx) + dist_params
-        output = (out_var,)
-
-        return Apply(self, inputs, outputs)
-
-    def perform(self, node, inputs, outputs):
-        smpl_out = outputs
-        rng, size, dtype, *args = inputs
-
-        out_var = node.outputs[1]
-
-        # If `size == []`, that means no size is enforced, and NumPy is trusted
-        # to draw the appropriate number of samples, NumPy uses `size=None` to
-        # represent that.  Otherwise, NumPy expects a tuple.
-        if np.size(size) == 0:
-            size = None
-        else:
-            size = tuple(size)
-
-        ##----------------------##
-        ##  THE IMPORTANT STUFF ##
-        ##----------------------##
-        rng = np.random.Generator(np.random.Philox(key=rng.key, counter=rng.counter))
-        smpl_val = self.rng_fn(rng, *(args + [size]))
-        ##----------------------##
-        ##  THE IMPORTANT STUFF ##
-        ##----------------------##
-
-        if (
-            not isinstance(smpl_val, np.ndarray)
-            or str(smpl_val.dtype) != out_var.type.dtype
-        ):
-            smpl_val = _asarray(smpl_val, dtype=out_var.type.dtype)
-
-        smpl_out[0] = smpl_val
-
-    def rng_fn(self, rng, *args, **kwargs):
-        """Sample a numeric random variate."""
-        return getattr(rng, self.name)(*args, **kwargs)
-#+end_src
+- =__call__= now takes a =RandState= as a positional argument;
+- =make_node= only returns =out_var=. The =default_output= attribute is not needed anymore.
 
 **** =RandomStream=
 
-We can keep the =RandomStream= API, use a shared variable to hold the =RandState= and handle the splitting internally. Note that this interface would not be as flexible as the explicit interface:
+We can keep the =RandomStream= API, use a shared variable to hold the =RandState= and handle the splitting internally. The RNG sub-graphs are now found in the updates' graph.
 
-#+begin_src python
-def gen(self, op: "RandomVariable", *args, **kwargs) -> TensorVariable:
-    r"""Generate a draw from `op` seeded from this `RandomStream`.
+/In a second time we may consider instantiating =RandState= as shared variables by default to decouple both the random variable and the PRNG state graphs. I am not sure of the tradeoffs here, but it may alleviate concerns related to graph rewrites./
 
-    Parameters
-    ----------
-    op
-        A `RandomVariable` instance
-    args
-        Positional arguments passed to `op`.
-    kwargs
-        Keyword arguments passed to `op`.
+*** Compilation
 
-    Returns
-    -------
-    The symbolic random draw performed by `op`.  This function stores
-    the updated `RandomType`\s for use at compile time.
-
-    """
-    if "rng" in kwargs:
-        raise ValueError(
-            "The `rng` option cannot be used with a variate in a `RandomStream`"
-        )
-
-    # Update the random state and take a sample
-    _, self.rng = at.random.split(self.rng)
-    out = op(self.rng, *args, **kwargs)
-
-    # This is the value that should be used to replace the old state
-    # (i.e. `rng`) after `out` is sampled/evaluated.
-    # The updates mechanism in `aesara.function` is supposed to perform
-    # this replace action.
-    new_rng = out.owner.outputs[0]
-
-    self.state_updates.append((rng, new_rng))  # happens here
-
-    rng.default_update = new_rng
-
-    return out
-#+end_src
-
-
-*** Transpilation
+It is essential that our representation of PRNG states and =RandomVariable=\s in the graph can be easily transpiled to the existing targets (C, Numba, JAX) and future targets. In the following I outline the transpilation process for the current targets.
 
 **** Numba
 
-After [[https://github.com/aesara-devs/aesara/pull/1245][#1245]] Aesara will support NumPy's Generator API. NumPy has support for [[https://numpy.org/doc/stable/reference/random/bit_generators/philox.html][Philox as a BitGenerator]]. Philox is a [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][counter-based PRNG]] which can easily accomodate [[https://publications.lib.chalmers.se/records/fulltext/183348/local_183348.pdf][splittable PRNG representations]]. Assuming we use Philox's hash function directly in the Aesara graph, the transpilation of =RandomStream=\s should be straighforward. For the explicit interface, we can directly translate the =RandomVariable=\s to NumPy =Generator=\s and seed these generators at compile time. So that:
+After [[https://github.com/aesara-devs/aesara/pull/1245][#1245]] Aesara will support NumPy's Generator API. Furthermore NumPy has support for [[https://numpy.org/doc/stable/reference/random/bit_generators/philox.html][Philox as a BitGenerator]], a [[http://www.thesalmons.org/john/random123/papers/random123sc11.pdf][counter-based PRNG]] which can easily accomodate [[https://publications.lib.chalmers.se/records/fulltext/183348/local_183348.pdf][splittable PRNG representations]]. Assuming we can map each path in the PRNG graph to a =(key, counter)= tuple, the transpilation of =RandomStream=\s using the Philox =BitGenerator= should be straighforward. For the explicit splitting interface, we can directly translate the =RandomVariable=\s to NumPy =Generator=\s and seed these generators at compile time. So that:
 
 #+begin_src python
 at.random.normal(rng, 0, 1)
@@ -546,11 +353,9 @@ at.random.normal(rng, 0, 1)
 Becomes:
 
 #+begin_src python
-rng = np.random.Generator(np.random.Philox(counter=rng.counter, key=rng.key))
-rng.normal(0, 1)
+gen = np.random.Generator(np.random.Philox(counter=rng.counter, key=rng.key))
+gen.normal(0, 1)
 #+end_src
-
-Alternatively, we could interpret the structure of the RNG-Variables graph, initialize one =np.random.Generator= and use the =jumped= and =advance= methods of the Philox =BitGenerator=.
 
 **** JAX
 
@@ -567,94 +372,73 @@ at.random.splitn(rng, 10)
 jax.random.split(rng_key, 10)
 #+end_src
 
-*** Etuplization
+** Back to the motivating issues
 
-These new operators simplify greatly the work with etuplized versions of graphs with random variables. Assuming we have a =Nth= operator in Aesara as well:
+The problems linked to the existence of the =default_output= attribute disappear since =RandomVariable=\s do not return PRNG states anymore. The one-to-many difficulty we are facing with the relations between etuplized graphs also disappears with a =split= operator. Using the example from the beginning we can for instance write:
 
 #+begin_src python
-from etuples import ExpressionTuple, etuplize
-from aesara.graph.rewriting.unify import OpExpressionTuple
+from etuples import etuple
+from kanren import var
 
-rng = at.random.default_rng()
-rng_x, rng_y = at.random.split(rng)
-x_rv = at.random.normal(rng_x, 0, 1)
-y_rv = at.random.normal(rng_y, 0, 1)
-z_at = x_rv + y_rv
+mu_x, mu_y, sigma2_x, sigma2_y = var(), var(), var(), var()
 
-z_et = OpExpressionTuple(
-    etuplize(at.add),
-    OpExpressionTuple(
-        etuplize(at.random.normal),
-        ExpressionTuple(
-           etuplize(aesara.graph.nth),
-           1,
-           OpExpressionTuple(
-               etuplize(at.random.split)
-               rng
-           )
-        ),
-        0,
-        1,
-        size,
-        dtype,
+rng, size, dtype = var(), var(), var()
+X_et = etuple(
+    etuplize(at.random.normal),
+    rng,
+    size,
+    dtype,
+    etuple(
+        etuplize(at.add),
+        mu_x,
+        mu_y
     ),
-    OpExpressionTuple(
-        etuplize(at.random.normal),
-        ExpressionTuple(
-           etuplize(aesara.graph.nth),
-           0,
-           OpExpressionTuple(
-               etuplize(at.random.split)
-               rng
-           )
-        ),
-        0,
-        1,
-        size,
-        dtype,
-    ),
+    etuple(
+        etuplize(at.add),
+        sigma2_x,
+        sigma2_y,
+    )
 )
-#+end_src
 
-This solves the one-to-many problem we had for mixtures. If we have a relation between a single random variable and two we can now write:
-
-#+begin_src python
-z_et = etuple(etuplize(at.random.normal), rng_lv, size_lv, dtype_lv, at.as_tensor(1.), at.as_tensor(2.))
-
-sum_et = etuple(
+rng_x, size_x, dtype_x = var(), var(), var()
+rng_y, size_y, dtype_y = var(), var(), var()
+Y_et = etuple(
     etuplize(at.add),
     etuple(
         etuplize(at.random.normal),
         etuple(
-            etuplize(at.graph.nth),
+            nth,
             0,
             etuple(
-                etuplize(at.random.split),
-                rng_lv,
+                split,
+                rng,
             )
-        )
-        size_lv,
-        dtype_lv,
-        at.as_tensor(0.),
-        at.as_tensor(1.),
+        ),
+        size_x,
+        dtype_x,
+        mu_x,
+        sigma2_x
     ),
     etuple(
         etuplize(at.random.normal),
         etuple(
-            etuplize(at.graph.nth),
+            nth,
             1,
             etuple(
-                etuplize(at.random.split),
-                rng_lv,
+                split,
+                rng,
             )
-        )
-        size_lv,
-        dtype_lv,
-        at.as_tensor(0.),
-        at.as_tensor(1.),
+        ),
+        size_y,
+        dtype_y,
+        mu_y,
+        sigma2_y
     )
 )
 #+end_src
+
+Which is guaranteed to be collision-free by construction of the =split= operator, as long as the PRNG state used by the original normal distribution isn't passed to a =split= operator somewhere else in the original graph (*todo:* specify API requirements to guarantee uniqueness of the random numbers).
+
 
 * RandomVariable Ops
 
