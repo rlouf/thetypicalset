@@ -1,0 +1,93 @@
+#+title: Oh the objects we manipulate
+#+date:  <2022-11-15 Tue>
+
+Since some dude has realized that we could implement boolean logic using electrical circuits, the history of computing has consisted in piling up abstractions on top of another. From the electronic the machine code was born, on top of which compilers were born, on top of which modern languages were born. And has the history keeps unfolding, these abstractions are getting us closer to the abstractions that are manipulated by other fields. Doing so, we are getting closer to have computers do something that is useful /to us/, rather than about us doing something that is useful for computing itself.
+
+Sometimes, it works the other way, and it is the outside abstractions that help you understand your code better. I have spent the past few weeks mulling over the /meaning/ of the following code:
+
+#+begin_src python
+import aeppl
+import aesara.tensor as at
+
+x_rv = at.random.normal(0, 1)
+y = at.clip(x_rv, 0, 1)
+
+logprob, (y_vv,) = aeppl.joint_logprob(y)
+#+end_src
+
+There is a little context to unpack here. In Aesara, =x_rv= is an instance of a =RandomVariable=, and compiling the following code will generate samples from =normal(0, 1)=, and =at.clip= will be applied to the resulting samples:
+
+#+begin_src python :results output
+import aesara
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+x_rv = srng.normal(0, 3)
+y = at.clip(x_rv, 0, 1)
+
+sample_fn = aesara.function((), y)
+print(sample_fn())
+print(sample_fn())
+print(sample_fn())
+print(sample_fn())
+#+end_src
+
+#+RESULTS:
+: 1.0
+: 0.0
+: 1.0
+: 0.01763112121528293
+
+No ambiguity here. The =RandomVariable= operator is a function that takes a =rng= state, some parameters and returns a sample:
+
+#+begin_src haskell
+RandomVariable :: RNG, mu, sigma -> Sample
+#+end_src
+
+$f \longrightarrow \mathbb{R}$. The =at.clip(_, 0, 1)= operator represents a function $\mathbb{R} \longrightarrow \left[0, 1\right]$, and so operates naturally on the output of the random variable. So in this code snippet, there is no ambiguity as long as =RandomVariable= generates values in $\mathbb{R}$ or any of its subsets.
+
+But the first snippet above tells a different story. Let's take a simpler example, trying to compute the joint log-probability density of the distribution defined as:
+
+#+begin_src python
+import aeppl
+import aesara
+import aesara.tensor as at
+
+x_rv = at.random.normal(0, 1)
+z_rv = at.random.normal(x_rv, 1)
+
+logprob, (x_vv, y_vv,) = aeppl.joint_logprob(x_rv, y_rv)
+fn = aesara.function((x_vv, y_vv), logprob)
+print(fn(1., 1.))
+#+end_src
+
+#+RESULTS:
+
+Have you noticed? The /meaning/ of =x_rv= has suddenly changed! It suddenly becomes an object to which a density is attached, and =joint_logprob= uses this information to compute the joint log-density of the full model.
+
+=RandomVariable=\s are not merely functions in $\mathbb{R}$ anymore. There are something more: random variables. In probability as measure theory, random variables are merely measurable functions, of measures, here of type $\mathbb{MR}$. The output of =at.random.normal(0, 1)= is no longer $\mathbb{R}$ but $\mathbb{MR}$. So the first code snippet is indeed confusing:
+
+#+begin_src python
+x_rv = at.random.normal(0, 1)
+y = at.clip(x, 0, 1)
+#+end_src
+
+because =at.clip= is defined for arguments of type $\mathbb{R}$ and not $\mathbb{MR}$! If you code a little bit, you are probably used to the concept of /operator overloading/, which is to use the same name for operators that operate in different types. We could thus overload =at.clip= in this context for arguments in $\mathbb{MR}$. But what is the type of the output in this case?
+
+Well for this you need a little bit of measure theory! The measure $x_{rv}$ can be denoted as, using the expectation notations used by de Finetti:
+
+
+$$
+x_{rv} = \lambda f. \int_\mathbb{R} \operatorname{dnormal}(0, 1)(x)\; f(x) dx
+$$
+
+where $\operatorname{dnormal(0, 1)}$ is the probability density of the normal distribution. What happens when we take =at.clip= of this measure? Well we just have to write it down:
+
+\begin{align*}
+y &= \lambda f. \int_\mathbb{R} \operatorname{dnormal}(0, 1)(x)\; f(\min(0, \max(1, x))) dx\\
+  &= \lambda f. \int_{-\infty}^0 \operatorname{dnormal}(0, 1)(x) \mathrm{d}x\; f(0)\\
+  &+ \lambda f. \int_{0}^1 \operatorname{dnormal}(0, 1)(x)\; f(x) \mathrm{d}x\\
+  &+ \lambda f. \int_{1}^\infty \operatorname{dnormal}(0, 1)(x) \mathrm{d}x\; f(1)
+\end{align*}
+
+So $y$ is a measure, and we can even compute its density!
