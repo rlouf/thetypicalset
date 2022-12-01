@@ -3,53 +3,99 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-11-25 Fri 17:45 -->
+<!-- 2022-12-01 Thu 08:41 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">Shape semantics for random variables in Aesara</h1>
 <p>
-The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> is partitioned in semantically different pieces:
+<b><b>DRAFT</b></b>
+</p>
+
+<p>
+We can relate the <code>RandomVariable</code> objects in Aesara to their mathematical counterpart by tying the set of possible RNG states to the sample space \(\Omega\). If the random variable \(X\) takes its values in the measurable space \(E\), then \(X\) can be understod as a function \(X: \Omega \to E\). It is important to undestand that the <code>RandomVariable</code> operator does not represent random variables, but <i>creates</i> random variables (the apply nodes that take random draws). We represent \(E\) by its elements; although the returned arrays are symbolic representations of elements of \(E\), they do not represent the values themselves, which are obtained by compiling an running the function. We represent \(X\) by its output (we conveniently forget about \(\omega\))
+</p>
+
+<p>
+The operators return <b>realizations</b> of the random variables.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = srng.normal(0, 1)
+
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">srng.normal(0, 1) : \Omega \to E</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">x \in E</span>
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Other consideration are relevant for AePPL, here we just need to know they're elements of $E$.</span>
+
+</pre>
+</div>
+
+<p>
+The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> is partitioned in semantically different pieces, that refer to the shape of \(E\), i.e. the shape of draws we get:
 </p>
 <ul class="org-ul">
-<li>The <b>support shape</b> is the shape of one draw from the base distribution;</li>
-<li>The <b>batch shape</b> is the number of independent draws we want from the distribution;</li>
-<li>The <b>batch shape</b> can be infered using broadcasting rules for the distribution parameters, and broadcasting shapes with the <code>size</code> keyword argument;</li>
-<li>The shape of samples is given by <code>sample_shape = batch_shape + support_shape</code></li>
+<li>The <b>support shape</b> corresponds to the shape of one element in \(E\), the support of the distribution;</li>
+<li>The <b>batch shape</b> is the number \(N\) of independent random variables \(X_i: \Omega \to E\) where \(i \in \left\{ 1 \dots N\right\}\); These can be identically or differently distributed.</li>
+<li><code>RandomVariable</code> creates <i>differently distributed</i> random variables by passing different values of parameters to the operators. Broadcasting rules apply, and the <b>batch shape</b> (i.e. number of differently distributed random variables) is inferred from these broadcasting rules.</li>
+<li><code>RandomVariable</code> creates <i>identically distributed</i> random variables via the <code>size</code> keyword argument. There is a level of indirection here; the shape specified by <code>size</code> must broadcast with the shape of the broadcasted arguments. So if the latter is <code>(a, b)</code>, to define <code>c</code> identically distributed RVs one must set <code>size</code> to <code>(c, a, b)</code>.</li>
+<li><p>
+The shape of the array of random variables is given by <code>sample_shape = batch_shape + support_shape</code>
+</p>
+
+<blockquote>
+<p>
+What's confusing about all this is that we are passing a single RNG state to the distribution even when we are looking a realization of several different random variables. Underlying implementation must use different rng states, though, and we should probably talk about this.
+</p>
+</blockquote></li>
 </ul>
 
-<div id="outline-container-org5d7504b" class="outline-2">
-<h2 id="org5d7504b">Support shape</h2>
-<div class="outline-text-2" id="text-org5d7504b">
+
+<div id="outline-container-orge019eb3" class="outline-2">
+<h2 id="orge019eb3">Support shape</h2>
+<div class="outline-text-2" id="text-orge019eb3">
 <p>
-The first distinction we must make is based on the <i>support</i> of the distributions. Simply put, the support of a distribution is the domain over which the probability density (mass) function of the distribution is defined.
+The first distinction we must make is based on the <i>support</i> \(E\) of the distributions. Simply put, the support of a distribution is the domain over which the density of the probability measure is defined, i.e.
 </p>
 
 <p>
@@ -66,11 +112,11 @@ The length of the <i>support shape</i> is the equal to the dimensionality of the
 </p>
 </div>
 
-<div id="outline-container-org3831c77" class="outline-3">
-<h3 id="org3831c77">Distributions over scalar values</h3>
-<div class="outline-text-3" id="text-org3831c77">
+<div id="outline-container-orge566824" class="outline-3">
+<h3 id="orge566824">Distributions over scalar values</h3>
+<div class="outline-text-3" id="text-orge566824">
 <p>
-The support of the normal distribution, for instance, is the real line: every sample drawn from that distribution will be a real number. The support of the bernoulli distribution, on the other hand, is the set of integers $\left\{0, 1\right\}. These distributions are <i>scalar distributions</i>, in the sense that their support has 0 dimension (in <i>array</i> terms). Their support shape is <i>always</i> <code>(,)</code>.
+The support of the normal distribution, for instance, is \(\mathbb{R}\): every sample drawn from that distribution is an element of \(\mathbb{R}\). The support of the bernoulli distribution, on the other hand, is the set of integers \(\left\{0, 1\right\}\). These distributions are <i>scalar distributions</i>, in the sense that their support has 0 dimension (in <i>array</i> terms). Their support shape is <i>always</i> <code>(,)</code>.
 </p>
 
 <div class="org-src-container">
@@ -92,11 +138,11 @@ support shape: ()
 </div>
 </div>
 
-<div id="outline-container-org1c6fd56" class="outline-3">
-<h3 id="org1c6fd56">Distributions over vectors</h3>
-<div class="outline-text-3" id="text-org1c6fd56">
+<div id="outline-container-orgefc8645" class="outline-3">
+<h3 id="orgefc8645">Distributions over vectors</h3>
+<div class="outline-text-3" id="text-orgefc8645">
 <p>
-Other distributions are defined on more complex spaces. The multivariate normal distribution, for instance, is 1-dimentsional and can be defined for an arbitrary number of components \(k\). In this case the support shape is of length 1 and equal to <code>(k,)</code>.
+Other distributions are defined on more complex spaces. The multivariate normal distribution is defined on \(\mathbb{R}^k\), so a sample from this distribution will be a vector of length \(k\). In this case the support shape is thus equal to <code>(k,)</code>.
 </p>
 
 <div class="org-src-container">
@@ -105,9 +151,9 @@ Other distributions are defined on more complex spaces. The multivariate normal 
 
 <span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">d</span> = 4
-<span style="font-weight: bold; font-style: italic;">mu</span> = np.random.rand(d)
-<span style="font-weight: bold; font-style: italic;">sigma</span> = np.eye(d)
+<span style="font-weight: bold; font-style: italic;">k</span> = 4
+<span style="font-weight: bold; font-style: italic;">mu</span> = np.random.rand(k)
+<span style="font-weight: bold; font-style: italic;">sigma</span> = np.eye(k)
 <span style="font-weight: bold; font-style: italic;">rv</span> = srng.multivariate_normal(mu, sigma)
 <span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
 
@@ -117,7 +163,7 @@ Other distributions are defined on more complex spaces. The multivariate normal 
 </div>
 
 <pre class="example">
-sample value: [ 1.98832878 -0.61854378  1.36816224  0.02745684]
+sample value: [ 2.39376392 -0.59212003  1.48160085  0.18195058]
 support shape: (4,)
 </pre>
 
@@ -154,20 +200,20 @@ Example of distributions with 1-dimensional support: <code>multivariate_normal</
 </div>
 </div>
 
-<div id="outline-container-org870bb3d" class="outline-3">
-<h3 id="org870bb3d">Distributions over matrices, etc.</h3>
-<div class="outline-text-3" id="text-org870bb3d">
+<div id="outline-container-org582e4d1" class="outline-3">
+<h3 id="org582e4d1">Distributions over matrices, etc.</h3>
+<div class="outline-text-3" id="text-org582e4d1">
 <p>
-Finally, distributions can be defined on a space with an arbitrary number of dimensions. The <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart distribution</a> for instance is 2-dimensional: a sample from this distribution is a matrix.
+Finally, distributions can be defined on a space with an arbitrary number of dimensions, for instance over \(\mathbb{R}^{n \times m}\). The <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart distribution</a> for instance is 2-dimensional: a sample from this distribution is a matrix.
 </p>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-org8f1be8f" class="outline-2">
-<h2 id="org8f1be8f">Batch shape</h2>
-<div class="outline-text-2" id="text-org8f1be8f">
+<div id="outline-container-orgf69b44d" class="outline-2">
+<h2 id="orgf69b44d">Batch shape</h2>
+<div class="outline-text-2" id="text-orgf69b44d">
 <p>
 Let us only consider distributions over scalar values for now.
 </p>
@@ -191,7 +237,7 @@ sample shape: ()
 
 
 <p>
-The <code>batch shape</code> encompasses one reality: the number of independent, identically distributed samples we want to draw from the probability distribution. There are two ways to arrive at the same batch shape:
+The <code>batch shape</code> encompasses one reality: the number of independent random variables we want to define using a probability distribution. There are two ways to arrive at the same batch shape:
 </p>
 <ul class="org-ul">
 <li>Setting the shape explicitly;</li>
@@ -199,11 +245,11 @@ The <code>batch shape</code> encompasses one reality: the number of independent,
 </ul>
 </div>
 
-<div id="outline-container-org2c9c54c" class="outline-3">
-<h3 id="org2c9c54c">Batching</h3>
-<div class="outline-text-3" id="text-org2c9c54c">
+<div id="outline-container-orgeb64b3a" class="outline-3">
+<h3 id="orgeb64b3a">Batching</h3>
+<div class="outline-text-3" id="text-orgeb64b3a">
 <p>
-If we want to take \(3\) independent and indentically distributed samples from this distribution we can use the <code>size</code> keyword argument:
+If we want to take independent and indentically distributed samples from a distribution we can use the <code>size</code> keyword argument. Here we are requesting \(3\) independent and identically distributed random variables:
 </p>
 
 <div class="org-src-container">
@@ -225,7 +271,7 @@ sample shape: (3,)
 
 
 <p>
-We can request <i>tensors</i> with independent and identically distributed samples of arbitrary shape:
+We can obviously require that these independent and identically distributed samples be returned in a tensor of any shape:
 </p>
 
 <div class="org-src-container">
@@ -252,20 +298,19 @@ sample shape: (2, 2, 2)
 
 
 <p>
-We will say that <code>size</code> explicits the <i>batch shape</i>, which is the shape of the tensor of idependent random variables produced by the op. In this example the random variables are identically distributed, but this need not be the case.
+<code>Size</code> explicits the <i>batch shape</i>, which is the shape of the tensor of idependent random variables produced by the op. In this example the random variables are identically distributed, but this need not be the case.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org869b3f2" class="outline-3">
-<h3 id="org869b3f2">Vectorizing</h3>
-<div class="outline-text-3" id="text-org869b3f2">
+<div id="outline-container-org3ef1085" class="outline-3">
+<h3 id="org3ef1085">Vectorizing</h3>
+<div class="outline-text-3" id="text-org3ef1085">
 <blockquote>
 <p>
 <b>tldr;</b> Random Variables are `Blockwise` operators
 </p>
 </blockquote>
-
 
 <p>
 Say we want a sample from three normal distributions with a \(0\), \(3\) and \(5\) mean value respectively. One (cumbersome) way to achieve this is:
@@ -293,7 +338,7 @@ sample shape: (3,)
 
 
 <p>
-To simplify this common operation we can use pass arrays as parameters, and the random variable uses common NumPy broadcasting rules.
+To simplify this common operation we can pass arrays as parameters to the <code>RandomVariable</code>, and the <code>Op</code> will use NumPy broadcasting rules to return an array of independent random variables:
 </p>
 
 <div class="org-src-container">
@@ -342,7 +387,7 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </pre>
 </div>
 
-<pre class="example" id="orga965cb1">
+<pre class="example" id="orgfb9d5aa">
 shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F8DCB881A80&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -423,20 +468,16 @@ batch shape: (3,)
 
 <blockquote>
 <p>
-Broadcasting rules can be a bit obscure for distributions, since the operations they are performing to draw samples or compute the value of the log-probability density (mass) function are unknown.
-</p>
-
-<p>
-We should specify these broadcasting rules as `gufunc` signatures in the docstrings.
+The functions that draw samples from \(E\) could be implemented as generalized universal functions using the operator <code>Blockwise</code>.
 </p>
 </blockquote>
 </div>
 </div>
 
 
-<div id="outline-container-orgd0216fd" class="outline-3">
-<h3 id="orgd0216fd">Vectorizing + Batching</h3>
-<div class="outline-text-3" id="text-orgd0216fd">
+<div id="outline-container-org47a6def" class="outline-3">
+<h3 id="org47a6def">Vectorizing + Batching</h3>
+<div class="outline-text-3" id="text-org47a6def">
 <p>
 It is possible to vectorize and batch at the same time. Note that <code>size</code> and that vectorized shape must be broadcastable
 </p>
@@ -483,9 +524,9 @@ It IS really simple:
 </div>
 
 
-<div id="outline-container-orgc63304b" class="outline-2">
-<h2 id="orgc63304b">All together</h2>
-<div class="outline-text-2" id="text-orgc63304b">
+<div id="outline-container-org4e7aeeb" class="outline-2">
+<h2 id="org4e7aeeb">All together</h2>
+<div class="outline-text-2" id="text-org4e7aeeb">
 <p>
 Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> will raise an exception if this is not correctly set.
 </p>
@@ -508,7 +549,7 @@ Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> w
 </pre>
 </div>
 
-<pre class="example" id="org7c9f681">
+<pre class="example" id="orgd3bd10e">
 sample value: [[[6 2 2]
   [4 0 5]]
 
@@ -523,9 +564,9 @@ batch shape: (3, 2)
 </pre>
 </div>
 
-<div id="outline-container-org803a060" class="outline-3">
-<h3 id="org803a060">Broadcasting</h3>
-<div class="outline-text-3" id="text-org803a060">
+<div id="outline-container-orgd3ba85e" class="outline-3">
+<h3 id="orgd3ba85e">Broadcasting</h3>
+<div class="outline-text-3" id="text-orgd3ba85e">
 <p>
 When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
 </p>

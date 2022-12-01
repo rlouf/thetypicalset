@@ -3,34 +3,45 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-11-25 Fri 17:45 -->
+<!-- 2022-12-01 Thu 08:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gaussian process</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
@@ -62,9 +73,9 @@ A very import special case of Gaussian processes is <a href="20211213085917-gaus
 </p>
 
 
-<div id="outline-container-org82a0e2c" class="outline-2">
-<h2 id="org82a0e2c">Kernels</h2>
-<div class="outline-text-2" id="text-org82a0e2c">
+<div id="outline-container-orgcc79b32" class="outline-2">
+<h2 id="orgcc79b32">Kernels</h2>
+<div class="outline-text-2" id="text-orgcc79b32">
 <p>
 We often express the covariance function \(\Sigma(x, x')\) as a function of a <i>kernel</i> \(K(x,x')\)):
 </p>
@@ -86,9 +97,9 @@ We can combine kernels. The <a href="20211206102342-combine_kernels_by_multiplic
 </p>
 </div>
 
-<div id="outline-container-orgd7e8089" class="outline-3">
-<h3 id="orgd7e8089">References</h3>
-<div class="outline-text-3" id="text-orgd7e8089">
+<div id="outline-container-orgf5b4764" class="outline-3">
+<h3 id="orgf5b4764">References</h3>
+<div class="outline-text-3" id="text-orgf5b4764">
 <ul class="org-ul">
 <li>The Kernel Cookbook (<a target='_blank' rel='noopener noreferrer' class='external' href="https://www.cs.toronto.edu/~duvenaud/cookbook/">David Duvenaud's website</a>)</li>
 <li>Structure Discovery in Nonparametric Regression Through Compositional Search (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1302.4922">ArXiV</a>)</li>
@@ -100,9 +111,9 @@ We can combine kernels. The <a href="20211206102342-combine_kernels_by_multiplic
 </div>
 
 
-<div id="outline-container-org5df0cf7" class="outline-2">
-<h2 id="org5df0cf7">Sample</h2>
-<div class="outline-text-2" id="text-org5df0cf7">
+<div id="outline-container-org809ffc0" class="outline-2">
+<h2 id="org809ffc0">Sample</h2>
+<div class="outline-text-2" id="text-org809ffc0">
 <ul class="org-ul">
 <li>How to <a href="20211206204210-sample_from_a_gaussian_process_predictive_distribution.html#ID-00ed041f-9d96-4d76-833f-39d1c2e40e70">Sample from a Gaussian Process predictive distribution</a></li>
 <li>Practical implementation of Gaussian Process Regression (<a target='_blank' rel='noopener noreferrer' class='external' href="https://gregorygundersen.com/blog/2019/09/12/practical-gp-regression/">Gregory Undersen's blog</a>)</li>
@@ -111,9 +122,9 @@ We can combine kernels. The <a href="20211206102342-combine_kernels_by_multiplic
 </div>
 </div>
 
-<div id="outline-container-orgd3de35a" class="outline-2">
-<h2 id="orgd3de35a">Learn</h2>
-<div class="outline-text-2" id="text-orgd3de35a">
+<div id="outline-container-org3c9ed13" class="outline-2">
+<h2 id="org3c9ed13">Learn</h2>
+<div class="outline-text-2" id="text-org3c9ed13">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://distill.pub/2019/visual-exploration-gaussian-processes/">Visual exploration of gaussian processes</a> is a very good introduction</li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://yugeten.github.io/posts/2019/09/GP/">Gaussian Process, not quite for dummies</a> is excellent, starts from gaussians to gaussian in high dimensions to get to gaussian process. One of the best things I've read on the topic.</li>
@@ -122,9 +133,9 @@ We can combine kernels. The <a href="20211206102342-combine_kernels_by_multiplic
 </div>
 </div>
 
-<div id="outline-container-org6cc472c" class="outline-2">
-<h2 id="org6cc472c">Use</h2>
-<div class="outline-text-2" id="text-org6cc472c">
+<div id="outline-container-org2c92497" class="outline-2">
+<h2 id="org2c92497">Use</h2>
+<div class="outline-text-2" id="text-org2c92497">
 <p>
 Here is a list of libraries implementating different flavors of Gaussian processes. The catch is that gaussian processes can quick get computation-intensive.
 </p>
@@ -137,9 +148,9 @@ Here is a list of libraries implementating different flavors of Gaussian process
 </div>
 </div>
 
-<div id="outline-container-orgf5d41c6" class="outline-2">
-<h2 id="orgf5d41c6">Links to this note</h2>
-<div class="outline-text-2" id="text-orgf5d41c6">
+<div id="outline-container-orga44c557" class="outline-2">
+<h2 id="orga44c557">Links to this note</h2>
+<div class="outline-text-2" id="text-orga44c557">
 <ul class="org-ul">
 <li><a href="./20220826152626-gpae.html">GPae</a></li>
 <li><a href="./20211129200726-gaussian_noise_kernel.html">Ornstein-Uhlenbeck kernel</a></li>

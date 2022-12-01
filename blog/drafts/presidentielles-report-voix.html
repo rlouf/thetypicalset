@@ -3,34 +3,45 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-11-25 Fri 17:45 -->
+<!-- 2022-12-01 Thu 08:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Estimer le report des voix aux présidentielles</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
@@ -69,32 +80,32 @@ On se placera ici à l'échelle de la circonscription législative. Le découpag
 </pre>
 </div>
 
-<div id="outline-container-org31be64d" class="outline-2">
-<h2 id="org31be64d"><span class="todo TODO">TODO</span> Refactor the code a little bit</h2>
-<div class="outline-text-2" id="text-org31be64d">
+<div id="outline-container-org3ed255e" class="outline-2">
+<h2 id="org3ed255e"><span class="todo TODO">TODO</span> Refactor the code a little bit</h2>
+<div class="outline-text-2" id="text-org3ed255e">
 </div>
-<div id="outline-container-org68278b9" class="outline-3">
-<h3 id="org68278b9"><span class="todo TODO">TODO</span> No one cares about the data downloading, hide</h3>
+<div id="outline-container-org733dda4" class="outline-3">
+<h3 id="org733dda4"><span class="todo TODO">TODO</span> No one cares about the data downloading, hide</h3>
 </div>
-<div id="outline-container-org4d5c434" class="outline-3">
-<h3 id="org4d5c434"><span class="todo TODO">TODO</span> Factor the plotting code into functions</h3>
+<div id="outline-container-orgec19501" class="outline-3">
+<h3 id="orgec19501"><span class="todo TODO">TODO</span> Factor the plotting code into functions</h3>
 </div>
-<div id="outline-container-orgacefeea" class="outline-3">
-<h3 id="orgacefeea"><span class="todo TODO">TODO</span> Factor the sampling code into functions</h3>
+<div id="outline-container-org2ac4a28" class="outline-3">
+<h3 id="org2ac4a28"><span class="todo TODO">TODO</span> Factor the sampling code into functions</h3>
 </div>
 </div>
 
-<div id="outline-container-orgfcb9f34" class="outline-2">
-<h2 id="orgfcb9f34">Les données</h2>
-<div class="outline-text-2" id="text-orgfcb9f34">
+<div id="outline-container-org55fd62d" class="outline-2">
+<h2 id="org55fd62d">Les données</h2>
+<div class="outline-text-2" id="text-org55fd62d">
 <p>
 Les résultats des élections présidentielles 2022 sont publiquement disponibles à l'échelle des circonscriptions législatives sous format <code>xlsx</code>. On utilise la librairies python <code>pandas</code> pour les manipuler et convertir dans le format approprié pour le modèle.
 </p>
 </div>
 
-<div id="outline-container-org5f14283" class="outline-3">
-<h3 id="org5f14283">Premier tour</h3>
-<div class="outline-text-3" id="text-org5f14283">
+<div id="outline-container-org6fc3f43" class="outline-3">
+<h3 id="org6fc3f43">Premier tour</h3>
+<div class="outline-text-3" id="text-org6fc3f43">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">'/tmp/T1.xlsx'</span>
 
@@ -179,16 +190,16 @@ filename
 #+attr<sub>html</sub> :width 100%
 </p>
 
-<div id="orgb486418" class="figure">
+<div id="orgfd6086a" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-premier-tour.png" alt="resultats-premier-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org3d5564a" class="outline-3">
-<h3 id="org3d5564a">Deuxième tour</h3>
-<div class="outline-text-3" id="text-org3d5564a">
+<div id="outline-container-org8560d63" class="outline-3">
+<h3 id="org8560d63">Deuxième tour</h3>
+<div class="outline-text-3" id="text-org8560d63">
 <p>
 Le processus de récupération des données est identique pour le second tour :
 </p>
@@ -246,16 +257,16 @@ filename
 #+attr<sub>html</sub> :width 100%
 </p>
 
-<div id="org591ea20" class="figure">
+<div id="orgb46b9cc" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-second-tour.png" alt="resultats-second-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgb4952a5" class="outline-3">
-<h3 id="orgb4952a5">Second order</h3>
-<div class="outline-text-3" id="text-orgb4952a5">
+<div id="outline-container-org69793a9" class="outline-3">
+<h3 id="org69793a9">Second order</h3>
+<div class="outline-text-3" id="text-org69793a9">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
 
@@ -277,7 +288,7 @@ filename
 </div>
 
 
-<div id="orgdf0c8b8" class="figure">
+<div id="orge658ec4" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figures6n2pL.png" alt="figures6n2pL.png" />
 </p>
 </div>
@@ -304,7 +315,7 @@ filename
 </div>
 
 
-<div id="orged3c860" class="figure">
+<div id="org85f842a" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figurePLSP8R.png" alt="figurePLSP8R.png" />
 </p>
 </div>
@@ -330,7 +341,7 @@ filename
 </div>
 
 
-<div id="orgc2b191a" class="figure">
+<div id="org7a5e2b3" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figurei4jzIx.png" alt="figurei4jzIx.png" />
 </p>
 </div>
@@ -339,9 +350,9 @@ filename
 </div>
 
 
-<div id="outline-container-orgd452743" class="outline-2">
-<h2 id="orgd452743">Simple modèle écologique</h2>
-<div class="outline-text-2" id="text-orgd452743">
+<div id="outline-container-org60ca258" class="outline-2">
+<h2 id="org60ca258">Simple modèle écologique</h2>
+<div class="outline-text-2" id="text-org60ca258">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:577, :]
 <span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:577:]
@@ -356,9 +367,9 @@ The model we implement is taken from <a target='_blank' rel='noopener noreferrer
 </p>
 </div>
 
-<div id="outline-container-orgd8c3740" class="outline-3">
-<h3 id="orgd8c3740"><span class="todo TODO">TODO</span> Full mixing</h3>
-<div class="outline-text-3" id="text-orgd8c3740">
+<div id="outline-container-org00b5234" class="outline-3">
+<h3 id="org00b5234"><span class="todo TODO">TODO</span> Full mixing</h3>
+<div class="outline-text-3" id="text-org00b5234">
 <div class="org-src-container">
 <pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 <span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
@@ -466,9 +477,9 @@ On vérifie que le modèle, aussi surprenant que cela soit, est k
 </div>
 </div>
 
-<div id="outline-container-org6e85510" class="outline-3">
-<h3 id="org6e85510"><span class="todo TODO">TODO</span> Hyperprior on dirichlet</h3>
-<div class="outline-text-3" id="text-org6e85510">
+<div id="outline-container-orga59ae1e" class="outline-3">
+<h3 id="orga59ae1e"><span class="todo TODO">TODO</span> Hyperprior on dirichlet</h3>
+<div class="outline-text-3" id="text-orga59ae1e">
 <p>
 Per the paper on ecological inference we add an exponential hyperprior on the dirichlet distribution.
 </p>
@@ -620,19 +631,19 @@ Les résultats sont de toute évidence faux: il suffit de comparer les graphes a
 </ul>
 </div>
 </div>
-<div id="outline-container-orgef158ac" class="outline-3">
-<h3 id="orgef158ac"><span class="todo TODO">TODO</span> Explain why we get weird results with full mixing</h3>
+<div id="outline-container-orgd0643c5" class="outline-3">
+<h3 id="orgd0643c5"><span class="todo TODO">TODO</span> Explain why we get weird results with full mixing</h3>
 </div>
-<div id="outline-container-org12b33c6" class="outline-3">
-<h3 id="org12b33c6"><span class="todo TODO">TODO</span> Hierarchical model</h3>
-<div class="outline-text-3" id="text-org12b33c6">
+<div id="outline-container-orgaa18338" class="outline-3">
+<h3 id="orgaa18338"><span class="todo TODO">TODO</span> Hierarchical model</h3>
+<div class="outline-text-3" id="text-orgaa18338">
 <p>
 The hierarchical model should allow us to give more reasonable national estimates. It is not purely descriptive as this gives us access to a quantity we did not have access to before: the transition matrices.
 </p>
 </div>
 </div>
-<div id="outline-container-org2c1cc0b" class="outline-3">
-<h3 id="org2c1cc0b"><span class="todo TODO">TODO</span> Extract information from the model</h3>
+<div id="outline-container-org3706df9" class="outline-3">
+<h3 id="org3706df9"><span class="todo TODO">TODO</span> Extract information from the model</h3>
 </div>
 </div>
 </div>

@@ -3,34 +3,45 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-11-25 Fri 17:45 -->
+<!-- 2022-12-01 Thu 08:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Counter-based RNGS</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
@@ -85,9 +96,9 @@ s_n = b_k(n)
 Where \(k\) is an  element of a key space and \(b_k\) member of a family of bijections. Algorithms in this paper are of period $$2<sup>128</sup>$ and \(2^{64}\) parallel streams.
 </p>
 
-<div id="outline-container-org3c74dbb" class="outline-2">
-<h2 id="org3c74dbb">The API</h2>
-<div class="outline-text-2" id="text-org3c74dbb">
+<div id="outline-container-org8dfa072" class="outline-2">
+<h2 id="org8dfa072">The API</h2>
+<div class="outline-text-2" id="text-org8dfa072">
 <p>
 In the <i>multistream</i> approach we assign a unique key \(k\) to each unit, and then the units generate their own set of random numbers in parallel.
 </p>
@@ -109,9 +120,9 @@ For <i>seeding</i> one can easily reserve 32 bits in the key or counter.
 </div>
 </div>
 
-<div id="outline-container-org41e0e96" class="outline-2">
-<h2 id="org41e0e96">The splitting mechanism</h2>
-<div class="outline-text-2" id="text-org41e0e96">
+<div id="outline-container-org6d7ed45" class="outline-2">
+<h2 id="org6d7ed45">The splitting mechanism</h2>
+<div class="outline-text-2" id="text-org6d7ed45">
 <p>
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.tweag.io/blog/2020-06-29-prng-test/">https://www.tweag.io/blog/2020-06-29-prng-test/</a>
 </p>
@@ -163,8 +174,8 @@ Attempting to generalize a linear PRNG into splittable one is problematic:
 </div>
 </div>
 
-<div id="outline-container-org89083af" class="outline-2">
-<h2 id="org89083af">Links to this note</h2>
+<div id="outline-container-orgcb43ad4" class="outline-2">
+<h2 id="orgcb43ad4">Links to this note</h2>
 </div>
 </div>
 </body>

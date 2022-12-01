@@ -3,42 +3,53 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-11-25 Fri 17:45 -->
+<!-- 2022-12-01 Thu 08:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Stochastic gradient Langevin Dynamics (SgLD)</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">Stochastic gradient Langevin Dynamics (SgLD)</h1>
 
-<div id="outline-container-org400f5f8" class="outline-2">
-<h2 id="org400f5f8">Principle and motivation</h2>
-<div class="outline-text-2" id="text-org400f5f8">
+<div id="outline-container-org5f37243" class="outline-2">
+<h2 id="org5f37243">Principle and motivation</h2>
+<div class="outline-text-2" id="text-org5f37243">
 <p>
 We use the same solver for the overdamped Langevin dynamics as for the <a href="20220329092624-metropolis_adjusted_langevin_algorithm.html#ID-2b7665c9-e950-4432-b260-9e30b593b375">Metropolis-Adjusted Langevin Algorithm</a>, but we work with an <i>estimator</i> \(\hat{\nabla} \log \pi\) for the gradient of the log-probability density function instead of the gradient itself. There are two reasons why one would want to do that:
 </p>
@@ -77,21 +88,21 @@ So the proposed update using the Langevin dynamics is:
 </div>
 </div>
 
-<div id="outline-container-orgdab1795" class="outline-2">
-<h2 id="orgdab1795">Convergence</h2>
+<div id="outline-container-org72cd3e1" class="outline-2">
+<h2 id="org72cd3e1">Convergence</h2>
 </div>
 
-<div id="outline-container-orgb655c28" class="outline-2">
-<h2 id="orgb655c28">References</h2>
-<div class="outline-text-2" id="text-orgb655c28">
+<div id="outline-container-org2eae1dd" class="outline-2">
+<h2 id="org2eae1dd">References</h2>
+<div class="outline-text-2" id="text-org2eae1dd">
 <ul class="org-ul">
 <li>Welling &amp; Teh (2011) <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf">Bayesian Learning via Stochastic Gradient Langevin Dynamics</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgaec9d05" class="outline-2">
-<h2 id="orgaec9d05">Links to this note</h2>
+<div id="outline-container-orgf3633ca" class="outline-2">
+<h2 id="orgf3633ca">Links to this note</h2>
 </div>
 </div>
 </body>
