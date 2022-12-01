@@ -77,7 +77,9 @@ print(f"support shape: {sample.shape}")
 
 We call the shape of the realizations of the random variables the *support shape*; for the normal distribution it is equal to =()=, the Dirichlet and multinomial distribution it is equal to =(k,)= where =k= is the size of the parameter $\alpha$ and $p$ respectively. Distributions can have arbitrarily complex support shapes: the random variable with a [[https://en.wikipedia.org/wiki/Wishart_distribution][Wishart density]] is a function in $\mathbb{R}^{n \times m}$, and the support shape is =(n,m)=.
 
-* Independent random variables: vectorizing
+* The batch shape
+
+** Batching by broadcasting
 
 Say we want a sample from three independent random variables that are normally distributed with a mean of $0$, $3$ and $5$ respectively. One (cumbersome) way to achieve this is:
 
@@ -257,7 +259,7 @@ So we have the simple formula; if =support_shape= and =batch_shape= are tuples, 
 sample_shape = batch_shape + support_shape
 #+end_quote
 
-* Identically independently distributed random variable
+** Batching identically distributed random variables
 
 We also frequently need to define iiid random variables. We can define 3 normally-distributed random variables with mean 0 and variance 1 with:
 
@@ -320,6 +322,8 @@ print(f"sample shape: {sample.shape}")
 : sample shape: (3, 3)
 
 Since we are still talking about independent random variables, =batch= refers indistinctly to identifically distributed or differently distributed random variables.
+
+** Broadcasting and expanding
 
 * Matching
 
