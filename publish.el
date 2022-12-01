@@ -16,11 +16,14 @@
 (package-install 'org)
 (package-install 'org-roam)
 (package-install 's)
+(package-install 'github-modern-theme)
 
 (require 's)
 (require 'ox-publish)
 (require 'find-lisp)
 (require 'org-roam)
+
+(load-theme 'github-modern t)
 
 (setq make-backup-files nil)
 
@@ -32,6 +35,9 @@
 
 (setq org-html-validation-link nil ;; Do not show "Validate" link
       org-confirm-babel-evaluate nil)
+;; The following setting is to ask htmlize to output HTML with
+;; classes instead of defining the theme inline
+;; (setq org-html-htmlize-output-type 'css) ; default: 'inline-css
 
 (setq org-publish-project-alist
       '(
