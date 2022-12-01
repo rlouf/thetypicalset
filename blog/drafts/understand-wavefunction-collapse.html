@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MiniKanren and WaveFunction Collapse I - The Even Simpler Tiled Model</title>
@@ -35,12 +35,12 @@ The first wavefunction is a superposition of every possible results (akin to log
 Here we try to arrange pixels in an input image.
 </p>
 
-<div id="outline-container-orgf4feb7a" class="outline-2">
-<h2 id="orgf4feb7a">Even simpler tiled model</h2>
+<div id="outline-container-org37005c1" class="outline-2">
+<h2 id="org37005c1">Even simpler tiled model</h2>
 </div>
-<div id="outline-container-orgfabbb18" class="outline-2">
-<h2 id="orgfabbb18"><span class="todo TODO">TODO</span> Do on 1D line (sea-cost-land-cost-sea-sea-cost-land-land-coast)</h2>
-<div class="outline-text-2" id="text-orgfabbb18">
+<div id="outline-container-org1d37c92" class="outline-2">
+<h2 id="org1d37c92"><span class="todo TODO">TODO</span> Do on 1D line (sea-cost-land-cost-sea-sea-cost-land-land-coast)</h2>
+<div class="outline-text-2" id="text-org1d37c92">
 <p>
 Here I reproduce the example of <a target='_blank' rel='noopener noreferrer' class='external' href="https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/">this article</a>.
 </p>
@@ -54,7 +54,7 @@ For instance, <code>("sea", "coast", "left")</code> specifies that a <code>sea</
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">tiles</span> = ((<span style="font-style: italic;">"s"</span>,<span style="font-style: italic;">"s"</span>), (<span style="font-style: italic;">"s"</span>,<span style="font-style: italic;">"c"</span>), (<span style="font-style: italic;">"c"</span>, <span style="font-style: italic;">"c"</span>), (<span style="font-style: italic;">"c"</span>,<span style="font-style: italic;">"s"</span>), (<span style="font-style: italic;">"c"</span>,<span style="font-style: italic;">"l"</span>), (<span style="font-style: italic;">"l,c"</span>), (<span style="font-style: italic;">"l,l"</span>))
+<pre class="src src-python"><span style="color: #24292e;">tiles</span> = ((<span style="color: #032f62;">"s"</span>,<span style="color: #032f62;">"s"</span>), (<span style="color: #032f62;">"s"</span>,<span style="color: #032f62;">"c"</span>), (<span style="color: #032f62;">"c"</span>, <span style="color: #032f62;">"c"</span>), (<span style="color: #032f62;">"c"</span>,<span style="color: #032f62;">"s"</span>), (<span style="color: #032f62;">"c"</span>,<span style="color: #032f62;">"l"</span>), (<span style="color: #032f62;">"l,c"</span>), (<span style="color: #032f62;">"l,l"</span>))
 </pre>
 </div>
 
@@ -63,7 +63,7 @@ We can have the program parse an input image and learn adjacencies from this. Ap
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">example_img</span> = [[<span style="font-style: italic;">"s"</span>, <span style="font-style: italic;">"s"</span>, <span style="font-style: italic;">"s"</span>], [<span style="font-style: italic;">"c"</span>, <span style="font-style: italic;">"c"</span>, <span style="font-style: italic;">"s"</span>], [<span style="font-style: italic;">"l"</span>, <span style="font-style: italic;">"l"</span>, <span style="font-style: italic;">"c"</span>]]
+<pre class="src src-python"><span style="color: #24292e;">example_img</span> = [[<span style="color: #032f62;">"s"</span>, <span style="color: #032f62;">"s"</span>, <span style="color: #032f62;">"s"</span>], [<span style="color: #032f62;">"c"</span>, <span style="color: #032f62;">"c"</span>, <span style="color: #032f62;">"s"</span>], [<span style="color: #032f62;">"l"</span>, <span style="color: #032f62;">"l"</span>, <span style="color: #032f62;">"c"</span>]]
 </pre>
 </div>
 
@@ -72,13 +72,13 @@ There is a notion of randomness here that we cannot really account for with (or 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">horizontal_pairs</span>(grid):
-    <span style="font-weight: bold; font-style: italic;">length</span> = <span style="font-weight: bold; font-style: italic;">height</span> = <span style="font-weight: bold;">len</span>(grid)
-    <span style="font-weight: bold;">return</span> [(grid[i][j], grid[i][j+1]) <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(height) <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(length-1)]
+<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">horizontal_pairs</span>(grid):
+    <span style="color: #24292e;">length</span> = <span style="color: #24292e;">height</span> = <span style="color: #d73a49;">len</span>(grid)
+    <span style="color: #d73a49;">return</span> [(grid[i][j], grid[i][j+1]) <span style="color: #d73a49;">for</span> i <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">range</span>(height) <span style="color: #d73a49;">for</span> j <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">range</span>(length-1)]
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">vertical_pairs</span>(grid):
-    <span style="font-weight: bold; font-style: italic;">length</span> = <span style="font-weight: bold; font-style: italic;">height</span> = <span style="font-weight: bold;">len</span>(grid)
-    <span style="font-weight: bold;">return</span> [(grid[i][j], grid[i+1][j]) <span style="font-weight: bold;">for</span> i <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(height-1) <span style="font-weight: bold;">for</span> j <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(length)]
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">vertical_pairs</span>(grid):
+    <span style="color: #24292e;">length</span> = <span style="color: #24292e;">height</span> = <span style="color: #d73a49;">len</span>(grid)
+    <span style="color: #d73a49;">return</span> [(grid[i][j], grid[i+1][j]) <span style="color: #d73a49;">for</span> i <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">range</span>(height-1) <span style="color: #d73a49;">for</span> j <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">range</span>(length)]
 </pre>
 </div>
 
@@ -89,30 +89,30 @@ the correponding goal is:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall, lany, eq, <span style="font-weight: bold;">vars</span>, run
-<span style="font-weight: bold;">from</span> kanren.goals <span style="font-weight: bold;">import</span> permuteo
+<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> lall, lany, eq, <span style="color: #d73a49;">vars</span>, run
+<span style="color: #d73a49;">from</span> kanren.goals <span style="color: #d73a49;">import</span> permuteo
 
-<span style="font-weight: bold; font-style: italic;">tiles</span> = ((<span style="font-style: italic;">"s"</span>,<span style="font-style: italic;">"s"</span>), (<span style="font-style: italic;">"s"</span>,<span style="font-style: italic;">"c"</span>), (<span style="font-style: italic;">"c"</span>, <span style="font-style: italic;">"c"</span>), (<span style="font-style: italic;">"c"</span>,<span style="font-style: italic;">"s"</span>), (<span style="font-style: italic;">"c"</span>,<span style="font-style: italic;">"l"</span>), (<span style="font-style: italic;">"l,c"</span>), (<span style="font-style: italic;">"l,l"</span>))
-<span style="font-weight: bold; font-style: italic;">ratios</span> = {<span style="font-style: italic;">"c"</span>: 3/9, <span style="font-style: italic;">"s"</span>: 4/9, <span style="font-style: italic;">"l"</span>: 2/9}
-<span style="font-weight: bold; font-style: italic;">tiles</span> = [(<span style="font-style: italic;">"s"</span>, <span style="font-style: italic;">"s"</span>)]
+<span style="color: #24292e;">tiles</span> = ((<span style="color: #032f62;">"s"</span>,<span style="color: #032f62;">"s"</span>), (<span style="color: #032f62;">"s"</span>,<span style="color: #032f62;">"c"</span>), (<span style="color: #032f62;">"c"</span>, <span style="color: #032f62;">"c"</span>), (<span style="color: #032f62;">"c"</span>,<span style="color: #032f62;">"s"</span>), (<span style="color: #032f62;">"c"</span>,<span style="color: #032f62;">"l"</span>), (<span style="color: #032f62;">"l,c"</span>), (<span style="color: #032f62;">"l,l"</span>))
+<span style="color: #24292e;">ratios</span> = {<span style="color: #032f62;">"c"</span>: 3/9, <span style="color: #032f62;">"s"</span>: 4/9, <span style="color: #032f62;">"l"</span>: 2/9}
+<span style="color: #24292e;">tiles</span> = [(<span style="color: #032f62;">"s"</span>, <span style="color: #032f62;">"s"</span>)]
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">get_pairs</span>(line):
-    <span style="font-weight: bold;">return</span> [(a, b) <span style="font-weight: bold;">for</span> a, b <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">zip</span>(line[:-1], line[1:])]
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">get_pairs</span>(line):
+    <span style="color: #d73a49;">return</span> [(a, b) <span style="color: #d73a49;">for</span> a, b <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">zip</span>(line[:-1], line[1:])]
 
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">generate</span>(grid, colors):
-    <span style="font-weight: bold; font-style: italic;">pairs</span> = get_pairs(grid)
-    <span style="font-weight: bold;">return</span> lall(
-        <span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">permuteo(grid, colors),</span>
-        *[lany(*[eq(obs, pair) <span style="font-weight: bold;">for</span> obs <span style="font-weight: bold;">in</span> tiles]) <span style="font-weight: bold;">for</span> pair <span style="font-weight: bold;">in</span> pairs]
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">generate</span>(grid, colors):
+    <span style="color: #24292e;">pairs</span> = get_pairs(grid)
+    <span style="color: #d73a49;">return</span> lall(
+        <span style="color: #6a737d;">#</span><span style="color: #6a737d;">permuteo(grid, colors),</span>
+        *[lany(*[eq(obs, pair) <span style="color: #d73a49;">for</span> obs <span style="color: #d73a49;">in</span> tiles]) <span style="color: #d73a49;">for</span> pair <span style="color: #d73a49;">in</span> pairs]
     )
 
-<span style="font-weight: bold; font-style: italic;">N</span> = 1000
-<span style="font-weight: bold; font-style: italic;">grid</span> = <span style="font-weight: bold;">vars</span>(N)
-<span style="font-weight: bold; font-style: italic;">colors</span> = [<span style="font-style: italic;">"c"</span>] * <span style="font-weight: bold;">int</span>(ratios[<span style="font-style: italic;">"c"</span>] * N) + [<span style="font-style: italic;">"l"</span>] * <span style="font-weight: bold;">int</span>(ratios[<span style="font-style: italic;">"l"</span>] * N) + [<span style="font-style: italic;">"s"</span>] * (N - <span style="font-weight: bold;">int</span>(ratios[<span style="font-style: italic;">"c"</span>] * N) - <span style="font-weight: bold;">int</span>(ratios[<span style="font-style: italic;">"l"</span>] * N))
+<span style="color: #24292e;">N</span> = 1000
+<span style="color: #24292e;">grid</span> = <span style="color: #d73a49;">vars</span>(N)
+<span style="color: #24292e;">colors</span> = [<span style="color: #032f62;">"c"</span>] * <span style="color: #d73a49;">int</span>(ratios[<span style="color: #032f62;">"c"</span>] * N) + [<span style="color: #032f62;">"l"</span>] * <span style="color: #d73a49;">int</span>(ratios[<span style="color: #032f62;">"l"</span>] * N) + [<span style="color: #032f62;">"s"</span>] * (N - <span style="color: #d73a49;">int</span>(ratios[<span style="color: #032f62;">"c"</span>] * N) - <span style="color: #d73a49;">int</span>(ratios[<span style="color: #032f62;">"l"</span>] * N))
 
-<span style="font-weight: bold; font-style: italic;">res</span> = run(1, grid, generate(grid, colors))
-<span style="font-weight: bold;">print</span>(res)
+<span style="color: #24292e;">res</span> = run(1, grid, generate(grid, colors))
+<span style="color: #d73a49;">print</span>(res)
 </pre>
 </div>
 
@@ -122,37 +122,37 @@ Ok so this is not great.
 </div>
 
 
-<div id="outline-container-org0d20439" class="outline-3">
-<h3 id="org0d20439"><span class="todo TODO">TODO</span> Plot the results each time</h3>
+<div id="outline-container-org39bdee2" class="outline-3">
+<h3 id="org39bdee2"><span class="todo TODO">TODO</span> Plot the results each time</h3>
 </div>
 </div>
 
-<div id="outline-container-org6fe3771" class="outline-2">
-<h2 id="org6fe3771">TODO</h2>
+<div id="outline-container-orgcd342f6" class="outline-2">
+<h2 id="orgcd342f6">TODO</h2>
 </div>
 
-<div id="outline-container-org5290fae" class="outline-2">
-<h2 id="org5290fae"><span class="todo TODO">TODO</span> Show the grid as it is being built (i.e. the miniKanren state being passed)</h2>
+<div id="outline-container-org72d91ae" class="outline-2">
+<h2 id="org72d91ae"><span class="todo TODO">TODO</span> Show the grid as it is being built (i.e. the miniKanren state being passed)</h2>
 </div>
-<div id="outline-container-org70f80fe" class="outline-2">
-<h2 id="org70f80fe"><span class="todo TODO">TODO</span> Show the stream of possible grids in a stream.</h2>
+<div id="outline-container-org24f3fe9" class="outline-2">
+<h2 id="org24f3fe9"><span class="todo TODO">TODO</span> Show the stream of possible grids in a stream.</h2>
 </div>
-<div id="outline-container-org0b23029" class="outline-2">
-<h2 id="org0b23029"><span class="todo TODO">TODO</span> What is the influence of the original adjacency matrix?</h2>
-<div class="outline-text-2" id="text-org0b23029">
+<div id="outline-container-orgc79a888" class="outline-2">
+<h2 id="orgc79a888"><span class="todo TODO">TODO</span> What is the influence of the original adjacency matrix?</h2>
+<div class="outline-text-2" id="text-orgc79a888">
 <p>
 In particular I would like to understand if more land on the original image will indeed lead to
 more land on the final images. Maybe show the result as a function of % of land at the beginning. This is a central-ish feature of the Wavefunction Collapse.
 </p>
 </div>
 </div>
-<div id="outline-container-org3097f31" class="outline-2">
-<h2 id="org3097f31"><span class="todo TODO">TODO</span> Realtion between kanren and the entropy heuristic?</h2>
+<div id="outline-container-org86a6f87" class="outline-2">
+<h2 id="org86a6f87"><span class="todo TODO">TODO</span> Realtion between kanren and the entropy heuristic?</h2>
 </div>
 
-<div id="outline-container-org11e7b25" class="outline-2">
-<h2 id="org11e7b25">Simple tiled model</h2>
-<div class="outline-text-2" id="text-org11e7b25">
+<div id="outline-container-orge82e1c5" class="outline-2">
+<h2 id="orge82e1c5">Simple tiled model</h2>
+<div class="outline-text-2" id="text-orge82e1c5">
 <p>
 Small number of small pre-defined tiles that define "rules" such as land, sea, coast, mountains. We choose the tile with the lowest entropy to collapse the wavefunction.
 </p>
@@ -162,12 +162,12 @@ Initially the state is completely unobserved:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> <span style="font-weight: bold;">vars</span>
+<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> <span style="color: #d73a49;">vars</span>
 
-<span style="font-weight: bold; font-style: italic;">width</span> = 10
-<span style="font-weight: bold; font-style: italic;">height</span> = 10
+<span style="color: #24292e;">width</span> = 10
+<span style="color: #24292e;">height</span> = 10
 
-<span style="font-weight: bold; font-style: italic;">grid</span> = <span style="font-weight: bold;">vars</span>(width * height)
+<span style="color: #24292e;">grid</span> = <span style="color: #d73a49;">vars</span>(width * height)
 </pre>
 </div>
 
@@ -176,10 +176,10 @@ Well actually, each pixel value is constrained to be one of the colors of the in
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall, membero
+<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> lall, membero
 
-<span style="font-weight: bold; font-style: italic;">BITMAP</span> = (1, 2, 3, 4)
-<span style="font-weight: bold; font-style: italic;">goal</span> = lall(*<span style="font-weight: bold;">tuple</span>(membero(pixel, BITMAP) <span style="font-weight: bold;">for</span> pixel <span style="font-weight: bold;">in</span> grid))
+<span style="color: #24292e;">BITMAP</span> = (1, 2, 3, 4)
+<span style="color: #24292e;">goal</span> = lall(*<span style="color: #d73a49;">tuple</span>(membero(pixel, BITMAP) <span style="color: #d73a49;">for</span> pixel <span style="color: #d73a49;">in</span> grid))
 </pre>
 </div>
 
@@ -188,9 +188,9 @@ From what I understand the resulting grid can only be a combination of the input
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">input_tile</span> = [(1, 2), (1, 1), (2, 3)]
-<span style="font-weight: bold; font-style: italic;">target_tiles</span> = get_tiles(grid)  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">extract tiles from the target grid</span>
-<span style="font-weight: bold; font-style: italic;">goal</span> = lall(*<span style="font-weight: bold;">tuple</span>(lany(*<span style="font-weight: bold;">tuple</span>(membero(tile, model) <span style="font-weight: bold;">for</span> model <span style="font-weight: bold;">in</span> input_tiles)) <span style="font-weight: bold;">for</span> tile <span style="font-weight: bold;">in</span> target_tiles))
+<pre class="src src-python"><span style="color: #24292e;">input_tile</span> = [(1, 2), (1, 1), (2, 3)]
+<span style="color: #24292e;">target_tiles</span> = get_tiles(grid)  <span style="color: #6a737d;"># </span><span style="color: #6a737d;">extract tiles from the target grid</span>
+<span style="color: #24292e;">goal</span> = lall(*<span style="color: #d73a49;">tuple</span>(lany(*<span style="color: #d73a49;">tuple</span>(membero(tile, model) <span style="color: #d73a49;">for</span> model <span style="color: #d73a49;">in</span> input_tiles)) <span style="color: #d73a49;">for</span> tile <span style="color: #d73a49;">in</span> target_tiles))
 </pre>
 </div>
 

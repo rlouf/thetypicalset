@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sondages</title>
@@ -56,18 +56,18 @@ We want to display the latest polls as well as some additional information that 
 </ul>
 
 
-<div id="outline-container-org884a5a4" class="outline-2">
-<h2 id="org884a5a4">Estimate the error</h2>
-<div class="outline-text-2" id="text-org884a5a4">
+<div id="outline-container-orgd0ef9d3" class="outline-2">
+<h2 id="orgd0ef9d3">Estimate the error</h2>
+<div class="outline-text-2" id="text-orgd0ef9d3">
 <p>
 We use a Dirichlet-Multinomial model to represent the data generating process. We note \(\vec{p} = (p_1, \dots, p_N)\) the respective probabilities of voting for either of the candidates, \(\vec{\alpha} = (\alpha_1, \dots, \alpha_n)\) the corresponding concentration parameters. The number of votes observed for each candidate is given by:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\vec</span>{p} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Dirichlet}(<span style="font-weight: bold;">\vec</span>{<span style="font-weight: bold;">\alpha</span>})
-  <span style="font-weight: bold;">\vec</span>{N} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Multinomial}(<span style="font-weight: bold;">\vec</span>{p}, N_{tot})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+<pre class="src src-latex"><span style="color: #d73a49;">\begin</span>{<span style="color: #6f42c1;">align*</span>}
+  <span style="color: #d73a49;">\vec</span>{p} <span style="color: #d73a49;">\sim</span> <span style="color: #d73a49;">\operatorname</span>{Dirichlet}(<span style="color: #d73a49;">\vec</span>{<span style="color: #d73a49;">\alpha</span>})
+  <span style="color: #d73a49;">\vec</span>{N} <span style="color: #d73a49;">\sim</span> <span style="color: #d73a49;">\operatorname</span>{Multinomial}(<span style="color: #d73a49;">\vec</span>{p}, N_{tot})
+<span style="color: #d73a49;">\end</span>{<span style="color: #6f42c1;">align*</span>}
 </pre>
 </div>
 
@@ -76,9 +76,9 @@ It turns out (surprise!) that the Dirichlet distribution is the conjugate prior 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  <span style="font-weight: bold;">\vec</span>{p} <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Dirichlet}(<span style="font-weight: bold;">\vec</span>{N} + <span style="font-weight: bold;">\vec</span>{<span style="font-weight: bold;">\alpha</span>})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+<pre class="src src-latex"><span style="color: #d73a49;">\begin</span>{<span style="color: #6f42c1;">align*</span>}
+  <span style="color: #d73a49;">\vec</span>{p} <span style="color: #d73a49;">\sim</span> <span style="color: #d73a49;">\operatorname</span>{Dirichlet}(<span style="color: #d73a49;">\vec</span>{N} + <span style="color: #d73a49;">\vec</span>{<span style="color: #d73a49;">\alpha</span>})
+<span style="color: #d73a49;">\end</span>{<span style="color: #6f42c1;">align*</span>}
 </pre>
 </div>
 
@@ -87,9 +87,9 @@ We are interested in displaying the marginals, i.e. \(P(p_i|\vec{N})\). If we ca
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
-  p_i <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Beta}(N_i + <span style="font-weight: bold;">\alpha</span>_i, N_{tot} - N_i + <span style="font-weight: bold;">\alpha</span>_0 -<span style="font-weight: bold;">\alpha</span>_i)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
+<pre class="src src-latex"><span style="color: #d73a49;">\begin</span>{<span style="color: #6f42c1;">align*</span>}
+  p_i <span style="color: #d73a49;">\sim</span> <span style="color: #d73a49;">\operatorname</span>{Beta}(N_i + <span style="color: #d73a49;">\alpha</span>_i, N_{tot} - N_i + <span style="color: #d73a49;">\alpha</span>_0 -<span style="color: #d73a49;">\alpha</span>_i)
+<span style="color: #d73a49;">\end</span>{<span style="color: #6f42c1;">align*</span>}
 </pre>
 </div>
 
@@ -98,9 +98,9 @@ From which the HDI can be easily computed using eg <a target='_blank' rel='noope
 </p>
 </div>
 
-<div id="outline-container-org16d5cf7" class="outline-3">
-<h3 id="org16d5cf7">Choice of prior</h3>
-<div class="outline-text-3" id="text-org16d5cf7">
+<div id="outline-container-orgd06b834" class="outline-3">
+<h3 id="orgd06b834">Choice of prior</h3>
+<div class="outline-text-3" id="text-orgd06b834">
 <p>
 Jeffrey prior is \(\alpha_i = 1/2\), <i>but</i> we do have prior information on the different candidates. We know that Arthaud and Poutou, for instance, are more likely to be between 0 and .05. We also know it is unlikely that anyone will be above .4
 </p>
@@ -113,17 +113,17 @@ How do we elicit this prior?
 </div>
 
 
-<div id="outline-container-org404936c" class="outline-2">
-<h2 id="org404936c">Estimate the probability that the candidate will go to second tour?</h2>
-<div class="outline-text-2" id="text-org404936c">
+<div id="outline-container-org0e9bea7" class="outline-2">
+<h2 id="org0e9bea7">Estimate the probability that the candidate will go to second tour?</h2>
+<div class="outline-text-2" id="text-org0e9bea7">
 <p>
 Take posterior predictive samples for the \(N_i\). Count the number of times the candidate is in the top 10. Run ~100k simulations (&lt; 1s par sondage).
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgdea22d8" class="outline-2">
-<h2 id="orgdea22d8">Links to this note</h2>
+<div id="outline-container-org6335629" class="outline-2">
+<h2 id="org6335629">Links to this note</h2>
 </div>
 </div>
 </body>

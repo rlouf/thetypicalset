@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Target JAX's intermediate representation with Aesara</title>
@@ -25,132 +25,132 @@ There are several questions we need to answer:
 <li>Can we <code>grad</code> the following functions?</li>
 </ol>
 
-<div id="outline-container-org2abb272" class="outline-2">
-<h2 id="org2abb272">Issues we'd like to solve</h2>
-<div class="outline-text-2" id="text-org2abb272">
+<div id="outline-container-org28fcbd3" class="outline-2">
+<h2 id="org28fcbd3">Issues we'd like to solve</h2>
+<div class="outline-text-2" id="text-org28fcbd3">
 <p>
 The following fails even though it has static shape:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> functools
+<pre class="src src-python"><span style="color: #d73a49;">import</span> functools
 
-<span style="font-weight: bold;">import</span> jax
-<span style="font-weight: bold;">import</span> jax.numpy <span style="font-weight: bold;">as</span> jnp
-<span style="font-weight: bold;">from</span> jax <span style="font-weight: bold;">import</span> make_jaxpr
+<span style="color: #d73a49;">import</span> jax
+<span style="color: #d73a49;">import</span> jax.numpy <span style="color: #d73a49;">as</span> jnp
+<span style="color: #d73a49;">from</span> jax <span style="color: #d73a49;">import</span> make_jaxpr
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">d</span>(y, z):
-    <span style="font-weight: bold;">return</span> jnp.shape(y)[z]
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">d</span>(y, z):
+    <span style="color: #d73a49;">return</span> jnp.shape(y)[z]
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">c</span>(y, z):
-    <span style="font-weight: bold;">return</span> jnp.where(d(y, 0) / z &gt; 0, d(y, 0) / z, 0)
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">c</span>(y, z):
+    <span style="color: #d73a49;">return</span> jnp.where(d(y, 0) / z &gt; 0, d(y, 0) / z, 0)
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">b</span>(y):
-    <span style="font-weight: bold;">return</span> [c(y, 2), c(y, 3)]
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">b</span>(y):
+    <span style="color: #d73a49;">return</span> [c(y, 2), c(y, 3)]
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">a</span>(y):
-    <span style="font-weight: bold;">return</span> jnp.reshape(y, b(y))
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">a</span>(y):
+    <span style="color: #d73a49;">return</span> jnp.reshape(y, b(y))
 
-<span style="font-weight: bold; font-style: italic;">a_jaxpr</span> = make_jaxpr(a)(jnp.array([1., 1.]))
+<span style="color: #24292e;">a_jaxpr</span> = make_jaxpr(a)(jnp.array([1., 1.]))
 a_jaxpr
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">TypeError: Shapes must be 1D sequences of concrete values of integer type, got [Traced&lt;ShapedArray(float32[], weak_type=True)&gt;with&lt;DynamicJaxprTrace(level=1/0)&gt;, Traced&lt;ShapedArray(float32[], weak_type=True)&gt;with&lt;DynamicJaxprTrace(level=1/0)&gt;].</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">If using `jit`, try using `static_argnums` or applying `jit` to smaller subfunctions.</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">TypeError: Shapes must be 1D sequences of concrete values of integer type, got [Traced&lt;ShapedArray(float32[], weak_type=True)&gt;with&lt;DynamicJaxprTrace(level=1/0)&gt;, Traced&lt;ShapedArray(float32[], weak_type=True)&gt;with&lt;DynamicJaxprTrace(level=1/0)&gt;].</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">If using `jit`, try using `static_argnums` or applying `jit` to smaller subfunctions.</span>
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax.numpy <span style="font-weight: bold;">as</span> jnp
-<span style="font-weight: bold;">from</span> jax <span style="font-weight: bold;">import</span> make_jaxpr
+<pre class="src src-python"><span style="color: #d73a49;">import</span> jax.numpy <span style="color: #d73a49;">as</span> jnp
+<span style="color: #d73a49;">from</span> jax <span style="color: #d73a49;">import</span> make_jaxpr
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">a</span>(x, y):
-    <span style="font-weight: bold;">return</span> jnp.reshape(x, y)
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">a</span>(x, y):
+    <span style="color: #d73a49;">return</span> jnp.reshape(x, y)
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">b</span>(x):
-    <span style="font-weight: bold;">return</span> jnp.reshape(x, (1,2))
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">b</span>(x):
+    <span style="color: #d73a49;">return</span> jnp.reshape(x, (1,2))
 
-<span style="font-weight: bold;">try</span>:
-    <span style="font-weight: bold; font-style: italic;">a_jaxpr</span> = make_jaxpr(a)(jnp.array([1., 1.]), [0, 1])
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(e)
+<span style="color: #d73a49;">try</span>:
+    <span style="color: #24292e;">a_jaxpr</span> = make_jaxpr(a)(jnp.array([1., 1.]), [0, 1])
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">Exception</span> <span style="color: #d73a49;">as</span> e:
+    <span style="color: #d73a49;">print</span>(e)
 
-<span style="font-weight: bold;">try</span>:
-    <span style="font-weight: bold; font-style: italic;">b_jaxpr</span> = make_jaxpr(b)(jnp.array([1., 1.]))
-    <span style="font-weight: bold;">print</span>(b_jaxpr)
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(e)
+<span style="color: #d73a49;">try</span>:
+    <span style="color: #24292e;">b_jaxpr</span> = make_jaxpr(b)(jnp.array([1., 1.]))
+    <span style="color: #d73a49;">print</span>(b_jaxpr)
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">Exception</span> <span style="color: #d73a49;">as</span> e:
+    <span style="color: #d73a49;">print</span>(e)
 </pre>
 </div>
 
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> functools <span style="font-weight: bold;">as</span> ft
-<span style="font-weight: bold;">import</span> jax
-<span style="font-weight: bold;">import</span> jax.numpy <span style="font-weight: bold;">as</span> jnp
-<span style="font-weight: bold;">from</span> jax <span style="font-weight: bold;">import</span> make_jaxpr
+<pre class="src src-python"><span style="color: #d73a49;">import</span> functools <span style="color: #d73a49;">as</span> ft
+<span style="color: #d73a49;">import</span> jax
+<span style="color: #d73a49;">import</span> jax.numpy <span style="color: #d73a49;">as</span> jnp
+<span style="color: #d73a49;">from</span> jax <span style="color: #d73a49;">import</span> make_jaxpr
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">ex1</span>(x):
-  <span style="font-weight: bold; font-style: italic;">size</span> = jnp.prod(jnp.array(x.shape))
-  <span style="font-weight: bold;">return</span> x.reshape((size,))
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">ex1</span>(x):
+  <span style="color: #24292e;">size</span> = jnp.prod(jnp.array(x.shape))
+  <span style="color: #d73a49;">return</span> x.reshape((size,))
 
-<span style="font-weight: bold;">try</span>:
-    <span style="font-weight: bold; font-style: italic;">a_jaxpr</span> = make_jaxpr(ex1)(jnp.array([1., 1.]))
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(e)
+<span style="color: #d73a49;">try</span>:
+    <span style="color: #24292e;">a_jaxpr</span> = make_jaxpr(ex1)(jnp.array([1., 1.]))
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">Exception</span> <span style="color: #d73a49;">as</span> e:
+    <span style="color: #d73a49;">print</span>(e)
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgb3b92b6" class="outline-2">
-<h2 id="orgb3b92b6"><span class="todo TODO">TODO</span> Can we use dyanic values as arguments to <code>reshape</code> in the JAXprs?</h2>
-<div class="outline-text-2" id="text-orgb3b92b6">
+<div id="outline-container-orge0bb346" class="outline-2">
+<h2 id="orge0bb346"><span class="todo TODO">TODO</span> Can we use dyanic values as arguments to <code>reshape</code> in the JAXprs?</h2>
+<div class="outline-text-2" id="text-orge0bb346">
 <p>
 Take this one:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax.numpy <span style="font-weight: bold;">as</span> jnp
-<span style="font-weight: bold;">from</span> jax <span style="font-weight: bold;">import</span> make_jaxpr
+<pre class="src src-python"><span style="color: #d73a49;">import</span> jax.numpy <span style="color: #d73a49;">as</span> jnp
+<span style="color: #d73a49;">from</span> jax <span style="color: #d73a49;">import</span> make_jaxpr
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">b</span>(x):
-    <span style="font-weight: bold;">return</span> jnp.reshape(x, (1,2))
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">b</span>(x):
+    <span style="color: #d73a49;">return</span> jnp.reshape(x, (1,2))
 
-<span style="font-weight: bold; font-style: italic;">b_jaxpr</span> = make_jaxpr(b)(jnp.array([1., 1.]))
-<span style="font-weight: bold;">print</span>(b_jaxpr)
-<span style="font-weight: bold;">print</span>(b_jaxpr.eqns[0])
-<span style="font-weight: bold;">print</span>(b_jaxpr.eqns[0].primitive)
-<span style="font-weight: bold;">print</span>(b_jaxpr.eqns[0].invars)
-<span style="font-weight: bold;">print</span>(b_jaxpr.eqns[0].params)
+<span style="color: #24292e;">b_jaxpr</span> = make_jaxpr(b)(jnp.array([1., 1.]))
+<span style="color: #d73a49;">print</span>(b_jaxpr)
+<span style="color: #d73a49;">print</span>(b_jaxpr.eqns[0])
+<span style="color: #d73a49;">print</span>(b_jaxpr.eqns[0].primitive)
+<span style="color: #d73a49;">print</span>(b_jaxpr.eqns[0].invars)
+<span style="color: #d73a49;">print</span>(b_jaxpr.eqns[0].params)
 </pre>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-org94d4cca" class="outline-2">
-<h2 id="org94d4cca">JIT-ing functions built from JAXprs</h2>
-<div class="outline-text-2" id="text-org94d4cca">
+<div id="outline-container-org3ecd7f8" class="outline-2">
+<h2 id="org3ecd7f8">JIT-ing functions built from JAXprs</h2>
+<div class="outline-text-2" id="text-org3ecd7f8">
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
-<span style="font-weight: bold;">from</span> jax <span style="font-weight: bold;">import</span> lax
-<span style="font-weight: bold;">from</span> jax <span style="font-weight: bold;">import</span> make_jaxpr
+<pre class="src src-python"><span style="color: #d73a49;">import</span> jax
+<span style="color: #d73a49;">from</span> jax <span style="color: #d73a49;">import</span> lax
+<span style="color: #d73a49;">from</span> jax <span style="color: #d73a49;">import</span> make_jaxpr
 
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">add_fn</span>(a, b):
-    <span style="font-weight: bold;">return</span> lax.add(a, b)
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">add_fn</span>(a, b):
+    <span style="color: #d73a49;">return</span> lax.add(a, b)
 
-<span style="font-weight: bold; font-style: italic;">add_jaxpr</span> = jax.make_jaxpr(add_fn)(1., 1.)
-<span style="font-weight: bold;">print</span>(add_jaxpr)
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">{ lambda ; a:f32[] b:f32[]. let c:f32[] = add a b in (c,) }</span>
+<span style="color: #24292e;">add_jaxpr</span> = jax.make_jaxpr(add_fn)(1., 1.)
+<span style="color: #d73a49;">print</span>(add_jaxpr)
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">{ lambda ; a:f32[] b:f32[]. let c:f32[] = add a b in (c,) }</span>
 
-<span style="font-weight: bold;">from</span> jax.core <span style="font-weight: bold;">import</span> jaxpr_as_fun
-<span style="font-weight: bold; font-style: italic;">add_1d</span> = jaxpr_as_fun(add_jaxpr)
-<span style="font-weight: bold; font-style: italic;">jitted_add_1d</span> = jax.jit(add_1d)
-<span style="font-weight: bold;">print</span>(jitted_add_1d)
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">&lt;CompiledFunction of functools.partial(&lt;function jaxpr_as_fun at 0x7fa8e7551990&gt;, { lambda ; a:f32[] b:f32[]. let c:f32[] = add a b in (c,) })&gt;</span>
+<span style="color: #d73a49;">from</span> jax.core <span style="color: #d73a49;">import</span> jaxpr_as_fun
+<span style="color: #24292e;">add_1d</span> = jaxpr_as_fun(add_jaxpr)
+<span style="color: #24292e;">jitted_add_1d</span> = jax.jit(add_1d)
+<span style="color: #d73a49;">print</span>(jitted_add_1d)
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">&lt;CompiledFunction of functools.partial(&lt;function jaxpr_as_fun at 0x7fa8e7551990&gt;, { lambda ; a:f32[] b:f32[]. let c:f32[] = add a b in (c,) })&gt;</span>
 
-<span style="font-weight: bold; font-style: italic;">jitted_add_1d_jaxpr</span> = make_jaxpr(jitted_add_1d)(1., 1.)
-<span style="font-weight: bold;">print</span>(jitted_add_1d_jaxpr)
+<span style="color: #24292e;">jitted_add_1d_jaxpr</span> = make_jaxpr(jitted_add_1d)(1., 1.)
+<span style="color: #d73a49;">print</span>(jitted_add_1d_jaxpr)
 </pre>
 </div>
 
@@ -161,28 +161,28 @@ Take this one:
 </div>
 </div>
 
-<div id="outline-container-orge19894f" class="outline-2">
-<h2 id="orge19894f">VMAP-ing functions built from JAXprs</h2>
-<div class="outline-text-2" id="text-orge19894f">
+<div id="outline-container-org6aa368e" class="outline-2">
+<h2 id="org6aa368e">VMAP-ing functions built from JAXprs</h2>
+<div class="outline-text-2" id="text-org6aa368e">
 <p>
 We can vmap the function produced by <code>jaxpr_as_fun</code>, <i>but</i> we cannot indicate vmapped in Jaxpr
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax.numpy <span style="font-weight: bold;">as</span> jnp
+<pre class="src src-python"><span style="color: #d73a49;">import</span> jax.numpy <span style="color: #d73a49;">as</span> jnp
 
-<span style="font-weight: bold; font-style: italic;">vmapped_add_1d</span> = jax.vmap(add_1d, in_axes=(0, 0))
-<span style="font-weight: bold;">print</span>(vmapped_add_1d)
+<span style="color: #24292e;">vmapped_add_1d</span> = jax.vmap(add_1d, in_axes=(0, 0))
+<span style="color: #d73a49;">print</span>(vmapped_add_1d)
 
-<span style="font-weight: bold; font-style: italic;">vmapped_add_1d_jaxpr</span> = make_jaxpr(vmapped_add_1d)(jnp.array([1., 1.]), jnp.array([1., 1.]))
-<span style="font-weight: bold;">print</span>(vmapped_add_1d_jaxpr)
+<span style="color: #24292e;">vmapped_add_1d_jaxpr</span> = make_jaxpr(vmapped_add_1d)(jnp.array([1., 1.]), jnp.array([1., 1.]))
+<span style="color: #d73a49;">print</span>(vmapped_add_1d_jaxpr)
 
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">my_func</span>(a):
-    <span style="font-weight: bold; font-style: italic;">b</span> = jax.vmap(add_fn, in_axes=(1, 1))(a, a)
-    <span style="font-weight: bold;">return</span> b
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">my_func</span>(a):
+    <span style="color: #24292e;">b</span> = jax.vmap(add_fn, in_axes=(1, 1))(a, a)
+    <span style="color: #d73a49;">return</span> b
 
-<span style="font-weight: bold;">print</span>(make_jaxpr(my_func)(jnp.array([[1., 2., 3.], [1., 2., 3.]])))
+<span style="color: #d73a49;">print</span>(make_jaxpr(my_func)(jnp.array([[1., 2., 3.], [1., 2., 3.]])))
 </pre>
 </div>
 
@@ -193,21 +193,21 @@ We can vmap the function produced by <code>jaxpr_as_fun</code>, <i>but</i> we ca
 </div>
 </div>
 
-<div id="outline-container-org1b290c6" class="outline-2">
-<h2 id="org1b290c6">Grad-ing functions built from Jaxprs</h2>
-<div class="outline-text-2" id="text-org1b290c6">
+<div id="outline-container-orgcd95981" class="outline-2">
+<h2 id="orgcd95981">Grad-ing functions built from Jaxprs</h2>
+<div class="outline-text-2" id="text-orgcd95981">
 <p>
 This one is interesting, but less critical since Aesara can compile gradient graphs.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">grad_add_1d</span> = jax.grad(add_1d)
-<span style="font-weight: bold;">print</span>(grad_add_1_d)
+<pre class="src src-python"><span style="color: #24292e;">grad_add_1d</span> = jax.grad(add_1d)
+<span style="color: #d73a49;">print</span>(grad_add_1_d)
 
-<span style="font-weight: bold;">try</span>:
-    <span style="font-weight: bold; font-style: italic;">grad_add_1d_jaxpr</span> = make_jaxpr(grad_add_1d)(1., 1.)
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(e)
+<span style="color: #d73a49;">try</span>:
+    <span style="color: #24292e;">grad_add_1d_jaxpr</span> = make_jaxpr(grad_add_1d)(1., 1.)
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">Exception</span> <span style="color: #d73a49;">as</span> e:
+    <span style="color: #d73a49;">print</span>(e)
 </pre>
 </div>
 </div>

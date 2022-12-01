@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian Monte Carlo</title>
@@ -53,17 +53,17 @@ HMC requires users to specify two parameters:
 <li>A step size \(\epsilon\). It is too large the simulation will be inaccurate and lead to poor acceptance rate; too small computation will be wasted.</li>
 <li>A number of integration steps \(N\). If it is too small, slow mixing; if it is too large the trajectory can loop back to the original point.</li>
 </ol>
-<div id="outline-container-org249871f" class="outline-2">
-<h2 id="org249871f">A metric to decide when we've integrated for "long enouh"</h2>
-<div class="outline-text-2" id="text-org249871f">
+<div id="outline-container-orgecdfcbe" class="outline-2">
+<h2 id="orgecdfcbe">A metric to decide when we've integrated for "long enouh"</h2>
+<div class="outline-text-2" id="text-orgecdfcbe">
 <p>
 NUTS = extension of HMC that eliminates the need to specify a fixed value of \(N\). The metric used to tell us when we have simulated the dynamics for long enough is the squared distance between the initial position \(\theta\) and current position \(\tilde{\theta}\):
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  <span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\theta</span>} = <span style="font-weight: bold;">\theta</span>)^{2}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-latex"><span style="color: #d73a49;">\begin</span>{<span style="color: #6f42c1;">equation</span>}
+  <span style="color: #d73a49;">\left</span>(<span style="color: #d73a49;">\tilde</span>{<span style="color: #d73a49;">\theta</span>} = <span style="color: #d73a49;">\theta</span>)^{2}
+<span style="color: #d73a49;">\end</span>{<span style="color: #6f42c1;">equation</span>}
 </pre>
 </div>
 
@@ -72,9 +72,9 @@ It derivative is given by:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  <span style="font-weight: bold;">\left</span>(<span style="font-weight: bold;">\tilde</span>{<span style="font-weight: bold;">\theta</span>} - <span style="font-weight: bold;">\theta</span>) <span style="font-weight: bold;">\dot</span> <span style="font-weight: bold;">\tilde</span>{r}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-latex"><span style="color: #d73a49;">\begin</span>{<span style="color: #6f42c1;">equation</span>}
+  <span style="color: #d73a49;">\left</span>(<span style="color: #d73a49;">\tilde</span>{<span style="color: #d73a49;">\theta</span>} - <span style="color: #d73a49;">\theta</span>) <span style="color: #d73a49;">\dot</span> <span style="color: #d73a49;">\tilde</span>{r}
+<span style="color: #d73a49;">\end</span>{<span style="color: #6f42c1;">equation</span>}
 </pre>
 </div>
 
@@ -85,28 +85,28 @@ where \(\tilde{r}\) is the current momentum. The idea is to run the integrator u
 </div>
 
 
-<div id="outline-container-orgbe2e5be" class="outline-2">
-<h2 id="orgbe2e5be">The NUTS algorithm</h2>
-<div class="outline-text-2" id="text-orgbe2e5be">
+<div id="outline-container-org86f4561" class="outline-2">
+<h2 id="org86f4561">The NUTS algorithm</h2>
+<div class="outline-text-2" id="text-org86f4561">
 <p>
 Let \(\mathcal{B}\) be the set of states that the integrator traces out during a NUTS iteration, and \(\mathcal{C}\) the subset of those states to which we can transition without violating detailed balance.
 </p>
 </div>
 
-<div id="outline-container-org658babf" class="outline-3">
-<h3 id="org658babf">Theory</h3>
+<div id="outline-container-orgda9dc19" class="outline-3">
+<h3 id="orgda9dc19">Theory</h3>
 </div>
 
-<div id="outline-container-org6e6aeea" class="outline-3">
-<h3 id="org6e6aeea">An algorithm that satisfies the constraints</h3>
+<div id="outline-container-org06e3a4f" class="outline-3">
+<h3 id="org06e3a4f">An algorithm that satisfies the constraints</h3>
 </div>
-<div id="outline-container-orgb12a77a" class="outline-3">
-<h3 id="orgb12a77a">A more sophisticated algoritm</h3>
+<div id="outline-container-orgb164ce6" class="outline-3">
+<h3 id="orgb164ce6">A more sophisticated algoritm</h3>
 </div>
 </div>
 
-<div id="outline-container-org766774a" class="outline-2">
-<h2 id="org766774a">Links to this note</h2>
+<div id="outline-container-orgcf7402e" class="outline-2">
+<h2 id="orgcf7402e">Links to this note</h2>
 </div>
 </div>
 </body>

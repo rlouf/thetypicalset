@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Estimer le report des voix aux présidentielles</title>
@@ -74,47 +74,47 @@ On se placera ici à l'échelle de la circonscription législative. Le découpag
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> os
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
-<span style="font-weight: bold;">import</span> pandas <span style="font-weight: bold;">as</span> pd
+<pre class="src src-python"><span style="color: #d73a49;">import</span> os
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+<span style="color: #d73a49;">import</span> pandas <span style="color: #d73a49;">as</span> pd
 </pre>
 </div>
 
-<div id="outline-container-org36333b3" class="outline-2">
-<h2 id="org36333b3"><span class="todo TODO">TODO</span> Refactor the code a little bit</h2>
-<div class="outline-text-2" id="text-org36333b3">
+<div id="outline-container-org115c0ed" class="outline-2">
+<h2 id="org115c0ed"><span class="todo TODO">TODO</span> Refactor the code a little bit</h2>
+<div class="outline-text-2" id="text-org115c0ed">
 </div>
-<div id="outline-container-org6e05156" class="outline-3">
-<h3 id="org6e05156"><span class="todo TODO">TODO</span> No one cares about the data downloading, hide</h3>
+<div id="outline-container-org5efa94a" class="outline-3">
+<h3 id="org5efa94a"><span class="todo TODO">TODO</span> No one cares about the data downloading, hide</h3>
 </div>
-<div id="outline-container-org1c86a66" class="outline-3">
-<h3 id="org1c86a66"><span class="todo TODO">TODO</span> Factor the plotting code into functions</h3>
+<div id="outline-container-orge9eec45" class="outline-3">
+<h3 id="orge9eec45"><span class="todo TODO">TODO</span> Factor the plotting code into functions</h3>
 </div>
-<div id="outline-container-orgf988cce" class="outline-3">
-<h3 id="orgf988cce"><span class="todo TODO">TODO</span> Factor the sampling code into functions</h3>
+<div id="outline-container-orgb0f63e2" class="outline-3">
+<h3 id="orgb0f63e2"><span class="todo TODO">TODO</span> Factor the sampling code into functions</h3>
 </div>
 </div>
 
-<div id="outline-container-org9247566" class="outline-2">
-<h2 id="org9247566">Les données</h2>
-<div class="outline-text-2" id="text-org9247566">
+<div id="outline-container-org4af5adb" class="outline-2">
+<h2 id="org4af5adb">Les données</h2>
+<div class="outline-text-2" id="text-org4af5adb">
 <p>
 Les résultats des élections présidentielles 2022 sont publiquement disponibles à l'échelle des circonscriptions législatives sous format <code>xlsx</code>. On utilise la librairies python <code>pandas</code> pour les manipuler et convertir dans le format approprié pour le modèle.
 </p>
 </div>
 
-<div id="outline-container-org6039c60" class="outline-3">
-<h3 id="org6039c60">Premier tour</h3>
-<div class="outline-text-3" id="text-org6039c60">
+<div id="outline-container-org078ffec" class="outline-3">
+<h3 id="org078ffec">Premier tour</h3>
+<div class="outline-text-3" id="text-org078ffec">
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">'/tmp/T1.xlsx'</span>
+<pre class="src src-python"><span style="color: #24292e;">fname</span> = <span style="color: #032f62;">'/tmp/T1.xlsx'</span>
 
-<span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> os.path.isfile(fname):
-    <span style="font-weight: bold; font-style: italic;">url</span> = <span style="font-style: italic;">"https://www.data.gouv.fr/fr/datasets/r/1a35594a-99f2-4257-87e0-ec2f55039276"</span>
-    <span style="font-weight: bold;">import</span> urllib.request
+<span style="color: #d73a49;">if</span> <span style="color: #d73a49;">not</span> os.path.isfile(fname):
+    <span style="color: #24292e;">url</span> = <span style="color: #032f62;">"https://www.data.gouv.fr/fr/datasets/r/1a35594a-99f2-4257-87e0-ec2f55039276"</span>
+    <span style="color: #d73a49;">import</span> urllib.request
     urllib.request.urlretrieve(url, fname)
 
-<span style="font-weight: bold; font-style: italic;">T1</span> = pd.read_excel(fname)
+<span style="color: #24292e;">T1</span> = pd.read_excel(fname)
 </pre>
 </div>
 
@@ -132,12 +132,12 @@ On regroupe les abstentions, votes blancs et nuls sous la catégorie des votes n
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">df_1</span> = T1[[<span style="font-style: italic;">'Nuls'</span>, <span style="font-style: italic;">'Blancs'</span>, <span style="font-style: italic;">'Abstentions'</span>]].copy()
-<span style="font-weight: bold; font-style: italic;">df_1</span>[<span style="font-style: italic;">"Non exprim&#233;s"</span>] =  df_1[<span style="font-style: italic;">'Nuls'</span>] + df_1[<span style="font-style: italic;">'Blancs'</span>] + df_1[<span style="font-style: italic;">'Abstentions'</span>]
-<span style="font-weight: bold; font-style: italic;">df_1</span> = df_1[[<span style="font-style: italic;">"Non exprim&#233;s"</span>]].copy()
+<pre class="src src-python"><span style="color: #24292e;">df_1</span> = T1[[<span style="color: #032f62;">'Nuls'</span>, <span style="color: #032f62;">'Blancs'</span>, <span style="color: #032f62;">'Abstentions'</span>]].copy()
+<span style="color: #24292e;">df_1</span>[<span style="color: #032f62;">"Non exprim&#233;s"</span>] =  df_1[<span style="color: #032f62;">'Nuls'</span>] + df_1[<span style="color: #032f62;">'Blancs'</span>] + df_1[<span style="color: #032f62;">'Abstentions'</span>]
+<span style="color: #24292e;">df_1</span> = df_1[[<span style="color: #032f62;">"Non exprim&#233;s"</span>]].copy()
 
-<span style="font-weight: bold; font-style: italic;">T1</span>[<span style="font-style: italic;">'Code de la circonscription'</span>] = T1[<span style="font-style: italic;">'Code de la circonscription'</span>].<span style="font-weight: bold;">apply</span>(<span style="font-weight: bold;">str</span>)
-<span style="font-weight: bold; font-style: italic;">circonscriptions</span> = T1[<span style="font-style: italic;">'Code du d&#233;partement'</span>] + T1[<span style="font-style: italic;">'Code de la circonscription'</span>]
+<span style="color: #24292e;">T1</span>[<span style="color: #032f62;">'Code de la circonscription'</span>] = T1[<span style="color: #032f62;">'Code de la circonscription'</span>].<span style="color: #d73a49;">apply</span>(<span style="color: #d73a49;">str</span>)
+<span style="color: #24292e;">circonscriptions</span> = T1[<span style="color: #032f62;">'Code du d&#233;partement'</span>] + T1[<span style="color: #032f62;">'Code de la circonscription'</span>]
 
 df_1.head()
 </pre>
@@ -148,13 +148,13 @@ Et on réccupère maintenant les votes par candidat:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">col_start</span> = 21
-<span style="font-weight: bold; font-style: italic;">col_par_cdt</span> = 7
-<span style="font-weight: bold; font-style: italic;">candidats</span> = T1.iloc[0][col_start::col_par_cdt]
+<pre class="src src-python"><span style="color: #24292e;">col_start</span> = 21
+<span style="color: #24292e;">col_par_cdt</span> = 7
+<span style="color: #24292e;">candidats</span> = T1.iloc[0][col_start::col_par_cdt]
 
-<span style="font-weight: bold;">for</span> i_candidat, candidat <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(candidats):
-    <span style="font-weight: bold; font-style: italic;">i_col</span> = col_start + i_candidat*col_par_cdt + 2
-    <span style="font-weight: bold; font-style: italic;">df_1</span>[candidat] = T1.iloc[:, i_col].values
+<span style="color: #d73a49;">for</span> i_candidat, candidat <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">enumerate</span>(candidats):
+    <span style="color: #24292e;">i_col</span> = col_start + i_candidat*col_par_cdt + 2
+    <span style="color: #24292e;">df_1</span>[candidat] = T1.iloc[:, i_col].values
 </pre>
 </div>
 
@@ -163,25 +163,25 @@ On peut maintenant regarder la distribution des votes au premier tour:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> matplotlib.pyplot <span style="font-weight: bold;">as</span> plt
+<pre class="src src-python"><span style="color: #d73a49;">import</span> matplotlib.pyplot <span style="color: #d73a49;">as</span> plt
 
-<span style="font-weight: bold; font-style: italic;">results</span> = df_1.<span style="font-weight: bold;">sum</span>()/df_1.<span style="font-weight: bold;">sum</span>().<span style="font-weight: bold;">sum</span>()
+<span style="color: #24292e;">results</span> = df_1.<span style="color: #d73a49;">sum</span>()/df_1.<span style="color: #d73a49;">sum</span>().<span style="color: #d73a49;">sum</span>()
 
-<span style="font-weight: bold; font-style: italic;">fig</span>, <span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplots(figsize=(13, 5))
-<span style="font-weight: bold; font-style: italic;">ax</span> = results.plot.bar(ax=ax)
+<span style="color: #24292e;">fig</span>, <span style="color: #24292e;">ax</span> = plt.subplots(figsize=(13, 5))
+<span style="color: #24292e;">ax</span> = results.plot.bar(ax=ax)
 
 ax.set_yticks([])
 
-<span style="font-weight: bold; font-style: italic;">spines_to_remove</span> = [<span style="font-style: italic;">"top"</span>, <span style="font-style: italic;">"left"</span>, <span style="font-style: italic;">"right"</span>]
-<span style="font-weight: bold;">for</span> spine <span style="font-weight: bold;">in</span> spines_to_remove:
-    ax.spines[spine].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
+<span style="color: #24292e;">spines_to_remove</span> = [<span style="color: #032f62;">"top"</span>, <span style="color: #032f62;">"left"</span>, <span style="color: #032f62;">"right"</span>]
+<span style="color: #d73a49;">for</span> spine <span style="color: #d73a49;">in</span> spines_to_remove:
+    ax.spines[spine].set_visible(<span style="color: #005cc5;">False</span>)
 
 
-<span style="font-weight: bold;">for</span> i, val <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(<span style="font-weight: bold;">list</span>(results.values)):
-    plt.text(i, val + 0.01, f<span style="font-style: italic;">"{val*100:.01f}%"</span>, ha=<span style="font-style: italic;">"center"</span>)
+<span style="color: #d73a49;">for</span> i, val <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">enumerate</span>(<span style="color: #d73a49;">list</span>(results.values)):
+    plt.text(i, val + 0.01, f<span style="color: #032f62;">"{val*100:.01f}%"</span>, ha=<span style="color: #032f62;">"center"</span>)
 
-plt.title(<span style="font-style: italic;">"R&#233;sultats du premier tour"</span>)
-plt.savefig(filename, bbox_inches=<span style="font-style: italic;">"tight"</span>)
+plt.title(<span style="color: #032f62;">"R&#233;sultats du premier tour"</span>)
+plt.savefig(filename, bbox_inches=<span style="color: #032f62;">"tight"</span>)
 filename
 </pre>
 </div>
@@ -190,65 +190,65 @@ filename
 #+attr<sub>html</sub> :width 100%
 </p>
 
-<div id="org9c71a4a" class="figure">
+<div id="orge5b19c0" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-premier-tour.png" alt="resultats-premier-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgca4b990" class="outline-3">
-<h3 id="orgca4b990">Deuxième tour</h3>
-<div class="outline-text-3" id="text-orgca4b990">
+<div id="outline-container-orgfb0472b" class="outline-3">
+<h3 id="orgfb0472b">Deuxième tour</h3>
+<div class="outline-text-3" id="text-orgfb0472b">
 <p>
 Le processus de récupération des données est identique pour le second tour :
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fname</span> = <span style="font-style: italic;">'/tmp/T2.xlsx'</span>
+<pre class="src src-python"><span style="color: #24292e;">fname</span> = <span style="color: #032f62;">'/tmp/T2.xlsx'</span>
 
-<span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> os.path.isfile(fname):
-    <span style="font-weight: bold; font-style: italic;">url</span> = <span style="font-style: italic;">"https://www.data.gouv.fr/fr/datasets/r/5eacdbc7-b1a2-440c-8eef-09c8bfb87609"</span>
-    <span style="font-weight: bold;">import</span> urllib.request
+<span style="color: #d73a49;">if</span> <span style="color: #d73a49;">not</span> os.path.isfile(fname):
+    <span style="color: #24292e;">url</span> = <span style="color: #032f62;">"https://www.data.gouv.fr/fr/datasets/r/5eacdbc7-b1a2-440c-8eef-09c8bfb87609"</span>
+    <span style="color: #d73a49;">import</span> urllib.request
     urllib.request.urlretrieve(url, fname)
 
-<span style="font-weight: bold; font-style: italic;">T2</span> = pd.read_excel(fname)
+<span style="color: #24292e;">T2</span> = pd.read_excel(fname)
 
-<span style="font-weight: bold; font-style: italic;">df_2</span> = T2[[<span style="font-style: italic;">'Nuls'</span>, <span style="font-style: italic;">'Blancs'</span>, <span style="font-style: italic;">'Abstentions'</span>]].copy()
-<span style="font-weight: bold; font-style: italic;">df_2</span>[<span style="font-style: italic;">"Non exprim&#233;s"</span>] =  df_2[<span style="font-style: italic;">'Nuls'</span>] + df_2[<span style="font-style: italic;">'Blancs'</span>] + df_2[<span style="font-style: italic;">'Abstentions'</span>]
-<span style="font-weight: bold; font-style: italic;">df_2</span> = df_2[[<span style="font-style: italic;">"Non exprim&#233;s"</span>]].copy()
+<span style="color: #24292e;">df_2</span> = T2[[<span style="color: #032f62;">'Nuls'</span>, <span style="color: #032f62;">'Blancs'</span>, <span style="color: #032f62;">'Abstentions'</span>]].copy()
+<span style="color: #24292e;">df_2</span>[<span style="color: #032f62;">"Non exprim&#233;s"</span>] =  df_2[<span style="color: #032f62;">'Nuls'</span>] + df_2[<span style="color: #032f62;">'Blancs'</span>] + df_2[<span style="color: #032f62;">'Abstentions'</span>]
+<span style="color: #24292e;">df_2</span> = df_2[[<span style="color: #032f62;">"Non exprim&#233;s"</span>]].copy()
 
-<span style="font-weight: bold; font-style: italic;">col_start</span> = 21
-<span style="font-weight: bold; font-style: italic;">col_par_cdt</span> = 7
-<span style="font-weight: bold; font-style: italic;">candidats</span> = T2.iloc[0][col_start::col_par_cdt]
+<span style="color: #24292e;">col_start</span> = 21
+<span style="color: #24292e;">col_par_cdt</span> = 7
+<span style="color: #24292e;">candidats</span> = T2.iloc[0][col_start::col_par_cdt]
 
-<span style="font-weight: bold;">for</span> i_candidat, candidat <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(candidats):
-    <span style="font-weight: bold; font-style: italic;">i_col</span> = col_start + i_candidat*col_par_cdt + 2
-    <span style="font-weight: bold;">print</span>(<span style="font-style: italic;">'# colonne'</span>, i_col, <span style="font-style: italic;">' r&#233;sultats='</span>, T2.iloc[:, i_col].values)
-    <span style="font-weight: bold; font-style: italic;">df_2</span>[candidat] = T2.iloc[:, i_col].values
+<span style="color: #d73a49;">for</span> i_candidat, candidat <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">enumerate</span>(candidats):
+    <span style="color: #24292e;">i_col</span> = col_start + i_candidat*col_par_cdt + 2
+    <span style="color: #d73a49;">print</span>(<span style="color: #032f62;">'# colonne'</span>, i_col, <span style="color: #032f62;">' r&#233;sultats='</span>, T2.iloc[:, i_col].values)
+    <span style="color: #24292e;">df_2</span>[candidat] = T2.iloc[:, i_col].values
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> matplotlib.pyplot <span style="font-weight: bold;">as</span> plt
+<pre class="src src-python"><span style="color: #d73a49;">import</span> matplotlib.pyplot <span style="color: #d73a49;">as</span> plt
 
-<span style="font-weight: bold; font-style: italic;">results</span> = df_2.<span style="font-weight: bold;">sum</span>()/df_2.<span style="font-weight: bold;">sum</span>().<span style="font-weight: bold;">sum</span>()
+<span style="color: #24292e;">results</span> = df_2.<span style="color: #d73a49;">sum</span>()/df_2.<span style="color: #d73a49;">sum</span>().<span style="color: #d73a49;">sum</span>()
 
-<span style="font-weight: bold; font-style: italic;">fig</span>, <span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplots(figsize=(13, 5))
-<span style="font-weight: bold; font-style: italic;">ax</span> = results.plot.bar(ax=ax)
+<span style="color: #24292e;">fig</span>, <span style="color: #24292e;">ax</span> = plt.subplots(figsize=(13, 5))
+<span style="color: #24292e;">ax</span> = results.plot.bar(ax=ax)
 
 ax.set_yticks([])
 
-<span style="font-weight: bold; font-style: italic;">spines_to_remove</span> = [<span style="font-style: italic;">"top"</span>, <span style="font-style: italic;">"left"</span>, <span style="font-style: italic;">"right"</span>]
-<span style="font-weight: bold;">for</span> spine <span style="font-weight: bold;">in</span> spines_to_remove:
-    ax.spines[spine].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
+<span style="color: #24292e;">spines_to_remove</span> = [<span style="color: #032f62;">"top"</span>, <span style="color: #032f62;">"left"</span>, <span style="color: #032f62;">"right"</span>]
+<span style="color: #d73a49;">for</span> spine <span style="color: #d73a49;">in</span> spines_to_remove:
+    ax.spines[spine].set_visible(<span style="color: #005cc5;">False</span>)
 
 
-<span style="font-weight: bold;">for</span> i, val <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(<span style="font-weight: bold;">list</span>(results.values)):
-    plt.text(i, val + 0.01, f<span style="font-style: italic;">"{val*100:.01f}%"</span>, ha=<span style="font-style: italic;">"center"</span>)
+<span style="color: #d73a49;">for</span> i, val <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">enumerate</span>(<span style="color: #d73a49;">list</span>(results.values)):
+    plt.text(i, val + 0.01, f<span style="color: #032f62;">"{val*100:.01f}%"</span>, ha=<span style="color: #032f62;">"center"</span>)
 
-plt.title(<span style="font-style: italic;">"R&#233;sultats du second tour"</span>)
-plt.savefig(filename, bbox_inches=<span style="font-style: italic;">"tight"</span>)
+plt.title(<span style="color: #032f62;">"R&#233;sultats du second tour"</span>)
+plt.savefig(filename, bbox_inches=<span style="color: #032f62;">"tight"</span>)
 filename
 </pre>
 </div>
@@ -257,91 +257,91 @@ filename
 #+attr<sub>html</sub> :width 100%
 </p>
 
-<div id="org2afd91c" class="figure">
+<div id="orgd9d6b58" class="figure">
 <p><img src="figs/presidentielles-report-voix/resultats-second-tour.png" alt="resultats-second-tour.png" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org621d55f" class="outline-3">
-<h3 id="org621d55f">Second order</h3>
-<div class="outline-text-3" id="text-org621d55f">
+<div id="outline-container-org85df176" class="outline-3">
+<h3 id="org85df176">Second order</h3>
+<div class="outline-text-3" id="text-org85df176">
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
+<pre class="src src-python"><span style="color: #d73a49;">import</span> seaborn <span style="color: #d73a49;">as</span> sns
 
-<span style="font-weight: bold; font-style: italic;">CDT_1</span> = <span style="font-style: italic;">"ARTHAUD"</span>
-<span style="font-weight: bold; font-style: italic;">CDT_2</span> = <span style="font-style: italic;">"LE PEN"</span>
+<span style="color: #24292e;">CDT_1</span> = <span style="color: #032f62;">"ARTHAUD"</span>
+<span style="color: #24292e;">CDT_2</span> = <span style="color: #032f62;">"LE PEN"</span>
 
-<span style="font-weight: bold; font-style: italic;">df_12</span> = pd.DataFrame()
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_1[CDT_1].copy()
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_2[CDT_2].copy()
+<span style="color: #24292e;">df_12</span> = pd.DataFrame()
+<span style="color: #24292e;">df_12</span>[CDT_1] = df_1[CDT_1].copy()
+<span style="color: #24292e;">df_12</span>[CDT_2] = df_2[CDT_2].copy()
 
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_12[CDT_1]/df_1.<span style="font-weight: bold;">sum</span>(axis=1)
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="font-weight: bold;">sum</span>(axis=1)
+<span style="color: #24292e;">df_12</span>[CDT_1] = df_12[CDT_1]/df_1.<span style="color: #d73a49;">sum</span>(axis=1)
+<span style="color: #24292e;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="color: #d73a49;">sum</span>(axis=1)
 
-<span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0, 0.02), ylim=(0, 1), kind=<span style="font-style: italic;">'hist'</span>, height=8);
+<span style="color: #24292e;">fig</span> = plt.figure()
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0, 0.02), ylim=(0, 1), kind=<span style="color: #032f62;">'hist'</span>, height=8);
 plt.savefig(filename)
 filename
 </pre>
 </div>
 
 
-<div id="orgb1d4750" class="figure">
+<div id="org5b66d69" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figures6n2pL.png" alt="figures6n2pL.png" />
 </p>
 </div>
 
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
+<pre class="src src-python"><span style="color: #d73a49;">import</span> seaborn <span style="color: #d73a49;">as</span> sns
 
-<span style="font-weight: bold; font-style: italic;">CDT_1</span> = <span style="font-style: italic;">"ARTHAUD"</span>
-<span style="font-weight: bold; font-style: italic;">CDT_2</span> = <span style="font-style: italic;">"Non exprim&#233;s"</span>
+<span style="color: #24292e;">CDT_1</span> = <span style="color: #032f62;">"ARTHAUD"</span>
+<span style="color: #24292e;">CDT_2</span> = <span style="color: #032f62;">"Non exprim&#233;s"</span>
 
-<span style="font-weight: bold; font-style: italic;">df_12</span> = pd.DataFrame()
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_1[CDT_1].copy()
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_2[CDT_2].copy()
+<span style="color: #24292e;">df_12</span> = pd.DataFrame()
+<span style="color: #24292e;">df_12</span>[CDT_1] = df_1[CDT_1].copy()
+<span style="color: #24292e;">df_12</span>[CDT_2] = df_2[CDT_2].copy()
 
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_12[CDT_1]/df_1.<span style="font-weight: bold;">sum</span>(axis=1)
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="font-weight: bold;">sum</span>(axis=1)
+<span style="color: #24292e;">df_12</span>[CDT_1] = df_12[CDT_1]/df_1.<span style="color: #d73a49;">sum</span>(axis=1)
+<span style="color: #24292e;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="color: #d73a49;">sum</span>(axis=1)
 
-<span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0,0.02), ylim=(0, 1), kind=<span style="font-style: italic;">'hist'</span>, height=8);
+<span style="color: #24292e;">fig</span> = plt.figure()
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0,0.02), ylim=(0, 1), kind=<span style="color: #032f62;">'hist'</span>, height=8);
 plt.savefig(filename)
 filename
 </pre>
 </div>
 
 
-<div id="org44a8e45" class="figure">
+<div id="org08126e1" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figurePLSP8R.png" alt="figurePLSP8R.png" />
 </p>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> seaborn <span style="font-weight: bold;">as</span> sns
+<pre class="src src-python"><span style="color: #d73a49;">import</span> seaborn <span style="color: #d73a49;">as</span> sns
 
-<span style="font-weight: bold; font-style: italic;">CDT_1</span> = <span style="font-style: italic;">"Non exprim&#233;s"</span>
-<span style="font-weight: bold; font-style: italic;">CDT_2</span> = <span style="font-style: italic;">"MACRON"</span>
+<span style="color: #24292e;">CDT_1</span> = <span style="color: #032f62;">"Non exprim&#233;s"</span>
+<span style="color: #24292e;">CDT_2</span> = <span style="color: #032f62;">"MACRON"</span>
 
-<span style="font-weight: bold; font-style: italic;">df_12</span> = pd.DataFrame()
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_1[CDT_1].copy()
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_2[CDT_2].copy()
+<span style="color: #24292e;">df_12</span> = pd.DataFrame()
+<span style="color: #24292e;">df_12</span>[CDT_1] = df_1[CDT_1].copy()
+<span style="color: #24292e;">df_12</span>[CDT_2] = df_2[CDT_2].copy()
 
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_1] = df_12[CDT_1]/df_1.<span style="font-weight: bold;">sum</span>(axis=1)
-<span style="font-weight: bold; font-style: italic;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="font-weight: bold;">sum</span>(axis=1)
+<span style="color: #24292e;">df_12</span>[CDT_1] = df_12[CDT_1]/df_1.<span style="color: #d73a49;">sum</span>(axis=1)
+<span style="color: #24292e;">df_12</span>[CDT_2] = df_12[CDT_2]/df_2.<span style="color: #d73a49;">sum</span>(axis=1)
 
-<span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure()
-sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0, 1), ylim=(0, 1), kind=<span style="font-style: italic;">'hist'</span>, height=8);
+<span style="color: #24292e;">fig</span> = plt.figure()
+sns.jointplot(x=df_12[CDT_1], y=df_12[CDT_2], xlim=(0, 1), ylim=(0, 1), kind=<span style="color: #032f62;">'hist'</span>, height=8);
 plt.savefig(filename)
 filename
 </pre>
 </div>
 
 
-<div id="org3b64f55" class="figure">
+<div id="orgde270cb" class="figure">
 <p><img src="file:///tmp/babel-DTyOHT/figurei4jzIx.png" alt="figurei4jzIx.png" />
 </p>
 </div>
@@ -350,15 +350,15 @@ filename
 </div>
 
 
-<div id="outline-container-orge6a81e5" class="outline-2">
-<h2 id="orge6a81e5">Simple modèle écologique</h2>
-<div class="outline-text-2" id="text-orge6a81e5">
+<div id="outline-container-orgdf6ce13" class="outline-2">
+<h2 id="orgdf6ce13">Simple modèle écologique</h2>
+<div class="outline-text-2" id="text-orgdf6ce13">
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:577, :]
-<span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:577:]
-<span style="font-weight: bold; font-style: italic;">n_premier</span> = premier.shape[1]
-<span style="font-weight: bold; font-style: italic;">n_second</span> = second.shape[1]
-<span style="font-weight: bold; font-style: italic;">n_circos</span> = premier.shape[0]
+<pre class="src src-python"><span style="color: #24292e;">second</span> = df_2[1:].values[:577, :]
+<span style="color: #24292e;">premier</span> = df_1[1:].values[:577:]
+<span style="color: #24292e;">n_premier</span> = premier.shape[1]
+<span style="color: #24292e;">n_second</span> = second.shape[1]
+<span style="color: #24292e;">n_circos</span> = premier.shape[0]
 </pre>
 </div>
 
@@ -367,96 +367,96 @@ The model we implement is taken from <a target='_blank' rel='noopener noreferrer
 </p>
 </div>
 
-<div id="outline-container-org4005d55" class="outline-3">
-<h3 id="org4005d55"><span class="todo TODO">TODO</span> Full mixing</h3>
-<div class="outline-text-3" id="text-org4005d55">
+<div id="outline-container-orga7acbdd" class="outline-3">
+<h3 id="orga7acbdd"><span class="todo TODO">TODO</span> Full mixing</h3>
+<div class="outline-text-3" id="text-orga7acbdd">
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">from</span> aesara.tensor.random <span style="color: #d73a49;">import</span> RandomStream
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = RandomStream(0)
+<span style="color: #24292e;">srng</span> = RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">p1_at</span> = at.as_tensor(premier / premier.<span style="font-weight: bold;">sum</span>(axis=1).reshape((premier.shape[0], 1)))
-<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.dirichlet(at.ones((n_premier, n_second)))
-<span style="font-weight: bold; font-style: italic;">p2_at</span> = at.dot(p1_at, beta_rv)
-<span style="font-weight: bold; font-style: italic;">p2_at_norm</span> = p2_at / p2_at.<span style="font-weight: bold;">sum</span>(axis=1).reshape((p2_at.shape[0], 1))
-<span style="font-weight: bold; font-style: italic;">R2_rv</span> = srng.multinomial(at.<span style="font-weight: bold;">sum</span>(second, axis=1), p2_at)
+<span style="color: #24292e;">p1_at</span> = at.as_tensor(premier / premier.<span style="color: #d73a49;">sum</span>(axis=1).reshape((premier.shape[0], 1)))
+<span style="color: #24292e;">beta_rv</span> = srng.dirichlet(at.ones((n_premier, n_second)))
+<span style="color: #24292e;">p2_at</span> = at.dot(p1_at, beta_rv)
+<span style="color: #24292e;">p2_at_norm</span> = p2_at / p2_at.<span style="color: #d73a49;">sum</span>(axis=1).reshape((p2_at.shape[0], 1))
+<span style="color: #24292e;">R2_rv</span> = srng.multinomial(at.<span style="color: #d73a49;">sum</span>(second, axis=1), p2_at)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.link.jax.dispatch <span style="font-weight: bold;">import</span> jax_funcify
-<span style="font-weight: bold;">from</span> aesara.graph.fg <span style="font-weight: bold;">import</span> FunctionGraph
-<span style="font-weight: bold;">from</span> aeppl.opt <span style="font-weight: bold;">import</span> logprob_rewrites_db
-<span style="font-weight: bold;">from</span> aesara.<span style="font-weight: bold;">compile</span> <span style="font-weight: bold;">import</span> mode
-<span style="font-weight: bold;">from</span> aesara.raise_op <span style="font-weight: bold;">import</span> CheckAndRaise
+<pre class="src src-python"><span style="color: #d73a49;">from</span> aesara.link.jax.dispatch <span style="color: #d73a49;">import</span> jax_funcify
+<span style="color: #d73a49;">from</span> aesara.graph.fg <span style="color: #d73a49;">import</span> FunctionGraph
+<span style="color: #d73a49;">from</span> aeppl.opt <span style="color: #d73a49;">import</span> logprob_rewrites_db
+<span style="color: #d73a49;">from</span> aesara.<span style="color: #d73a49;">compile</span> <span style="color: #d73a49;">import</span> mode
+<span style="color: #d73a49;">from</span> aesara.raise_op <span style="color: #d73a49;">import</span> CheckAndRaise
 
-<span style="font-weight: bold; text-decoration: underline;">@jax_funcify.register</span>(CheckAndRaise)
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">jax_funcify_Assert</span>(op, **kwargs):
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Jax does not allow assert whose values aren't known during JIT compilation</span>
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">within it's JIT-ed code. Hence we need to make a simple pass through</span>
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">version of the Assert Op.</span>
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">https://github.com/google/jax/issues/2273#issuecomment-589098722</span>
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">assert_fn</span>(value, *inps):
-        <span style="font-weight: bold;">return</span> value
+<span style="color: #005cc5;">@jax_funcify.register</span>(CheckAndRaise)
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">jax_funcify_Assert</span>(op, **kwargs):
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Jax does not allow assert whose values aren't known during JIT compilation</span>
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">within it's JIT-ed code. Hence we need to make a simple pass through</span>
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">version of the Assert Op.</span>
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">https://github.com/google/jax/issues/2273#issuecomment-589098722</span>
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">assert_fn</span>(value, *inps):
+        <span style="color: #d73a49;">return</span> value
 
-    <span style="font-weight: bold;">return</span> assert_fn
+    <span style="color: #d73a49;">return</span> assert_fn
 
-<span style="font-weight: bold; font-style: italic;">fgraph</span> = FunctionGraph(inputs=(beta_vv, R2_vv), outputs=(logprob,))
+<span style="color: #24292e;">fgraph</span> = FunctionGraph(inputs=(beta_vv, R2_vv), outputs=(logprob,))
 mode.JAX.optimizer.optimize(fgraph)
-<span style="font-weight: bold; font-style: italic;">jax_fn</span> = jax_funcify(fgraph)
+<span style="color: #24292e;">jax_fn</span> = jax_funcify(fgraph)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">M</span> = SimplexTransform().forward(beta_rv).<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(jax_fn(M, second)[0])
+<pre class="src src-python"><span style="color: #24292e;">M</span> = SimplexTransform().forward(beta_rv).<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(jax_fn(M, second)[0])
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logpdf</span>(beta):
-    <span style="font-weight: bold;">return</span> jax_fn(beta, second)[0]
+<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">logpdf</span>(beta):
+    <span style="color: #d73a49;">return</span> jax_fn(beta, second)[0]
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
-<span style="font-weight: bold;">import</span> blackjax
+<pre class="src src-python"><span style="color: #d73a49;">import</span> jax
+<span style="color: #d73a49;">import</span> blackjax
 
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">inference_loop</span>(rng_key, kernel, initial_state, num_samples):
-    <span style="font-style: italic;">"""Sequantially draws samples given the kernel of choice."""</span>
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">inference_loop</span>(rng_key, kernel, initial_state, num_samples):
+    <span style="color: #032f62;">"""Sequantially draws samples given the kernel of choice."""</span>
 
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">one_step</span>(state, rng_key):
-        <span style="font-weight: bold; font-style: italic;">state</span>, <span style="font-weight: bold; font-style: italic;">_</span> = kernel(rng_key, state)
-        <span style="font-weight: bold;">return</span> state, state
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">one_step</span>(state, rng_key):
+        <span style="color: #24292e;">state</span>, <span style="color: #24292e;">_</span> = kernel(rng_key, state)
+        <span style="color: #d73a49;">return</span> state, state
 
-    <span style="font-weight: bold; font-style: italic;">keys</span> = jax.random.split(rng_key, num_samples)
-    <span style="font-weight: bold; font-style: italic;">_</span>, <span style="font-weight: bold; font-style: italic;">states</span> = jax.lax.scan(one_step, initial_state, keys)
+    <span style="color: #24292e;">keys</span> = jax.random.split(rng_key, num_samples)
+    <span style="color: #24292e;">_</span>, <span style="color: #24292e;">states</span> = jax.lax.scan(one_step, initial_state, keys)
 
-    <span style="font-weight: bold;">return</span> states
+    <span style="color: #d73a49;">return</span> states
 
 
-<span style="font-weight: bold; font-style: italic;">rng</span> = jax.random.PRNGKey(0)
-<span style="font-weight: bold; font-style: italic;">adapt</span> = blackjax.window_adaptation(blackjax.nuts, logpdf, 3000, initial_step_size=1., target_acceptance_rate=0.8)
-<span style="font-weight: bold; font-style: italic;">state</span>, <span style="font-weight: bold; font-style: italic;">kernel</span>, <span style="font-weight: bold; font-style: italic;">_</span> = adapt.run(rng, M)
-<span style="font-weight: bold; font-style: italic;">samples</span> = inference_loop(rng, kernel, state, 1000)
+<span style="color: #24292e;">rng</span> = jax.random.PRNGKey(0)
+<span style="color: #24292e;">adapt</span> = blackjax.window_adaptation(blackjax.nuts, logpdf, 3000, initial_step_size=1., target_acceptance_rate=0.8)
+<span style="color: #24292e;">state</span>, <span style="color: #24292e;">kernel</span>, <span style="color: #24292e;">_</span> = adapt.run(rng, M)
+<span style="color: #24292e;">samples</span> = inference_loop(rng, kernel, state, 1000)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">trans_at</span> = at.matrix()
-<span style="font-weight: bold; font-style: italic;">untrans_at</span> = SimplexTransform().backward(trans_at)
+<pre class="src src-python"><span style="color: #24292e;">trans_at</span> = at.matrix()
+<span style="color: #24292e;">untrans_at</span> = SimplexTransform().backward(trans_at)
 
-<span style="font-weight: bold; font-style: italic;">fgraph</span> = FunctionGraph(inputs=(trans_at,), outputs=(untrans_at,))
+<span style="color: #24292e;">fgraph</span> = FunctionGraph(inputs=(trans_at,), outputs=(untrans_at,))
 mode.JAX.optimizer.optimize(fgraph)
-<span style="font-weight: bold; font-style: italic;">untransform_fn</span> = jax_funcify(fgraph)
+<span style="color: #24292e;">untransform_fn</span> = jax_funcify(fgraph)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">a</span> = jax.vmap(untransform_fn, in_axes=(0))(samples.position)[0]
+<pre class="src src-python"><span style="color: #24292e;">a</span> = jax.vmap(untransform_fn, in_axes=(0))(samples.position)[0]
 jnp.mean(a, axis=0)
 </pre>
 </div>
@@ -477,140 +477,140 @@ On vérifie que le modèle, aussi surprenant que cela soit, est k
 </div>
 </div>
 
-<div id="outline-container-org33683e4" class="outline-3">
-<h3 id="org33683e4"><span class="todo TODO">TODO</span> Hyperprior on dirichlet</h3>
-<div class="outline-text-3" id="text-org33683e4">
+<div id="outline-container-org3184a6b" class="outline-3">
+<h3 id="org3184a6b"><span class="todo TODO">TODO</span> Hyperprior on dirichlet</h3>
+<div class="outline-text-3" id="text-org3184a6b">
 <p>
 Per the paper on ecological inference we add an exponential hyperprior on the dirichlet distribution.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">second</span> = df_2[1:].values[:100,:]
-<span style="font-weight: bold; font-style: italic;">premier</span> = df_1[1:].values[:100,:]
-<span style="font-weight: bold; font-style: italic;">n_premier</span> = premier.shape[1]
-<span style="font-weight: bold; font-style: italic;">n_second</span> = second.shape[1]
-<span style="font-weight: bold; font-style: italic;">n_circos</span> = premier.shape[0]
+<pre class="src src-python"><span style="color: #24292e;">second</span> = df_2[1:].values[:100,:]
+<span style="color: #24292e;">premier</span> = df_1[1:].values[:100,:]
+<span style="color: #24292e;">n_premier</span> = premier.shape[1]
+<span style="color: #24292e;">n_second</span> = second.shape[1]
+<span style="color: #24292e;">n_circos</span> = premier.shape[0]
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">from</span> aesara.tensor.random <span style="color: #d73a49;">import</span> RandomStream
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = RandomStream(0)
+<span style="color: #24292e;">srng</span> = RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">p1_at</span> = at.as_tensor(premier / premier.<span style="font-weight: bold;">sum</span>(axis=1).reshape((premier.shape[0], 1)))
-<span style="font-weight: bold; font-style: italic;">delta_rv</span> = srng.exponential(at.ones((n_premier, n_second)) * 10.)
-<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.dirichlet(delta_rv)
-<span style="font-weight: bold; font-style: italic;">p2_at</span> = at.dot(p1_at, beta_rv)
-<span style="font-weight: bold; font-style: italic;">p2_at_norm</span> = p2_at / p2_at.<span style="font-weight: bold;">sum</span>(axis=1).reshape((p2_at.shape[0], 1))
-<span style="font-weight: bold; font-style: italic;">R2_rv</span> = srng.multinomial(at.<span style="font-weight: bold;">sum</span>(second, axis=1), p2_at)
+<span style="color: #24292e;">p1_at</span> = at.as_tensor(premier / premier.<span style="color: #d73a49;">sum</span>(axis=1).reshape((premier.shape[0], 1)))
+<span style="color: #24292e;">delta_rv</span> = srng.exponential(at.ones((n_premier, n_second)) * 10.)
+<span style="color: #24292e;">beta_rv</span> = srng.dirichlet(delta_rv)
+<span style="color: #24292e;">p2_at</span> = at.dot(p1_at, beta_rv)
+<span style="color: #24292e;">p2_at_norm</span> = p2_at / p2_at.<span style="color: #d73a49;">sum</span>(axis=1).reshape((p2_at.shape[0], 1))
+<span style="color: #24292e;">R2_rv</span> = srng.multinomial(at.<span style="color: #d73a49;">sum</span>(second, axis=1), p2_at)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> aeppl.transforms <span style="font-weight: bold;">import</span> TransformValuesOpt, LogTransform, SimplexTransform
+<pre class="src src-python"><span style="color: #d73a49;">from</span> aeppl.transforms <span style="color: #d73a49;">import</span> TransformValuesOpt, LogTransform, SimplexTransform
 
 
-<span style="font-weight: bold; font-style: italic;">R2_vv</span> = R2_rv.clone()
-<span style="font-weight: bold; font-style: italic;">beta_vv</span> = beta_rv.clone()
-<span style="font-weight: bold; font-style: italic;">delta_vv</span> = delta_rv.clone()
+<span style="color: #24292e;">R2_vv</span> = R2_rv.clone()
+<span style="color: #24292e;">beta_vv</span> = beta_rv.clone()
+<span style="color: #24292e;">delta_vv</span> = delta_rv.clone()
 
-<span style="font-weight: bold; font-style: italic;">transforms_op</span> = TransformValuesOpt(
+<span style="color: #24292e;">transforms_op</span> = TransformValuesOpt(
      {beta_vv: SimplexTransform(), delta_vv: LogTransform()}
 )
-<span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob(
+<span style="color: #24292e;">logprob</span> = joint_logprob(
     {R2_rv: R2_vv, beta_rv: beta_vv, delta_rv: delta_vv},
     extra_rewrites=transforms_op
 )
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Compile the logprob function</span>
-<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((beta_vv, delta_vv, R2_vv), logprob)
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Compile the logprob function</span>
+<span style="color: #24292e;">logprob_fn</span> = aesara.function((beta_vv, delta_vv, R2_vv), logprob)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">beta</span> = SimplexTransform().forward(beta_rv).<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold; font-style: italic;">delta</span> = LogTransform().forward(delta_rv).<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(logprob_fn(beta, delta, second))
+<pre class="src src-python"><span style="color: #24292e;">beta</span> = SimplexTransform().forward(beta_rv).<span style="color: #d73a49;">eval</span>()
+<span style="color: #24292e;">delta</span> = LogTransform().forward(delta_rv).<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(logprob_fn(beta, delta, second))
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.link.jax.dispatch <span style="font-weight: bold;">import</span> jax_funcify
-<span style="font-weight: bold;">from</span> aesara.graph.fg <span style="font-weight: bold;">import</span> FunctionGraph
-<span style="font-weight: bold;">from</span> aeppl.opt <span style="font-weight: bold;">import</span> logprob_rewrites_db
-<span style="font-weight: bold;">from</span> aesara.<span style="font-weight: bold;">compile</span> <span style="font-weight: bold;">import</span> mode
-<span style="font-weight: bold;">from</span> aesara.raise_op <span style="font-weight: bold;">import</span> CheckAndRaise
+<pre class="src src-python"><span style="color: #d73a49;">from</span> aesara.link.jax.dispatch <span style="color: #d73a49;">import</span> jax_funcify
+<span style="color: #d73a49;">from</span> aesara.graph.fg <span style="color: #d73a49;">import</span> FunctionGraph
+<span style="color: #d73a49;">from</span> aeppl.opt <span style="color: #d73a49;">import</span> logprob_rewrites_db
+<span style="color: #d73a49;">from</span> aesara.<span style="color: #d73a49;">compile</span> <span style="color: #d73a49;">import</span> mode
+<span style="color: #d73a49;">from</span> aesara.raise_op <span style="color: #d73a49;">import</span> CheckAndRaise
 
-<span style="font-weight: bold; text-decoration: underline;">@jax_funcify.register</span>(CheckAndRaise)
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">jax_funcify_Assert</span>(op, **kwargs):
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Jax does not allow assert whose values aren't known during JIT compilation</span>
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">within it's JIT-ed code. Hence we need to make a simple pass through</span>
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">version of the Assert Op.</span>
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">https://github.com/google/jax/issues/2273#issuecomment-589098722</span>
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">assert_fn</span>(value, *inps):
-        <span style="font-weight: bold;">return</span> value
+<span style="color: #005cc5;">@jax_funcify.register</span>(CheckAndRaise)
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">jax_funcify_Assert</span>(op, **kwargs):
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Jax does not allow assert whose values aren't known during JIT compilation</span>
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">within it's JIT-ed code. Hence we need to make a simple pass through</span>
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">version of the Assert Op.</span>
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">https://github.com/google/jax/issues/2273#issuecomment-589098722</span>
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">assert_fn</span>(value, *inps):
+        <span style="color: #d73a49;">return</span> value
 
-    <span style="font-weight: bold;">return</span> assert_fn
+    <span style="color: #d73a49;">return</span> assert_fn
 
-<span style="font-weight: bold; font-style: italic;">fgraph</span> = FunctionGraph(inputs=(beta_vv, delta_vv, R2_vv), outputs=(logprob,))
+<span style="color: #24292e;">fgraph</span> = FunctionGraph(inputs=(beta_vv, delta_vv, R2_vv), outputs=(logprob,))
 mode.JAX.optimizer.optimize(fgraph)
-<span style="font-weight: bold; font-style: italic;">jax_fn</span> = jax_funcify(fgraph)
+<span style="color: #24292e;">jax_fn</span> = jax_funcify(fgraph)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">M</span> = SimplexTransform().forward(beta_rv).<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold; font-style: italic;">d</span> = LogTransform().forward(delta_rv).<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(jax_fn(M, d, second)[0])
+<pre class="src src-python"><span style="color: #24292e;">M</span> = SimplexTransform().forward(beta_rv).<span style="color: #d73a49;">eval</span>()
+<span style="color: #24292e;">d</span> = LogTransform().forward(delta_rv).<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(jax_fn(M, d, second)[0])
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logpdf</span>(x):
-    <span style="font-weight: bold; font-style: italic;">beta</span>, <span style="font-weight: bold; font-style: italic;">delta</span> = x
-    <span style="font-weight: bold;">return</span> jax_fn(beta, delta, second)[0]
+<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">logpdf</span>(x):
+    <span style="color: #24292e;">beta</span>, <span style="color: #24292e;">delta</span> = x
+    <span style="color: #d73a49;">return</span> jax_fn(beta, delta, second)[0]
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
-<span style="font-weight: bold;">import</span> blackjax
+<pre class="src src-python"><span style="color: #d73a49;">import</span> jax
+<span style="color: #d73a49;">import</span> blackjax
 
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">inference_loop</span>(rng_key, kernel, initial_state, num_samples):
-    <span style="font-style: italic;">"""Sequantially draws samples given the kernel of choice."""</span>
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">inference_loop</span>(rng_key, kernel, initial_state, num_samples):
+    <span style="color: #032f62;">"""Sequantially draws samples given the kernel of choice."""</span>
 
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">one_step</span>(state, rng_key):
-        <span style="font-weight: bold; font-style: italic;">state</span>, <span style="font-weight: bold; font-style: italic;">_</span> = kernel(rng_key, state)
-        <span style="font-weight: bold;">return</span> state, state
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">one_step</span>(state, rng_key):
+        <span style="color: #24292e;">state</span>, <span style="color: #24292e;">_</span> = kernel(rng_key, state)
+        <span style="color: #d73a49;">return</span> state, state
 
-    <span style="font-weight: bold; font-style: italic;">keys</span> = jax.random.split(rng_key, num_samples)
-    <span style="font-weight: bold; font-style: italic;">_</span>, <span style="font-weight: bold; font-style: italic;">states</span> = jax.lax.scan(one_step, initial_state, keys)
+    <span style="color: #24292e;">keys</span> = jax.random.split(rng_key, num_samples)
+    <span style="color: #24292e;">_</span>, <span style="color: #24292e;">states</span> = jax.lax.scan(one_step, initial_state, keys)
 
-    <span style="font-weight: bold;">return</span> states
+    <span style="color: #d73a49;">return</span> states
 
 
-<span style="font-weight: bold; font-style: italic;">rng</span> = jax.random.PRNGKey(0)
-<span style="font-weight: bold; font-style: italic;">adapt</span> = blackjax.window_adaptation(blackjax.nuts, logpdf, 3000, initial_step_size=1., target_acceptance_rate=0.8)
-<span style="font-weight: bold; font-style: italic;">state</span>, <span style="font-weight: bold; font-style: italic;">kernel</span>, <span style="font-weight: bold; font-style: italic;">_</span> = adapt.run(rng, (M, d))
-<span style="font-weight: bold; font-style: italic;">samples</span> = inference_loop(rng, kernel, state, 1000)
+<span style="color: #24292e;">rng</span> = jax.random.PRNGKey(0)
+<span style="color: #24292e;">adapt</span> = blackjax.window_adaptation(blackjax.nuts, logpdf, 3000, initial_step_size=1., target_acceptance_rate=0.8)
+<span style="color: #24292e;">state</span>, <span style="color: #24292e;">kernel</span>, <span style="color: #24292e;">_</span> = adapt.run(rng, (M, d))
+<span style="color: #24292e;">samples</span> = inference_loop(rng, kernel, state, 1000)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">trans_at</span> = at.matrix()
-<span style="font-weight: bold; font-style: italic;">untrans_at</span> = LogTransform().backward(trans_at)
+<pre class="src src-python"><span style="color: #24292e;">trans_at</span> = at.matrix()
+<span style="color: #24292e;">untrans_at</span> = LogTransform().backward(trans_at)
 
-<span style="font-weight: bold; font-style: italic;">fgraph</span> = FunctionGraph(inputs=(trans_at,), outputs=(untrans_at,))
+<span style="color: #24292e;">fgraph</span> = FunctionGraph(inputs=(trans_at,), outputs=(untrans_at,))
 mode.JAX.optimizer.optimize(fgraph)
-<span style="font-weight: bold; font-style: italic;">untransform_fn</span> = jax_funcify(fgraph)
+<span style="color: #24292e;">untransform_fn</span> = jax_funcify(fgraph)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">a</span> = jax.vmap(untransform_fn, in_axes=(0))(samples.position[1])[0]
+<pre class="src src-python"><span style="color: #24292e;">a</span> = jax.vmap(untransform_fn, in_axes=(0))(samples.position[1])[0]
 jnp.mean(a, axis=0)
 </pre>
 </div>
@@ -631,19 +631,19 @@ Les résultats sont de toute évidence faux: il suffit de comparer les graphes a
 </ul>
 </div>
 </div>
-<div id="outline-container-org7b16da7" class="outline-3">
-<h3 id="org7b16da7"><span class="todo TODO">TODO</span> Explain why we get weird results with full mixing</h3>
+<div id="outline-container-org8021188" class="outline-3">
+<h3 id="org8021188"><span class="todo TODO">TODO</span> Explain why we get weird results with full mixing</h3>
 </div>
-<div id="outline-container-orgae5cc1e" class="outline-3">
-<h3 id="orgae5cc1e"><span class="todo TODO">TODO</span> Hierarchical model</h3>
-<div class="outline-text-3" id="text-orgae5cc1e">
+<div id="outline-container-orga652407" class="outline-3">
+<h3 id="orga652407"><span class="todo TODO">TODO</span> Hierarchical model</h3>
+<div class="outline-text-3" id="text-orga652407">
 <p>
 The hierarchical model should allow us to give more reasonable national estimates. It is not purely descriptive as this gives us access to a quantity we did not have access to before: the transition matrices.
 </p>
 </div>
 </div>
-<div id="outline-container-orga15f321" class="outline-3">
-<h3 id="orga15f321"><span class="todo TODO">TODO</span> Extract information from the model</h3>
+<div id="outline-container-orgea73f3c" class="outline-3">
+<h3 id="orgea73f3c"><span class="todo TODO">TODO</span> Extract information from the model</h3>
 </div>
 </div>
 </div>

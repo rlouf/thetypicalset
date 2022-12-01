@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Term rewriting in miniKanren</title>
@@ -58,22 +58,22 @@ x + x &= 2 * x\\
 
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> numbers <span style="font-weight: bold;">import</span> Real
+<pre class="src src-python"><span style="color: #d73a49;">from</span> numbers <span style="color: #d73a49;">import</span> Real
 
-<span style="font-weight: bold;">from</span> etuples.core <span style="font-weight: bold;">import</span> ExpressionTuple, etuple
+<span style="color: #d73a49;">from</span> etuples.core <span style="color: #d73a49;">import</span> ExpressionTuple, etuple
 
-<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> var, conde, lall
-<span style="font-weight: bold;">from</span> kanren.constraints <span style="font-weight: bold;">import</span> isinstanceo
+<span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> var, conde, lall
+<span style="color: #d73a49;">from</span> kanren.constraints <span style="color: #d73a49;">import</span> isinstanceo
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">single_math_reduceo</span>(expanded_term, reduced_term):
-    <span style="font-weight: bold; font-style: italic;">x_lv</span> = var()
-    <span style="font-weight: bold;">return</span> lall(
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">single_math_reduceo</span>(expanded_term, reduced_term):
+    <span style="color: #24292e;">x_lv</span> = var()
+    <span style="color: #d73a49;">return</span> lall(
         isinstanceo(x_lv, Real),
         isinstanceo(x_lv, ExpressionTuple),
         conde(
-            <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">add(x, x) == mul(2, x)</span>
+            <span style="color: #6a737d;"># </span><span style="color: #6a737d;">add(x, x) == mul(2, x)</span>
             [eq(expanded_term, etuple(add, x_lv, x_lv)), eq(reduced_term, etuple(mul, 2, x))],
-            <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">exp(log(x)) == x</span>
+            <span style="color: #6a737d;"># </span><span style="color: #6a737d;">exp(log(x)) == x</span>
             [eq(expanded_term, etuple(log, etuple(exp, x_lv))), eq(reduced_term, x_lv)],
         )
     )
@@ -85,11 +85,11 @@ x + x &= 2 * x\\
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> functools <span style="font-weight: bold;">import</span> partial
+<pre class="src src-python"><span style="color: #d73a49;">from</span> functools <span style="color: #d73a49;">import</span> partial
 
-<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> reduceo
+<span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> reduceo
 
-<span style="font-weight: bold; font-style: italic;">math_reduceo</span> = partial(reduceo, single_math_reduceo)
+<span style="color: #24292e;">math_reduceo</span> = partial(reduceo, single_math_reduceo)
 </pre>
 </div>
 
@@ -98,32 +98,32 @@ x + x &= 2 * x\\
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren.graph <span style="font-weight: bold;">import</span> walko
+<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren.graph <span style="color: #d73a49;">import</span> walko
 
-<span style="font-weight: bold; font-style: italic;">math_walko</span> = partial(walko, single_math_reduceo)
+<span style="color: #24292e;">math_walko</span> = partial(walko, single_math_reduceo)
 </pre>
 </div>
 
-<div id="outline-container-orgd6d0502" class="outline-2">
-<h2 id="orgd6d0502">Try a simple expansion</h2>
-<div class="outline-text-2" id="text-orgd6d0502">
+<div id="outline-container-org59f1325" class="outline-2">
+<h2 id="org59f1325">Try a simple expansion</h2>
+<div class="outline-text-2" id="text-org59f1325">
 <p>
 We're starting from the expanded expression \(3 + 3 + \exp(\log(\exp(5)))\) and will try to get the reduced version:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">expanded_term</span>  = etuple(add, etuple(add, 3, 3), euple(exp, etuple(log, etuple(exp, 5))))
-<span style="font-weight: bold; font-style: italic;">reduced_term</span> = var()
+<pre class="src src-python"><span style="color: #24292e;">expanded_term</span>  = etuple(add, etuple(add, 3, 3), euple(exp, etuple(log, etuple(exp, 5))))
+<span style="color: #24292e;">reduced_term</span> = var()
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org3580122" class="outline-2">
-<h2 id="org3580122">References</h2>
+<div id="outline-container-org7b7b1f7" class="outline-2">
+<h2 id="org7b7b1f7">References</h2>
 </div>
 
-<div id="outline-container-org619087f" class="outline-2">
-<h2 id="org619087f">Links to this note</h2>
+<div id="outline-container-org12c4eb5" class="outline-2">
+<h2 id="org12c4eb5">Links to this note</h2>
 </div>
 </div>
 </body>

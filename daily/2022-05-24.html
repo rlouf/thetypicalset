@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>2022-05-24</title>
@@ -15,19 +15,19 @@
 <div id="content" class="content">
 <h1 class="title">2022-05-24</h1>
 
-<div id="outline-container-org0d878f1" class="outline-2">
-<h2 id="org0d878f1">API for variational inference in `blackjax`</h2>
-<div class="outline-text-2" id="text-org0d878f1">
+<div id="outline-container-org01c610a" class="outline-2">
+<h2 id="org01c610a">API for variational inference in `blackjax`</h2>
+<div class="outline-text-2" id="text-org01c610a">
 <p>
 Can <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">variational inference</a> (VI) be represented with a kernel? MCMC algorithms are represented as such, for instance for SGLD:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> blackjax
+<pre class="src src-python"><span style="color: #d73a49;">import</span> blackjax
 
-<span style="font-weight: bold; font-style: italic;">sgld</span> = blackjax.sgld(grad_fn, schedule_fn)
-<span style="font-weight: bold; font-style: italic;">state</span> = sgld.init(init_position, data_batch)
-<span style="font-weight: bold; font-style: italic;">new_state</span> = sgld.step(rng_key, state, data_batch)
+<span style="color: #24292e;">sgld</span> = blackjax.sgld(grad_fn, schedule_fn)
+<span style="color: #24292e;">state</span> = sgld.init(init_position, data_batch)
+<span style="color: #24292e;">new_state</span> = sgld.step(rng_key, state, data_batch)
 
 </pre>
 </div>
@@ -37,18 +37,18 @@ However, VI is not a stepping process like MCMC is. It <i>creates a distribution
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> blackjax
+<pre class="src src-python"><span style="color: #d73a49;">import</span> blackjax
 
-<span style="font-weight: bold; font-style: italic;">pathfinder</span> = blackjax.pathfinder(logprob_fn)
-<span style="font-weight: bold; font-style: italic;">approximation</span> = pathfinder.approximate(initial_points, num_steps)
-<span style="font-weight: bold; font-style: italic;">samples</span> = pathfinder.sample(approximation, num_samples)
+<span style="color: #24292e;">pathfinder</span> = blackjax.pathfinder(logprob_fn)
+<span style="color: #24292e;">approximation</span> = pathfinder.approximate(initial_points, num_steps)
+<span style="color: #24292e;">samples</span> = pathfinder.sample(approximation, num_samples)
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgf068e8e" class="outline-2">
-<h2 id="orgf068e8e">Links to this note</h2>
+<div id="outline-container-org9cda4f6" class="outline-2">
+<h2 id="org9cda4f6">Links to this note</h2>
 </div>
 </div>
 </body>

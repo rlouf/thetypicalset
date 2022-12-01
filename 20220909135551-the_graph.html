@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Graph</title>
@@ -48,9 +48,9 @@
 <h1 class="title">The Graph</h1>
 
 
-<div id="outline-container-orgbaa203a" class="outline-2">
-<h2 id="orgbaa203a">How the graph is built</h2>
-<div class="outline-text-2" id="text-orgbaa203a">
+<div id="outline-container-org7d149b1" class="outline-2">
+<h2 id="org7d149b1">How the graph is built</h2>
+<div class="outline-text-2" id="text-org7d149b1">
 <p>
 The core elements are the <code>Op</code>\s. <code>Op</code>\s are objects that have different purposes in Aesara:
 </p>
@@ -61,67 +61,67 @@ The core elements are the <code>Op</code>\s. <code>Op</code>\s are objects that 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">RandomVariable</span>(Op):
+<pre class="src src-python"><span style="color: #d73a49;">class</span> <span style="color: #005cc5;">RandomVariable</span>(Op):
 
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">make_node</span>(<span style="font-weight: bold;">self</span>, rng, size, dtype, *dist_params):
-        <span style="font-style: italic;">"""Create a random variable node.</span>
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">make_node</span>(<span style="color: #d73a49;">self</span>, rng, size, dtype, *dist_params):
+        <span style="color: #032f62;">"""Create a random variable node.</span>
 
-<span style="font-style: italic;">        Parameters</span>
-<span style="font-style: italic;">        ----------</span>
-<span style="font-style: italic;">        rng: RandomGeneratorType or RandomStateType</span>
-<span style="font-style: italic;">            Existing Aesara `Generator` or `RandomState` object to be used.  Creates a</span>
-<span style="font-style: italic;">            new one, if `None`.</span>
-<span style="font-style: italic;">        size: int or Sequence</span>
-<span style="font-style: italic;">            NumPy-like size parameter.</span>
-<span style="font-style: italic;">        dtype: str</span>
-<span style="font-style: italic;">            The dtype of the sampled output.  If the value ``"floatX"`` is</span>
-<span style="font-style: italic;">            given, then `dtype` is set to ``aesara.config.floatX``.  This value is</span>
-<span style="font-style: italic;">            only used when ``self.dtype`` isn't set.</span>
-<span style="font-style: italic;">        dist_params: list</span>
-<span style="font-style: italic;">            Distribution parameters.</span>
+<span style="color: #032f62;">        Parameters</span>
+<span style="color: #032f62;">        ----------</span>
+<span style="color: #032f62;">        rng: RandomGeneratorType or RandomStateType</span>
+<span style="color: #032f62;">            Existing Aesara `Generator` or `RandomState` object to be used.  Creates a</span>
+<span style="color: #032f62;">            new one, if `None`.</span>
+<span style="color: #032f62;">        size: int or Sequence</span>
+<span style="color: #032f62;">            NumPy-like size parameter.</span>
+<span style="color: #032f62;">        dtype: str</span>
+<span style="color: #032f62;">            The dtype of the sampled output.  If the value ``"floatX"`` is</span>
+<span style="color: #032f62;">            given, then `dtype` is set to ``aesara.config.floatX``.  This value is</span>
+<span style="color: #032f62;">            only used when ``self.dtype`` isn't set.</span>
+<span style="color: #032f62;">        dist_params: list</span>
+<span style="color: #032f62;">            Distribution parameters.</span>
 
-<span style="font-style: italic;">        Results</span>
-<span style="font-style: italic;">        -------</span>
-<span style="font-style: italic;">        out: Apply</span>
-<span style="font-style: italic;">            A node with inputs ``(rng, size, dtype) + dist_args`` and outputs</span>
-<span style="font-style: italic;">            ``(rng_var, out_var)``.</span>
+<span style="color: #032f62;">        Results</span>
+<span style="color: #032f62;">        -------</span>
+<span style="color: #032f62;">        out: Apply</span>
+<span style="color: #032f62;">            A node with inputs ``(rng, size, dtype) + dist_args`` and outputs</span>
+<span style="color: #032f62;">            ``(rng_var, out_var)``.</span>
 
-<span style="font-style: italic;">        """</span>
-        <span style="font-weight: bold; font-style: italic;">size</span> = normalize_size_param(size)
+<span style="color: #032f62;">        """</span>
+        <span style="color: #24292e;">size</span> = normalize_size_param(size)
 
-        <span style="font-weight: bold; font-style: italic;">dist_params</span> = <span style="font-weight: bold;">tuple</span>(
-            as_tensor_variable(p) <span style="font-weight: bold;">if</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(p, Variable) <span style="font-weight: bold;">else</span> p
-            <span style="font-weight: bold;">for</span> p <span style="font-weight: bold;">in</span> dist_params
+        <span style="color: #24292e;">dist_params</span> = <span style="color: #d73a49;">tuple</span>(
+            as_tensor_variable(p) <span style="color: #d73a49;">if</span> <span style="color: #d73a49;">not</span> <span style="color: #d73a49;">isinstance</span>(p, Variable) <span style="color: #d73a49;">else</span> p
+            <span style="color: #d73a49;">for</span> p <span style="color: #d73a49;">in</span> dist_params
         )
 
-        <span style="font-weight: bold;">if</span> rng <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span>:
-            <span style="font-weight: bold; font-style: italic;">rng</span> = aesara.shared(np.random.default_rng())
-        <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(rng.<span style="font-weight: bold;">type</span>, RandomType):
-            <span style="font-weight: bold;">raise</span> <span style="font-weight: bold; text-decoration: underline;">TypeError</span>(
-                <span style="font-style: italic;">"The type of rng should be an instance of either RandomGeneratorType or RandomStateType"</span>
+        <span style="color: #d73a49;">if</span> rng <span style="color: #d73a49;">is</span> <span style="color: #005cc5;">None</span>:
+            <span style="color: #24292e;">rng</span> = aesara.shared(np.random.default_rng())
+        <span style="color: #d73a49;">elif</span> <span style="color: #d73a49;">not</span> <span style="color: #d73a49;">isinstance</span>(rng.<span style="color: #d73a49;">type</span>, RandomType):
+            <span style="color: #d73a49;">raise</span> <span style="color: #005cc5;">TypeError</span>(
+                <span style="color: #032f62;">"The type of rng should be an instance of either RandomGeneratorType or RandomStateType"</span>
             )
 
-        <span style="font-weight: bold; font-style: italic;">shape</span> = <span style="font-weight: bold;">self</span>._infer_shape(size, dist_params)
-        <span style="font-weight: bold; font-style: italic;">_</span>, <span style="font-weight: bold; font-style: italic;">bcast</span> = infer_broadcastable(shape)
-        <span style="font-weight: bold; font-style: italic;">dtype</span> = <span style="font-weight: bold;">self</span>.dtype <span style="font-weight: bold;">or</span> dtype
+        <span style="color: #24292e;">shape</span> = <span style="color: #d73a49;">self</span>._infer_shape(size, dist_params)
+        <span style="color: #24292e;">_</span>, <span style="color: #24292e;">bcast</span> = infer_broadcastable(shape)
+        <span style="color: #24292e;">dtype</span> = <span style="color: #d73a49;">self</span>.dtype <span style="color: #d73a49;">or</span> dtype
 
-        <span style="font-weight: bold;">if</span> dtype == <span style="font-style: italic;">"floatX"</span>:
-            <span style="font-weight: bold; font-style: italic;">dtype</span> = config.floatX
-        <span style="font-weight: bold;">elif</span> dtype <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> (<span style="font-weight: bold;">isinstance</span>(dtype, <span style="font-weight: bold;">str</span>) <span style="font-weight: bold;">and</span> dtype <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">in</span> all_dtypes):
-            <span style="font-weight: bold;">raise</span> <span style="font-weight: bold; text-decoration: underline;">TypeError</span>(<span style="font-style: italic;">"dtype is unspecified"</span>)
+        <span style="color: #d73a49;">if</span> dtype == <span style="color: #032f62;">"floatX"</span>:
+            <span style="color: #24292e;">dtype</span> = config.floatX
+        <span style="color: #d73a49;">elif</span> dtype <span style="color: #d73a49;">is</span> <span style="color: #005cc5;">None</span> <span style="color: #d73a49;">or</span> (<span style="color: #d73a49;">isinstance</span>(dtype, <span style="color: #d73a49;">str</span>) <span style="color: #d73a49;">and</span> dtype <span style="color: #d73a49;">not</span> <span style="color: #d73a49;">in</span> all_dtypes):
+            <span style="color: #d73a49;">raise</span> <span style="color: #005cc5;">TypeError</span>(<span style="color: #032f62;">"dtype is unspecified"</span>)
 
-        <span style="font-weight: bold;">if</span> <span style="font-weight: bold;">isinstance</span>(dtype, <span style="font-weight: bold;">str</span>):
-            <span style="font-weight: bold; font-style: italic;">dtype_idx</span> = constant(all_dtypes.index(dtype), dtype=<span style="font-style: italic;">"int64"</span>)
-        <span style="font-weight: bold;">else</span>:
-            <span style="font-weight: bold; font-style: italic;">dtype_idx</span> = constant(dtype, dtype=<span style="font-style: italic;">"int64"</span>)
-            <span style="font-weight: bold; font-style: italic;">dtype</span> = all_dtypes[dtype_idx.data]
+        <span style="color: #d73a49;">if</span> <span style="color: #d73a49;">isinstance</span>(dtype, <span style="color: #d73a49;">str</span>):
+            <span style="color: #24292e;">dtype_idx</span> = constant(all_dtypes.index(dtype), dtype=<span style="color: #032f62;">"int64"</span>)
+        <span style="color: #d73a49;">else</span>:
+            <span style="color: #24292e;">dtype_idx</span> = constant(dtype, dtype=<span style="color: #032f62;">"int64"</span>)
+            <span style="color: #24292e;">dtype</span> = all_dtypes[dtype_idx.data]
 
-        <span style="font-weight: bold; font-style: italic;">outtype</span> = TensorType(dtype=dtype, shape=bcast)
-        <span style="font-weight: bold; font-style: italic;">out_var</span> = outtype()
-        <span style="font-weight: bold; font-style: italic;">inputs</span> = (rng, size, dtype_idx) + dist_params
-        <span style="font-weight: bold; font-style: italic;">outputs</span> = (rng.<span style="font-weight: bold;">type</span>(), out_var)
+        <span style="color: #24292e;">outtype</span> = TensorType(dtype=dtype, shape=bcast)
+        <span style="color: #24292e;">out_var</span> = outtype()
+        <span style="color: #24292e;">inputs</span> = (rng, size, dtype_idx) + dist_params
+        <span style="color: #24292e;">outputs</span> = (rng.<span style="color: #d73a49;">type</span>(), out_var)
 
-        <span style="font-weight: bold;">return</span> Apply(<span style="font-weight: bold;">self</span>, inputs, outputs)
+        <span style="color: #d73a49;">return</span> Apply(<span style="color: #d73a49;">self</span>, inputs, outputs)
 
 </pre>
 </div></li>
@@ -134,12 +134,12 @@ There is a subtility here in that <code>__call__</code> does not need to return 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">RandomVariable</span>(Op):
+<pre class="src src-python"><span style="color: #d73a49;">class</span> <span style="color: #005cc5;">RandomVariable</span>(Op):
 
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__call__</span>(<span style="font-weight: bold;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
-        <span style="font-weight: bold; font-style: italic;">node</span> = <span style="font-weight: bold;">self</span>.make_node(*inputs, **kwargs)
-        <span style="font-weight: bold; font-style: italic;">rval</span> = node.outputs[1]
-        <span style="font-weight: bold;">return</span> rval
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">__call__</span>(<span style="color: #d73a49;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
+        <span style="color: #24292e;">node</span> = <span style="color: #d73a49;">self</span>.make_node(*inputs, **kwargs)
+        <span style="color: #24292e;">rval</span> = node.outputs[1]
+        <span style="color: #d73a49;">return</span> rval
 </pre>
 </div>
 
@@ -148,11 +148,11 @@ You then have single output <code>Op</code>\s, for which Aesara returns a single
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">SingleOutputOp</span>(Op):
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__call__</span>(<span style="font-weight: bold;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
-        <span style="font-weight: bold; font-style: italic;">node</span> = <span style="font-weight: bold;">self</span>.make_node(*inputs, **kwargs)
-        <span style="font-weight: bold; font-style: italic;">rval</span> = node.outputs[0]
-        <span style="font-weight: bold;">return</span> rval
+<pre class="src src-python"><span style="color: #d73a49;">class</span> <span style="color: #005cc5;">SingleOutputOp</span>(Op):
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">__call__</span>(<span style="color: #d73a49;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
+        <span style="color: #24292e;">node</span> = <span style="color: #d73a49;">self</span>.make_node(*inputs, **kwargs)
+        <span style="color: #24292e;">rval</span> = node.outputs[0]
+        <span style="color: #d73a49;">return</span> rval
 </pre>
 </div>
 
@@ -161,10 +161,10 @@ And <code>MultipleOutputOp</code>\s for which Aesara returns the list of outputs
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">SingleOutputOp</span>(Op):
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">__call__</span>(<span style="font-weight: bold;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
-        <span style="font-weight: bold; font-style: italic;">node</span> = <span style="font-weight: bold;">self</span>.make_node(*inputs, **kwargs)
-        <span style="font-weight: bold;">return</span> node.outputs
+<pre class="src src-python"><span style="color: #d73a49;">class</span> <span style="color: #005cc5;">SingleOutputOp</span>(Op):
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">__call__</span>(<span style="color: #d73a49;">self</span>, *inputs: Any, **kwargs) -&gt; Union[Variable, List[Variable]]:
+        <span style="color: #24292e;">node</span> = <span style="color: #d73a49;">self</span>.make_node(*inputs, **kwargs)
+        <span style="color: #d73a49;">return</span> node.outputs
 </pre>
 </div>
 
@@ -173,7 +173,7 @@ A first issue with this is conceptual: it is all in the code (in <code>__call__<
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_rv</span> = at.random.normal(0, 1)
+<pre class="src src-python"><span style="color: #24292e;">z_rv</span> = at.random.normal(0, 1)
 </pre>
 </div>
 
@@ -182,7 +182,7 @@ gives
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_et</span> = OpExpressionTuple(ExpressionTuple(RandomVariable, name, ndim_supp, ndim_params, dtype), rng, size, dtype, *dist_params)
+<pre class="src src-python"><span style="color: #24292e;">z_et</span> = OpExpressionTuple(ExpressionTuple(RandomVariable, name, ndim_supp, ndim_params, dtype), rng, size, dtype, *dist_params)
 </pre>
 </div>
 
@@ -191,7 +191,7 @@ which when evaluated returns the outputs:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_rv</span> = z_et.evaled_obj
+<pre class="src src-python"><span style="color: #24292e;">z_rv</span> = z_et.evaled_obj
 </pre>
 </div>
 
@@ -204,31 +204,31 @@ Even worse are <code>MultipleOutputOp</code>\s
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">from</span> etuples <span style="color: #d73a49;">import</span> etuple, etuplize
 
-<span style="font-weight: bold; font-style: italic;">a</span> = at.matrix(<span style="font-style: italic;">'a'</span>)
-<span style="font-weight: bold; font-style: italic;">u</span>, <span style="font-weight: bold; font-style: italic;">v</span>, <span style="font-weight: bold; font-style: italic;">w</span> = at.nlinalg.svd(a)
-<span style="font-weight: bold; font-style: italic;">u_et</span> = etuplize(u)
-<span style="font-weight: bold;">print</span>(u_et)
+<span style="color: #24292e;">a</span> = at.matrix(<span style="color: #032f62;">'a'</span>)
+<span style="color: #24292e;">u</span>, <span style="color: #24292e;">v</span>, <span style="color: #24292e;">w</span> = at.nlinalg.svd(a)
+<span style="color: #24292e;">u_et</span> = etuplize(u)
+<span style="color: #d73a49;">print</span>(u_et)
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">reset the saved evaled obj</span>
-<span style="font-weight: bold; font-style: italic;">u_et._evaled_obj</span> = u_et.null
-<span style="font-weight: bold;">print</span>(u_et.evaled_obj)
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">reset the saved evaled obj</span>
+<span style="color: #24292e;">u_et._evaled_obj</span> = u_et.null
+<span style="color: #d73a49;">print</span>(u_et.evaled_obj)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">from</span> etuples <span style="color: #d73a49;">import</span> etuple, etuplize
 
-<span style="font-weight: bold; font-style: italic;">u_rv</span> = at.random.normal(0, 1)
-<span style="font-weight: bold; font-style: italic;">u_et</span> = etuplize(u_rv)
-<span style="font-weight: bold;">print</span>(u_et)
+<span style="color: #24292e;">u_rv</span> = at.random.normal(0, 1)
+<span style="color: #24292e;">u_et</span> = etuplize(u_rv)
+<span style="color: #d73a49;">print</span>(u_et)
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">reset the saved evaled obj</span>
-<span style="font-weight: bold; font-style: italic;">u_et._evaled_obj</span> = u_et.null
-<span style="font-weight: bold;">print</span>(u_et.evaled_obj)
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">reset the saved evaled obj</span>
+<span style="color: #24292e;">u_et._evaled_obj</span> = u_et.null
+<span style="color: #d73a49;">print</span>(u_et.evaled_obj)
 </pre>
 </div>
 
@@ -267,8 +267,8 @@ for the output variables.
 </div>
 </div>
 
-<div id="outline-container-orgab5801b" class="outline-2">
-<h2 id="orgab5801b">Links to this note</h2>
+<div id="outline-container-org8dda016" class="outline-2">
+<h2 id="org8dda016">Links to this note</h2>
 </div>
 </div>
 </body>

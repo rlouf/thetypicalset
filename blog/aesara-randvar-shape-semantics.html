@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
@@ -59,14 +59,14 @@ The operators return <b>realizations</b> of the random variables.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">x_rv</span> = srng.normal(0, 1)
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">x_rv</span> = srng.normal(0, 1)
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">srng.normal(0, 1) : \Omega \to E</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">x \in E</span>
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Other consideration are relevant for AePPL, here we just need to know they're elements of $E$.</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">srng.normal(0, 1) : \Omega \to E</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">x \in E</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Other consideration are relevant for AePPL, here we just need to know they're elements of $E$.</span>
 
 </pre>
 </div>
@@ -91,9 +91,9 @@ What's confusing about all this is that we are passing a single RNG state to the
 </ul>
 
 
-<div id="outline-container-org0f2d274" class="outline-2">
-<h2 id="org0f2d274">Support shape</h2>
-<div class="outline-text-2" id="text-org0f2d274">
+<div id="outline-container-org4421fdc" class="outline-2">
+<h2 id="org4421fdc">Support shape</h2>
+<div class="outline-text-2" id="text-org4421fdc">
 <p>
 The first distinction we must make is based on the <i>support</i> \(E\) of the distributions. Simply put, the support of a distribution is the domain over which the density of the probability measure is defined, i.e.
 </p>
@@ -112,22 +112,22 @@ The length of the <i>support shape</i> is the equal to the dimensionality of the
 </p>
 </div>
 
-<div id="outline-container-org0ff6e16" class="outline-3">
-<h3 id="org0ff6e16">Distributions over scalar values</h3>
-<div class="outline-text-3" id="text-org0ff6e16">
+<div id="outline-container-org0656783" class="outline-3">
+<h3 id="org0656783">Distributions over scalar values</h3>
+<div class="outline-text-3" id="text-org0656783">
 <p>
 The support of the normal distribution, for instance, is \(\mathbb{R}\): every sample drawn from that distribution is an element of \(\mathbb{R}\). The support of the bernoulli distribution, on the other hand, is the set of integers \(\left\{0, 1\right\}\). These distributions are <i>scalar distributions</i>, in the sense that their support has 0 dimension (in <i>array</i> terms). Their support shape is <i>always</i> <code>(,)</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.normal(0, 1)
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">rv</span> = srng.normal(0, 1)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
 
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"support shape: {sample.shape}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -138,27 +138,27 @@ support shape: ()
 </div>
 </div>
 
-<div id="outline-container-org63725fb" class="outline-3">
-<h3 id="org63725fb">Distributions over vectors</h3>
-<div class="outline-text-3" id="text-org63725fb">
+<div id="outline-container-orga6409fb" class="outline-3">
+<h3 id="orga6409fb">Distributions over vectors</h3>
+<div class="outline-text-3" id="text-orga6409fb">
 <p>
 Other distributions are defined on more complex spaces. The multivariate normal distribution is defined on \(\mathbb{R}^k\), so a sample from this distribution will be a vector of length \(k\). In this case the support shape is thus equal to <code>(k,)</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">k</span> = 4
-<span style="font-weight: bold; font-style: italic;">mu</span> = np.random.rand(k)
-<span style="font-weight: bold; font-style: italic;">sigma</span> = np.eye(k)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.multivariate_normal(mu, sigma)
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
+<span style="color: #24292e;">k</span> = 4
+<span style="color: #24292e;">mu</span> = np.random.rand(k)
+<span style="color: #24292e;">sigma</span> = np.eye(k)
+<span style="color: #24292e;">rv</span> = srng.multivariate_normal(mu, sigma)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
 
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"support shape: {sample.shape}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -173,18 +173,18 @@ We can define a multivariate normal distribution with one component, and for con
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">mu</span> = np.array([1])
-<span style="font-weight: bold; font-style: italic;">sigma</span> = np.eye(1)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.multivariate_normal(mu, sigma)
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
+<span style="color: #24292e;">mu</span> = np.array([1])
+<span style="color: #24292e;">sigma</span> = np.eye(1)
+<span style="color: #24292e;">rv</span> = srng.multivariate_normal(mu, sigma)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
 
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"support shape: {sample.shape}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -200,9 +200,9 @@ Example of distributions with 1-dimensional support: <code>multivariate_normal</
 </div>
 </div>
 
-<div id="outline-container-orgc7b9676" class="outline-3">
-<h3 id="orgc7b9676">Distributions over matrices, etc.</h3>
-<div class="outline-text-3" id="text-orgc7b9676">
+<div id="outline-container-org5cf7905" class="outline-3">
+<h3 id="org5cf7905">Distributions over matrices, etc.</h3>
+<div class="outline-text-3" id="text-org5cf7905">
 <p>
 Finally, distributions can be defined on a space with an arbitrary number of dimensions, for instance over \(\mathbb{R}^{n \times m}\). The <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart distribution</a> for instance is 2-dimensional: a sample from this distribution is a matrix.
 </p>
@@ -211,22 +211,22 @@ Finally, distributions can be defined on a space with an arbitrary number of dim
 </div>
 
 
-<div id="outline-container-orgcbd5868" class="outline-2">
-<h2 id="orgcbd5868">Batch shape</h2>
-<div class="outline-text-2" id="text-orgcbd5868">
+<div id="outline-container-orgea76b03" class="outline-2">
+<h2 id="orgea76b03">Batch shape</h2>
+<div class="outline-text-2" id="text-orgea76b03">
 <p>
 Let us only consider distributions over scalar values for now.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.normal(0, 1)
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">rv</span> = srng.normal(0, 1)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
 
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample shape: {sample.shape}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -245,22 +245,22 @@ The <code>batch shape</code> encompasses one reality: the number of independent 
 </ul>
 </div>
 
-<div id="outline-container-org3955cb5" class="outline-3">
-<h3 id="org3955cb5">Batching</h3>
-<div class="outline-text-3" id="text-org3955cb5">
+<div id="outline-container-orgf0bbf52" class="outline-3">
+<h3 id="orgf0bbf52">Batching</h3>
+<div class="outline-text-3" id="text-orgf0bbf52">
 <p>
 If we want to take independent and indentically distributed samples from a distribution we can use the <code>size</code> keyword argument. Here we are requesting \(3\) independent and identically distributed random variables:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.normal(0, 1, size=(3,))  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">size=3 gives the same result</span>
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">rv</span> = srng.normal(0, 1, size=(3,))  <span style="color: #6a737d;"># </span><span style="color: #6a737d;">size=3 gives the same result</span>
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
 
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample shape: {sample.shape}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -275,15 +275,15 @@ We can obviously require that these independent and identically distributed samp
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">batch_shape</span> = (2, 2, 2)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.normal(0, 1, size=batch_shape)
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">batch_shape</span> = (2, 2, 2)
+<span style="color: #24292e;">rv</span> = srng.normal(0, 1, size=batch_shape)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
 
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample shape: {sample.shape}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -303,9 +303,9 @@ sample shape: (2, 2, 2)
 </div>
 </div>
 
-<div id="outline-container-org956c906" class="outline-3">
-<h3 id="org956c906">Vectorizing</h3>
-<div class="outline-text-3" id="text-org956c906">
+<div id="outline-container-org9547fac" class="outline-3">
+<h3 id="org9547fac">Vectorizing</h3>
+<div class="outline-text-3" id="text-org9547fac">
 <blockquote>
 <p>
 <b>tldr;</b> Random Variables are `Blockwise` operators
@@ -317,17 +317,17 @@ Say we want a sample from three normal distributions with a \(0\), \(3\) and \(5
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream()
-<span style="font-weight: bold; font-style: italic;">rv_0</span> = srng.normal(0, 1)
-<span style="font-weight: bold; font-style: italic;">rv_3</span> = srng.normal(3, 1)
-<span style="font-weight: bold; font-style: italic;">rv_5</span> = srng.normal(5, 1)
-<span style="font-weight: bold; font-style: italic;">rv</span> = at.stack([rv_0, rv_3, rv_5])
+<span style="color: #24292e;">srng</span> = at.random.RandomStream()
+<span style="color: #24292e;">rv_0</span> = srng.normal(0, 1)
+<span style="color: #24292e;">rv_3</span> = srng.normal(3, 1)
+<span style="color: #24292e;">rv_5</span> = srng.normal(5, 1)
+<span style="color: #24292e;">rv</span> = at.stack([rv_0, rv_3, rv_5])
 
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample shape: {sample.shape}"</span>)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -342,17 +342,17 @@ To simplify this common operation we can pass arrays as parameters to the <code>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">mean</span> = np.array([0, 3, 5])
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.normal(mean, 1)
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">rv</span> = srng.normal(mean, 1)
 
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample values: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"batch shape: {sample.shape}"</span>)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"batch shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -371,23 +371,23 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">mean</span> = np.array([0, 3, 5])
-<span style="font-weight: bold; font-style: italic;">sigma</span> = np.array([1, 2])
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.normal(mean, sigma)
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2])
+<span style="color: #24292e;">rv</span> = srng.normal(mean, sigma)
 
-<span style="font-weight: bold;">try</span>:
-    rv.<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">ValueError</span> <span style="font-weight: bold;">as</span> err:
-    <span style="font-weight: bold;">print</span>(err)
+<span style="color: #d73a49;">try</span>:
+    rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">ValueError</span> <span style="color: #d73a49;">as</span> err:
+    <span style="color: #d73a49;">print</span>(err)
 </pre>
 </div>
 
-<pre class="example" id="org3916085">
+<pre class="example" id="org246c575">
 shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F8DCB881A80&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -406,14 +406,14 @@ Indeed <code>mean</code> and <code>sigma</code> cannot be broadcast together:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">mean</span> = np.array([0, 3, 5])
-<span style="font-weight: bold; font-style: italic;">sigma</span> = np.array([1, 2])
-<span style="font-weight: bold;">try</span>:
-    np.broadcast(mean, sigma)  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">error</span>
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">ValueError</span> <span style="font-weight: bold;">as</span> err:
-    <span style="font-weight: bold;">print</span>(err)
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2])
+<span style="color: #d73a49;">try</span>:
+    np.broadcast(mean, sigma)  <span style="color: #6a737d;"># </span><span style="color: #6a737d;">error</span>
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">ValueError</span> <span style="color: #d73a49;">as</span> err:
+    <span style="color: #d73a49;">print</span>(err)
 </pre>
 </div>
 
@@ -427,11 +427,11 @@ shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is betw
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">mean</span> = np.array([0, 3, 5])
-<span style="font-weight: bold; font-style: italic;">sigma</span> = np.array([1, 2, 7])
-<span style="font-weight: bold;">print</span>(np.broadcast(mean, sigma).shape)
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2, 7])
+<span style="color: #d73a49;">print</span>(np.broadcast(mean, sigma).shape)
 </pre>
 </div>
 
@@ -445,18 +445,18 @@ Indeed:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">mean</span> = np.array([0, 3, 5])
-<span style="font-weight: bold; font-style: italic;">sigma</span> = np.array([1, 2, 3])
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.normal(mean, sigma)
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2, 3])
+<span style="color: #24292e;">rv</span> = srng.normal(mean, sigma)
 
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample values: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"batch shape: {sample.shape}"</span>)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"batch shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -475,26 +475,26 @@ The functions that draw samples from \(E\) could be implemented as generalized u
 </div>
 
 
-<div id="outline-container-org8f395dc" class="outline-3">
-<h3 id="org8f395dc">Vectorizing + Batching</h3>
-<div class="outline-text-3" id="text-org8f395dc">
+<div id="outline-container-org4017eb7" class="outline-3">
+<h3 id="org4017eb7">Vectorizing + Batching</h3>
+<div class="outline-text-3" id="text-org4017eb7">
 <p>
 It is possible to vectorize and batch at the same time. Note that <code>size</code> and that vectorized shape must be broadcastable
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">mean</span> = np.array([0, 3, 5])
-<span style="font-weight: bold; font-style: italic;">sigma</span> = np.array([1, 2, 3])
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.normal(mean, sigma, size=(2, 2, 3))
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2, 3])
+<span style="color: #24292e;">rv</span> = srng.normal(mean, sigma, size=(2, 2, 3))
 
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample values: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"batch shape: {sample.shape}"</span>)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"batch shape: {sample.shape}"</span>)
 </pre>
 </div>
 
@@ -524,32 +524,32 @@ It IS really simple:
 </div>
 
 
-<div id="outline-container-org0cf96c3" class="outline-2">
-<h2 id="org0cf96c3">All together</h2>
-<div class="outline-text-2" id="text-org0cf96c3">
+<div id="outline-container-orgc890da3" class="outline-2">
+<h2 id="orgc890da3">All together</h2>
+<div class="outline-text-2" id="text-orgc890da3">
 <p>
 Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> will raise an exception if this is not correctly set.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">n</span> = np.array([10, 9])
-<span style="font-weight: bold; font-style: italic;">p</span> = np.array([[.8, .1, .1], [.4, .1, .5]])
+<span style="color: #24292e;">n</span> = np.array([10, 9])
+<span style="color: #24292e;">p</span> = np.array([[.8, .1, .1], [.4, .1, .5]])
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.multinomial(n, p, size=(3, 2))
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">rv</span> = srng.multinomial(n, p, size=(3, 2))
 
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample shape: {sample.shape}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"support shape: {sample.shape[-1:]}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"batch shape: {sample.shape[:-1]}"</span>)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape[-1:]}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"batch shape: {sample.shape[:-1]}"</span>)
 </pre>
 </div>
 
-<pre class="example" id="org8bba4c7">
+<pre class="example" id="orgea5c755">
 sample value: [[[6 2 2]
   [4 0 5]]
 
@@ -564,9 +564,9 @@ batch shape: (3, 2)
 </pre>
 </div>
 
-<div id="outline-container-org80718a3" class="outline-3">
-<h3 id="org80718a3">Broadcasting</h3>
-<div class="outline-text-3" id="text-org80718a3">
+<div id="outline-container-org2dce05d" class="outline-3">
+<h3 id="org2dce05d">Broadcasting</h3>
+<div class="outline-text-3" id="text-org2dce05d">
 <p>
 When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
 </p>
@@ -584,20 +584,20 @@ In the case of the multinomial distribution, the size of the last dimension of \
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">n</span> = np.array([10, 9])
-<span style="font-weight: bold; font-style: italic;">p</span> = np.array([[.8, .1, .1], [.4, .1, .5]])
+<span style="color: #24292e;">n</span> = np.array([10, 9])
+<span style="color: #24292e;">p</span> = np.array([[.8, .1, .1], [.4, .1, .5]])
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">rv</span> = srng.multinomial(n, p)
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="color: #24292e;">rv</span> = srng.multinomial(n, p)
 
-<span style="font-weight: bold; font-style: italic;">sample</span> = rv.<span style="font-weight: bold;">eval</span>()
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample value: {sample}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"sample shape: {sample.shape}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"support shape: {sample.shape[-1:]}"</span>)
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"batch shape: {sample.shape[0]}"</span>)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape[-1:]}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"batch shape: {sample.shape[0]}"</span>)
 </pre>
 </div>
 

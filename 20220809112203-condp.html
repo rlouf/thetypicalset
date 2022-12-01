@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>condp</title>
@@ -29,24 +29,24 @@ The current implementation of <code>conde</code> in <code>kanren</code> calls th
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">ldisj_seq</span>(goals: Iterable[GoalType]) -&gt; GoalType:
-    <span style="font-style: italic;">"""Produce a goal that returns the appended state stream from all successful goal arguments.</span>
-<span style="font-style: italic;">    In other words, it behaves like logical disjunction/OR for goals.</span>
-<span style="font-style: italic;">    """</span>  <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">noqa: E501</span>
+<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">ldisj_seq</span>(goals: Iterable[GoalType]) -&gt; GoalType:
+    <span style="color: #032f62;">"""Produce a goal that returns the appended state stream from all successful goal arguments.</span>
+<span style="color: #032f62;">    In other words, it behaves like logical disjunction/OR for goals.</span>
+<span style="color: #032f62;">    """</span>  <span style="color: #6a737d;"># </span><span style="color: #6a737d;">noqa: E501</span>
 
-    <span style="font-weight: bold;">if</span> length_hint(goals, -1) == 0:
-        <span style="font-weight: bold;">return</span> succeed
+    <span style="color: #d73a49;">if</span> length_hint(goals, -1) == 0:
+        <span style="color: #d73a49;">return</span> succeed
 
-    <span style="font-weight: bold;">assert</span> <span style="font-weight: bold;">isinstance</span>(goals, Iterable)
+    <span style="color: #d73a49;">assert</span> <span style="color: #d73a49;">isinstance</span>(goals, Iterable)
 
-    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">ldisj_seq_goal</span>(S: StateType) -&gt; StateStreamType:
-        <span style="font-weight: bold;">nonlocal</span> goals
+    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">ldisj_seq_goal</span>(S: StateType) -&gt; StateStreamType:
+        <span style="color: #d73a49;">nonlocal</span> goals
 
-        <span style="font-weight: bold; font-style: italic;">goals</span>, <span style="font-weight: bold; font-style: italic;">_goals</span> = tee(goals)
+        <span style="color: #24292e;">goals</span>, <span style="color: #24292e;">_goals</span> = tee(goals)
 
-        <span style="font-weight: bold;">yield</span> <span style="font-weight: bold;">from</span> interleave(g(S) <span style="font-weight: bold;">for</span> g <span style="font-weight: bold;">in</span> _goals)
+        <span style="color: #d73a49;">yield</span> <span style="color: #d73a49;">from</span> interleave(g(S) <span style="color: #d73a49;">for</span> g <span style="color: #d73a49;">in</span> _goals)
 
-    <span style="font-weight: bold;">return</span> ldisj_seq_goal
+    <span style="color: #d73a49;">return</span> ldisj_seq_goal
 
 </pre>
 </div>
@@ -61,9 +61,9 @@ The current implementation of <code>conde</code> in <code>kanren</code> calls th
 This allows user to specify flexible search structures. Authors use the example of <code>Pie</code>, a dependent-type library which is complex enough to reach <code>conde</code>'s limitations.
 </p>
 
-<div id="outline-container-org3a683f6" class="outline-2">
-<h2 id="org3a683f6">Suggestion functions</h2>
-<div class="outline-text-2" id="text-org3a683f6">
+<div id="outline-container-org521f0d9" class="outline-2">
+<h2 id="org521f0d9">Suggestion functions</h2>
+<div class="outline-text-2" id="text-org521f0d9">
 <p>
 The user passes <i>suggestion functions</i> to <code>condp</code> that can tell miniKanren which lines of <code>condp</code> are relevant or not.
 </p>
@@ -84,65 +84,65 @@ Functions are implemented in the host language (here python), and it is thus pos
 </ul>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">_ls_keys</span>(ls):
-    <span style="font-weight: bold;">if</span> isvar(ls):
-        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"use-maybe"</span>,)
-    <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">isinstance</span>(ls, ConsNull):
-        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"BASE"</span>,)
-    <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">isinstance</span>(ls, ConsPair):
-        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"KEEP"</span>, <span style="font-style: italic;">"SWAP"</span>)
-    <span style="font-weight: bold;">else</span>:
-        <span style="font-weight: bold;">return</span> ()
+<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">_ls_keys</span>(ls):
+    <span style="color: #d73a49;">if</span> isvar(ls):
+        <span style="color: #d73a49;">return</span> (<span style="color: #032f62;">"use-maybe"</span>,)
+    <span style="color: #d73a49;">elif</span> <span style="color: #d73a49;">isinstance</span>(ls, ConsNull):
+        <span style="color: #d73a49;">return</span> (<span style="color: #032f62;">"BASE"</span>,)
+    <span style="color: #d73a49;">elif</span> <span style="color: #d73a49;">isinstance</span>(ls, ConsPair):
+        <span style="color: #d73a49;">return</span> (<span style="color: #032f62;">"KEEP"</span>, <span style="color: #032f62;">"SWAP"</span>)
+    <span style="color: #d73a49;">else</span>:
+        <span style="color: #d73a49;">return</span> ()
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">_o_keys</span>(o):
-    <span style="font-weight: bold;">if</span> isvar(o):
-        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"BASE"</span>, <span style="font-style: italic;">"KEEP"</span>, <span style="font-style: italic;">"SWAP"</span>)
-    <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">isinstance</span>(o, ConsNull):
-        <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"BASE"</span>,)
-    <span style="font-weight: bold;">elif</span> <span style="font-weight: bold;">isinstance</span>(o, ConsPair):
-        <span style="font-weight: bold;">if</span> isvar(car(o)) <span style="font-weight: bold;">or</span> <span style="font-style: italic;">"novel"</span> == car(o):
-            <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"KEEP"</span>, <span style="font-style: italic;">"SWAP"</span>)
-        <span style="font-weight: bold;">else</span>:
-            <span style="font-weight: bold;">return</span> (<span style="font-style: italic;">"KEEP"</span>,)
-    <span style="font-weight: bold;">else</span>:
-        <span style="font-weight: bold;">return</span> ()
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">_o_keys</span>(o):
+    <span style="color: #d73a49;">if</span> isvar(o):
+        <span style="color: #d73a49;">return</span> (<span style="color: #032f62;">"BASE"</span>, <span style="color: #032f62;">"KEEP"</span>, <span style="color: #032f62;">"SWAP"</span>)
+    <span style="color: #d73a49;">elif</span> <span style="color: #d73a49;">isinstance</span>(o, ConsNull):
+        <span style="color: #d73a49;">return</span> (<span style="color: #032f62;">"BASE"</span>,)
+    <span style="color: #d73a49;">elif</span> <span style="color: #d73a49;">isinstance</span>(o, ConsPair):
+        <span style="color: #d73a49;">if</span> isvar(car(o)) <span style="color: #d73a49;">or</span> <span style="color: #032f62;">"novel"</span> == car(o):
+            <span style="color: #d73a49;">return</span> (<span style="color: #032f62;">"KEEP"</span>, <span style="color: #032f62;">"SWAP"</span>)
+        <span style="color: #d73a49;">else</span>:
+            <span style="color: #d73a49;">return</span> (<span style="color: #032f62;">"KEEP"</span>,)
+    <span style="color: #d73a49;">else</span>:
+        <span style="color: #d73a49;">return</span> ()
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">swap_somep</span>(ls, o):
-    <span style="font-weight: bold; font-style: italic;">a</span>, <span style="font-weight: bold; font-style: italic;">d</span>, <span style="font-weight: bold; font-style: italic;">res</span> = var(), var(), var()
-    <span style="font-weight: bold; font-style: italic;">res</span> = condp(
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">swap_somep</span>(ls, o):
+    <span style="color: #24292e;">a</span>, <span style="color: #24292e;">d</span>, <span style="color: #24292e;">res</span> = var(), var(), var()
+    <span style="color: #24292e;">res</span> = condp(
         ((_ls_keys, ls), (_o_keys, o)),
         {
-            <span style="font-style: italic;">"BASE"</span>: (nullo(ls), nullo(o)),
-            <span style="font-style: italic;">"KEEP"</span>: (
+            <span style="color: #032f62;">"BASE"</span>: (nullo(ls), nullo(o)),
+            <span style="color: #032f62;">"KEEP"</span>: (
                 eq(cons(a, d), ls),
                 eq(cons(a, res), o),
                 Zzz(swap_somep, d, res),
             ),
-            <span style="font-style: italic;">"SWAP"</span>: (
+            <span style="color: #032f62;">"SWAP"</span>: (
                 eq(cons(a, d), ls),
-                eq(cons(<span style="font-style: italic;">"novel"</span>, res), o),
+                eq(cons(<span style="color: #032f62;">"novel"</span>, res), o),
                 Zzz(swap_somep, d, res),
             ),
         },
     )
-    <span style="font-weight: bold;">return</span> res
+    <span style="color: #d73a49;">return</span> res
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">swap_someo</span>(ls, o):
-    <span style="font-style: italic;">"""The original `conde` version."""</span>
-    <span style="font-weight: bold; font-style: italic;">a</span>, <span style="font-weight: bold; font-style: italic;">d</span>, <span style="font-weight: bold; font-style: italic;">res</span> = var(), var(), var()
-    <span style="font-weight: bold;">return</span> conde(
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">swap_someo</span>(ls, o):
+    <span style="color: #032f62;">"""The original `conde` version."""</span>
+    <span style="color: #24292e;">a</span>, <span style="color: #24292e;">d</span>, <span style="color: #24292e;">res</span> = var(), var(), var()
+    <span style="color: #d73a49;">return</span> conde(
         [nullo(ls), nullo(o)],
         [eq(cons(a, d), ls), eq(cons(a, res), o), Zzz(swap_someo, d, res)],
-        [eq(cons(a, d), ls), eq(cons(<span style="font-style: italic;">"novel"</span>, res), o), Zzz(swap_someo, d, res)],
+        [eq(cons(a, d), ls), eq(cons(<span style="color: #032f62;">"novel"</span>, res), o), Zzz(swap_someo, d, res)],
     )
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org751cacf" class="outline-2">
-<h2 id="org751cacf">Links to this note</h2>
-<div class="outline-text-2" id="text-org751cacf">
+<div id="outline-container-orgd65210f" class="outline-2">
+<h2 id="orgd65210f">Links to this note</h2>
+<div class="outline-text-2" id="text-orgd65210f">
 <ul class="org-ul">
 <li><a href="./20220804135950-minikanren.html">miniKanren</a></li>
 </ul>

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Rewriting Aesara graphs</title>
@@ -31,12 +31,12 @@ We start by creating a graph of our target expressions–i.e. <code>at.dot(A, x 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">A_tt</span> = at.matrix(<span style="font-style: italic;">"A"</span>)
-<span style="font-weight: bold; font-style: italic;">x_tt</span> = at.vector(<span style="font-style: italic;">"x"</span>)
-<span style="font-weight: bold; font-style: italic;">y_tt</span> = at.vector(<span style="font-style: italic;">"y"</span>)
-<span style="font-weight: bold; font-style: italic;">z_tt</span> = at.dot(A_tt, x_tt + y_tt)
+<span style="color: #24292e;">A_tt</span> = at.matrix(<span style="color: #032f62;">"A"</span>)
+<span style="color: #24292e;">x_tt</span> = at.vector(<span style="color: #032f62;">"x"</span>)
+<span style="color: #24292e;">y_tt</span> = at.vector(<span style="color: #032f62;">"y"</span>)
+<span style="color: #24292e;">z_tt</span> = at.dot(A_tt, x_tt + y_tt)
 </pre>
 </div>
 
@@ -45,7 +45,7 @@ We can get a text print-out of the graph using the debug print function <code>dp
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara
 
 aesara.dprint(z_tt)
 </pre>
@@ -68,23 +68,23 @@ The output of <code>dprint</code> shows the underlying operators (<code>dot</cod
 To "math/search for" combinations of Aesara operations&#x2013;or, as we just saw, graphs&#x2013;we use <b>unification</b>; to "replace" parts of the graph (well, produce a copy with replaced parts) we use <b>reificatoin</b>. Aesara provides support for these via <b>expression-tuples</b>.
 </p>
 
-<div id="outline-container-org7df8151" class="outline-2">
-<h2 id="org7df8151">S-expressions</h2>
-<div class="outline-text-2" id="text-org7df8151">
+<div id="outline-container-org961aed1" class="outline-2">
+<h2 id="org961aed1">S-expressions</h2>
+<div class="outline-text-2" id="text-org961aed1">
 <p>
 We can convert an Aesara graphs into an <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/S-expression">S-expression-like</a> form using <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/etuples">etuples</a>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
-<span style="font-weight: bold;">from</span> IPython.lib.pretty <span style="font-weight: bold;">import</span> pprint
+<pre class="src src-python"><span style="color: #d73a49;">from</span> etuples <span style="color: #d73a49;">import</span> etuple, etuplize
+<span style="color: #d73a49;">from</span> IPython.lib.pretty <span style="color: #d73a49;">import</span> pprint
 
-<span style="font-weight: bold; font-style: italic;">z_et</span> = etuplize(z_tt)
+<span style="color: #24292e;">z_et</span> = etuplize(z_tt)
 pprint(z_et)
 </pre>
 </div>
 
-<pre class="example" id="org8273ae6">
+<pre class="example" id="org04e704e">
 e(
   e(aesara.tensor.math.Dot),
   A,
@@ -110,10 +110,10 @@ For instance we can create an <code>etuple</code> that uses the function <code>a
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> var
+<pre class="src src-python"><span style="color: #d73a49;">from</span> unification <span style="color: #d73a49;">import</span> var
 
-<span style="font-weight: bold; font-style: italic;">x_lv</span>, <span style="font-weight: bold; font-style: italic;">y_lv</span> = var(<span style="font-style: italic;">'x'</span>), var(<span style="font-style: italic;">'y'</span>)
-<span style="font-weight: bold; font-style: italic;">add_pattern</span> = etuple(etuplize(at.add), x_lv, y_lv)
+<span style="color: #24292e;">x_lv</span>, <span style="color: #24292e;">y_lv</span> = var(<span style="color: #032f62;">'x'</span>), var(<span style="color: #032f62;">'y'</span>)
+<span style="color: #24292e;">add_pattern</span> = etuple(etuplize(at.add), x_lv, y_lv)
 </pre>
 </div>
 
@@ -122,10 +122,10 @@ It wouldn't normally be possible to call the <code>at.add</code> function with t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">try</span>:
+<pre class="src src-python"><span style="color: #d73a49;">try</span>:
     at.add(x_lv, 1)
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">NotImplementedError</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">str</span>(e))
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">NotImplementedError</span> <span style="color: #d73a49;">as</span> e:
+    <span style="color: #d73a49;">print</span>(<span style="color: #d73a49;">str</span>(e))
 </pre>
 </div>
 
@@ -139,9 +139,9 @@ We'll get a similar error if we attempt to evaluate the <code>etuple</code> by a
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> reify
+<pre class="src src-python"><span style="color: #d73a49;">from</span> unification <span style="color: #d73a49;">import</span> reify
 
-<span style="font-weight: bold; font-style: italic;">new_add_pattern</span> = reify(add_pattern, {x_lv: 1., y_lv: 1.})
+<span style="color: #24292e;">new_add_pattern</span> = reify(add_pattern, {x_lv: 1., y_lv: 1.})
 pprint(new_add_pattern)
 </pre>
 </div>
@@ -173,9 +173,9 @@ Working with S-expressions is much like manipulating a subset of Python AST, so,
 </div>
 </div>
 
-<div id="outline-container-org466d75e" class="outline-2">
-<h2 id="org466d75e">Operators and their parameters</h2>
-<div class="outline-text-2" id="text-org466d75e">
+<div id="outline-container-org421f5b4" class="outline-2">
+<h2 id="org421f5b4">Operators and their parameters</h2>
+<div class="outline-text-2" id="text-org421f5b4">
 <p>
 In etuplized-graph-print the <code>etuple</code> form of our matrix-multuplication graph <code>z_et</code> produced Aesaa operators
 </p>
@@ -191,9 +191,9 @@ e(aesara.tensor.math.Dot)
 </div>
 </div>
 
-<div id="outline-container-org6d2cb8c" class="outline-2">
-<h2 id="org6d2cb8c">Unification and reification</h2>
-<div class="outline-text-2" id="text-org6d2cb8c">
+<div id="outline-container-org2904e80" class="outline-2">
+<h2 id="org2904e80">Unification and reification</h2>
+<div class="outline-text-2" id="text-org2904e80">
 <p>
 With the ability to use logic variables and Aesara graphs together, we can now "search" or "match" arbitrary graphs using <b>unification</b> and produce new graphs by replacing logic variables using <b>reification</b>.
 </p>
@@ -207,10 +207,10 @@ We start by making "patterns" or templates for the subgraphs we would like to ma
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.tensor.math <span style="font-weight: bold;">import</span> Dot
+<pre class="src src-python"><span style="color: #d73a49;">from</span> aesara.tensor.math <span style="color: #d73a49;">import</span> Dot
 
-<span style="font-weight: bold; font-style: italic;">A_lv</span>, <span style="font-weight: bold; font-style: italic;">B_lv</span> = var(<span style="font-style: italic;">"A"</span>), var(<span style="font-style: italic;">"B"</span>)
-<span style="font-weight: bold; font-style: italic;">dot_pattern</span> = etuple(etuple(Dot), A_lv, B_lv)
+<span style="color: #24292e;">A_lv</span>, <span style="color: #24292e;">B_lv</span> = var(<span style="color: #032f62;">"A"</span>), var(<span style="color: #032f62;">"B"</span>)
+<span style="color: #24292e;">dot_pattern</span> = etuple(etuple(Dot), A_lv, B_lv)
 </pre>
 </div>
 
@@ -219,17 +219,17 @@ We start by making "patterns" or templates for the subgraphs we would like to ma
 </p>
 </div>
 
-<div id="outline-container-orge59aea5" class="outline-3">
-<h3 id="orge59aea5">Unification</h3>
-<div class="outline-text-3" id="text-orge59aea5">
+<div id="outline-container-org0b01ebb" class="outline-3">
+<h3 id="org0b01ebb">Unification</h3>
+<div class="outline-text-3" id="text-org0b01ebb">
 <p>
 We can perform unification using the function <code>unify</code>. The result is a <code>dict</code> mapping logic variables to their unified values.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify
+<pre class="src src-python"><span style="color: #d73a49;">from</span> unification <span style="color: #d73a49;">import</span> unify
 
-<span style="font-weight: bold; font-style: italic;">s</span> = unify(dot_pattern, z_et)
+<span style="color: #24292e;">s</span> = unify(dot_pattern, z_et)
 pprint(s)
 </pre>
 </div>
@@ -252,9 +252,9 @@ The logic variable <code>A</code> has been correctly unified with <code>A_tt</co
 </div>
 </div>
 
-<div id="outline-container-org659b448" class="outline-3">
-<h3 id="org659b448">Reification</h3>
-<div class="outline-text-3" id="text-org659b448">
+<div id="outline-container-orged1f7da" class="outline-3">
+<h3 id="orged1f7da">Reification</h3>
+<div class="outline-text-3" id="text-orged1f7da">
 <p>
 Using <code>reify</code> we can "fill-in"&#x2013;or replace&#x2014;the logic variables of our "pattern" with the matches obtained by <code>unify</code> that are held within the variable s, or we could specify our own substitutions based on that information.
 </p>
@@ -264,15 +264,15 @@ In the following snipped we simply exchange the <code>A_tt</code> tensor with an
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">X_tt</span> = at.matrix(<span style="font-style: italic;">"X"</span>)
-<span style="font-weight: bold; font-style: italic;">s</span>[A_lv] = X_tt
+<pre class="src src-python"><span style="color: #24292e;">X_tt</span> = at.matrix(<span style="color: #032f62;">"X"</span>)
+<span style="color: #24292e;">s</span>[A_lv] = X_tt
 
-<span style="font-weight: bold; font-style: italic;">z_et_re</span> = reify(dot_pattern, s)
+<span style="color: #24292e;">z_et_re</span> = reify(dot_pattern, s)
 pprint(z_et_re)
 </pre>
 </div>
 
-<pre class="example" id="org8bc7e81">
+<pre class="example" id="org000170a">
 e(
   e(aesara.tensor.math.Dot),
   X,
@@ -287,15 +287,15 @@ e(
 </div>
 </div>
 
-<div id="outline-container-orgb447db7" class="outline-3">
-<h3 id="orgb447db7">Finishing our implementation</h3>
-<div class="outline-text-3" id="text-orgb447db7">
+<div id="outline-container-orgae4f86f" class="outline-3">
+<h3 id="orgae4f86f">Finishing our implementation</h3>
+<div class="outline-text-3" id="text-orgae4f86f">
 <p>
 We can also reify an entirely different graph using the values extracted from the graph <code>z_et</code>. In this case, we create an "output" pattern graph, to complement our new "input" pattern graph <code>dot_pattern</code>. If we combine our dot product and addition <code>etuple</code> patterns, we can extract all the arguments needed as input to a distributed multiplication pattern.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">output_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), B_lv, y_lv))
+<pre class="src src-python"><span style="color: #24292e;">output_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), B_lv, y_lv))
 pprint(output_pattern)
 </pre>
 </div>
@@ -320,12 +320,12 @@ Using the previous unification results contained in <code>s</code> we only need 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">s_add</span> = unify(s[B_lv], add_pattern, s)
+<pre class="src src-python"><span style="color: #24292e;">s_add</span> = unify(s[B_lv], add_pattern, s)
 pprint(s_add)
 </pre>
 </div>
 
-<pre class="example" id="org8221462">
+<pre class="example" id="org1446baa">
 {~A: X,
  ~B: e(
    e(
@@ -339,12 +339,12 @@ pprint(s_add)
 </pre>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">z_new</span> = reify(output_pattern, s_add)
+<pre class="src src-python"><span style="color: #24292e;">z_new</span> = reify(output_pattern, s_add)
 aesara.dprint(z_new.evaled_obj)
 </pre>
 </div>
 
-<pre class="example" id="org08c04ea">
+<pre class="example" id="org7ea6944">
 Elemwise{add,no_inplace} [id A] ''
  |dot [id B] ''
  | |X [id C]
@@ -368,9 +368,9 @@ Next we will introduce another major element of Aesara that orchestrates and sim
 </div>
 </div>
 
-<div id="outline-container-org4515f85" class="outline-2">
-<h2 id="org4515f85">Relational programming in miniKanren</h2>
-<div class="outline-text-2" id="text-org4515f85">
+<div id="outline-container-org5bc04f3" class="outline-2">
+<h2 id="org5bc04f3">Relational programming in miniKanren</h2>
+<div class="outline-text-2" id="text-org5bc04f3">
 <p>
 Aesara uses a Python implementation of the embedded domain-specific language miniKanren&#x2013;provided by the <code>kanren</code> package&#x2013;to orchestrate more sophisticated uses of unification and reification. For a quick intro, see <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/pythological/kanren/blob/master/doc/basic.md">the basic introduction</a> provided by the <code>kanren</code> package. We'll cover most of the same basic material here.
 </p>
@@ -384,9 +384,9 @@ In their most basic form, miniKanren <b>states</b> are simply the substitution m
 </p>
 </div>
 
-<div id="outline-container-org33cca3a" class="outline-3">
-<h3 id="org33cca3a">The basic goals</h3>
-<div class="outline-text-3" id="text-org33cca3a">
+<div id="outline-container-orgabb9c4a" class="outline-3">
+<h3 id="orgabb9c4a">The basic goals</h3>
+<div class="outline-text-3" id="text-orgabb9c4a">
 <p>
 Normally, a user will only need to construct compound goals from a basic set of primitives. Arguably, the most primitive goal is the <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Equivalence_relation">equivalence relation</a> under unification denoted by <code>eq</code> in Python.
 </p>
@@ -396,10 +396,10 @@ In the following code block we ask for all successful results/reifications (sign
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> run, eq
+<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> run, eq
 
-<span style="font-weight: bold; font-style: italic;">q_lv</span> = var(<span style="font-style: italic;">'q'</span>)
-<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(0, q_lv, eq(q_lv, 1))
+<span style="color: #24292e;">q_lv</span> = var(<span style="color: #032f62;">'q'</span>)
+<span style="color: #24292e;">mk_res</span> = run(0, q_lv, eq(q_lv, 1))
 pprint(mk_res)
 </pre>
 </div>
@@ -418,9 +418,9 @@ The other basic primitives represent conjunction and disjunction of miniKanren g
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lall
+<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> lall
 
-<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(0, q_lv, lall(eq(q_lv, 1), eq(q_lv, 2)))
+<span style="color: #24292e;">mk_res</span> = run(0, q_lv, lall(eq(q_lv, 1), eq(q_lv, 2)))
 pprint(mk_res)
 </pre>
 </div>
@@ -434,9 +434,9 @@ Goal disjunction, <code>lany</code>, will split a state stream accross goals, pr
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> lany
+<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> lany
 
-<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(0, q_lv, lany(eq(q_lv, 1), eq(q_lv, 2)))
+<span style="color: #24292e;">mk_res</span> = run(0, q_lv, lany(eq(q_lv, 1), eq(q_lv, 2)))
 pprint(mk_res)
 </pre>
 </div>
@@ -450,11 +450,11 @@ A common pattern of disjuntion and conjunction is called <code>conde</code>, and
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> conde
+<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> conde
 
-<span style="font-weight: bold; font-style: italic;">r_lv</span> = var(<span style="font-style: italic;">"r"</span>)
+<span style="color: #24292e;">r_lv</span> = var(<span style="color: #032f62;">"r"</span>)
 
-<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(
+<span style="color: #24292e;">mk_res</span> = run(
     0,
     [q_lv, r_lv],
     conde(
@@ -480,7 +480,7 @@ The following code demonstrated when <code>conde</code> can behave more like a t
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">mk_res</span> = run(0, [q_lv, r_lv],
+<pre class="src src-python"><span style="color: #24292e;">mk_res</span> = run(0, [q_lv, r_lv],
              lall(eq(q_lv, 1),
                   conde(
                       [eq(q_lv, 1), eq(r_lv, 10)],
@@ -496,20 +496,20 @@ pprint(mk_res)
 </div>
 </div>
 
-<div id="outline-container-org6b2df74" class="outline-3">
-<h3 id="org6b2df74">A better implementation</h3>
-<div class="outline-text-3" id="text-org6b2df74">
+<div id="outline-container-org83cc41f" class="outline-3">
+<h3 id="org83cc41f">A better implementation</h3>
+<div class="outline-text-3" id="text-org83cc41f">
 <p>
 Since miniKanren uses unification and reification, we can apply its basic goals to Aesara graphs, as we did earlier, and reproduce the entire implementation in a much more concise manner.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, output_pattern, eq(dot_pattern, z_et), eq(add_pattern, B_lv))
+<pre class="src src-python"><span style="color: #24292e;">mk_res</span> = run(1, output_pattern, eq(dot_pattern, z_et), eq(add_pattern, B_lv))
 pprint(mk_res)
 </pre>
 </div>
 
-<pre class="example" id="orge65e215">
+<pre class="example" id="org7ea4a5c">
 (e(
    e(
      aesara.tensor.elemwise.Elemwise,
@@ -537,7 +537,7 @@ We obtain an etuple that we can evaluate to get the graph
 </pre>
 </div>
 
-<pre class="example" id="org920fbb9">
+<pre class="example" id="orgb00581b">
 Elemwise{add,no_inplace} [id A] ''
  |dot [id B] ''
  | |A [id C]
@@ -559,41 +559,41 @@ Before moving on to the next section and goal construction, let us summarize eve
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
-<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
-<span style="font-weight: bold;">from</span> aesara.tensor.math <span style="font-weight: bold;">import</span> Dot
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara
+<span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">from</span> aesara.tensor.math <span style="color: #d73a49;">import</span> Dot
 
-<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
-<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, run
-<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> var
+<span style="color: #d73a49;">from</span> etuples <span style="color: #d73a49;">import</span> etuple, etuplize
+<span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> eq, run
+<span style="color: #d73a49;">from</span> unification <span style="color: #d73a49;">import</span> var
 
-<span style="font-weight: bold;">from</span> IPython.lib.pretty <span style="font-weight: bold;">import</span> pprint
+<span style="color: #d73a49;">from</span> IPython.lib.pretty <span style="color: #d73a49;">import</span> pprint
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Define the graph we want to "modify"</span>
-<span style="font-weight: bold; font-style: italic;">A_tt</span> = at.matrix(<span style="font-style: italic;">"A"</span>)
-<span style="font-weight: bold; font-style: italic;">x_tt</span> = at.vector(<span style="font-style: italic;">"x"</span>)
-<span style="font-weight: bold; font-style: italic;">y_tt</span> = at.vector(<span style="font-style: italic;">"y"</span>)
-<span style="font-weight: bold; font-style: italic;">z_tt</span> = at.dot(A_tt, x_tt + y_tt)
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Define the graph we want to "modify"</span>
+<span style="color: #24292e;">A_tt</span> = at.matrix(<span style="color: #032f62;">"A"</span>)
+<span style="color: #24292e;">x_tt</span> = at.vector(<span style="color: #032f62;">"x"</span>)
+<span style="color: #24292e;">y_tt</span> = at.vector(<span style="color: #032f62;">"y"</span>)
+<span style="color: #24292e;">z_tt</span> = at.dot(A_tt, x_tt + y_tt)
 
-<span style="font-weight: bold; font-style: italic;">z_et</span> = etuplize(z_tt)
+<span style="color: #24292e;">z_et</span> = etuplize(z_tt)
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Input patterns and logic variables</span>
-<span style="font-weight: bold; font-style: italic;">x_lv</span>, <span style="font-weight: bold; font-style: italic;">y_lv</span> = var(<span style="font-style: italic;">'x'</span>), var(<span style="font-style: italic;">'y'</span>)
-<span style="font-weight: bold; font-style: italic;">add_pattern</span> = etuple(etuplize(at.add), x_lv, y_lv)
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Input patterns and logic variables</span>
+<span style="color: #24292e;">x_lv</span>, <span style="color: #24292e;">y_lv</span> = var(<span style="color: #032f62;">'x'</span>), var(<span style="color: #032f62;">'y'</span>)
+<span style="color: #24292e;">add_pattern</span> = etuple(etuplize(at.add), x_lv, y_lv)
 
-<span style="font-weight: bold; font-style: italic;">A_lv</span>, <span style="font-weight: bold; font-style: italic;">B_lv</span> = var(<span style="font-style: italic;">'A'</span>), var(<span style="font-style: italic;">'B'</span>)
-<span style="font-weight: bold; font-style: italic;">dot_pattern</span> = etuple(etuple(Dot), A_lv, B_lv)
+<span style="color: #24292e;">A_lv</span>, <span style="color: #24292e;">B_lv</span> = var(<span style="color: #032f62;">'A'</span>), var(<span style="color: #032f62;">'B'</span>)
+<span style="color: #24292e;">dot_pattern</span> = etuple(etuple(Dot), A_lv, B_lv)
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Output pattern</span>
-<span style="font-weight: bold; font-style: italic;">output_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), B_lv, y_lv))
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Output pattern</span>
+<span style="color: #24292e;">output_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), B_lv, y_lv))
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Using miniKanren</span>
-<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, output_pattern, eq(dot_pattern, z_et), eq(add_pattern, B_lv))
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Using miniKanren</span>
+<span style="color: #24292e;">mk_res</span> = run(1, output_pattern, eq(dot_pattern, z_et), eq(add_pattern, B_lv))
 aesara.dprint(mk_res[0].evaled_obj)
 </pre>
 </div>
 
-<pre class="example" id="org3dfc1c7">
+<pre class="example" id="org6ed151b">
 Elemwise{add,no_inplace} [id A] ''
  |dot [id B] ''
  | |A [id C]
@@ -612,21 +612,21 @@ When combinations of miniKanren goals comprise logical units, we can wrap their 
 </div>
 </div>
 
-<div id="outline-container-orgd3109a7" class="outline-3">
-<h3 id="orgd3109a7">Goals Constructors</h3>
-<div class="outline-text-3" id="text-orgd3109a7">
+<div id="outline-container-org4da74c9" class="outline-3">
+<h3 id="org4da74c9">Goals Constructors</h3>
+<div class="outline-text-3" id="text-org4da74c9">
 <p>
 Using our distributive law example, we can create a goal constructor that creates our combined pattern and applies it in one go.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">distributeo</span>(in_g, out_g):
-    <span style="font-style: italic;">"""Create a oal that represents commuted matrix multiplicatoin and addition."""</span>
-    <span style="font-weight: bold; font-style: italic;">A_lv</span>, <span style="font-weight: bold; font-style: italic;">x_lv</span>, <span style="font-weight: bold; font-style: italic;">y_lv</span> = var(), var(), var()
-    <span style="font-weight: bold; font-style: italic;">dot_pattern</span> = etuple(etuple(Dot), A_lv, etuple(etuplize(at.add), x_lv, y_lv))
-    <span style="font-weight: bold; font-style: italic;">dist_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), A_lv, y_lv))
+<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">distributeo</span>(in_g, out_g):
+    <span style="color: #032f62;">"""Create a oal that represents commuted matrix multiplicatoin and addition."""</span>
+    <span style="color: #24292e;">A_lv</span>, <span style="color: #24292e;">x_lv</span>, <span style="color: #24292e;">y_lv</span> = var(), var(), var()
+    <span style="color: #24292e;">dot_pattern</span> = etuple(etuple(Dot), A_lv, etuple(etuplize(at.add), x_lv, y_lv))
+    <span style="color: #24292e;">dist_pattern</span> = etuple(etuplize(at.add), etuple(etuple(Dot), A_lv, x_lv), etuple(etuple(Dot), A_lv, y_lv))
 
-    <span style="font-weight: bold;">return</span> lall(eq(in_g, dot_pattern), eq(out_g, dist_pattern))
+    <span style="color: #d73a49;">return</span> lall(eq(in_g, dot_pattern), eq(out_g, dist_pattern))
 </pre>
 </div>
 
@@ -639,9 +639,9 @@ In the following example we "expand" the multiplication:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">q_lv</span> = var()
-<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, q_lv, distributeo(z_et, q_lv))
-<span style="font-weight: bold; font-style: italic;">z_expanded_et</span> = mk_res[0].evaled_obj
+<pre class="src src-python"><span style="color: #24292e;">q_lv</span> = var()
+<span style="color: #24292e;">mk_res</span> = run(1, q_lv, distributeo(z_et, q_lv))
+<span style="color: #24292e;">z_expanded_et</span> = mk_res[0].evaled_obj
 aesara.dprint(z_expanded_et)
 </pre>
 </div>
@@ -662,9 +662,9 @@ And in the following example we "contract" the previously expanded result
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">q_lv</span> = var()
-<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, q_lv, distributeo(q_lv, z_expanded_et))
-<span style="font-weight: bold; font-style: italic;">z_contracted_et</span> = mk_res[0].evaled_obj
+<pre class="src src-python"><span style="color: #24292e;">q_lv</span> = var()
+<span style="color: #24292e;">mk_res</span> = run(1, q_lv, distributeo(q_lv, z_expanded_et))
+<span style="color: #24292e;">z_contracted_et</span> = mk_res[0].evaled_obj
 aesara.dprint(z_contracted_et)
 </pre>
 </div>
@@ -679,9 +679,9 @@ dot [id A] ''
 </div>
 </div>
 
-<div id="outline-container-orge2a13ae" class="outline-3">
-<h3 id="orge2a13ae">Graph-based goals</h3>
-<div class="outline-text-3" id="text-orge2a13ae">
+<div id="outline-container-orgb179ba0" class="outline-3">
+<h3 id="orgb179ba0">Graph-based goals</h3>
+<div class="outline-text-3" id="text-orgb179ba0">
 <p>
 In most situation the desired graphs will be subgraphs of much larger ones. Aesara introduces some miniKanren goals that apply other goals throughout graphs until a fixed-point is reached. This sequence of operations is generally necessary for graph simplification and rewriting.
 </p>
@@ -690,7 +690,7 @@ In most situation the desired graphs will be subgraphs of much larger ones. Aesa
 In the following example we create a new graph that contains <code>at.dot(A, x+y)</code> as a subgraph.
 </p>
 
-<pre class="example" id="org4088999">
+<pre class="example" id="org7e44cc1">
 e(
   e(
     aesara.tensor.elemwise.Elemwise,
@@ -724,20 +724,20 @@ We define <code>graph_walko</code>, a function that walks term graphs and will a
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> etuples.core <span style="font-weight: bold;">import</span> ExpressionTuple
-<span style="font-weight: bold;">from</span> kanren.graph <span style="font-weight: bold;">import</span> walko
-<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq
-<span style="font-weight: bold;">from</span> functools <span style="font-weight: bold;">import</span> partial
+<pre class="src src-python"><span style="color: #d73a49;">from</span> etuples.core <span style="color: #d73a49;">import</span> ExpressionTuple
+<span style="color: #d73a49;">from</span> kanren.graph <span style="color: #d73a49;">import</span> walko
+<span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> eq
+<span style="color: #d73a49;">from</span> functools <span style="color: #d73a49;">import</span> partial
 
-<span style="font-weight: bold; font-style: italic;">graph_walko</span> = partial(walko, rator_goal=eq)
+<span style="color: #24292e;">graph_walko</span> = partial(walko, rator_goal=eq)
 
-<span style="font-weight: bold; font-style: italic;">q_lv</span> = var()
-<span style="font-weight: bold; font-style: italic;">mk_res</span> = run(1, q_lv, graph_walko(distributeo, z_graph_et, q_lv))
+<span style="color: #24292e;">q_lv</span> = var()
+<span style="color: #24292e;">mk_res</span> = run(1, q_lv, graph_walko(distributeo, z_graph_et, q_lv))
 aesara.dprint(mk_res[0].evaled_obj)
 </pre>
 </div>
 
-<pre class="example" id="orga643e5a">
+<pre class="example" id="org2660004">
 Elemwise{add,no_inplace} [id A] ''
  |Elemwise{mul,no_inplace} [id B] ''
  | |InplaceDimShuffle{x} [id C] ''

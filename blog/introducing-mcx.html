@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Probabilistic programming via source code rewriting (MCX)</title>
@@ -68,7 +68,7 @@ Of course we can implement these two representations separately. This is simple 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">x</span> = Beta(1., 1.)
+<pre class="src src-python"><span style="color: #24292e;">x</span> = Beta(1., 1.)
 </pre>
 </div>
 
@@ -115,15 +115,15 @@ It has random variables, random variables that are used to define othe random va
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">regression</span>(X):
-  <span style="font-weight: bold; font-style: italic;">alpha</span> = Normal(0, 10)
-  <span style="font-weight: bold; font-style: italic;">beta</span> = Normal(np.zeros(5), 10)
-  <span style="font-weight: bold; font-style: italic;">sigma</span> = HalfNormal(1)
+<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">regression</span>(X):
+  <span style="color: #24292e;">alpha</span> = Normal(0, 10)
+  <span style="color: #24292e;">beta</span> = Normal(np.zeros(5), 10)
+  <span style="color: #24292e;">sigma</span> = HalfNormal(1)
 
-  <span style="font-weight: bold; font-style: italic;">y</span> = alpha + np.dot(beta, X)
-  <span style="font-weight: bold; font-style: italic;">predictions</span> = Normal(y, sigma)
+  <span style="color: #24292e;">y</span> = alpha + np.dot(beta, X)
+  <span style="color: #24292e;">predictions</span> = Normal(y, sigma)
 
-  <span style="font-weight: bold;">return</span> predictions
+  <span style="color: #d73a49;">return</span> predictions
 </pre>
 </div>
 
@@ -132,21 +132,21 @@ It has random variables, random variables that are used to define othe random va
 Welcome MCX. Well, almost.
 </p>
 
-<div id="outline-container-orga3411e7" class="outline-2">
-<h2 id="orga3411e7">Defining probabilistic models with MCX</h2>
-<div class="outline-text-2" id="text-orga3411e7">
+<div id="outline-container-org770517f" class="outline-2">
+<h2 id="org770517f">Defining probabilistic models with MCX</h2>
+<div class="outline-text-2" id="text-org770517f">
 <p>
 Here is how you express the beta-binomial model in MCX:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> mcx
+<pre class="src src-python"><span style="color: #d73a49;">import</span> mcx
 
-<span style="font-weight: bold; text-decoration: underline;">@mcx.model</span>
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">beta_binomial</span>(beta=2):
+<span style="color: #005cc5;">@mcx.model</span>
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">beta_binomial</span>(beta=2):
   a &lt;~ Beta(1, beta)
   b &lt;~ Binomial(a)
-  <span style="font-weight: bold;">return</span> b
+  <span style="color: #d73a49;">return</span> b
 </pre>
 </div>
 
@@ -173,21 +173,21 @@ observed. While MCX models also represent a distribution, in the API we treat th
 </div>
 </div>
 
-<div id="outline-container-org28359ed" class="outline-2">
-<h2 id="org28359ed">Interacting with MCX models</h2>
-<div class="outline-text-2" id="text-org28359ed">
+<div id="outline-container-org876d916" class="outline-2">
+<h2 id="org876d916">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-org876d916">
 <p>
 Consider the following linear regression model:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; text-decoration: underline;">@mcx.model</span>
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">linear_regression</span>(x, lmba=1.):
+<pre class="src src-python"><span style="color: #005cc5;">@mcx.model</span>
+<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">linear_regression</span>(x, lmba=1.):
     scale &lt;~ Exponential(lmbda)
     coef &lt;~ Normal(np.zeros(x.shape[-1]), 1)
-    <span style="font-weight: bold; font-style: italic;">y</span> = np.dot(x, coef)
+    <span style="color: #24292e;">y</span> = np.dot(x, coef)
     preds &lt;~ Normal(y, scale)
-    <span style="font-weight: bold;">return</span> preds
+    <span style="color: #d73a49;">return</span> preds
 </pre>
 </div>
 
@@ -197,7 +197,7 @@ Calling the generative function should return a different value each time it is 
 
 <div class="org-src-container">
 <pre class="src src-python">linear_regression(rng_key, x)
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">2.3</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">2.3</span>
 </pre>
 </div>
 
@@ -206,11 +206,11 @@ Note the apparition of <code>rng_key</code> between the definition and the call 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fn</span> = mcx.seed(linear_regression, rng_key)
+<pre class="src src-python"><span style="color: #24292e;">fn</span> = mcx.seed(linear_regression, rng_key)
 fn(10)
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">34.5</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">34.5</span>
 fn(10)
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">52.1</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">52.1</span>
 </pre>
 </div>
 
@@ -219,10 +219,10 @@ fn(10)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+<pre class="src src-python"><span style="color: #d73a49;">import</span> jax
 
-<span style="font-weight: bold; font-style: italic;">keys</span> = jax.random.split(rng_key, num_samples)
-jax.vmap(linear_regression, in_axes=(0, <span style="font-weight: bold; text-decoration: underline;">None</span>))(keys, x_data)
+<span style="color: #24292e;">keys</span> = jax.random.split(rng_key, num_samples)
+jax.vmap(linear_regression, in_axes=(0, <span style="color: #005cc5;">None</span>))(keys, x_data)
 </pre>
 </div>
 
@@ -240,7 +240,7 @@ The generative function implicitly defines a multivariate distribution over the 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">sampler</span> = mcx.sample_joint(rng_key, linear_regression, (x_data,))
+<pre class="src src-python"><span style="color: #24292e;">sampler</span> = mcx.sample_joint(rng_key, linear_regression, (x_data,))
 </pre>
 </div>
 
@@ -268,11 +268,11 @@ To sample from the posterior distribution we need to specify which variables we 
 
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">sampler</span> = mcx.sampler(
+<pre class="src src-python"><span style="color: #24292e;">sampler</span> = mcx.sampler(
     rng_key,
     linear_regression,
     (x_data,),
-    {<span style="font-style: italic;">"preds"</span>: y_data},
+    {<span style="color: #032f62;">"preds"</span>: y_data},
     HMC(100),
 )
 sampler.run(1000)
@@ -284,7 +284,7 @@ Once the model's posterior distribution has been sampled we can define a new gen
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">evaluated_model</span> = mcx.evaluate(linear_regression, trace)
+<pre class="src src-python"><span style="color: #24292e;">evaluated_model</span> = mcx.evaluate(linear_regression, trace)
 </pre>
 </div>
 
@@ -294,7 +294,7 @@ When sampling from the predictive distribution, instead of drawing a value for e
 
 <div class="org-src-container">
 <pre class="src src-python">evaluated_model(rng_key, x_data)
-<span style="font-weight: bold; font-style: italic;">seeded</span> = mcx.seed(evaluated_model, rng_key)
+<span style="color: #24292e;">seeded</span> = mcx.seed(evaluated_model, rng_key)
 mcx.sample_predictive(rng_key, evaluate_model, (x_data,), num_samples=100)
 </pre>
 </div>
@@ -304,9 +304,9 @@ Unlike the original model, however, the evaluated program is not a distribution.
 </p>
 </div>
 
-<div id="outline-container-org9860077" class="outline-3">
-<h3 id="org9860077">Go on your own</h3>
-<div class="outline-text-3" id="text-org9860077">
+<div id="outline-container-org4dda4a8" class="outline-3">
+<h3 id="org4dda4a8">Go on your own</h3>
+<div class="outline-text-3" id="text-org4dda4a8">
 <p>
 MCX provides a convenient interface to interact with the model's predictive,
 joint prior and posterior distributions, but should you want to build something
@@ -314,11 +314,11 @@ more sophisticated you can always access the underlying functions directly:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Get the function that computes the logprobability</span>
+<pre class="src src-python"><span style="color: #6a737d;"># </span><span style="color: #6a737d;">Get the function that computes the logprobability</span>
 log_prob(model)
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Get a function that draws one sample from the joint distributon</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Get a function that draws one sample from the joint distributon</span>
 joint_sampler(model)
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Function that draws one sample from the predictive distribution</span>
+<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Function that draws one sample from the predictive distribution</span>
 predictive_sampler(model)
 </pre>
 </div>
@@ -331,19 +331,19 @@ particular, allows to you to write your model with MCX and use another library
 </div>
 </div>
 </div>
-<div id="outline-container-org9d869a8" class="outline-2">
-<h2 id="org9d869a8">How does it work? MCX's internals</h2>
-<div class="outline-text-2" id="text-org9d869a8">
+<div id="outline-container-org0122f99" class="outline-2">
+<h2 id="org0122f99">How does it work? MCX's internals</h2>
+<div class="outline-text-2" id="text-org0122f99">
 </div>
-<div id="outline-container-org387a3ee" class="outline-3">
-<h3 id="org387a3ee">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
-<div class="outline-text-3" id="text-org387a3ee">
+<div id="outline-container-org4c38770" class="outline-3">
+<h3 id="org4c38770">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
+<div class="outline-text-3" id="text-org4c38770">
 <p>
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">new_graph</span> = simplify_conjugacy(graph)
+<pre class="src src-python"><span style="color: #24292e;">new_graph</span> = simplify_conjugacy(graph)
 </pre>
 </div>
 
@@ -354,7 +354,7 @@ sampling, reparametrization is trivial to do, etc. Manipulating the graph is
 pretty much akin to manipulating the mathematical object.
 </p>
 
-<pre class="example" id="orgcb291b3">
+<pre class="example" id="org7ea499c">
 
                                      +----&gt; logpdf
 @mcx.model                           |
@@ -387,7 +387,7 @@ framework-agnostic. Hell, you could even write, without too much effort, an
 edward2, pymc3 or pyro compiler!
 </p>
 
-<pre class="example" id="orgcdda8be">
+<pre class="example" id="org123e3c6">
 Example with control flow and different
 </pre>
 
@@ -399,15 +399,15 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 </p>
 
-<pre class="example" id="orgbee4cda">
+<pre class="example" id="org801e7b4">
 model.source_logpdf
 </pre>
 </div>
 </div>
 
-<div id="outline-container-orga4d6588" class="outline-3">
-<h3 id="orga4d6588">Inference</h3>
-<div class="outline-text-3" id="text-orga4d6588">
+<div id="outline-container-org117c63b" class="outline-3">
+<h3 id="org117c63b">Inference</h3>
+<div class="outline-text-3" id="text-org117c63b">
 <p>
 <i>The modeling language and the inference module are completely separate.</i> The modeling language compiles to a logpdf, and that is all the samplers need.
 </p>
@@ -422,7 +422,7 @@ Inference in MCX is also very modular. The idea is that inference in traditional
 <li><i>Runtimes</i>, that tie the data, the model and the kernel together and then make the chains move forward following an execution plan.</li>
 </ol>
 
-<pre class="example" id="orge36d47b">
+<pre class="example" id="orgba7ec85">
 Runtime (Sampling loop)
 -------------------------------------------------
 Programs (HMC)

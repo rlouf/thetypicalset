@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 09:58 -->
+<!-- 2022-12-01 Thu 10:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Define user sessions in mobile applications</title>
@@ -51,7 +51,7 @@ No one really know how to define what a <i>session</i> in a mobile app is, and i
 </p>
 
 
-<div id="orgdaef1bf" class="figure">
+<div id="org511735b" class="figure">
 <p><img src="images/session-length.png" alt="session-length.png" />
 </p>
 </div>
@@ -89,28 +89,28 @@ The implementation in PyMC3 is straightforward:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> pymc3 <span style="font-weight: bold;">as</span> pm
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #d73a49;">import</span> pymc3 <span style="color: #d73a49;">as</span> pm
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">data</span> = [insert, your, inter, event, time, data, here]
+<span style="color: #24292e;">data</span> = [insert, your, inter, event, time, data, here]
 
-<span style="font-weight: bold;">with</span> pm.Model() <span style="font-weight: bold;">as</span> mixture_model:
+<span style="color: #d73a49;">with</span> pm.Model() <span style="color: #d73a49;">as</span> mixture_model:
 
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Define priors</span>
-    <span style="font-weight: bold; font-style: italic;">BoundedNormal</span> = pm.Bound(pm.Normal, lower=0.0)
-    <span style="font-weight: bold; font-style: italic;">k</span> = BoundedNormal(<span style="font-style: italic;">'k'</span>, mu=20, sd=np.sqrt(data.var()), testval=20)
-    <span style="font-weight: bold; font-style: italic;">theta</span> = pm.HalfCauchy(<span style="font-style: italic;">'theta'</span>, 5)
-    <span style="font-weight: bold; font-style: italic;">alpha</span> = pm.HalfNormal(<span style="font-style: italic;">'alpha'</span>, 5)
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Define priors</span>
+    <span style="color: #24292e;">BoundedNormal</span> = pm.Bound(pm.Normal, lower=0.0)
+    <span style="color: #24292e;">k</span> = BoundedNormal(<span style="color: #032f62;">'k'</span>, mu=20, sd=np.sqrt(data.var()), testval=20)
+    <span style="color: #24292e;">theta</span> = pm.HalfCauchy(<span style="color: #032f62;">'theta'</span>, 5)
+    <span style="color: #24292e;">alpha</span> = pm.HalfNormal(<span style="color: #032f62;">'alpha'</span>, 5)
 
 
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Likelihood</span>
-    <span style="font-weight: bold; font-style: italic;">gamma</span> = pm.Gamma.dist(mu=k, sd=theta)
-    <span style="font-weight: bold; font-style: italic;">pareto</span> = pm.Pareto.dist(alpha=alpha, m=0.1)
-    <span style="font-weight: bold; font-style: italic;">w</span> = pm.Dirichlet(<span style="font-style: italic;">'weight'</span>, a=np.array([1, 1]))
-    <span style="font-weight: bold; font-style: italic;">interval_obs</span> = pm.Mixture(<span style="font-style: italic;">'interval_obs'</span>, w=w, comp_dists=[gamma,pareto], observed=data)
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Likelihood</span>
+    <span style="color: #24292e;">gamma</span> = pm.Gamma.dist(mu=k, sd=theta)
+    <span style="color: #24292e;">pareto</span> = pm.Pareto.dist(alpha=alpha, m=0.1)
+    <span style="color: #24292e;">w</span> = pm.Dirichlet(<span style="color: #032f62;">'weight'</span>, a=np.array([1, 1]))
+    <span style="color: #24292e;">interval_obs</span> = pm.Mixture(<span style="color: #032f62;">'interval_obs'</span>, w=w, comp_dists=[gamma,pareto], observed=data)
 
-    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Inference</span>
-    <span style="font-weight: bold; font-style: italic;">trace</span> = pm.sample()
+    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Inference</span>
+    <span style="color: #24292e;">trace</span> = pm.sample()
 
 </pre>
 </div>
@@ -128,7 +128,7 @@ Where \(\epsilon\) is a constant to dermine (we can probably use decision theory
 </p>
 
 
-<div id="org39c0d37" class="figure">
+<div id="orgee0e332" class="figure">
 <p><img src="images/session-length-delta-t.png" alt="session-length-delta-t.png" />
 </p>
 </div>
@@ -138,7 +138,7 @@ In other words, we will consider that a session is still active as long as \(\De
 </p>
 
 
-<div id="org04de016" class="figure">
+<div id="org428833c" class="figure">
 <p><img src="images/session-length-model.png" alt="session-length-model.png" />
 </p>
 </div>
@@ -147,9 +147,9 @@ In other words, we will consider that a session is still active as long as \(\De
 Of course there are details to iron out. The definition could be improved by discarding "noise" events (that lead to these very short inter-action times) but the main idea (using a mixture) is here.
 </p>
 
-<div id="outline-container-org2e3c332" class="outline-2">
-<h2 id="org2e3c332">Links to this note</h2>
-<div class="outline-text-2" id="text-org2e3c332">
+<div id="outline-container-orgdd217f9" class="outline-2">
+<h2 id="orgdd217f9">Links to this note</h2>
+<div class="outline-text-2" id="text-orgdd217f9">
 <ul class="org-ul">
 <li><a href="./20211202091119-how_to_define_urban_areas.html">How to define urban areas</a></li>
 <li><a href="./20211125144125-bayesian_statistics.html">Bayesian statistics</a></li>
