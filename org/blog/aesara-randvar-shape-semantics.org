@@ -2,23 +2,330 @@
 #+date: <2022-08-17 Wed>
 #+PROPERTY: header-args :results output :eval never-export :exports both
 
-**DRAFT**
+**Although this contains useful information, this post is a draft and will probably be integrated to Aesara's documentation**
 
-We can relate the =RandomVariable= objects in Aesara to their mathematical counterpart by tying the set of possible RNG states to the sample space $\Omega$. If the random variable $X$ takes its values in the measurable space $E$, then $X$ can be understod as a function $X: \Omega \to E$. It is important to undestand that the =RandomVariable= operator does not represent random variables, but /creates/ random variables (the apply nodes that take random draws). We represent $E$ by its elements; although the returned arrays are symbolic representations of elements of $E$, they do not represent the values themselves, which are obtained by compiling an running the function. We represent $X$ by its output (we conveniently forget about $\omega$)
+* A primer on random variables in Aesara
 
-The operators return *realizations* of the random variables.
+The =RandomVariable= operator in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] corresponds to the following mathematical function:
+
+$$
+\operatorname{RandomVariable}: \Omega \times \boldsymbol{\Theta} \to E
+$$
+
+Were $\Omega$ is the set of available RNG seeds, $\Theta$ the (potentially multi-dimensional) space in which the parameters of the distribution take their values. $E$ is the state space, also called the support of the corresponding distribution. Given a random seed and parameter values, the operator returns a *realization* of the random variable it represents, and element of $E$.
+
+* The support shape
+
+The dimensionality of the parameter space and the sample space differs depending on the distribution. For instance, the normal distribution takes scalar values for $\mu \in \mathbb{R}$ and $\sigma \in \mathbb{R}^+$ and returns a scalar $\in \mathbb{R}$:
+
+#+begin_src python :results output
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+mu = 0
+sigma = 1
+x_rv = srng.normal(mu, sigma)
+sample = x_rv.eval()
+
+print(f"sample value: {sample}")
+print(f"support shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample value: 1.4436909546981256
+: support shape: ()
+
+The Dirichlet distribution is parametrized by a vector $\boldsymbol{\alpha} \in \mathbb{R}^k$ and returns a vector in the k-unit simplex $\operatorname{\Delta}^k$:
+
+#+begin_src python :results output
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+alpha = [1., 3., 4.]
+x_rv = srng.dirichlet(alpha)
+sample = x_rv.eval()
+
+print(f"sample value: {sample}")
+print(f"support shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample value: [0.39086221 0.17265609 0.43648169]
+: support shape: (3,)
+
+The multinomial is another interesting example; it is parametrized by a probability vector $\boldsymbol{p} \in \Delta^k$, a number of trials $n \in \mathbb{N}$ and returns a vector in $\mathbb{N}^k$:
+
+#+begin_src python :results output
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+n = 10
+p = [.1, .3, .6]
+x_rv = srng.multinomial(n, p)
+sample = x_rv.eval()
+
+print(f"sample value: {sample}")
+print(f"support shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample value: [3 2 5]
+: support shape: (3,)
+
+We call the shape of the realizations of the random variables the *support shape*; for the normal distribution it is equal to =()=, the Dirichlet and multinomial distribution it is equal to =(k,)= where =k= is the size of the parameter $\alpha$ and $p$ respectively. Distributions can have arbitrarily complex support shapes: the random variable with a [[https://en.wikipedia.org/wiki/Wishart_distribution][Wishart density]] is a function in $\mathbb{R}^{n \times m}$, and the support shape is =(n,m)=.
+
+* Independent random variables: vectorizing
+
+Say we want a sample from three independent random variables that are normally distributed with a mean of $0$, $3$ and $5$ respectively. One (cumbersome) way to achieve this is:
 
 #+begin_src python
 import aesara.tensor as at
 
-srng = at.random.RandomStream(0)
-x_rv = srng.normal(0, 1)
+srng = at.random.RandomStream()
+rv_0 = srng.normal(0, 1)
+rv_3 = srng.normal(3, 1)
+rv_5 = srng.normal(5, 1)
+rv = at.stack([rv_0, rv_3, rv_5])
 
-# srng.normal(0, 1) : \Omega \to E
-# x \in E
-# Other consideration are relevant for AePPL, here we just need to know they're elements of $E$.
-
+sample = rv.eval()
+print(f"sample value: {sample}")
+print(f"sample shape: {sample.shape}")
 #+end_src
+
+#+RESULTS:
+: sample value: [1.65040785 1.76749492 5.86773357]
+: sample shape: (3,)
+
+To simplify this common operation, we can pass arrays as parameters to Aesara's =RandomVariable=, and the =Op= will use NumPy broadcasting rules to return an array of independent random variables:
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+mean = np.array([0, 3, 5])
+rv = srng.normal(mean, 1)
+
+sample = rv.eval()
+print(f"sample values: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [1.44369095 2.10405402 5.73595567]
+: sample shape: (3,)
+
+ In this case the /batch shape/ is also  =(3,)=; it is the shape of the tensor that contains random variables that are independently distributed and whose distribution belong to the same family.
+
+ In this case, =srng.normal(mean, 1)= implicitly represents 3 independent random variables; if it helps one can imagine it is a shortcut for the first code block of this section.
+
+ We can also use arrays for the standard deviation in this case. Standard broadcasting rules apply to determine the batch shape. For instance, the following fails with a shape mismatch error:
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2])
+rv = srng.normal(mean, sigma)
+
+try:
+    rv.eval()
+except ValueError as err:
+    print(err)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+shape mismatch: objects cannot be broadcast to a single shape
+Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FDB97DFD200>), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
+Toposort index: 0
+Inputs types: [RandomGeneratorType, TensorType(int64, (0,)), TensorType(int64, ()), TensorType(int64, (3,)), TensorType(int64, (2,))]
+Inputs shapes: ['No shapes', (0,), (), (3,), (2,)]
+Inputs strides: ['No strides', (8,), (), (8,), (8,)]
+Inputs values: [Generator(PCG64) at 0x7FDB97DFD200, array([], dtype=int64), array(11), array([0, 3, 5]), array([1, 2])]
+Outputs clients: [['output'], ['output']]
+
+HINT: Re-running with most Aesara optimizations disabled could provide a back-trace showing when this node was created. This can be done by setting the Aesara flag 'optimizer=fast_compile'. If that does not work, Aesara optimizations can be disabled with 'optimizer=None'.
+HINT: Use the Aesara flag `exception_verbosity=high` for a debug print-out and storage map footprint of this Apply node.
+#+end_example
+
+Indeed =mean= and =sigma= cannot be broadcast together:
+
+#+begin_src python
+import numpy as np
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2])
+try:
+    np.broadcast(mean, sigma)  # error
+except ValueError as err:
+    print(err)
+#+end_src
+
+#+RESULTS:
+: shape mismatch: objects cannot be broadcast to a single shape
+
+=np.broadcast(mean, sigma)= gives us the batch shape:
+
+#+begin_src python
+import numpy as np
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2, 7])
+print(np.broadcast(mean, sigma).shape)
+#+end_src
+
+#+RESULTS:
+: (3,)
+
+Indeed:
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+mean = np.array([0, 3, 5])
+sigma = np.array([1, 2, 3])
+rv = srng.normal(mean, sigma)
+
+sample = rv.eval()
+print(f"sample values: {sample}")
+print(f"batch shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [1.44369095 1.20810805 7.20786701]
+: batch shape: (3,)
+
+Since the =RandomVariable= represents a batch of random variables, we will call the resulting shape the *batch shape*.
+
+The normal distribution is fairly simple since its parameters and realization are 1-dimensional. Let take our dirichlet example:
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+alpha = np.array([[1., 2., 4.], [3., 5., 7.]])
+rv = srng.dirichlet(alpha)
+sample = rv.eval()
+
+print(f"sample values: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [[0.42615878 0.09794332 0.4758979 ]
+:  [0.15408529 0.34781447 0.49810024]]
+: sample shape: (2, 3)
+
+Which is equivalent to:
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+rv1 = srng.dirichlet([1., 2., 4.])
+rv2 = srng.dirichlet([3., 5., 7.])
+rv = at.stack([rv1, rv2])
+sample = rv.eval()
+
+print(f"sample values: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [[0.42615878 0.09794332 0.4758979 ]
+:  [0.27582652 0.02985376 0.69431972]]
+: sample shape: (2, 3)
+
+So we have the simple formula; if =support_shape= and =batch_shape= are tuples, then:
+
+#+begin_quote
+sample_shape = batch_shape + support_shape
+#+end_quote
+
+* Identically independently distributed random variable
+
+We also frequently need to define iiid random variables. We can define 3 normally-distributed random variables with mean 0 and variance 1 with:
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+mean = np.zeros(3)
+rv = srng.normal(mean, 1)
+
+sample = rv.eval()
+print(f"sample values: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [ 1.44369095 -0.89594598  0.73595567]
+: sample shape: (3,)
+
+But there is a shortcut: the =size= parameter of the distribution. In the following code, =size= allows us to define the same 3 random variables as above in a more concise way:
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+rv = srng.normal(0, 1, size=3)
+
+sample = rv.eval()
+print(f"sample values: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [ 1.44369095 -0.89594598  0.73595567]
+: sample shape: (3,)
+
+We can of course do the same thing with the dirichlet distribution:
+
+#+begin_src python
+import aesara.tensor as at
+import numpy as np
+
+srng = at.random.RandomStream(0)
+
+rv = srng.dirichlet([1, 3, 5], size=3)
+
+sample = rv.eval()
+print(f"sample values: {sample}")
+print(f"sample shape: {sample.shape}")
+#+end_src
+
+#+RESULTS:
+: sample values: [[0.34934376 0.15431609 0.49634016]
+:  [0.16080299 0.37886972 0.4603273 ]
+:  [0.21030357 0.42525361 0.36444282]]
+: sample shape: (3, 3)
+
+Since we are still talking about independent random variables, =batch= refers indistinctly to identifically distributed or differently distributed random variables.
+
+* Matching
+
+It gets complicated when broadcasting rules apply /and/ we set the =size= parameter.
+
+* Rest
 
 The shape of random tensors in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] is partitioned in semantically different pieces, that refer to the shape of $E$, i.e. the shape of draws we get:
 - The *support shape* corresponds to the shape of one element in $E$, the support of the distribution;
@@ -30,88 +337,6 @@ The shape of random tensors in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara
   #+begin_quote
 What's confusing about all this is that we are passing a single RNG state to the distribution even when we are looking a realization of several different random variables. Underlying implementation must use different rng states, though, and we should probably talk about this.
   #+end_quote
-
-
-* Support shape
-
-The first distinction we must make is based on the /support/ $E$ of the distributions. Simply put, the support of a distribution is the domain over which the density of the probability measure is defined, i.e.
-
-The length of the /support shape/ is the equal to the dimensionality of the distribution's support.
-- 0 for distributions defined in 1 dimension (normal distribution, etc.)
-- Vectors (1 dimension)
-- Matrices (2 dimensions)
-
-*The support shape is the shape of one draw.*
-
-** Distributions over scalar values
-
-The support of the normal distribution, for instance, is $\mathbb{R}$: every sample drawn from that distribution is an element of $\mathbb{R}$. The support of the bernoulli distribution, on the other hand, is the set of integers $\left\{0, 1\right\}$. These distributions are /scalar distributions/, in the sense that their support has 0 dimension (in /array/ terms). Their support shape is /always/ =(,)=.
-
-#+begin_src python
-import aesara.tensor as at
-
-srng = at.random.RandomStream(0)
-rv = srng.normal(0, 1)
-sample = rv.eval()
-
-print(f"sample value: {sample}")
-print(f"support shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample value: 1.4436909546981256
-: support shape: ()
-
-** Distributions over vectors
-
-Other distributions are defined on more complex spaces. The multivariate normal distribution is defined on $\mathbb{R}^k$, so a sample from this distribution will be a vector of length $k$. In this case the support shape is thus equal to =(k,)=.
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-srng = at.random.RandomStream(0)
-
-k = 4
-mu = np.random.rand(k)
-sigma = np.eye(k)
-rv = srng.multivariate_normal(mu, sigma)
-sample = rv.eval()
-
-print(f"sample value: {sample}")
-print(f"support shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample value: [ 2.39376392 -0.59212003  1.48160085  0.18195058]
-: support shape: (4,)
-
-We can define a multivariate normal distribution with one component, and for consistency its support shape is equal to =(1,)=.
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-srng = at.random.RandomStream(0)
-
-mu = np.array([1])
-sigma = np.eye(1)
-rv = srng.multivariate_normal(mu, sigma)
-sample = rv.eval()
-
-print(f"sample value: {sample}")
-print(f"support shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample value: [2.44369095]
-: support shape: (1,)
-
-Example of distributions with 1-dimensional support: =multivariate_normal=, =categorical=, =multinomial=, =dirichlet=.
-
-** Distributions over matrices, etc.
-
-Finally, distributions can be defined on a space with an arbitrary number of dimensions, for instance over $\mathbb{R}^{n \times m}$. The [[https://en.wikipedia.org/wiki/Wishart_distribution][Wishart distribution]] for instance is 2-dimensional: a sample from this distribution is a matrix.
 
 
 * Batch shape
@@ -186,135 +411,6 @@ print(f"sample shape: {sample.shape}")
 *tldr;* Random Variables are `Blockwise` operators
 #+end_quote
 
-Say we want a sample from three normal distributions with a $0$, $3$ and $5$ mean value respectively. One (cumbersome) way to achieve this is:
-
-#+begin_src python
-import aesara.tensor as at
-
-srng = at.random.RandomStream()
-rv_0 = srng.normal(0, 1)
-rv_3 = srng.normal(3, 1)
-rv_5 = srng.normal(5, 1)
-rv = at.stack([rv_0, rv_3, rv_5])
-
-sample = rv.eval()
-print(f"sample value: {sample}")
-print(f"sample shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample value: [-0.41520246  1.92093324  6.74827434]
-: sample shape: (3,)
-
-To simplify this common operation we can pass arrays as parameters to the =RandomVariable=, and the =Op= will use NumPy broadcasting rules to return an array of independent random variables:
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-srng = at.random.RandomStream(0)
-
-mean = np.array([0, 3, 5])
-rv = srng.normal(mean, 1)
-
-sample = rv.eval()
-print(f"sample values: {sample}")
-print(f"batch shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample value: [1.44369095 2.10405402 5.73595567]
-: sample shape: (3,)
-
- In this case the /batch shape/ is also  =(3,)=; it is the shape of the tensor that contains random variables that are independently distributed and whose distribution belong to the same family.
-
- We can also use arrays for the standard deviation in this case. Standard broadcasting rules apply to determine the batch shape. For instance, the following fails with a shape mismatch error:
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-srng = at.random.RandomStream(0)
-
-mean = np.array([0, 3, 5])
-sigma = np.array([1, 2])
-rv = srng.normal(mean, sigma)
-
-try:
-    rv.eval()
-except ValueError as err:
-    print(err)
-#+end_src
-
-#+RESULTS:
-#+begin_example
-shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
-Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7F8DCB881A80>), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
-Toposort index: 0
-Inputs types: [RandomGeneratorType, TensorType(int64, (0,)), TensorType(int64, ()), TensorType(int64, (3,)), TensorType(int64, (2,))]
-Inputs shapes: ['No shapes', (0,), (), (3,), (2,)]
-Inputs strides: ['No strides', (0,), (), (8,), (8,)]
-Inputs values: [Generator(PCG64) at 0x7F8DCB881A80, array([], dtype=int64), array(11), array([0, 3, 5]), array([1, 2])]
-Outputs clients: [['output'], ['output']]
-
-HINT: Re-running with most Aesara optimizations disabled could provide a back-trace showing when this node was created. This can be done by setting the Aesara flag 'optimizer=fast_compile'. If that does not work, Aesara optimizations can be disabled with 'optimizer=None'.
-HINT: Use the Aesara flag `exception_verbosity=high` for a debug print-out and storage map footprint of this Apply node.
-#+end_example
-
-Indeed =mean= and =sigma= cannot be broadcast together:
-
-#+begin_src python
-import numpy as np
-
-mean = np.array([0, 3, 5])
-sigma = np.array([1, 2])
-try:
-    np.broadcast(mean, sigma)  # error
-except ValueError as err:
-    print(err)
-#+end_src
-
-#+RESULTS:
-: shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
-
-=np.broadcast(mean, sigma)= gives us the batch shape:
-
-#+begin_src python
-import numpy as np
-
-mean = np.array([0, 3, 5])
-sigma = np.array([1, 2, 7])
-print(np.broadcast(mean, sigma).shape)
-#+end_src
-
-#+RESULTS:
-: (3,)
-
-Indeed:
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-srng = at.random.RandomStream(0)
-
-mean = np.array([0, 3, 5])
-sigma = np.array([1, 2, 3])
-rv = srng.normal(mean, sigma)
-
-sample = rv.eval()
-print(f"sample values: {sample}")
-print(f"batch shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample values: [1.44369095 1.20810805 7.20786701]
-: batch shape: (3,)
-
-#+begin_quote
-The functions that draw samples from $E$ could be implemented as generalized universal functions using the operator =Blockwise=.
-
-#+end_quote
 
 
 ** Vectorizing + Batching
