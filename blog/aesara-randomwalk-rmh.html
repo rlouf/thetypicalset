@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 08:41 -->
+<!-- 2022-12-01 Thu 08:57 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Walk Rosenbluth-Metropolis-Hastings in Aesara</title>
@@ -54,9 +54,9 @@ Right before I started working on <a href="file:///home/runner/projects/thetypic
 The full code was added to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/rlouf/blog-benchmark-rwmetropolis/blob/master/aesara_sampler.py">repository</a>. For this example we use the <i>C backend</i>, though Aesara also offers a Numba and a JAX backend.
 </p>
 
-<div id="outline-container-org6d8b04e" class="outline-2">
-<h2 id="org6d8b04e">Mixture model</h2>
-<div class="outline-text-2" id="text-org6d8b04e">
+<div id="outline-container-orgc640404" class="outline-2">
+<h2 id="orgc640404">Mixture model</h2>
+<div class="outline-text-2" id="text-orgc640404">
 <p>
 <a href="jax-parallel-mcmc.html">In the original blog post</a> I set to sample from a mixture distribution with 4 components. I had to write the corresponding log-probability density function by hand, i.e. without using a PPL. Implementing a mixture model in <code>Aesara</code> is straightforward. No need for a <code>Mixture</code> distribution (like in e.g. PyMC), you just write it like it is:
 </p>
@@ -105,7 +105,7 @@ If you are not familiar with Theano/Aesara, the <code>aesara.function</code> may
 </pre>
 </div>
 
-<pre class="example" id="org43dd0da">
+<pre class="example" id="org356ed0c">
 Subtensor{int64} [id A]
  |normal_rv{0, (0, 0), floatX, False}.1 [id B] 'N'
  | |RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FBAB334F680&gt;) [id C]
@@ -167,9 +167,9 @@ Here we do not really care about the values that <code>I_rv</code> takes, so we 
 </div>
 </div>
 
-<div id="outline-container-orgfad4974" class="outline-2">
-<h2 id="orgfad4974">Implement the algorithm</h2>
-<div class="outline-text-2" id="text-orgfad4974">
+<div id="outline-container-org75f0d14" class="outline-2">
+<h2 id="org75f0d14">Implement the algorithm</h2>
+<div class="outline-text-2" id="text-org75f0d14">
 <p>
 The random walk Rosenbluth-Metropolis-Hasting algorithm is also straightforward to implement:
 </p>
@@ -215,15 +215,15 @@ Syntactically, <code>aesara.tensor</code> looks like a drop-in replacement to <c
 </div>
 </div>
 
-<div id="outline-container-org17c6f43" class="outline-2">
-<h2 id="org17c6f43">So, does it work?</h2>
-<div class="outline-text-2" id="text-org17c6f43">
+<div id="outline-container-org9793885" class="outline-2">
+<h2 id="org9793885">So, does it work?</h2>
+<div class="outline-text-2" id="text-org9793885">
 <p>
 Let us sample 1000 chains concurrently for an increasing number of samples and compare the running time to NumPy's and JAX's:
 </p>
 
 
-<div id="orgb7b99e0" class="figure">
+<div id="orge377b1f" class="figure">
 <p><img src="img/rmh-aesara-comparison.png" alt="rmh-aesara-comparison.png" width="100%" />
 </p>
 </div>
@@ -234,9 +234,9 @@ For small number of samples, Aesara (C backend) and JAX spend most of their time
 </div>
 </div>
 
-<div id="outline-container-org52bf381" class="outline-2">
-<h2 id="org52bf381">Perspectives</h2>
-<div class="outline-text-2" id="text-org52bf381">
+<div id="outline-container-org146b4f4" class="outline-2">
+<h2 id="org146b4f4">Perspectives</h2>
+<div class="outline-text-2" id="text-org146b4f4">
 <p>
 Aesara is still young and holds many promises for the future, <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/issues">come help us</a>! Here is what you can expect to change with this example in the near future:
 </p>
