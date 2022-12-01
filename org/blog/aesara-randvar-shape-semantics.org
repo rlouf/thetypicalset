@@ -2,15 +2,39 @@
 #+date: <2022-08-17 Wed>
 #+PROPERTY: header-args :results output :eval never-export :exports both
 
-The shape of random tensors in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] is partitioned in semantically different pieces:
-- The *support shape* is the shape of one draw from the base distribution;
-- The *batch shape* is the number of independent draws we want from the distribution;
-- The *batch shape* can be infered using broadcasting rules for the distribution parameters, and broadcasting shapes with the =size= keyword argument;
-- The shape of samples is given by =sample_shape = batch_shape + support_shape=
+**DRAFT**
+
+We can relate the =RandomVariable= objects in Aesara to their mathematical counterpart by tying the set of possible RNG states to the sample space $\Omega$. If the random variable $X$ takes its values in the measurable space $E$, then $X$ can be understod as a function $X: \Omega \to E$. It is important to undestand that the =RandomVariable= operator does not represent random variables, but /creates/ random variables (the apply nodes that take random draws). We represent $E$ by its elements; although the returned arrays are symbolic representations of elements of $E$, they do not represent the values themselves, which are obtained by compiling an running the function. We represent $X$ by its output (we conveniently forget about $\omega$)
+
+The operators return *realizations* of the random variables.
+
+#+begin_src python
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+x_rv = srng.normal(0, 1)
+
+# srng.normal(0, 1) : \Omega \to E
+# x \in E
+# Other consideration are relevant for AePPL, here we just need to know they're elements of $E$.
+
+#+end_src
+
+The shape of random tensors in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] is partitioned in semantically different pieces, that refer to the shape of $E$, i.e. the shape of draws we get:
+- The *support shape* corresponds to the shape of one element in $E$, the support of the distribution;
+- The *batch shape* is the number $N$ of independent random variables $X_i: \Omega \to E$ where $i \in \left\{ 1 \dots N\right\}$; These can be identically or differently distributed.
+- =RandomVariable= creates /differently distributed/ random variables by passing different values of parameters to the operators. Broadcasting rules apply, and the *batch shape* (i.e. number of differently distributed random variables) is inferred from these broadcasting rules.
+- =RandomVariable= creates /identically distributed/ random variables via the =size= keyword argument. There is a level of indirection here; the shape specified by =size= must broadcast with the shape of the broadcasted arguments. So if the latter is =(a, b)=, to define =c= identically distributed RVs one must set =size= to =(c, a, b)=.
+- The shape of the array of random variables is given by =sample_shape = batch_shape + support_shape=
+
+  #+begin_quote
+What's confusing about all this is that we are passing a single RNG state to the distribution even when we are looking a realization of several different random variables. Underlying implementation must use different rng states, though, and we should probably talk about this.
+  #+end_quote
+
 
 * Support shape
 
-The first distinction we must make is based on the /support/ of the distributions. Simply put, the support of a distribution is the domain over which the probability density (mass) function of the distribution is defined.
+The first distinction we must make is based on the /support/ $E$ of the distributions. Simply put, the support of a distribution is the domain over which the density of the probability measure is defined, i.e.
 
 The length of the /support shape/ is the equal to the dimensionality of the distribution's support.
 - 0 for distributions defined in 1 dimension (normal distribution, etc.)
@@ -21,7 +45,7 @@ The length of the /support shape/ is the equal to the dimensionality of the dist
 
 ** Distributions over scalar values
 
-The support of the normal distribution, for instance, is the real line: every sample drawn from that distribution will be a real number. The support of the bernoulli distribution, on the other hand, is the set of integers $\left\{0, 1\right\}. These distributions are /scalar distributions/, in the sense that their support has 0 dimension (in /array/ terms). Their support shape is /always/ =(,)=.
+The support of the normal distribution, for instance, is $\mathbb{R}$: every sample drawn from that distribution is an element of $\mathbb{R}$. The support of the bernoulli distribution, on the other hand, is the set of integers $\left\{0, 1\right\}$. These distributions are /scalar distributions/, in the sense that their support has 0 dimension (in /array/ terms). Their support shape is /always/ =(,)=.
 
 #+begin_src python
 import aesara.tensor as at
@@ -40,7 +64,7 @@ print(f"support shape: {sample.shape}")
 
 ** Distributions over vectors
 
-Other distributions are defined on more complex spaces. The multivariate normal distribution, for instance, is 1-dimentsional and can be defined for an arbitrary number of components $k$. In this case the support shape is of length 1 and equal to =(k,)=.
+Other distributions are defined on more complex spaces. The multivariate normal distribution is defined on $\mathbb{R}^k$, so a sample from this distribution will be a vector of length $k$. In this case the support shape is thus equal to =(k,)=.
 
 #+begin_src python
 import aesara.tensor as at
@@ -48,9 +72,9 @@ import numpy as np
 
 srng = at.random.RandomStream(0)
 
-d = 4
-mu = np.random.rand(d)
-sigma = np.eye(d)
+k = 4
+mu = np.random.rand(k)
+sigma = np.eye(k)
 rv = srng.multivariate_normal(mu, sigma)
 sample = rv.eval()
 
@@ -59,7 +83,7 @@ print(f"support shape: {sample.shape}")
 #+end_src
 
 #+RESULTS:
-: sample value: [ 1.98832878 -0.61854378  1.36816224  0.02745684]
+: sample value: [ 2.39376392 -0.59212003  1.48160085  0.18195058]
 : support shape: (4,)
 
 We can define a multivariate normal distribution with one component, and for consistency its support shape is equal to =(1,)=.
@@ -87,7 +111,7 @@ Example of distributions with 1-dimensional support: =multivariate_normal=, =cat
 
 ** Distributions over matrices, etc.
 
-Finally, distributions can be defined on a space with an arbitrary number of dimensions. The [[https://en.wikipedia.org/wiki/Wishart_distribution][Wishart distribution]] for instance is 2-dimensional: a sample from this distribution is a matrix.
+Finally, distributions can be defined on a space with an arbitrary number of dimensions, for instance over $\mathbb{R}^{n \times m}$. The [[https://en.wikipedia.org/wiki/Wishart_distribution][Wishart distribution]] for instance is 2-dimensional: a sample from this distribution is a matrix.
 
 
 * Batch shape
@@ -109,13 +133,13 @@ print(f"sample shape: {sample.shape}")
 : sample value: 1.4436909546981256
 : sample shape: ()
 
-The =batch shape= encompasses one reality: the number of independent, identically distributed samples we want to draw from the probability distribution. There are two ways to arrive at the same batch shape:
+The =batch shape= encompasses one reality: the number of independent random variables we want to define using a probability distribution. There are two ways to arrive at the same batch shape:
 - Setting the shape explicitly;
 - Broadcasting of parameter arrays.
 
 ** Batching
 
-If we want to take $3$ independent and indentically distributed samples from this distribution we can use the =size= keyword argument:
+If we want to take independent and indentically distributed samples from a distribution we can use the =size= keyword argument. Here we are requesting $3$ independent and identically distributed random variables:
 
 #+begin_src python
 import aesara.tensor as at
@@ -132,7 +156,7 @@ print(f"sample shape: {sample.shape}")
 : sample value: [ 1.44369095 -0.89594598  0.73595567]
 : sample shape: (3,)
 
-We can request /tensors/ with independent and identically distributed samples of arbitrary shape:
+We can obviously require that these independent and identically distributed samples be returned in a tensor of any shape:
 
 #+begin_src python
 import aesara.tensor as at
@@ -154,14 +178,13 @@ print(f"sample shape: {sample.shape}")
 :   [ 0.81931469  0.80565568]]]
 : sample shape: (2, 2, 2)
 
-We will say that =size= explicits the /batch shape/, which is the shape of the tensor of idependent random variables produced by the op. In this example the random variables are identically distributed, but this need not be the case.
+=Size= explicits the /batch shape/, which is the shape of the tensor of idependent random variables produced by the op. In this example the random variables are identically distributed, but this need not be the case.
 
 ** Vectorizing
 
 #+begin_quote
 *tldr;* Random Variables are `Blockwise` operators
 #+end_quote
-
 
 Say we want a sample from three normal distributions with a $0$, $3$ and $5$ mean value respectively. One (cumbersome) way to achieve this is:
 
@@ -183,7 +206,7 @@ print(f"sample shape: {sample.shape}")
 : sample value: [-0.41520246  1.92093324  6.74827434]
 : sample shape: (3,)
 
-To simplify this common operation we can use pass arrays as parameters, and the random variable uses common NumPy broadcasting rules.
+To simplify this common operation we can pass arrays as parameters to the =RandomVariable=, and the =Op= will use NumPy broadcasting rules to return an array of independent random variables:
 
 #+begin_src python
 import aesara.tensor as at
@@ -289,9 +312,8 @@ print(f"batch shape: {sample.shape}")
 : batch shape: (3,)
 
 #+begin_quote
-Broadcasting rules can be a bit obscure for distributions, since the operations they are performing to draw samples or compute the value of the log-probability density (mass) function are unknown.
+The functions that draw samples from $E$ could be implemented as generalized universal functions using the operator =Blockwise=.
 
-We should specify these broadcasting rules as `gufunc` signatures in the docstrings.
 #+end_quote
 
 
