@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 10:36 -->
+<!-- 2022-12-01 Thu 14:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
@@ -47,30 +47,437 @@
 <div id="content" class="content">
 <h1 class="title">Shape semantics for random variables in Aesara</h1>
 <p>
-<b><b>DRAFT</b></b>
+<b><b>Although this contains useful information, this post is a draft and will probably be integrated to Aesara's documentation</b></b>
+</p>
+
+<div id="outline-container-org30b4b1a" class="outline-2">
+<h2 id="org30b4b1a">A primer on random variables in Aesara</h2>
+<div class="outline-text-2" id="text-org30b4b1a">
+<p>
+The <code>RandomVariable</code> operator in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> corresponds to the following mathematical function:
 </p>
 
 <p>
-We can relate the <code>RandomVariable</code> objects in Aesara to their mathematical counterpart by tying the set of possible RNG states to the sample space \(\Omega\). If the random variable \(X\) takes its values in the measurable space \(E\), then \(X\) can be understod as a function \(X: \Omega \to E\). It is important to undestand that the <code>RandomVariable</code> operator does not represent random variables, but <i>creates</i> random variables (the apply nodes that take random draws). We represent \(E\) by its elements; although the returned arrays are symbolic representations of elements of \(E\), they do not represent the values themselves, which are obtained by compiling an running the function. We represent \(X\) by its output (we conveniently forget about \(\omega\))
+\[
+\operatorname{RandomVariable}: \Omega \times \boldsymbol{\Theta} \to E
+\]
 </p>
 
 <p>
-The operators return <b>realizations</b> of the random variables.
+Were \(\Omega\) is the set of available RNG seeds, \(\Theta\) the (potentially multi-dimensional) space in which the parameters of the distribution take their values. \(E\) is the state space, also called the support of the corresponding distribution. Given a random seed and parameter values, the operator returns a <b>realization</b> of the random variable it represents, and element of \(E\).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0b29ed6" class="outline-2">
+<h2 id="org0b29ed6">The support shape</h2>
+<div class="outline-text-2" id="text-org0b29ed6">
+<p>
+The dimensionality of the parameter space and the sample space differs depending on the distribution. For instance, the normal distribution takes scalar values for \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\) and returns a scalar \(\in \mathbb{R}\):
 </p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
 
 <span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
-<span style="color: #24292e;">x_rv</span> = srng.normal(0, 1)
 
-<span style="color: #6a737d;"># </span><span style="color: #6a737d;">srng.normal(0, 1) : \Omega \to E</span>
-<span style="color: #6a737d;"># </span><span style="color: #6a737d;">x \in E</span>
-<span style="color: #6a737d;"># </span><span style="color: #6a737d;">Other consideration are relevant for AePPL, here we just need to know they're elements of $E$.</span>
+<span style="color: #24292e;">mu</span> = 0
+<span style="color: #24292e;">sigma</span> = 1
+<span style="color: #24292e;">x_rv</span> = srng.normal(mu, sigma)
+<span style="color: #24292e;">sample</span> = x_rv.<span style="color: #d73a49;">eval</span>()
 
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
 </pre>
 </div>
 
+<pre class="example">
+sample value: 1.4436909546981256
+support shape: ()
+</pre>
+
+
+<p>
+The Dirichlet distribution is parametrized by a vector \(\boldsymbol{\alpha} \in \mathbb{R}^k\) and returns a vector in the k-unit simplex \(\operatorname{\Delta}^k\):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">alpha</span> = [1., 3., 4.]
+<span style="color: #24292e;">x_rv</span> = srng.dirichlet(alpha)
+<span style="color: #24292e;">sample</span> = x_rv.<span style="color: #d73a49;">eval</span>()
+
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample value: [0.39086221 0.17265609 0.43648169]
+support shape: (3,)
+</pre>
+
+
+<p>
+The multinomial is another interesting example; it is parametrized by a probability vector \(\boldsymbol{p} \in \Delta^k\), a number of trials \(n \in \mathbb{N}\) and returns a vector in \(\mathbb{N}^k\):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">n</span> = 10
+<span style="color: #24292e;">p</span> = [.1, .3, .6]
+<span style="color: #24292e;">x_rv</span> = srng.multinomial(n, p)
+<span style="color: #24292e;">sample</span> = x_rv.<span style="color: #d73a49;">eval</span>()
+
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample value: [3 2 5]
+support shape: (3,)
+</pre>
+
+
+<p>
+We call the shape of the realizations of the random variables the <b>support shape</b>; for the normal distribution it is equal to <code>()</code>, the Dirichlet and multinomial distribution it is equal to <code>(k,)</code> where <code>k</code> is the size of the parameter \(\alpha\) and \(p\) respectively. Distributions can have arbitrarily complex support shapes: the random variable with a <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart density</a> is a function in \(\mathbb{R}^{n \times m}\), and the support shape is <code>(n,m)</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbfa3b48" class="outline-2">
+<h2 id="orgbfa3b48">Independent random variables: vectorizing</h2>
+<div class="outline-text-2" id="text-orgbfa3b48">
+<p>
+Say we want a sample from three independent random variables that are normally distributed with a mean of \(0\), \(3\) and \(5\) respectively. One (cumbersome) way to achieve this is:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream()
+<span style="color: #24292e;">rv_0</span> = srng.normal(0, 1)
+<span style="color: #24292e;">rv_3</span> = srng.normal(3, 1)
+<span style="color: #24292e;">rv_5</span> = srng.normal(5, 1)
+<span style="color: #24292e;">rv</span> = at.stack([rv_0, rv_3, rv_5])
+
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample value: [1.65040785 1.76749492 5.86773357]
+sample shape: (3,)
+</pre>
+
+
+<p>
+To simplify this common operation, we can pass arrays as parameters to Aesara's <code>RandomVariable</code>, and the <code>Op</code> will use NumPy broadcasting rules to return an array of independent random variables:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">rv</span> = srng.normal(mean, 1)
+
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample values: [1.44369095 2.10405402 5.73595567]
+sample shape: (3,)
+</pre>
+
+
+<p>
+In this case the <i>batch shape</i> is also  <code>(3,)</code>; it is the shape of the tensor that contains random variables that are independently distributed and whose distribution belong to the same family.
+</p>
+
+<p>
+In this case, <code>srng.normal(mean, 1)</code> implicitly represents 3 independent random variables; if it helps one can imagine it is a shortcut for the first code block of this section.
+</p>
+
+<p>
+We can also use arrays for the standard deviation in this case. Standard broadcasting rules apply to determine the batch shape. For instance, the following fails with a shape mismatch error:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2])
+<span style="color: #24292e;">rv</span> = srng.normal(mean, sigma)
+
+<span style="color: #d73a49;">try</span>:
+    rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">ValueError</span> <span style="color: #d73a49;">as</span> err:
+    <span style="color: #d73a49;">print</span>(err)
+</pre>
+</div>
+
+<pre class="example" id="org00c6877">
+shape mismatch: objects cannot be broadcast to a single shape
+Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FDB97DFD200&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
+Toposort index: 0
+Inputs types: [RandomGeneratorType, TensorType(int64, (0,)), TensorType(int64, ()), TensorType(int64, (3,)), TensorType(int64, (2,))]
+Inputs shapes: ['No shapes', (0,), (), (3,), (2,)]
+Inputs strides: ['No strides', (8,), (), (8,), (8,)]
+Inputs values: [Generator(PCG64) at 0x7FDB97DFD200, array([], dtype=int64), array(11), array([0, 3, 5]), array([1, 2])]
+Outputs clients: [['output'], ['output']]
+
+HINT: Re-running with most Aesara optimizations disabled could provide a back-trace showing when this node was created. This can be done by setting the Aesara flag 'optimizer=fast_compile'. If that does not work, Aesara optimizations can be disabled with 'optimizer=None'.
+HINT: Use the Aesara flag `exception_verbosity=high` for a debug print-out and storage map footprint of this Apply node.
+</pre>
+
+<p>
+Indeed <code>mean</code> and <code>sigma</code> cannot be broadcast together:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2])
+<span style="color: #d73a49;">try</span>:
+    np.broadcast(mean, sigma)  <span style="color: #6a737d;"># </span><span style="color: #6a737d;">error</span>
+<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">ValueError</span> <span style="color: #d73a49;">as</span> err:
+    <span style="color: #d73a49;">print</span>(err)
+</pre>
+</div>
+
+<pre class="example">
+shape mismatch: objects cannot be broadcast to a single shape
+</pre>
+
+
+<p>
+<code>np.broadcast(mean, sigma)</code> gives us the batch shape:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2, 7])
+<span style="color: #d73a49;">print</span>(np.broadcast(mean, sigma).shape)
+</pre>
+</div>
+
+<pre class="example">
+(3,)
+</pre>
+
+
+<p>
+Indeed:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
+<span style="color: #24292e;">sigma</span> = np.array([1, 2, 3])
+<span style="color: #24292e;">rv</span> = srng.normal(mean, sigma)
+
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"batch shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample values: [1.44369095 1.20810805 7.20786701]
+batch shape: (3,)
+</pre>
+
+
+<p>
+Since the <code>RandomVariable</code> represents a batch of random variables, we will call the resulting shape the <b>batch shape</b>.
+</p>
+
+<p>
+The normal distribution is fairly simple since its parameters and realization are 1-dimensional. Let take our dirichlet example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">alpha</span> = np.array([[1., 2., 4.], [3., 5., 7.]])
+<span style="color: #24292e;">rv</span> = srng.dirichlet(alpha)
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample values: [[0.42615878 0.09794332 0.4758979 ]
+ [0.15408529 0.34781447 0.49810024]]
+sample shape: (2, 3)
+</pre>
+
+
+<p>
+Which is equivalent to:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">rv1</span> = srng.dirichlet([1., 2., 4.])
+<span style="color: #24292e;">rv2</span> = srng.dirichlet([3., 5., 7.])
+<span style="color: #24292e;">rv</span> = at.stack([rv1, rv2])
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample values: [[0.42615878 0.09794332 0.4758979 ]
+ [0.27582652 0.02985376 0.69431972]]
+sample shape: (2, 3)
+</pre>
+
+
+<p>
+So we have the simple formula; if <code>support_shape</code> and <code>batch_shape</code> are tuples, then:
+</p>
+
+<blockquote>
+<p>
+sample<sub>shape</sub> = batch<sub>shape</sub> + support<sub>shape</sub>
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-org61b9217" class="outline-2">
+<h2 id="org61b9217">Identically independently distributed random variable</h2>
+<div class="outline-text-2" id="text-org61b9217">
+<p>
+We also frequently need to define iiid random variables. We can define 3 normally-distributed random variables with mean 0 and variance 1 with:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">mean</span> = np.zeros(3)
+<span style="color: #24292e;">rv</span> = srng.normal(mean, 1)
+
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample values: [ 1.44369095 -0.89594598  0.73595567]
+sample shape: (3,)
+</pre>
+
+
+<p>
+But there is a shortcut: the <code>size</code> parameter of the distribution. In the following code, <code>size</code> allows us to define the same 3 random variables as above in a more concise way:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">rv</span> = srng.normal(0, 1, size=3)
+
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample values: [ 1.44369095 -0.89594598  0.73595567]
+sample shape: (3,)
+</pre>
+
+
+<p>
+We can of course do the same thing with the dirichlet distribution:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+
+<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #24292e;">rv</span> = srng.dirichlet([1, 3, 5], size=3)
+
+<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
+<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example">
+sample values: [[0.34934376 0.15431609 0.49634016]
+ [0.16080299 0.37886972 0.4603273 ]
+ [0.21030357 0.42525361 0.36444282]]
+sample shape: (3, 3)
+</pre>
+
+
+<p>
+Since we are still talking about independent random variables, <code>batch</code> refers indistinctly to identifically distributed or differently distributed random variables.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6182af2" class="outline-2">
+<h2 id="org6182af2">Matching</h2>
+<div class="outline-text-2" id="text-org6182af2">
+<p>
+It gets complicated when broadcasting rules apply <i>and</i> we set the <code>size</code> parameter.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf2c5f9f" class="outline-2">
+<h2 id="orgf2c5f9f">Rest</h2>
+<div class="outline-text-2" id="text-orgf2c5f9f">
 <p>
 The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> is partitioned in semantically different pieces, that refer to the shape of \(E\), i.e. the shape of draws we get:
 </p>
@@ -89,131 +496,13 @@ What's confusing about all this is that we are passing a single RNG state to the
 </p>
 </blockquote></li>
 </ul>
-
-
-<div id="outline-container-orgca69632" class="outline-2">
-<h2 id="orgca69632">Support shape</h2>
-<div class="outline-text-2" id="text-orgca69632">
-<p>
-The first distinction we must make is based on the <i>support</i> \(E\) of the distributions. Simply put, the support of a distribution is the domain over which the density of the probability measure is defined, i.e.
-</p>
-
-<p>
-The length of the <i>support shape</i> is the equal to the dimensionality of the distribution's support.
-</p>
-<ul class="org-ul">
-<li>0 for distributions defined in 1 dimension (normal distribution, etc.)</li>
-<li>Vectors (1 dimension)</li>
-<li>Matrices (2 dimensions)</li>
-</ul>
-
-<p>
-<b>The support shape is the shape of one draw.</b>
-</p>
-</div>
-
-<div id="outline-container-orgaa8c038" class="outline-3">
-<h3 id="orgaa8c038">Distributions over scalar values</h3>
-<div class="outline-text-3" id="text-orgaa8c038">
-<p>
-The support of the normal distribution, for instance, is \(\mathbb{R}\): every sample drawn from that distribution is an element of \(\mathbb{R}\). The support of the bernoulli distribution, on the other hand, is the set of integers \(\left\{0, 1\right\}\). These distributions are <i>scalar distributions</i>, in the sense that their support has 0 dimension (in <i>array</i> terms). Their support shape is <i>always</i> <code>(,)</code>.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
-
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
-<span style="color: #24292e;">rv</span> = srng.normal(0, 1)
-<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
-
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
-</pre>
-</div>
-
-<pre class="example">
-sample value: 1.4436909546981256
-support shape: ()
-</pre>
-</div>
-</div>
-
-<div id="outline-container-orge4817a6" class="outline-3">
-<h3 id="orge4817a6">Distributions over vectors</h3>
-<div class="outline-text-3" id="text-orge4817a6">
-<p>
-Other distributions are defined on more complex spaces. The multivariate normal distribution is defined on \(\mathbb{R}^k\), so a sample from this distribution will be a vector of length \(k\). In this case the support shape is thus equal to <code>(k,)</code>.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
-<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
-
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
-
-<span style="color: #24292e;">k</span> = 4
-<span style="color: #24292e;">mu</span> = np.random.rand(k)
-<span style="color: #24292e;">sigma</span> = np.eye(k)
-<span style="color: #24292e;">rv</span> = srng.multivariate_normal(mu, sigma)
-<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
-
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
-</pre>
-</div>
-
-<pre class="example">
-sample value: [ 2.39376392 -0.59212003  1.48160085  0.18195058]
-support shape: (4,)
-</pre>
-
-
-<p>
-We can define a multivariate normal distribution with one component, and for consistency its support shape is equal to <code>(1,)</code>.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
-<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
-
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
-
-<span style="color: #24292e;">mu</span> = np.array([1])
-<span style="color: #24292e;">sigma</span> = np.eye(1)
-<span style="color: #24292e;">rv</span> = srng.multivariate_normal(mu, sigma)
-<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
-
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"support shape: {sample.shape}"</span>)
-</pre>
-</div>
-
-<pre class="example">
-sample value: [2.44369095]
-support shape: (1,)
-</pre>
-
-
-<p>
-Example of distributions with 1-dimensional support: <code>multivariate_normal</code>, <code>categorical</code>, <code>multinomial</code>, <code>dirichlet</code>.
-</p>
-</div>
-</div>
-
-<div id="outline-container-org3602d61" class="outline-3">
-<h3 id="org3602d61">Distributions over matrices, etc.</h3>
-<div class="outline-text-3" id="text-org3602d61">
-<p>
-Finally, distributions can be defined on a space with an arbitrary number of dimensions, for instance over \(\mathbb{R}^{n \times m}\). The <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart distribution</a> for instance is 2-dimensional: a sample from this distribution is a matrix.
-</p>
-</div>
 </div>
 </div>
 
 
-<div id="outline-container-org4d627e6" class="outline-2">
-<h2 id="org4d627e6">Batch shape</h2>
-<div class="outline-text-2" id="text-org4d627e6">
+<div id="outline-container-org87360ab" class="outline-2">
+<h2 id="org87360ab">Batch shape</h2>
+<div class="outline-text-2" id="text-org87360ab">
 <p>
 Let us only consider distributions over scalar values for now.
 </p>
@@ -245,9 +534,9 @@ The <code>batch shape</code> encompasses one reality: the number of independent 
 </ul>
 </div>
 
-<div id="outline-container-orgfe10c8a" class="outline-3">
-<h3 id="orgfe10c8a">Batching</h3>
-<div class="outline-text-3" id="text-orgfe10c8a">
+<div id="outline-container-org8987a10" class="outline-3">
+<h3 id="org8987a10">Batching</h3>
+<div class="outline-text-3" id="text-org8987a10">
 <p>
 If we want to take independent and indentically distributed samples from a distribution we can use the <code>size</code> keyword argument. Here we are requesting \(3\) independent and identically distributed random variables:
 </p>
@@ -303,181 +592,22 @@ sample shape: (2, 2, 2)
 </div>
 </div>
 
-<div id="outline-container-orgda79edb" class="outline-3">
-<h3 id="orgda79edb">Vectorizing</h3>
-<div class="outline-text-3" id="text-orgda79edb">
+<div id="outline-container-orgadb46a7" class="outline-3">
+<h3 id="orgadb46a7">Vectorizing</h3>
+<div class="outline-text-3" id="text-orgadb46a7">
 <blockquote>
 <p>
 <b>tldr;</b> Random Variables are `Blockwise` operators
 </p>
 </blockquote>
-
-<p>
-Say we want a sample from three normal distributions with a \(0\), \(3\) and \(5\) mean value respectively. One (cumbersome) way to achieve this is:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
-
-<span style="color: #24292e;">srng</span> = at.random.RandomStream()
-<span style="color: #24292e;">rv_0</span> = srng.normal(0, 1)
-<span style="color: #24292e;">rv_3</span> = srng.normal(3, 1)
-<span style="color: #24292e;">rv_5</span> = srng.normal(5, 1)
-<span style="color: #24292e;">rv</span> = at.stack([rv_0, rv_3, rv_5])
-
-<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample value: {sample}"</span>)
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample shape: {sample.shape}"</span>)
-</pre>
-</div>
-
-<pre class="example">
-sample value: [-0.41520246  1.92093324  6.74827434]
-sample shape: (3,)
-</pre>
-
-
-<p>
-To simplify this common operation we can pass arrays as parameters to the <code>RandomVariable</code>, and the <code>Op</code> will use NumPy broadcasting rules to return an array of independent random variables:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
-<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
-
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
-
-<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
-<span style="color: #24292e;">rv</span> = srng.normal(mean, 1)
-
-<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"batch shape: {sample.shape}"</span>)
-</pre>
-</div>
-
-<pre class="example">
-sample value: [1.44369095 2.10405402 5.73595567]
-sample shape: (3,)
-</pre>
-
-
-<p>
-In this case the <i>batch shape</i> is also  <code>(3,)</code>; it is the shape of the tensor that contains random variables that are independently distributed and whose distribution belong to the same family.
-</p>
-
-<p>
-We can also use arrays for the standard deviation in this case. Standard broadcasting rules apply to determine the batch shape. For instance, the following fails with a shape mismatch error:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
-<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
-
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
-
-<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
-<span style="color: #24292e;">sigma</span> = np.array([1, 2])
-<span style="color: #24292e;">rv</span> = srng.normal(mean, sigma)
-
-<span style="color: #d73a49;">try</span>:
-    rv.<span style="color: #d73a49;">eval</span>()
-<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">ValueError</span> <span style="color: #d73a49;">as</span> err:
-    <span style="color: #d73a49;">print</span>(err)
-</pre>
-</div>
-
-<pre class="example" id="org00be668">
-shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
-Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7F8DCB881A80&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
-Toposort index: 0
-Inputs types: [RandomGeneratorType, TensorType(int64, (0,)), TensorType(int64, ()), TensorType(int64, (3,)), TensorType(int64, (2,))]
-Inputs shapes: ['No shapes', (0,), (), (3,), (2,)]
-Inputs strides: ['No strides', (0,), (), (8,), (8,)]
-Inputs values: [Generator(PCG64) at 0x7F8DCB881A80, array([], dtype=int64), array(11), array([0, 3, 5]), array([1, 2])]
-Outputs clients: [['output'], ['output']]
-
-HINT: Re-running with most Aesara optimizations disabled could provide a back-trace showing when this node was created. This can be done by setting the Aesara flag 'optimizer=fast_compile'. If that does not work, Aesara optimizations can be disabled with 'optimizer=None'.
-HINT: Use the Aesara flag `exception_verbosity=high` for a debug print-out and storage map footprint of this Apply node.
-</pre>
-
-<p>
-Indeed <code>mean</code> and <code>sigma</code> cannot be broadcast together:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
-
-<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
-<span style="color: #24292e;">sigma</span> = np.array([1, 2])
-<span style="color: #d73a49;">try</span>:
-    np.broadcast(mean, sigma)  <span style="color: #6a737d;"># </span><span style="color: #6a737d;">error</span>
-<span style="color: #d73a49;">except</span> <span style="color: #005cc5;">ValueError</span> <span style="color: #d73a49;">as</span> err:
-    <span style="color: #d73a49;">print</span>(err)
-</pre>
-</div>
-
-<pre class="example">
-shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (3,) and arg 1 with shape (2,).
-</pre>
-
-
-<p>
-<code>np.broadcast(mean, sigma)</code> gives us the batch shape:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
-
-<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
-<span style="color: #24292e;">sigma</span> = np.array([1, 2, 7])
-<span style="color: #d73a49;">print</span>(np.broadcast(mean, sigma).shape)
-</pre>
-</div>
-
-<pre class="example">
-(3,)
-</pre>
-
-
-<p>
-Indeed:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
-<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
-
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
-
-<span style="color: #24292e;">mean</span> = np.array([0, 3, 5])
-<span style="color: #24292e;">sigma</span> = np.array([1, 2, 3])
-<span style="color: #24292e;">rv</span> = srng.normal(mean, sigma)
-
-<span style="color: #24292e;">sample</span> = rv.<span style="color: #d73a49;">eval</span>()
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"sample values: {sample}"</span>)
-<span style="color: #d73a49;">print</span>(f<span style="color: #032f62;">"batch shape: {sample.shape}"</span>)
-</pre>
-</div>
-
-<pre class="example">
-sample values: [1.44369095 1.20810805 7.20786701]
-batch shape: (3,)
-</pre>
-
-
-<blockquote>
-<p>
-The functions that draw samples from \(E\) could be implemented as generalized universal functions using the operator <code>Blockwise</code>.
-</p>
-</blockquote>
 </div>
 </div>
 
 
-<div id="outline-container-orgcda2204" class="outline-3">
-<h3 id="orgcda2204">Vectorizing + Batching</h3>
-<div class="outline-text-3" id="text-orgcda2204">
+
+<div id="outline-container-orgcd06329" class="outline-3">
+<h3 id="orgcd06329">Vectorizing + Batching</h3>
+<div class="outline-text-3" id="text-orgcd06329">
 <p>
 It is possible to vectorize and batch at the same time. Note that <code>size</code> and that vectorized shape must be broadcastable
 </p>
@@ -524,9 +654,9 @@ It IS really simple:
 </div>
 
 
-<div id="outline-container-org7fe9823" class="outline-2">
-<h2 id="org7fe9823">All together</h2>
-<div class="outline-text-2" id="text-org7fe9823">
+<div id="outline-container-orgdff5dd9" class="outline-2">
+<h2 id="orgdff5dd9">All together</h2>
+<div class="outline-text-2" id="text-orgdff5dd9">
 <p>
 Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> will raise an exception if this is not correctly set.
 </p>
@@ -549,7 +679,7 @@ Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> w
 </pre>
 </div>
 
-<pre class="example" id="orgea38790">
+<pre class="example" id="org4fd29dc">
 sample value: [[[6 2 2]
   [4 0 5]]
 
@@ -564,9 +694,9 @@ batch shape: (3, 2)
 </pre>
 </div>
 
-<div id="outline-container-org4a1a8ef" class="outline-3">
-<h3 id="org4a1a8ef">Broadcasting</h3>
-<div class="outline-text-3" id="text-org4a1a8ef">
+<div id="outline-container-org2591e6a" class="outline-3">
+<h3 id="org2591e6a">Broadcasting</h3>
+<div class="outline-text-3" id="text-org2591e6a">
 <p>
 When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
 </p>
