@@ -16,14 +16,14 @@
 (package-install 'org)
 (package-install 'org-roam)
 (package-install 's)
-(package-install 'github-modern-theme)
+(package-install 'nord-theme)
 
 (require 's)
 (require 'ox-publish)
 (require 'find-lisp)
 (require 'org-roam)
 
-(load-theme 'github-modern t)
+(load-theme 'nord t)
 
 (setq make-backup-files nil)
 
