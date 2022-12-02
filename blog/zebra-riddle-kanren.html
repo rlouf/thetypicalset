@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Solve the Zebra puzzle with miniKanren</title>
@@ -50,34 +50,34 @@ In the interest of clarity, it must be added that each of the five houses is pai
 </p>
 </blockquote>
 
-<div id="outline-container-orgb880dbe" class="outline-2">
-<h2 id="orgb880dbe">Implementation</h2>
-<div class="outline-text-2" id="text-orgb880dbe">
+<div id="outline-container-org951fe77" class="outline-2">
+<h2 id="org951fe77">Implementation</h2>
+<div class="outline-text-2" id="text-org951fe77">
 </div>
-<div id="outline-container-org27938c5" class="outline-3">
-<h3 id="org27938c5">Houses and what's inside them</h3>
-<div class="outline-text-3" id="text-org27938c5">
+<div id="outline-container-org1db11ee" class="outline-3">
+<h3 id="org1db11ee">Houses and what's inside them</h3>
+<div class="outline-text-3" id="text-org1db11ee">
 <p>
 The first line states that there are 5 houses. We will represent each house with a <i>logic variable</i> <code>Var</code>; the houses are stored in a tuple where the first element represents the leftmost house and the last element the rightmost house. Each house has 4 characteristics: its color, the nationality of the inhabitant, the kind of drink they're having, the kind of animal they own, and the brand of cigarettes they smoke. Given the structure of the problem, dataclasses where fields default to a new <code>Var</code> seems particularly adapted. We can use <code>unification</code>'s <code>@unifiable</code> decorator to make the dataclass "unifiable" so we can use it with <code>kanren</code>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass, field
-<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> var, <span style="font-weight: bold;">vars</span>
-<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unifiable
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> dataclasses <span style="color: #F0DFAF; font-weight: bold;">import</span> dataclass, field
+<span style="color: #F0DFAF; font-weight: bold;">from</span> kanren <span style="color: #F0DFAF; font-weight: bold;">import</span> var, <span style="color: #DCDCCC; font-weight: bold;">vars</span>
+<span style="color: #F0DFAF; font-weight: bold;">from</span> unification <span style="color: #F0DFAF; font-weight: bold;">import</span> unifiable
 
 
-<span style="font-weight: bold; text-decoration: underline;">@unifiable</span>
-<span style="font-weight: bold; text-decoration: underline;">@dataclass</span>
-<span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">House</span>():
-    nationality: <span style="font-weight: bold;">str</span> = field(default_factory=var)
-    drink: <span style="font-weight: bold;">str</span> = field(default_factory=var)
-    animal: <span style="font-weight: bold;">str</span> = field(default_factory=var)
-    cigarettes: <span style="font-weight: bold;">str</span> = field(default_factory=var)
-    color: <span style="font-weight: bold;">str</span> = field(default_factory=var)
+<span style="color: #7CB8BB;">@unifiable</span>
+<span style="color: #7CB8BB;">@dataclass</span>
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">House</span>():
+    nationality: <span style="color: #DCDCCC; font-weight: bold;">str</span> = field(default_factory=var)
+    drink: <span style="color: #DCDCCC; font-weight: bold;">str</span> = field(default_factory=var)
+    animal: <span style="color: #DCDCCC; font-weight: bold;">str</span> = field(default_factory=var)
+    cigarettes: <span style="color: #DCDCCC; font-weight: bold;">str</span> = field(default_factory=var)
+    color: <span style="color: #DCDCCC; font-weight: bold;">str</span> = field(default_factory=var)
 
 
-<span style="font-weight: bold; font-style: italic;">houses</span> = <span style="font-weight: bold;">vars</span>(5)
+<span style="color: #DFAF8F;">houses</span> = <span style="color: #DCDCCC; font-weight: bold;">vars</span>(5)
 </pre>
 </div>
 
@@ -86,9 +86,9 @@ The second statement translates to the following miniKanren goal:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> membero
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> kanren <span style="color: #F0DFAF; font-weight: bold;">import</span> membero
 
-membero(House(<span style="font-style: italic;">"Englishman"</span>, color=<span style="font-style: italic;">"red"</span>), houses)
+membero(House(<span style="color: #CC9393;">"Englishman"</span>, color=<span style="color: #CC9393;">"red"</span>), houses)
 </pre>
 </div>
 
@@ -97,25 +97,25 @@ Or, in plain english, "The house that is red and where the Englishman lives is o
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python">membero(House(drink=<span style="font-style: italic;">"water"</span>), houses)
-membero(House(animal=<span style="font-style: italic;">"zebra"</span>), houses)
+<pre class="src src-python">membero(House(drink=<span style="color: #CC9393;">"water"</span>), houses)
+membero(House(animal=<span style="color: #CC9393;">"zebra"</span>), houses)
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgc0d4d45" class="outline-3">
-<h3 id="orgc0d4d45">Houses' location</h3>
-<div class="outline-text-3" id="text-orgc0d4d45">
+<div id="outline-container-orgc426811" class="outline-3">
+<h3 id="orgc426811">Houses' location</h3>
+<div class="outline-text-3" id="text-orgc426811">
 <p>
 Some of the statements are about the houses' <i>location</i>. In particular, statement 6 is aboout a house that is located to the right of another one. We thus need to define a <i>goal</i> that expresses that a house is to the right of another:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">righto</span>(right, left, houses):
-    <span style="font-style: italic;">"""Express that `right` is on the right of `left` among all the houses."""</span>
-    <span style="font-weight: bold; font-style: italic;">neighbors</span> = <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">zip</span>(houses[:-1], houses[1:]))
-    <span style="font-weight: bold;">return</span> membero((left, right), neighbors)
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">righto</span>(right, left, houses):
+    <span style="color: #9FC59F;">"""Express that `right` is on the right of `left` among all the houses."""</span>
+    <span style="color: #DFAF8F;">neighbors</span> = <span style="color: #DCDCCC; font-weight: bold;">tuple</span>(<span style="color: #DCDCCC; font-weight: bold;">zip</span>(houses[:-1], houses[1:]))
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> membero((left, right), neighbors)
 </pre>
 </div>
 
@@ -124,11 +124,11 @@ Statements 11, 12, 15 are about houses that are located <i>next</i> to each othe
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> conde
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> kanren <span style="color: #F0DFAF; font-weight: bold;">import</span> conde
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">nexto</span>(a, b, houses):
-    <span style="font-style: italic;">"""Express that `a` and `b` are next to each other."""</span>
-    <span style="font-weight: bold;">return</span> conde([righto(a, b, houses)], [righto(b, a, houses)])
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">nexto</span>(a, b, houses):
+    <span style="color: #9FC59F;">"""Express that `a` and `b` are next to each other."""</span>
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> conde([righto(a, b, houses)], [righto(b, a, houses)])
 </pre>
 </div>
 
@@ -137,75 +137,75 @@ Statement 10 is about the <i>first</i> house, and statement 9 is about the <i>mi
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> kanren <span style="color: #F0DFAF; font-weight: bold;">import</span> eq
 
-eq(House(drink=<span style="font-style: italic;">"milk"</span>), houses[2])
-eq(House(<span style="font-style: italic;">"Norwegian"</span>), houses[0])
+eq(House(drink=<span style="color: #CC9393;">"milk"</span>), houses[2])
+eq(House(<span style="color: #CC9393;">"Norwegian"</span>), houses[0])
 </pre>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgf61aa37" class="outline-2">
-<h2 id="orgf61aa37">The solution</h2>
-<div class="outline-text-2" id="text-orgf61aa37">
+<div id="outline-container-org14d5a5c" class="outline-2">
+<h2 id="org14d5a5c">The solution</h2>
+<div class="outline-text-2" id="text-org14d5a5c">
 <p>
 Now that we have defined the concepts and objects we need, we can write the full solution:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> typing <span style="font-weight: bold;">import</span> Union
-<span style="font-weight: bold;">from</span> dataclasses <span style="font-weight: bold;">import</span> dataclass, field
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> Union
+<span style="color: #F0DFAF; font-weight: bold;">from</span> dataclasses <span style="color: #F0DFAF; font-weight: bold;">import</span> dataclass, field
 
-<span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> eq, conde, lall, membero, run
-<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unifiable, var, <span style="font-weight: bold;">vars</span>, Var
-
-
-<span style="font-weight: bold; text-decoration: underline;">@unifiable</span>
-<span style="font-weight: bold; text-decoration: underline;">@dataclass</span>
-<span style="font-weight: bold;">class</span> <span style="font-weight: bold; text-decoration: underline;">House</span>():
-    nationality: <span style="font-weight: bold; font-style: italic;">Union</span>[<span style="font-weight: bold;">str</span>, Var] = field(default_factory=var)
-    drink: <span style="font-weight: bold; font-style: italic;">Union</span>[<span style="font-weight: bold;">str</span>, Var] = field(default_factory=var)
-    animal: <span style="font-weight: bold; font-style: italic;">Union</span>[<span style="font-weight: bold;">str</span>, Var] = field(default_factory=var)
-    cigarettes: <span style="font-weight: bold; font-style: italic;">Union</span>[<span style="font-weight: bold;">str</span>, Var] = field(default_factory=var)
-    color: <span style="font-weight: bold; font-style: italic;">Union</span>[<span style="font-weight: bold;">str</span>, Var] = field(default_factory=var)
+<span style="color: #F0DFAF; font-weight: bold;">from</span> kanren <span style="color: #F0DFAF; font-weight: bold;">import</span> eq, conde, lall, membero, run
+<span style="color: #F0DFAF; font-weight: bold;">from</span> unification <span style="color: #F0DFAF; font-weight: bold;">import</span> unifiable, var, <span style="color: #DCDCCC; font-weight: bold;">vars</span>, Var
 
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">righto</span>(right, left, houses):
-    <span style="font-style: italic;">"""Express that `right` is on the right of `left` among all the houses."""</span>
-    <span style="font-weight: bold; font-style: italic;">neighbors</span> = <span style="font-weight: bold;">tuple</span>(<span style="font-weight: bold;">zip</span>(houses[:-1], houses[1:]))
-    <span style="font-weight: bold;">return</span> membero((left, right), neighbors)
+<span style="color: #7CB8BB;">@unifiable</span>
+<span style="color: #7CB8BB;">@dataclass</span>
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">House</span>():
+    nationality: <span style="color: #DFAF8F;">Union</span>[<span style="color: #DCDCCC; font-weight: bold;">str</span>, Var] = field(default_factory=var)
+    drink: <span style="color: #DFAF8F;">Union</span>[<span style="color: #DCDCCC; font-weight: bold;">str</span>, Var] = field(default_factory=var)
+    animal: <span style="color: #DFAF8F;">Union</span>[<span style="color: #DCDCCC; font-weight: bold;">str</span>, Var] = field(default_factory=var)
+    cigarettes: <span style="color: #DFAF8F;">Union</span>[<span style="color: #DCDCCC; font-weight: bold;">str</span>, Var] = field(default_factory=var)
+    color: <span style="color: #DFAF8F;">Union</span>[<span style="color: #DCDCCC; font-weight: bold;">str</span>, Var] = field(default_factory=var)
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">nexto</span>(a, b, houses):
-    <span style="font-style: italic;">"""Express that `a` and `b` are next to each other."""</span>
-    <span style="font-weight: bold;">return</span> conde([righto(a, b, houses)], [righto(b, a, houses)])
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">righto</span>(right, left, houses):
+    <span style="color: #9FC59F;">"""Express that `right` is on the right of `left` among all the houses."""</span>
+    <span style="color: #DFAF8F;">neighbors</span> = <span style="color: #DCDCCC; font-weight: bold;">tuple</span>(<span style="color: #DCDCCC; font-weight: bold;">zip</span>(houses[:-1], houses[1:]))
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> membero((left, right), neighbors)
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">nexto</span>(a, b, houses):
+    <span style="color: #9FC59F;">"""Express that `a` and `b` are next to each other."""</span>
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> conde([righto(a, b, houses)], [righto(b, a, houses)])
 
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">And now for the riddle</span>
-<span style="font-weight: bold; font-style: italic;">houses</span> = <span style="font-weight: bold;">vars</span>(5)
-<span style="font-weight: bold; font-style: italic;">goals</span> = lall(
-    membero(House(<span style="font-style: italic;">"Englishman"</span>, color=<span style="font-style: italic;">"red"</span>), houses),
-    membero(House(<span style="font-style: italic;">"Spaniard"</span>, animal=<span style="font-style: italic;">"dog"</span>), houses),
-    membero(House(drink=<span style="font-style: italic;">"coffee"</span>, color=<span style="font-style: italic;">"green"</span>), houses),
-    membero(House(<span style="font-style: italic;">"Ukrainian"</span>, drink=<span style="font-style: italic;">"tea"</span>), houses),
-    righto(House(color=<span style="font-style: italic;">"green"</span>), House(color=<span style="font-style: italic;">"ivory"</span>), houses),
-    membero(House(animal=<span style="font-style: italic;">"snails"</span>, cigarettes=<span style="font-style: italic;">"Old Gold"</span>), houses),
-    membero(House(color=<span style="font-style: italic;">"yellow"</span>, cigarettes=<span style="font-style: italic;">"Kools"</span>), houses),
-    eq(House(drink=<span style="font-style: italic;">"milk"</span>), houses[2]),
-    eq(House(<span style="font-style: italic;">"Norwegian"</span>), houses[0]),
-    nexto(House(cigarettes=<span style="font-style: italic;">"Chesterfields"</span>), House(animal=<span style="font-style: italic;">"fox"</span>), houses),
-    nexto(House(cigarettes=<span style="font-style: italic;">"Kools"</span>), House(animal=<span style="font-style: italic;">"horse"</span>), houses),
-    membero(House(drink=<span style="font-style: italic;">"orange juice"</span>, cigarettes=<span style="font-style: italic;">"Lucky Strike"</span>), houses),
-    membero(House(<span style="font-style: italic;">"Japanese"</span>, cigarettes=<span style="font-style: italic;">"Parliaments"</span>), houses),
-    nexto(House(<span style="font-style: italic;">"Norwegian"</span>), House(color=<span style="font-style: italic;">"blue"</span>), houses),
-    membero(House(drink=<span style="font-style: italic;">"water"</span>), houses),
-    membero(House(animal=<span style="font-style: italic;">"zebra"</span>), houses),
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">And now for the riddle</span>
+<span style="color: #DFAF8F;">houses</span> = <span style="color: #DCDCCC; font-weight: bold;">vars</span>(5)
+<span style="color: #DFAF8F;">goals</span> = lall(
+    membero(House(<span style="color: #CC9393;">"Englishman"</span>, color=<span style="color: #CC9393;">"red"</span>), houses),
+    membero(House(<span style="color: #CC9393;">"Spaniard"</span>, animal=<span style="color: #CC9393;">"dog"</span>), houses),
+    membero(House(drink=<span style="color: #CC9393;">"coffee"</span>, color=<span style="color: #CC9393;">"green"</span>), houses),
+    membero(House(<span style="color: #CC9393;">"Ukrainian"</span>, drink=<span style="color: #CC9393;">"tea"</span>), houses),
+    righto(House(color=<span style="color: #CC9393;">"green"</span>), House(color=<span style="color: #CC9393;">"ivory"</span>), houses),
+    membero(House(animal=<span style="color: #CC9393;">"snails"</span>, cigarettes=<span style="color: #CC9393;">"Old Gold"</span>), houses),
+    membero(House(color=<span style="color: #CC9393;">"yellow"</span>, cigarettes=<span style="color: #CC9393;">"Kools"</span>), houses),
+    eq(House(drink=<span style="color: #CC9393;">"milk"</span>), houses[2]),
+    eq(House(<span style="color: #CC9393;">"Norwegian"</span>), houses[0]),
+    nexto(House(cigarettes=<span style="color: #CC9393;">"Chesterfields"</span>), House(animal=<span style="color: #CC9393;">"fox"</span>), houses),
+    nexto(House(cigarettes=<span style="color: #CC9393;">"Kools"</span>), House(animal=<span style="color: #CC9393;">"horse"</span>), houses),
+    membero(House(drink=<span style="color: #CC9393;">"orange juice"</span>, cigarettes=<span style="color: #CC9393;">"Lucky Strike"</span>), houses),
+    membero(House(<span style="color: #CC9393;">"Japanese"</span>, cigarettes=<span style="color: #CC9393;">"Parliaments"</span>), houses),
+    nexto(House(<span style="color: #CC9393;">"Norwegian"</span>), House(color=<span style="color: #CC9393;">"blue"</span>), houses),
+    membero(House(drink=<span style="color: #CC9393;">"water"</span>), houses),
+    membero(House(animal=<span style="color: #CC9393;">"zebra"</span>), houses),
 )
 
 
-<span style="font-weight: bold; font-style: italic;">results</span> = run(0, houses, goals)
-<span style="font-weight: bold;">print</span>(results)
+<span style="color: #DFAF8F;">results</span> = run(0, houses, goals)
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(results)
 </pre>
 </div>
 
@@ -220,9 +220,9 @@ The Norwegian drinks water and the Japanese owns the zebra!
 </div>
 </div>
 
-<div id="outline-container-orgc48e835" class="outline-2">
-<h2 id="orgc48e835">Conclusion</h2>
-<div class="outline-text-2" id="text-orgc48e835">
+<div id="outline-container-org0b840ba" class="outline-2">
+<h2 id="org0b840ba">Conclusion</h2>
+<div class="outline-text-2" id="text-org0b840ba">
 <p>
 miniKanren's python implementation, <code>kanren</code>, allowed us to provide a very intuitive an easy-to-read solution to the Zebra puzzle. Being able to use python's data structures for relational programming goes a long way making miniKanren user friendly, and I hope this convinced you like it did convince me!
 </p>

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Prior choice</title>
@@ -48,9 +48,9 @@
 <h1 class="title">Prior choice</h1>
 
 
-<div id="outline-container-org4fdfd3f" class="outline-2">
-<h2 id="org4fdfd3f">Negative Binomial</h2>
-<div class="outline-text-2" id="text-org4fdfd3f">
+<div id="outline-container-org52af20f" class="outline-2">
+<h2 id="org52af20f">Negative Binomial</h2>
+<div class="outline-text-2" id="text-org52af20f">
 <p>
 Generic priors often fail dramatically when used for the dispersion parameter of the <a href="20210420200526-negative_binomial_distribution.html#ID-273bfd3a-7e6e-4971-b422-048f930ae5b0">Negative Binomial Distribution</a>.
 </p>
@@ -60,9 +60,9 @@ In PyMC3 the Negative binomial distribution can be parametrized in terms of the 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  <span style="font-weight: bold;">\sigma</span>^{2} = <span style="font-weight: bold;">\mu</span> + <span style="font-weight: bold;">\alpha</span> <span style="font-weight: bold;">\mu</span>^{2}
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-latex"><span style="color: #F0DFAF; font-weight: bold;">\begin</span>{<span style="color: #93E0E3;">equation</span>}
+  <span style="color: #F0DFAF; font-weight: bold;">\sigma</span>^{2} = <span style="color: #F0DFAF; font-weight: bold;">\mu</span> + <span style="color: #F0DFAF; font-weight: bold;">\alpha</span> <span style="color: #F0DFAF; font-weight: bold;">\mu</span>^{2}
+<span style="color: #F0DFAF; font-weight: bold;">\end</span>{<span style="color: #93E0E3;">equation</span>}
 </pre>
 </div>
 
@@ -71,9 +71,9 @@ We typically want \(\alpha\) to be small-ish, which can be problematic when \(\m
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
-  <span style="font-weight: bold;">\gamma</span> <span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\HalfCauchy</span>(10e-2)
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
+<pre class="src src-latex"><span style="color: #F0DFAF; font-weight: bold;">\begin</span>{<span style="color: #93E0E3;">equation</span>}
+  <span style="color: #F0DFAF; font-weight: bold;">\gamma</span> <span style="color: #F0DFAF; font-weight: bold;">\sim</span> <span style="color: #F0DFAF; font-weight: bold;">\HalfCauchy</span>(10e-2)
+<span style="color: #F0DFAF; font-weight: bold;">\end</span>{<span style="color: #93E0E3;">equation</span>}
 </pre>
 </div>
 
@@ -82,10 +82,10 @@ So \(\gamma\) can take arbitrarily large values. We can see it by rewriting the 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align</span>}
-  X | z &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Poisson}(<span style="font-weight: bold;">\mu</span> <span style="font-weight: bold;">\,</span> z)<span style="font-weight: bold;">\\</span>
-  z &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Gamma}(<span style="font-weight: bold;">\gamma</span>^{-1}, <span style="font-weight: bold;">\gamma</span>^{-1})
-<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align</span>}
+<pre class="src src-latex"><span style="color: #F0DFAF; font-weight: bold;">\begin</span>{<span style="color: #93E0E3;">align</span>}
+  X | z &amp;<span style="color: #F0DFAF; font-weight: bold;">\sim</span> <span style="color: #F0DFAF; font-weight: bold;">\operatorname</span>{Poisson}(<span style="color: #F0DFAF; font-weight: bold;">\mu</span> <span style="color: #F0DFAF; font-weight: bold;">\,</span> z)<span style="color: #D0BF8F; font-weight: bold;">\\</span>
+  z &amp;<span style="color: #F0DFAF; font-weight: bold;">\sim</span> <span style="color: #F0DFAF; font-weight: bold;">\operatorname</span>{Gamma}(<span style="color: #F0DFAF; font-weight: bold;">\gamma</span>^{-1}, <span style="color: #F0DFAF; font-weight: bold;">\gamma</span>^{-1})
+<span style="color: #F0DFAF; font-weight: bold;">\end</span>{<span style="color: #93E0E3;">align</span>}
 </pre>
 </div>
 
@@ -94,24 +94,24 @@ and the standard deviation of \(z\) is \(\sqrt{\gamma}\). This Gamma distributio
 </p>
 </div>
 
-<div id="outline-container-org7b92cf0" class="outline-3">
-<h3 id="org7b92cf0">Numerically</h3>
-<div class="outline-text-3" id="text-org7b92cf0">
+<div id="outline-container-orgb23af30" class="outline-3">
+<h3 id="orgb23af30">Numerically</h3>
+<div class="outline-text-3" id="text-orgb23af30">
 <p>
 Are there general numerical transformations on the computation graph that we can learn from this example?
 </p>
 </div>
 
-<div id="outline-container-org6a35b58" class="outline-4">
-<h4 id="org6a35b58">Model implementation in PyMC3</h4>
-<div class="outline-text-4" id="text-org6a35b58">
+<div id="outline-container-orgb19b641" class="outline-4">
+<h4 id="orgb19b641">Model implementation in PyMC3</h4>
+<div class="outline-text-4" id="text-orgb19b641">
 <p>
 The original model is written:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">alpha</span> = pm.HalfNormal(<span style="font-style: italic;">"alpha"</span>, 10e-2)
-<span style="font-weight: bold; font-style: italic;">Y</span> = pm.NegativeBinomial(<span style="font-style: italic;">"Y"</span>, mu, alpha)
+<pre class="src src-python"><span style="color: #DFAF8F;">alpha</span> = pm.HalfNormal(<span style="color: #CC9393;">"alpha"</span>, 10e-2)
+<span style="color: #DFAF8F;">Y</span> = pm.NegativeBinomial(<span style="color: #CC9393;">"Y"</span>, mu, alpha)
 </pre>
 </div>
 
@@ -120,9 +120,9 @@ While the reparametrized model is written:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">alpha</span> = pm.HalfNormal(<span style="font-style: italic;">"alpha"</span>, 10e-2)
-<span style="font-weight: bold; font-style: italic;">phi</span> = pm.Gamma(<span style="font-style: italic;">"phi"</span>, tt.sqrt(alpha), tt.sqrt(alpha))
-<span style="font-weight: bold; font-style: italic;">Y</span> = pm.Poisson(<span style="font-style: italic;">"Y"</span>, mu * phi)
+<pre class="src src-python"><span style="color: #DFAF8F;">alpha</span> = pm.HalfNormal(<span style="color: #CC9393;">"alpha"</span>, 10e-2)
+<span style="color: #DFAF8F;">phi</span> = pm.Gamma(<span style="color: #CC9393;">"phi"</span>, tt.sqrt(alpha), tt.sqrt(alpha))
+<span style="color: #DFAF8F;">Y</span> = pm.Poisson(<span style="color: #CC9393;">"Y"</span>, mu * phi)
 </pre>
 </div>
 
@@ -132,16 +132,16 @@ Note that we introduced a new degree of liberty by expanding the Negative Binomi
 </div>
 </div>
 
-<div id="outline-container-org87511e6" class="outline-4">
-<h4 id="org87511e6">The logpdf</h4>
-<div class="outline-text-4" id="text-org87511e6">
+<div id="outline-container-org4a05fa9" class="outline-4">
+<h4 id="org4a05fa9">The logpdf</h4>
+<div class="outline-text-4" id="text-org4a05fa9">
 <p>
 The logpdf of the negative binomial of parameters \(\mu\) and \(\alpha\) is implemented as
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logpdf_negativebinomial</span>(x, mu, alpha):
-    <span style="font-weight: bold;">return</span> (binomln(x + alpha -1, x)
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">logpdf_negativebinomial</span>(x, mu, alpha):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> (binomln(x + alpha -1, x)
             + logpow(mu, x)
             - logpow(mu+alpha, x)
             + logpow(alpha, alpha)
@@ -155,8 +155,8 @@ While the Poisson is implemented as:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logpdf_poisson</span>(x, mu, phi):
-    <span style="font-weight: bold;">return</span> aet.log(aet.gammainc(X + 1, mu * phi))
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">logpdf_poisson</span>(x, mu, phi):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> aet.log(aet.gammainc(X + 1, mu * phi))
 </pre>
 </div>
 
@@ -165,8 +165,8 @@ And the Gamma distribution as:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logpdf_gamma</span>(phi, alpha):
-    <span style="font-weight: bold;">return</span> (-gmmaln(alpha)
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">logpdf_gamma</span>(phi, alpha):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> (-gmmaln(alpha)
             + logpow(alpha, alpha)
             - alpha * phi
             + logpow(phi, alpha - 1)
@@ -179,8 +179,8 @@ So the logpdf of the re-parametrized negative binomial is given by:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">logpdf_reparam</span>(x, mu, alpha, phi):
-    <span style="font-weight: bold;">return</span> (
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">logpdf_reparam</span>(x, mu, alpha, phi):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> (
         aet.log(aet.gammainc(X + 1, mu * phi))
         -gmmaln(alpha)
         + logpow(alpha, alpha)
@@ -194,8 +194,8 @@ So the logpdf of the re-parametrized negative binomial is given by:
 </div>
 </div>
 
-<div id="outline-container-org6063de8" class="outline-2">
-<h2 id="org6063de8">Links to this note</h2>
+<div id="outline-container-org0e7d6ab" class="outline-2">
+<h2 id="org0e7d6ab">Links to this note</h2>
 </div>
 </div>
 </body>

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Polya-Gamma augmentation</title>
@@ -46,7 +46,7 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Polya-Gamma augmentation</h1>
-<div class="abstract" id="org16af269">
+<div class="abstract" id="org7b5ff31">
 <p>
 In this note we will go over the Polya-Gamma augmentation for logistic regression models.
 </p>
@@ -127,22 +127,22 @@ P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\
 So if we condition on \(\omega_n\) we find that \(P(y_i | x_i, \beta, \omega_n)\), and hence \(P(\beta|Y, X, \omega_n)\) to be gaaussian (if \(\omega_n\) is draws from \(\operatorname{PG}(1, 0)\))
 </p>
 
-<div id="outline-container-orgbd10593" class="outline-2">
-<h2 id="orgbd10593"><span class="todo TODO">TODO</span> Simple example with a bimodal distribution</h2>
-<div class="outline-text-2" id="text-orgbd10593">
+<div id="outline-container-org43181f8" class="outline-2">
+<h2 id="org43181f8"><span class="todo TODO">TODO</span> Simple example with a bimodal distribution</h2>
+<div class="outline-text-2" id="text-org43181f8">
 <p>
 And \(Y_i\) indicates which mode the sample belongs to. We can use the <code>polyagamma</code> library.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org2ed520c" class="outline-2">
-<h2 id="org2ed520c">Appendix</h2>
-<div class="outline-text-2" id="text-org2ed520c">
+<div id="outline-container-org7103784" class="outline-2">
+<h2 id="org7103784">Appendix</h2>
+<div class="outline-text-2" id="text-org7103784">
 </div>
-<div id="outline-container-org25c1aa9" class="outline-3">
-<h3 id="org25c1aa9">Likelihood</h3>
-<div class="outline-text-3" id="text-org25c1aa9">
+<div id="outline-container-org92cdb98" class="outline-3">
+<h3 id="org92cdb98">Likelihood</h3>
+<div class="outline-text-3" id="text-org92cdb98">
 <p>
 Let us derive the likelihood \(p(\boldsymbol{y} | x, \boldsymbol{\beta} )\) for the <a href="20220729104422-bernoulli_distribution.html#ID-82cc8d0e-682d-4082-90ac-36cf7fadcb72">Bernoulli</a> and <a href="20210420200526-negative_binomial_distribution.html#ID-273bfd3a-7e6e-4971-b422-048f930ae5b0">Negative Binomial</a> observation distribution. Assuming that the observations are i.i.d. from the same distribution we can write:
 </p>
@@ -152,9 +152,9 @@ P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i 
 \end{equation*}
 </div>
 
-<div id="outline-container-org8e86b14" class="outline-4">
-<h4 id="org8e86b14">Bernoulli observation distribution</h4>
-<div class="outline-text-4" id="text-org8e86b14">
+<div id="outline-container-orgd9ae420" class="outline-4">
+<h4 id="orgd9ae420">Bernoulli observation distribution</h4>
+<div class="outline-text-4" id="text-orgd9ae420">
 <p>
 In this case:
 </p>
@@ -183,17 +183,17 @@ So that:
 \end{equation*}
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
-<span style="font-weight: bold; font-style: italic;">X</span> = at.matrix(<span style="font-style: italic;">"X"</span>)
-<span style="font-weight: bold; font-style: italic;">beta</span> = at.vector(<span style="font-style: italic;">"beta"</span>)
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+<span style="color: #DFAF8F;">X</span> = at.matrix(<span style="color: #CC9393;">"X"</span>)
+<span style="color: #DFAF8F;">beta</span> = at.vector(<span style="color: #CC9393;">"beta"</span>)
 
-<span style="font-weight: bold; font-style: italic;">p</span> = at.sigmoid(at.dot(X.T, beta))
-<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.bernoulli(p, size=X.shape[0])
-<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
+<span style="color: #DFAF8F;">p</span> = at.sigmoid(at.dot(X.T, beta))
+<span style="color: #DFAF8F;">Y_rv</span> = srng.bernoulli(p, size=X.shape[0])
+<span style="color: #DFAF8F;">y_vv</span> = Y_rv.clone()
 
-<span style="font-weight: bold; font-style: italic;">loglikelihood</span> = y.logprob(y_vv)
+<span style="color: #DFAF8F;">loglikelihood</span> = y.logprob(y_vv)
 </pre>
 </div>
 
@@ -202,18 +202,18 @@ Is equivalent to:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">X</span> = at.matrix(<span style="font-style: italic;">"X"</span>)
-<span style="font-weight: bold; font-style: italic;">beta</span> = at.vector(<span style="font-style: italic;">"beta"</span>)
-<span style="font-weight: bold; font-style: italic;">f</span> = at.dot(X.T, beta)
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">loglikelihood = at.prod(at.pow(at.exp(f), y) / (1 + at.dot(exp(f)))...)</span>
+<pre class="src src-python"><span style="color: #DFAF8F;">X</span> = at.matrix(<span style="color: #CC9393;">"X"</span>)
+<span style="color: #DFAF8F;">beta</span> = at.vector(<span style="color: #CC9393;">"beta"</span>)
+<span style="color: #DFAF8F;">f</span> = at.dot(X.T, beta)
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">loglikelihood = at.prod(at.pow(at.exp(f), y) / (1 + at.dot(exp(f)))...)</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org78b9598" class="outline-4">
-<h4 id="org78b9598">Negative binomial observation distribution</h4>
-<div class="outline-text-4" id="text-org78b9598">
+<div id="outline-container-org7435a5a" class="outline-4">
+<h4 id="org7435a5a">Negative binomial observation distribution</h4>
+<div class="outline-text-4" id="text-org7435a5a">
 <p>
 If we note \(r\) the <a href="20210420200526-negative_binomial_distribution.html#ID-273bfd3a-7e6e-4971-b422-048f930ae5b0">negative binomial</a>'s dispersion parameter, and \(y_i\) the number of observations in experiment \(i\), then:
 </p>
@@ -248,9 +248,9 @@ So that
 </div>
 
 
-<div id="outline-container-orgd3e98b5" class="outline-2">
-<h2 id="orgd3e98b5">References</h2>
-<div class="outline-text-2" id="text-orgd3e98b5">
+<div id="outline-container-org42eb4c5" class="outline-2">
+<h2 id="org42eb4c5">References</h2>
+<div class="outline-text-2" id="text-org42eb4c5">
 <ul class="org-ul">
 <li>Dunson, etc. Bayesian inference for logistic models using Polya-Gamma latent variables. (2013)</li>
 <li>Slides: <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf">http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf</a></li>
@@ -261,9 +261,9 @@ So that
 </div>
 </div>
 
-<div id="outline-container-orgba955b1" class="outline-2">
-<h2 id="orgba955b1">Links to this note</h2>
-<div class="outline-text-2" id="text-orgba955b1">
+<div id="outline-container-org82878fd" class="outline-2">
+<h2 id="org82878fd">Links to this note</h2>
+<div class="outline-text-2" id="text-org82878fd">
 <ul class="org-ul">
 <li><a href="./20220823093551-rewrites_implement_facts.html">Rewrites implement facts</a></li>
 <li><a href="./20220823094247-reference_other_people_s_notes.html">Reference other people's ideas</a></li>

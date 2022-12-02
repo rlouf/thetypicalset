@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>FunctionGraph</title>
@@ -47,27 +47,27 @@
 <div id="content" class="content">
 <h1 class="title">FunctionGraph</h1>
 
-<div id="outline-container-org51e6b88" class="outline-2">
-<h2 id="org51e6b88"><span class="todo TODO">TODO</span> How do we initialize a <code>FunctionGraph</code>?</h2>
+<div id="outline-container-org6f3f27d" class="outline-2">
+<h2 id="org6f3f27d"><span class="todo TODO">TODO</span> How do we initialize a <code>FunctionGraph</code>?</h2>
 </div>
-<div id="outline-container-orgc084801" class="outline-2">
-<h2 id="orgc084801"><span class="todo TODO">TODO</span> What does a <code>FunctionGraph</code> do that a variable given by a <code>TensorVariable</code> does not?</h2>
+<div id="outline-container-orgce8b994" class="outline-2">
+<h2 id="orgce8b994"><span class="todo TODO">TODO</span> What does a <code>FunctionGraph</code> do that a variable given by a <code>TensorVariable</code> does not?</h2>
 </div>
-<div id="outline-container-org54609cb" class="outline-2">
-<h2 id="org54609cb"><span class="todo TODO">TODO</span> What are <code>Features</code>?</h2>
+<div id="outline-container-org6bc32bf" class="outline-2">
+<h2 id="org6bc32bf"><span class="todo TODO">TODO</span> What are <code>Features</code>?</h2>
 </div>
-<div id="outline-container-orgd17dfae" class="outline-2">
-<h2 id="orgd17dfae"><span class="todo TODO">TODO</span> What functionalities of <code>FunctionGraphs</code> are needed where?</h2>
-<div class="outline-text-2" id="text-orgd17dfae">
+<div id="outline-container-org42dd668" class="outline-2">
+<h2 id="org42dd668"><span class="todo TODO">TODO</span> What functionalities of <code>FunctionGraphs</code> are needed where?</h2>
+<div class="outline-text-2" id="text-org42dd668">
 <p>
 Need to draw a map of where the different <code>FunctionGraph</code> functionalities could be used.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgb3dc0ba" class="outline-2">
-<h2 id="orgb3dc0ba">Misc</h2>
-<div class="outline-text-2" id="text-orgb3dc0ba">
+<div id="outline-container-orgd2af093" class="outline-2">
+<h2 id="orgd2af093">Misc</h2>
+<div class="outline-text-2" id="text-orgd2af093">
 <p>
 From the documentation:
 </p>
@@ -109,42 +109,42 @@ What I am wondering is: when is a <code>FunctionGraph</code> needed? When does i
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
-<span style="font-weight: bold;">from</span> aesara.graph.fg <span style="font-weight: bold;">import</span> FunctionGraph
-<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
+<span style="color: #F0DFAF; font-weight: bold;">from</span> aesara.graph.fg <span style="color: #F0DFAF; font-weight: bold;">import</span> FunctionGraph
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">x</span> = at.vector(<span style="font-style: italic;">'x'</span>)
-<span style="font-weight: bold; font-style: italic;">z</span> = at.log(at.exp(x + x)) + x + x
+<span style="color: #DFAF8F;">x</span> = at.vector(<span style="color: #CC9393;">'x'</span>)
+<span style="color: #DFAF8F;">z</span> = at.log(at.exp(x + x)) + x + x
 
-<span style="font-weight: bold; font-style: italic;">fg</span> = FunctionGraph(outputs=[z])
+<span style="color: #DFAF8F;">fg</span> = FunctionGraph(outputs=[z])
 
 aesara.dprint(fg)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">print</span>(fg.clients)
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">print</span>(fg.clients)
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org8b945bb" class="outline-2">
-<h2 id="org8b945bb"><span class="todo TODO">TODO</span> What is the <code>clients</code> dictionary used for?</h2>
-<div class="outline-text-2" id="text-org8b945bb">
+<div id="outline-container-org8e67423" class="outline-2">
+<h2 id="org8e67423"><span class="todo TODO">TODO</span> What is the <code>clients</code> dictionary used for?</h2>
+<div class="outline-text-2" id="text-org8e67423">
 <p>
 It looks like this is what allows to traverse the graph?
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgd804fa7" class="outline-2">
-<h2 id="orgd804fa7"><span class="todo TODO">TODO</span> Keep track of where a <code>FunctionGraph</code> is necessary, where it is produced, where it is cloned, etc.</h2>
+<div id="outline-container-orgc2e33ab" class="outline-2">
+<h2 id="orgc2e33ab"><span class="todo TODO">TODO</span> Keep track of where a <code>FunctionGraph</code> is necessary, where it is produced, where it is cloned, etc.</h2>
 </div>
 
-<div id="outline-container-org979f57e" class="outline-2">
-<h2 id="org979f57e">Links to this note</h2>
-<div class="outline-text-2" id="text-org979f57e">
+<div id="outline-container-orgadfe7a4" class="outline-2">
+<h2 id="orgadfe7a4">Links to this note</h2>
+<div class="outline-text-2" id="text-orgadfe7a4">
 <ul class="org-ul">
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
 </ul>

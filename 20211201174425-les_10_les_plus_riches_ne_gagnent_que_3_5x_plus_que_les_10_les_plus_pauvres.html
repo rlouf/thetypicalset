@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Les 10% les plus riches ne gagnent que 3.5x plus que les 10% les plus pauvres</title>
@@ -65,9 +65,9 @@ les 10% les moins riches).
 </p>
 
 
-<div id="outline-container-org8d7449f" class="outline-2">
-<h2 id="org8d7449f">Pourquoi est-ce fallacieux?</h2>
-<div class="outline-text-2" id="text-org8d7449f">
+<div id="outline-container-orgea84cab" class="outline-2">
+<h2 id="orgea84cab">Pourquoi est-ce fallacieux?</h2>
+<div class="outline-text-2" id="text-orgea84cab">
 <p>
 Les déciles correspondent à une répartition de la <span class="underline">population</span> à parts égales. En 2018, le niveau de vie correspondant au 1er décile après redistribution est de \\(97,1\\). Imaginons que la population française soit de 100 personnes. Les 3 configuration suivantes donnent la meme valeur de 97,1:
 </p>
@@ -85,9 +85,9 @@ Pas du tout la même réalité, n'est-ce pas? De la même manière pour le 9e d�
 </div>
 
 
-<div id="outline-container-org77b564d" class="outline-2">
-<h2 id="org77b564d">Peut-on faire mieux ?</h2>
-<div class="outline-text-2" id="text-org77b564d">
+<div id="outline-container-org6057597" class="outline-2">
+<h2 id="org6057597">Peut-on faire mieux ?</h2>
+<div class="outline-text-2" id="text-org6057597">
 <p>
 Oui ! Arrêtons-nous deux minutes pour réfléchir à la quantité que l'on veut vraiment mesurer ici. Déjà reformulons en terme de niveau de vie, puisque c'est bien ce dont les statistiques de l'INSEE parlent:
 </p>
@@ -114,9 +114,9 @@ Mais nous n'avons pas accès à ces données. Ce n'est pas grave! Nous pouvons a
 </div>
 
 
-<div id="outline-container-org527e8c1" class="outline-3">
-<h3 id="org527e8c1">Données de l'INSEE</h3>
-<div class="outline-text-3" id="text-org527e8c1">
+<div id="outline-container-org225c7d8" class="outline-3">
+<h3 id="org225c7d8">Données de l'INSEE</h3>
+<div class="outline-text-3" id="text-org225c7d8">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.insee.fr/fr/statistiques/2011101?geo=METRO-1#chiffre-cle-8">https://www.insee.fr/fr/statistiques/2011101?geo=METRO-1#chiffre-cle-8</a>
 Il y a 27,510,608 ménages en France en 2018</li>
@@ -164,50 +164,50 @@ tableaux de l'économie française 2018
 </table>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">order_statistics</span>(num_points, quantiles, ):
-    <span style="font-weight: bold; font-style: italic;">logpdf</span> = 0
-    <span style="font-weight: bold; font-style: italic;">logpdf</span> += gammaln(N+1) - gammaln(N * q[0]) - gammaln(N - N * q[-1] + 1)
-    <span style="font-weight: bold; font-style: italic;">logpdf</span> += (N * q[0] - 1) * log(U[0])
-    <span style="font-weight: bold; font-style: italic;">logpdf</span> += (N-N*q[-1])*log(1-U[-1])
-    <span style="font-weight: bold;">for</span> val <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(1,M):
-        <span style="font-weight: bold; font-style: italic;">logpdf</span> +=
-<span style="font-style: italic;">"""</span>
-<span style="font-style: italic;">real orderstatistics(int N, int M, vector q, vector U){</span>
-<span style="font-style: italic;">    real lpdf = 0;</span>
-<span style="font-style: italic;">    lpdf += lgamma(N+1) - lgamma(N*q[1]) - lgamma(N-N*q[M]+1);</span>
-<span style="font-style: italic;">    lpdf += (N*q[1]-1)*log(U[1]);</span>
-<span style="font-style: italic;">    lpdf += (N-N*q[M])*log(1-U[M]);</span>
-<span style="font-style: italic;">    for (m in 2:M){</span>
-<span style="font-style: italic;">        lpdf += -lgamma(N*q[m]-N*q[m-1]);</span>
-<span style="font-style: italic;">        lpdf += (N*q[m]-N*q[m-1]-1)*log(U[m]-U[m-1]);</span>
-<span style="font-style: italic;">    }</span>
-<span style="font-style: italic;">    return lpdf;</span>
-<span style="font-style: italic;">"""</span>
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">order_statistics</span>(num_points, quantiles, ):
+    <span style="color: #DFAF8F;">logpdf</span> = 0
+    <span style="color: #DFAF8F;">logpdf</span> += gammaln(N+1) - gammaln(N * q[0]) - gammaln(N - N * q[-1] + 1)
+    <span style="color: #DFAF8F;">logpdf</span> += (N * q[0] - 1) * log(U[0])
+    <span style="color: #DFAF8F;">logpdf</span> += (N-N*q[-1])*log(1-U[-1])
+    <span style="color: #F0DFAF; font-weight: bold;">for</span> val <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(1,M):
+        <span style="color: #DFAF8F;">logpdf</span> +=
+<span style="color: #CC9393;">"""</span>
+<span style="color: #CC9393;">real orderstatistics(int N, int M, vector q, vector U){</span>
+<span style="color: #CC9393;">    real lpdf = 0;</span>
+<span style="color: #CC9393;">    lpdf += lgamma(N+1) - lgamma(N*q[1]) - lgamma(N-N*q[M]+1);</span>
+<span style="color: #CC9393;">    lpdf += (N*q[1]-1)*log(U[1]);</span>
+<span style="color: #CC9393;">    lpdf += (N-N*q[M])*log(1-U[M]);</span>
+<span style="color: #CC9393;">    for (m in 2:M){</span>
+<span style="color: #CC9393;">        lpdf += -lgamma(N*q[m]-N*q[m-1]);</span>
+<span style="color: #CC9393;">        lpdf += (N*q[m]-N*q[m-1]-1)*log(U[m]-U[m-1]);</span>
+<span style="color: #CC9393;">    }</span>
+<span style="color: #CC9393;">    return lpdf;</span>
+<span style="color: #CC9393;">"""</span>
 </pre>
 </div>
 
 <div class="org-src-container">
 <pre class="src src-python">
-<span style="font-weight: bold;">import</span> pymc3 <span style="font-weight: bold;">as</span> pm
+<span style="color: #F0DFAF; font-weight: bold;">import</span> pymc3 <span style="color: #F0DFAF; font-weight: bold;">as</span> pm
 
-<span style="font-weight: bold;">with</span> pm.Model() <span style="font-weight: bold;">as</span> curve_fitting:
-    <span style="font-weight: bold; font-style: italic;">stat</span> = pm.Factor((aaaaa))
+<span style="color: #F0DFAF; font-weight: bold;">with</span> pm.Model() <span style="color: #F0DFAF; font-weight: bold;">as</span> curve_fitting:
+    <span style="color: #DFAF8F;">stat</span> = pm.Factor((aaaaa))
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org6f1db3b" class="outline-3">
-<h3 id="org6f1db3b">Pourquoi c'est faux</h3>
+<div id="outline-container-org96ebfc8" class="outline-3">
+<h3 id="org96ebfc8">Pourquoi c'est faux</h3>
 </div>
 
-<div id="outline-container-org635635a" class="outline-3">
-<h3 id="org635635a">Méthodologie</h3>
+<div id="outline-container-org1e4bcce" class="outline-3">
+<h3 id="org1e4bcce">Méthodologie</h3>
 </div>
 
-<div id="outline-container-org37ba0d9" class="outline-3">
-<h3 id="org37ba0d9">References</h3>
-<div class="outline-text-3" id="text-org37ba0d9">
+<div id="outline-container-org2e4ba08" class="outline-3">
+<h3 id="org2e4ba08">References</h3>
+<div class="outline-text-3" id="text-org2e4ba08">
 <ul class="org-ul">
 <li>Vidéo avec Boulo et Babeau</li>
 </ul>
@@ -215,9 +215,9 @@ tableaux de l'économie française 2018
 </div>
 </div>
 
-<div id="outline-container-org8b2b894" class="outline-2">
-<h2 id="org8b2b894">Links to this note</h2>
-<div class="outline-text-2" id="text-org8b2b894">
+<div id="outline-container-orge8d0fbb" class="outline-2">
+<h2 id="orge8d0fbb">Links to this note</h2>
+<div class="outline-text-2" id="text-orge8d0fbb">
 <ul class="org-ul">
 <li><a href="./20211201174631-doxa.html">Doxa</a></li>
 </ul>

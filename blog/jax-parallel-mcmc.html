@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Massively parallel MCMC with JAX</title>
@@ -15,9 +15,9 @@
 <div id="content" class="content">
 <h1 class="title">Massively parallel MCMC with JAX</h1>
 
-<div id="outline-container-orgf74f659" class="outline-2">
-<h2 id="orgf74f659">TL;DR</h2>
-<div class="outline-text-2" id="text-orgf74f659">
+<div id="outline-container-org8d62c19" class="outline-2">
+<h2 id="org8d62c19">TL;DR</h2>
+<div class="outline-text-2" id="text-org8d62c19">
 <p>
 <i>Edit on 2020/10/01:</i> As pointed out by <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/SingularMattrix">Matthew Johnson</a> and <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/eigenhector">Hector Yee</a>, the
 results reported in a previous version of this post were artificially biaised in
@@ -48,9 +48,9 @@ want to avoid pre-allocating too much memory.
 </div>
 </div>
 
-<div id="outline-container-orgb44ee2a" class="outline-2">
-<h2 id="orgb44ee2a">Vectorized MCMC</h2>
-<div class="outline-text-2" id="text-orgb44ee2a">
+<div id="outline-container-org1e33bed" class="outline-2">
+<h2 id="org1e33bed">Vectorized MCMC</h2>
+<div class="outline-text-2" id="text-org1e33bed">
 <p>
 Colin Carroll recently wrote an interesting <a target='_blank' rel='noopener noreferrer' class='external' href="https://colindcarroll.com/2019/08/18/very-parallel-mcmc-sampling/">blog post</a> that
 uses Numpy and a vectorized version of the random walk metropolis algorithm
@@ -101,9 +101,9 @@ comparing:
 </div>
 
 
-<div id="outline-container-org4609232" class="outline-2">
-<h2 id="org4609232">Notes about benchmarking</h2>
-<div class="outline-text-2" id="text-org4609232">
+<div id="outline-container-org5c5e84d" class="outline-2">
+<h2 id="org5c5e84d">Notes about benchmarking</h2>
+<div class="outline-text-2" id="text-org5c5e84d">
 <p>
 Before giving the results, a few words of caution:
 </p>
@@ -128,34 +128,34 @@ frameworks.</li>
 </div>
 </div>
 
-<div id="outline-container-orgac4b85a" class="outline-2">
-<h2 id="orgac4b85a">Setup and results</h2>
-<div class="outline-text-2" id="text-orgac4b85a">
+<div id="outline-container-org5ba6c75" class="outline-2">
+<h2 id="org5ba6c75">Setup and results</h2>
+<div class="outline-text-2" id="text-org5ba6c75">
 <p>
 I am sampling an arbitrary Gaussian mixture with 4 components. Using Numpy:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
-<span style="font-weight: bold;">from</span> scipy.stats <span style="font-weight: bold;">import</span> norm
-<span style="font-weight: bold;">from</span> scipy.special <span style="font-weight: bold;">import</span> logsumexp
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+<span style="color: #F0DFAF; font-weight: bold;">from</span> scipy.stats <span style="color: #F0DFAF; font-weight: bold;">import</span> norm
+<span style="color: #F0DFAF; font-weight: bold;">from</span> scipy.special <span style="color: #F0DFAF; font-weight: bold;">import</span> logsumexp
 
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">mixture_logpdf</span>(x):
-    <span style="font-weight: bold; font-style: italic;">loc</span> = np.array([[-2, 0, 3.2, 2.5]]).T
-    <span style="font-weight: bold; font-style: italic;">scale</span> = np.array([[1.2, 1, 5, 2.8]]).T
-    <span style="font-weight: bold; font-style: italic;">weights</span> = np.array([[0.2, 0.3, 0.1, 0.4]]).T
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">mixture_logpdf</span>(x):
+    <span style="color: #DFAF8F;">loc</span> = np.array([[-2, 0, 3.2, 2.5]]).T
+    <span style="color: #DFAF8F;">scale</span> = np.array([[1.2, 1, 5, 2.8]]).T
+    <span style="color: #DFAF8F;">weights</span> = np.array([[0.2, 0.3, 0.1, 0.4]]).T
 
-    <span style="font-weight: bold; font-style: italic;">log_probs</span> = norm(loc, scale).logpdf(x)
+    <span style="color: #DFAF8F;">log_probs</span> = norm(loc, scale).logpdf(x)
 
-    <span style="font-weight: bold;">return</span> logsumexp(np.log(weights) + log_probs, axis=0)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> logsumexp(np.log(weights) + log_probs, axis=0)
 </pre>
 </div>
 </div>
 
-<div id="outline-container-orgb5327ee" class="outline-3">
-<h3 id="orgb5327ee">Numpy</h3>
-<div class="outline-text-3" id="text-orgb5327ee">
+<div id="outline-container-org80c70f9" class="outline-3">
+<h3 id="org80c70f9">Numpy</h3>
+<div class="outline-text-3" id="text-org80c70f9">
 <p>
 Colin Carroll's <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/ColCarroll/minimc">MiniMC</a> has the simplest and most readable implementations of
 Random Walk Metropolis and Hamiltonian Monte Carlo I have seen. My Numpy
@@ -163,77 +163,77 @@ implementation is an iteration upon his:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
 
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">rw_metropolis_sampler</span>(logpdf, initial_position):
-    <span style="font-weight: bold; font-style: italic;">position</span> = initial_position
-    <span style="font-weight: bold; font-style: italic;">log_prob</span> = logpdf(initial_position)
-    <span style="font-weight: bold;">yield</span> position
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">rw_metropolis_sampler</span>(logpdf, initial_position):
+    <span style="color: #DFAF8F;">position</span> = initial_position
+    <span style="color: #DFAF8F;">log_prob</span> = logpdf(initial_position)
+    <span style="color: #F0DFAF; font-weight: bold;">yield</span> position
 
-    <span style="font-weight: bold;">while</span> <span style="font-weight: bold; text-decoration: underline;">True</span>:
-        <span style="font-weight: bold; font-style: italic;">move_proposals</span> = np.random.normal(0, 0.1, size=initial_position.shape)
-        <span style="font-weight: bold; font-style: italic;">proposal</span> = position + move_proposals
-        <span style="font-weight: bold; font-style: italic;">proposal_log_prob</span> = logpdf(proposal)
+    <span style="color: #F0DFAF; font-weight: bold;">while</span> <span style="color: #BFEBBF;">True</span>:
+        <span style="color: #DFAF8F;">move_proposals</span> = np.random.normal(0, 0.1, size=initial_position.shape)
+        <span style="color: #DFAF8F;">proposal</span> = position + move_proposals
+        <span style="color: #DFAF8F;">proposal_log_prob</span> = logpdf(proposal)
 
-        <span style="font-weight: bold; font-style: italic;">log_uniform</span> = np.log(
+        <span style="color: #DFAF8F;">log_uniform</span> = np.log(
             np.random.rand(initial_position.shape[0], initial_position.shape[1])
         )
-        <span style="font-weight: bold; font-style: italic;">do_accept</span> = log_uniform &lt; proposal_log_prob - log_prob
+        <span style="color: #DFAF8F;">do_accept</span> = log_uniform &lt; proposal_log_prob - log_prob
 
-        <span style="font-weight: bold; font-style: italic;">position</span> = np.where(do_accept, proposal, position)
-        <span style="font-weight: bold; font-style: italic;">log_prob</span> = np.where(do_accept, proposal_log_prob, log_prob)
-        <span style="font-weight: bold;">yield</span> position
+        <span style="color: #DFAF8F;">position</span> = np.where(do_accept, proposal, position)
+        <span style="color: #DFAF8F;">log_prob</span> = np.where(do_accept, proposal_log_prob, log_prob)
+        <span style="color: #F0DFAF; font-weight: bold;">yield</span> position
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org12fb56f" class="outline-3">
-<h3 id="org12fb56f">JAX</h3>
-<div class="outline-text-3" id="text-org12fb56f">
+<div id="outline-container-orgdb50dee" class="outline-3">
+<h3 id="orgdb50dee">JAX</h3>
+<div class="outline-text-3" id="text-orgdb50dee">
 <p>
 Let us unpack the JAX implementation. The kernel is very similar to Numpy's:
 </p>
 
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> functools <span style="font-weight: bold;">import</span> partial
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> functools <span style="color: #F0DFAF; font-weight: bold;">import</span> partial
 
-<span style="font-weight: bold;">import</span> jax
-<span style="font-weight: bold;">import</span> jax.numpy <span style="font-weight: bold;">as</span> np
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax.numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
 
-<span style="font-weight: bold; text-decoration: underline;">@partial</span>(jax.jit, static_argnums=(1,))
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">rw_metropolis_kernel</span>(rng_key, logpdf, position, log_prob):
-    <span style="font-weight: bold; font-style: italic;">key</span>, <span style="font-weight: bold; font-style: italic;">subkey</span> = jax.random.split(rng_key)
-    <span style="font-style: italic;">"""Moves the chain by one step using the Random Walk Metropolis algorithm.</span>
+<span style="color: #7CB8BB;">@partial</span>(jax.jit, static_argnums=(1,))
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">rw_metropolis_kernel</span>(rng_key, logpdf, position, log_prob):
+    <span style="color: #DFAF8F;">key</span>, <span style="color: #DFAF8F;">subkey</span> = jax.random.split(rng_key)
+    <span style="color: #9FC59F;">"""Moves the chain by one step using the Random Walk Metropolis algorithm.</span>
 
-<span style="font-style: italic;">    Attributes</span>
-<span style="font-style: italic;">    ----------</span>
-<span style="font-style: italic;">    rng_key: jax.random.PRNGKey</span>
-<span style="font-style: italic;">      Key for the pseudo random number generator.</span>
-<span style="font-style: italic;">    logpdf: function</span>
-<span style="font-style: italic;">      Returns the log-probability of the model given a position.</span>
-<span style="font-style: italic;">    position: np.ndarray, shape (n_dims,)</span>
-<span style="font-style: italic;">      The starting position.</span>
-<span style="font-style: italic;">    log_prob: float</span>
-<span style="font-style: italic;">      The log probability at the starting position.</span>
+<span style="color: #9FC59F;">    Attributes</span>
+<span style="color: #9FC59F;">    ----------</span>
+<span style="color: #9FC59F;">    rng_key: jax.random.PRNGKey</span>
+<span style="color: #9FC59F;">      Key for the pseudo random number generator.</span>
+<span style="color: #9FC59F;">    logpdf: function</span>
+<span style="color: #9FC59F;">      Returns the log-probability of the model given a position.</span>
+<span style="color: #9FC59F;">    position: np.ndarray, shape (n_dims,)</span>
+<span style="color: #9FC59F;">      The starting position.</span>
+<span style="color: #9FC59F;">    log_prob: float</span>
+<span style="color: #9FC59F;">      The log probability at the starting position.</span>
 
-<span style="font-style: italic;">    Returns</span>
-<span style="font-style: italic;">    -------</span>
-<span style="font-style: italic;">    Tuple</span>
-<span style="font-style: italic;">        The next positions of the chains along with their log probability.</span>
-<span style="font-style: italic;">    """</span>
-    <span style="font-weight: bold; font-style: italic;">move_proposals</span> = jax.random.normal(key, shape=position.shape) * 0.1
-    <span style="font-weight: bold; font-style: italic;">proposal</span> = position + move_proposals
-    <span style="font-weight: bold; font-style: italic;">proposal_log_prob</span> = logpdf(proposal)
+<span style="color: #9FC59F;">    Returns</span>
+<span style="color: #9FC59F;">    -------</span>
+<span style="color: #9FC59F;">    Tuple</span>
+<span style="color: #9FC59F;">        The next positions of the chains along with their log probability.</span>
+<span style="color: #9FC59F;">    """</span>
+    <span style="color: #DFAF8F;">move_proposals</span> = jax.random.normal(key, shape=position.shape) * 0.1
+    <span style="color: #DFAF8F;">proposal</span> = position + move_proposals
+    <span style="color: #DFAF8F;">proposal_log_prob</span> = logpdf(proposal)
 
-    <span style="font-weight: bold; font-style: italic;">log_uniform</span> = np.log(jax.random.uniform(subkey))
-    <span style="font-weight: bold; font-style: italic;">do_accept</span> = log_uniform &lt; proposal_log_prob - log_prob
+    <span style="color: #DFAF8F;">log_uniform</span> = np.log(jax.random.uniform(subkey))
+    <span style="color: #DFAF8F;">do_accept</span> = log_uniform &lt; proposal_log_prob - log_prob
 
-    <span style="font-weight: bold; font-style: italic;">position</span> = np.where(do_accept, proposal, position)
-    <span style="font-weight: bold; font-style: italic;">log_prob</span> = np.where(do_accept, proposal_log_prob, log_prob)
-    <span style="font-weight: bold;">return</span> position, log_prob
+    <span style="color: #DFAF8F;">position</span> = np.where(do_accept, proposal, position)
+    <span style="color: #DFAF8F;">log_prob</span> = np.where(do_accept, proposal_log_prob, log_prob)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> position, log_prob
 </pre>
 </div>
 
@@ -291,47 +291,47 @@ heavy lifting: <code>rw_metropolis_kernel</code>.</li>
 </div>
 
 
-<div id="outline-container-orgca6bfa1" class="outline-3">
-<h3 id="orgca6bfa1">Tensorflow Probability</h3>
-<div class="outline-text-3" id="text-orgca6bfa1">
+<div id="outline-container-org821bd89" class="outline-3">
+<h3 id="org821bd89">Tensorflow Probability</h3>
+<div class="outline-text-3" id="text-org821bd89">
 <p>
 For TFP we use the Random Walk Metropolis algorithm implemented in the library:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> functools <span style="font-weight: bold;">import</span> partial
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> functools <span style="color: #F0DFAF; font-weight: bold;">import</span> partial
 
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
-<span style="font-weight: bold;">import</span> tensorflow <span style="font-weight: bold;">as</span> tf
-<span style="font-weight: bold;">import</span> tensorflow_probability <span style="font-weight: bold;">as</span> tfp
-<span style="font-weight: bold; font-style: italic;">tfd</span> = tfp.distributions
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+<span style="color: #F0DFAF; font-weight: bold;">import</span> tensorflow <span style="color: #F0DFAF; font-weight: bold;">as</span> tf
+<span style="color: #F0DFAF; font-weight: bold;">import</span> tensorflow_probability <span style="color: #F0DFAF; font-weight: bold;">as</span> tfp
+<span style="color: #DFAF8F;">tfd</span> = tfp.distributions
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">run_raw_metropolis</span>(n_dims, n_samples, n_chains, target):
-    <span style="font-weight: bold; font-style: italic;">samples</span>, <span style="font-weight: bold; font-style: italic;">_</span> = tfp.mcmc.sample_chain(
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">run_raw_metropolis</span>(n_dims, n_samples, n_chains, target):
+    <span style="color: #DFAF8F;">samples</span>, <span style="color: #DFAF8F;">_</span> = tfp.mcmc.sample_chain(
         num_results=n_samples,
         current_state=np.zeros((n_dims, n_chains), dtype=np.float32),
         kernel=tfp.mcmc.RandomWalkMetropolis(target.log_prob, seed=42),
         num_burnin_steps=0,
         parallel_iterations=8,
     )
-    <span style="font-weight: bold;">return</span> samples
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> samples
 
-<span style="font-weight: bold; font-style: italic;">run_mcm</span> = partial(run_tfp_mcmc, n_dims, n_samples, n_chains, target)
+<span style="color: #DFAF8F;">run_mcm</span> = partial(run_tfp_mcmc, n_dims, n_samples, n_chains, target)
 
-<span style="font-weight: bold; font-style: italic;">## </span><span style="font-weight: bold; font-style: italic;">Without XLA</span>
+<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">Without XLA</span>
 run_mcm()
 
-<span style="font-weight: bold; font-style: italic;">## </span><span style="font-weight: bold; font-style: italic;">With XLA compilation</span>
-tf.xla.experimental.<span style="font-weight: bold;">compile</span>(run_mcm)
+<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">With XLA compilation</span>
+tf.xla.experimental.<span style="color: #DCDCCC; font-weight: bold;">compile</span>(run_mcm)
 
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgfd4f3de" class="outline-3">
-<h3 id="orgfd4f3de">Results</h3>
-<div class="outline-text-3" id="text-orgfd4f3de">
+<div id="outline-container-org36bf5cb" class="outline-3">
+<h3 id="org36bf5cb">Results</h3>
+<div class="outline-text-3" id="text-org36bf5cb">
 <p>
 We have two degrees of freedom: the number of samples and the number of
 chains. While the first relies on raw number crunching power, the second also
@@ -353,15 +353,15 @@ hypothetical situation, just to show the improvement brought by compilation.</li
 </ol>
 </div>
 
-<div id="outline-container-orgefe354a" class="outline-4">
-<h4 id="orgefe354a">Draw an increasing number of samples with 1,000 chains</h4>
-<div class="outline-text-4" id="text-orgefe354a">
+<div id="outline-container-orgb4960cc" class="outline-4">
+<h4 id="orgb4960cc">Draw an increasing number of samples with 1,000 chains</h4>
+<div class="outline-text-4" id="text-orgb4960cc">
 <p>
 We fix the number of chains and make the number of samples vary.
 </p>
 
 
-<div id="org47c00ce" class="figure">
+<div id="org811961f" class="figure">
 <p><img src="img/jax-parallel-mcmc-samples.png" alt="jax-parallel-mcmc-samples.png" width="100%" />
 </p>
 </div>
@@ -398,15 +398,15 @@ you reach 10 iterations. For all practical purposes, JAX wins.
 </div>
 
 
-<div id="outline-container-orgfb117ae" class="outline-4">
-<h4 id="orgfb117ae">Draw 1,000 samples with an increasing number of chains</h4>
-<div class="outline-text-4" id="text-orgfb117ae">
+<div id="outline-container-org5b3585d" class="outline-4">
+<h4 id="org5b3585d">Draw 1,000 samples with an increasing number of chains</h4>
+<div class="outline-text-4" id="text-org5b3585d">
 <p>
 Here we fix the number of samples and make the number of chains vary.
 </p>
 
 
-<div id="org146dbcf" class="figure">
+<div id="org2280151" class="figure">
 <p><img src="img/jax-parallel-mcmc-chains.png" alt="jax-parallel-mcmc-chains.png" width="100%" />
 </p>
 </div>
@@ -433,9 +433,9 @@ JAX can generate a billion samples in 25s on CPU. 20 times faster than Numpy.
 </div>
 
 
-<div id="outline-container-org5948b3f" class="outline-2">
-<h2 id="org5948b3f">Conclusion</h2>
-<div class="outline-text-2" id="text-org5948b3f">
+<div id="outline-container-org5fb2b38" class="outline-2">
+<h2 id="org5fb2b38">Conclusion</h2>
+<div class="outline-text-2" id="text-org5fb2b38">
 <p>
 For something that allows us to write code in pure python, JAX's performance is
 incredible. Numpy still is a decent contender, especially for the smaller

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>JAX dispatcher</title>
@@ -15,13 +15,13 @@
 <div id="content" class="content">
 <h1 class="title">JAX dispatcher</h1>
 
-<div id="outline-container-org61e1d38" class="outline-2">
-<h2 id="org61e1d38">Static arguments</h2>
-<div class="outline-text-2" id="text-org61e1d38">
+<div id="outline-container-orgea9466a" class="outline-2">
+<h2 id="orgea9466a">Static arguments</h2>
+<div class="outline-text-2" id="text-orgea9466a">
 </div>
-<div id="outline-container-org8bfdee0" class="outline-3">
-<h3 id="org8bfdee0">Where they are needed</h3>
-<div class="outline-text-3" id="text-org8bfdee0">
+<div id="outline-container-orgb28ac70" class="outline-3">
+<h3 id="orgb28ac70">Where they are needed</h3>
+<div class="outline-text-3" id="text-orgb28ac70">
 <ul class="org-ul">
 <li><code>shape</code> parameters</li>
 <li>Scan's <code>length</code> parameter</li>
@@ -30,18 +30,18 @@
 </div>
 </div>
 
-<div id="outline-container-orgc0db878" class="outline-2">
-<h2 id="orgc0db878">Hashable static arguments to JIT compiled function</h2>
-<div class="outline-text-2" id="text-orgc0db878">
+<div id="outline-container-orgf674796" class="outline-2">
+<h2 id="orgf674796">Hashable static arguments to JIT compiled function</h2>
+<div class="outline-text-2" id="text-orgf674796">
 <p>
 i.e. no list, numpy array.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org158b61e" class="outline-2">
-<h2 id="org158b61e">TypeError: Shape</h2>
-<div class="outline-text-2" id="text-org158b61e">
+<div id="outline-container-orgf055859" class="outline-2">
+<h2 id="orgf055859">TypeError: Shape</h2>
+<div class="outline-text-2" id="text-orgf055859">
 <p>
 Related issues:
 </p>
@@ -64,32 +64,32 @@ Let's reproduce the example exactly:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
 
-<span style="font-weight: bold; font-style: italic;">shape</span> = jax.numpy.array([1000])
+<span style="color: #DFAF8F;">shape</span> = jax.numpy.array([1000])
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">jax_funcified</span>(prng_key):
-    <span style="font-weight: bold;">return</span> jax.random.normal(prng_key, shape)
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">jax_funcified</span>(prng_key):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> jax.random.normal(prng_key, shape)
 
-<span style="font-weight: bold; font-style: italic;">key</span> = jax.random.PRNGKey(0)
-<span style="font-weight: bold;">try</span>:
+<span style="color: #DFAF8F;">key</span> = jax.random.PRNGKey(0)
+<span style="color: #F0DFAF; font-weight: bold;">try</span>:
     jax.jit(jax_funcified)(key)
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(e)
+<span style="color: #F0DFAF; font-weight: bold;">except</span> <span style="color: #7CB8BB;">Exception</span> <span style="color: #F0DFAF; font-weight: bold;">as</span> e:
+    <span style="color: #F0DFAF; font-weight: bold;">print</span>(e)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">shape</span> = np.array([10])
+<span style="color: #DFAF8F;">shape</span> = np.array([10])
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">jax_funcified</span>(prng_key):
-    <span style="font-weight: bold;">return</span> jax.random.normal(prng_key, shape)
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">jax_funcified</span>(prng_key):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> jax.random.normal(prng_key, shape)
 
-<span style="font-weight: bold; font-style: italic;">key</span> = jax.random.PRNGKey(0)
-<span style="font-weight: bold;">print</span>(jax.jit(jax_funcified)(key))
+<span style="color: #DFAF8F;">key</span> = jax.random.PRNGKey(0)
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(jax.jit(jax_funcified)(key))
 </pre>
 </div></li>
 </ul>
@@ -97,60 +97,60 @@ Let's reproduce the example exactly:
 
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">rng_key</span> = jax.random.PRNGKey(0)
-<span style="font-weight: bold;">try</span>:
-    <span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=10))
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(e)
-<span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=[3]))
-<span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=(3,)))
-<span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=np.array([3])))
-<span style="font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=jax.numpy.array([3])))
+<span style="color: #DFAF8F;">rng_key</span> = jax.random.PRNGKey(0)
+<span style="color: #F0DFAF; font-weight: bold;">try</span>:
+    <span style="color: #F0DFAF; font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=10))
+<span style="color: #F0DFAF; font-weight: bold;">except</span> <span style="color: #7CB8BB;">Exception</span> <span style="color: #F0DFAF; font-weight: bold;">as</span> e:
+    <span style="color: #F0DFAF; font-weight: bold;">print</span>(e)
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=[3]))
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=(3,)))
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=np.array([3])))
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(jax.random.normal(rng_key, shape=jax.numpy.array([3])))
 
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> jax
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">fun</span>(x):
-    <span style="font-weight: bold; font-style: italic;">rng_key</span> = jax.random.PRNGKey(0)
-    <span style="font-weight: bold;">return</span> jax.random.normal(rng_key, shape=x)
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">fun</span>(x):
+    <span style="color: #DFAF8F;">rng_key</span> = jax.random.PRNGKey(0)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> jax.random.normal(rng_key, shape=x)
 
-<span style="font-weight: bold;">try</span>:
+<span style="color: #F0DFAF; font-weight: bold;">try</span>:
     jax.jit(fun)(1)
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as int: {e}"</span>)
+<span style="color: #F0DFAF; font-weight: bold;">except</span> <span style="color: #7CB8BB;">Exception</span> <span style="color: #F0DFAF; font-weight: bold;">as</span> e:
+    <span style="color: #F0DFAF; font-weight: bold;">print</span>(f<span style="color: #CC9393;">"shape as int: {e}"</span>)
 
-<span style="font-weight: bold;">try</span>:
+<span style="color: #F0DFAF; font-weight: bold;">try</span>:
     jax.jit(fun)([1, 2])
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as list: {e}"</span>)
+<span style="color: #F0DFAF; font-weight: bold;">except</span> <span style="color: #7CB8BB;">Exception</span> <span style="color: #F0DFAF; font-weight: bold;">as</span> e:
+    <span style="color: #F0DFAF; font-weight: bold;">print</span>(f<span style="color: #CC9393;">"shape as list: {e}"</span>)
 
-<span style="font-weight: bold;">try</span>:
+<span style="color: #F0DFAF; font-weight: bold;">try</span>:
     jax.jit(fun)((1, 2))
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as tuple: {e}"</span>)
+<span style="color: #F0DFAF; font-weight: bold;">except</span> <span style="color: #7CB8BB;">Exception</span> <span style="color: #F0DFAF; font-weight: bold;">as</span> e:
+    <span style="color: #F0DFAF; font-weight: bold;">print</span>(f<span style="color: #CC9393;">"shape as tuple: {e}"</span>)
 
-<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">using static_argnums</span>
-<span style="font-weight: bold; font-style: italic;">res</span> = jax.jit(fun, static_argnums=(0,))((1, 2))
-<span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as tuple (static argnum): {res}"</span>)
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">using static_argnums</span>
+<span style="color: #DFAF8F;">res</span> = jax.jit(fun, static_argnums=(0,))((1, 2))
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(f<span style="color: #CC9393;">"shape as tuple (static argnum): {res}"</span>)
 
-<span style="font-weight: bold;">try</span>:
-    <span style="font-weight: bold; font-style: italic;">res</span> = jax.jit(fun, static_argnums=(0,))([1, 2])
-<span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">Exception</span> <span style="font-weight: bold;">as</span> e:
-    <span style="font-weight: bold;">print</span>(f<span style="font-style: italic;">"shape as list (static_argnums): {e}"</span>)
+<span style="color: #F0DFAF; font-weight: bold;">try</span>:
+    <span style="color: #DFAF8F;">res</span> = jax.jit(fun, static_argnums=(0,))([1, 2])
+<span style="color: #F0DFAF; font-weight: bold;">except</span> <span style="color: #7CB8BB;">Exception</span> <span style="color: #F0DFAF; font-weight: bold;">as</span> e:
+    <span style="color: #F0DFAF; font-weight: bold;">print</span>(f<span style="color: #CC9393;">"shape as list (static_argnums): {e}"</span>)
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org1cdb701" class="outline-2">
-<h2 id="org1cdb701">Links to this note</h2>
-<div class="outline-text-2" id="text-org1cdb701">
+<div id="outline-container-orgfe07e05" class="outline-2">
+<h2 id="orgfe07e05">Links to this note</h2>
+<div class="outline-text-2" id="text-orgfe07e05">
 <ul class="org-ul">
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
 </ul>

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>La pyramide des votants</title>
@@ -35,12 +35,12 @@ Et en faire une jolie visualization.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python" id="org6642594"><span style="font-style: italic;">"""</span>
-<span style="font-style: italic;">These data were downloaded from https://www.insee.fr/fr/statistiques/2381472#tableau-figure1</span>
-<span style="font-style: italic;">Key = age r&#233;volu (100 = 100 ans et plus)</span>
-<span style="font-style: italic;">Value = nombre de personnes dans la population fran&#231;aise</span>
-<span style="font-style: italic;">"""</span>
-<span style="font-weight: bold; font-style: italic;">population</span> = {
+<pre class="src src-python" id="orgfe42ab3"><span style="color: #9FC59F;">"""</span>
+<span style="color: #9FC59F;">These data were downloaded from https://www.insee.fr/fr/statistiques/2381472#tableau-figure1</span>
+<span style="color: #9FC59F;">Key = age r&#233;volu (100 = 100 ans et plus)</span>
+<span style="color: #9FC59F;">Value = nombre de personnes dans la population fran&#231;aise</span>
+<span style="color: #9FC59F;">"""</span>
+<span style="color: #DFAF8F;">population</span> = {
     0: 690942,
     1: 695063,
     2: 716123,
@@ -147,90 +147,90 @@ Et en faire une jolie visualization.
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python" id="orged473c5"><span style="font-weight: bold; font-style: italic;">ages_limite</span> = [24, 34, 49, 59, 69, 101]
-<span style="font-weight: bold; font-style: italic;">participation</span> = [.65, .66, .75, .78, .85, .89]
-<span style="font-weight: bold; font-style: italic;">intentions</span> = {
-    <span style="font-style: italic;">"M&#233;lenchon"</span>: [.13, .12, .10, .09, .07, .03],
-    <span style="font-style: italic;">"Jadot"</span>: [.12, .09, .08, .06, .06, .04],
-    <span style="font-style: italic;">"Macron"</span>: [.18, .19, .23, .22, .28, .33],
-    <span style="font-style: italic;">"P&#233;cresse"</span>: [.08, .09, .10, .13, .15, .28],
-    <span style="font-style: italic;">"Le Pen"</span>: [.16, .19, .20, .20, .13, .08],
-    <span style="font-style: italic;">"Zemmour"</span>: [.12, .14, .11, .14, .14, .13],
+<pre class="src src-python" id="orge0ff9cb"><span style="color: #DFAF8F;">ages_limite</span> = [24, 34, 49, 59, 69, 101]
+<span style="color: #DFAF8F;">participation</span> = [.65, .66, .75, .78, .85, .89]
+<span style="color: #DFAF8F;">intentions</span> = {
+    <span style="color: #CC9393;">"M&#233;lenchon"</span>: [.13, .12, .10, .09, .07, .03],
+    <span style="color: #CC9393;">"Jadot"</span>: [.12, .09, .08, .06, .06, .04],
+    <span style="color: #CC9393;">"Macron"</span>: [.18, .19, .23, .22, .28, .33],
+    <span style="color: #CC9393;">"P&#233;cresse"</span>: [.08, .09, .10, .13, .15, .28],
+    <span style="color: #CC9393;">"Le Pen"</span>: [.16, .19, .20, .20, .13, .08],
+    <span style="color: #CC9393;">"Zemmour"</span>: [.12, .14, .11, .14, .14, .13],
 }
 
-<span style="font-weight: bold; font-style: italic;">colors</span> = {
-    <span style="font-style: italic;">"M&#233;lenchon"</span>: <span style="font-style: italic;">"#E85D75"</span>,
-    <span style="font-style: italic;">"Jadot"</span>: <span style="font-style: italic;">"#B2C9AB"</span>,
-    <span style="font-style: italic;">"Macron"</span>: <span style="font-style: italic;">"#748CAB"</span>,
-    <span style="font-style: italic;">"P&#233;cresse"</span>: <span style="font-style: italic;">"#748CAB"</span>,
-    <span style="font-style: italic;">"Zemmour"</span>: <span style="font-style: italic;">"#080708"</span>,
-    <span style="font-style: italic;">"Le Pen"</span>: <span style="font-style: italic;">"#292F36"</span>,
+<span style="color: #DFAF8F;">colors</span> = {
+    <span style="color: #CC9393;">"M&#233;lenchon"</span>: <span style="color: #CC9393;">"#E85D75"</span>,
+    <span style="color: #CC9393;">"Jadot"</span>: <span style="color: #CC9393;">"#B2C9AB"</span>,
+    <span style="color: #CC9393;">"Macron"</span>: <span style="color: #CC9393;">"#748CAB"</span>,
+    <span style="color: #CC9393;">"P&#233;cresse"</span>: <span style="color: #CC9393;">"#748CAB"</span>,
+    <span style="color: #CC9393;">"Zemmour"</span>: <span style="color: #CC9393;">"#080708"</span>,
+    <span style="color: #CC9393;">"Le Pen"</span>: <span style="color: #CC9393;">"#292F36"</span>,
 }
 </pre>
 </div>
 
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> bisect
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> bisect
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">ages</span> = <span style="font-weight: bold;">list</span>(population.keys())[18:]
+<span style="color: #DFAF8F;">ages</span> = <span style="color: #DCDCCC; font-weight: bold;">list</span>(population.keys())[18:]
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">get_num_votes</span>(population, ages_limite, intentions):
-    <span style="font-weight: bold; font-style: italic;">num_votes</span> = []
-    <span style="font-weight: bold;">for</span> a <span style="font-weight: bold;">in</span> ages:
-        <span style="font-weight: bold; font-style: italic;">idx</span> = bisect.bisect_left(ages_limite, a)
-        num_votes.append(<span style="font-weight: bold;">int</span>(population[a] * participation[idx] * intentions[idx]))
-    <span style="font-weight: bold;">return</span> num_votes
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">get_num_votes</span>(population, ages_limite, intentions):
+    <span style="color: #DFAF8F;">num_votes</span> = []
+    <span style="color: #F0DFAF; font-weight: bold;">for</span> a <span style="color: #F0DFAF; font-weight: bold;">in</span> ages:
+        <span style="color: #DFAF8F;">idx</span> = bisect.bisect_left(ages_limite, a)
+        num_votes.append(<span style="color: #DCDCCC; font-weight: bold;">int</span>(population[a] * participation[idx] * intentions[idx]))
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> num_votes
 
-<span style="font-weight: bold; font-style: italic;">participants</span> = get_num_votes(population, ages_limite, participation)
-<span style="font-weight: bold; font-style: italic;">votes</span> = {name: get_num_votes(population, ages_limite, values) <span style="font-weight: bold;">for</span> name, values <span style="font-weight: bold;">in</span>  intentions.items()}
-<span style="font-weight: bold; font-style: italic;">idx_median</span> = {name: bisect.bisect_left(np.cumsum(values) / np.<span style="font-weight: bold;">sum</span>(values), 0.5) <span style="font-weight: bold;">for</span> name, values <span style="font-weight: bold;">in</span> votes.items()}
-<span style="font-weight: bold; font-style: italic;">median</span> = {name: ages[idx] <span style="font-weight: bold;">for</span> name, idx <span style="font-weight: bold;">in</span> idx_median.items()}
-<span style="font-weight: bold; font-style: italic;">mean</span> = {name: <span style="font-weight: bold;">int</span>(np.<span style="font-weight: bold;">sum</span>(np.array(ages) * values)/np.<span style="font-weight: bold;">sum</span>(values)) <span style="font-weight: bold;">for</span> name, values <span style="font-weight: bold;">in</span> votes.items()}
+<span style="color: #DFAF8F;">participants</span> = get_num_votes(population, ages_limite, participation)
+<span style="color: #DFAF8F;">votes</span> = {name: get_num_votes(population, ages_limite, values) <span style="color: #F0DFAF; font-weight: bold;">for</span> name, values <span style="color: #F0DFAF; font-weight: bold;">in</span>  intentions.items()}
+<span style="color: #DFAF8F;">idx_median</span> = {name: bisect.bisect_left(np.cumsum(values) / np.<span style="color: #DCDCCC; font-weight: bold;">sum</span>(values), 0.5) <span style="color: #F0DFAF; font-weight: bold;">for</span> name, values <span style="color: #F0DFAF; font-weight: bold;">in</span> votes.items()}
+<span style="color: #DFAF8F;">median</span> = {name: ages[idx] <span style="color: #F0DFAF; font-weight: bold;">for</span> name, idx <span style="color: #F0DFAF; font-weight: bold;">in</span> idx_median.items()}
+<span style="color: #DFAF8F;">mean</span> = {name: <span style="color: #DCDCCC; font-weight: bold;">int</span>(np.<span style="color: #DCDCCC; font-weight: bold;">sum</span>(np.array(ages) * values)/np.<span style="color: #DCDCCC; font-weight: bold;">sum</span>(values)) <span style="color: #F0DFAF; font-weight: bold;">for</span> name, values <span style="color: #F0DFAF; font-weight: bold;">in</span> votes.items()}
 </pre>
 </div>
 
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> matplotlib.pyplot <span style="font-weight: bold;">as</span> plt
-<span style="font-weight: bold;">import</span> matplotlib.gridspec <span style="font-weight: bold;">as</span> gridspec
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.pyplot <span style="color: #F0DFAF; font-weight: bold;">as</span> plt
+<span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.gridspec <span style="color: #F0DFAF; font-weight: bold;">as</span> gridspec
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">add_title</span>(ax, name, legend=<span style="font-style: italic;">""</span>):
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">add_title</span>(ax, name, legend=<span style="color: #CC9393;">""</span>):
     ax.text(
         0.5,
         1.1,
-        f<span style="font-style: italic;">"{name}"</span>,
-        ha=<span style="font-style: italic;">"center"</span>,
-        va=<span style="font-style: italic;">"bottom"</span>,
-        fontname=<span style="font-style: italic;">"Futura PT"</span>,
+        f<span style="color: #CC9393;">"{name}"</span>,
+        ha=<span style="color: #CC9393;">"center"</span>,
+        va=<span style="color: #CC9393;">"bottom"</span>,
+        fontname=<span style="color: #CC9393;">"Futura PT"</span>,
         fontsize=25,
-        fontweight=<span style="font-style: italic;">"bold"</span>,
+        fontweight=<span style="color: #CC9393;">"bold"</span>,
     )
     ax.text(
         0.5,
         0.95,
-        <span style="font-style: italic;">"Ce grqphique repr&#233;sente la distibution des &#226;ges des gens qui"</span>,
-        ha=<span style="font-style: italic;">"center"</span>,
-        va=<span style="font-style: italic;">"bottom"</span>,
-        fontname=<span style="font-style: italic;">"Futura PT"</span>,
+        <span style="color: #CC9393;">"Ce grqphique repr&#233;sente la distibution des &#226;ges des gens qui"</span>,
+        ha=<span style="color: #CC9393;">"center"</span>,
+        va=<span style="color: #CC9393;">"bottom"</span>,
+        fontname=<span style="color: #CC9393;">"Futura PT"</span>,
         fontsize=10,
     )
-    ax.axis(<span style="font-style: italic;">"off"</span>)
+    ax.axis(<span style="color: #CC9393;">"off"</span>)
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">add_pyramide</span>(ax, ages, num_votes, median_idx, color=<span style="font-style: italic;">"blue"</span>):
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">add_pyramide</span>(ax, ages, num_votes, median_idx, color=<span style="color: #CC9393;">"blue"</span>):
     ax.bar(
         ages,
-        num_votes/np.<span style="font-weight: bold;">sum</span>(num_votes),
+        num_votes/np.<span style="color: #DCDCCC; font-weight: bold;">sum</span>(num_votes),
         width=1.0,
-        align=<span style="font-style: italic;">"edge"</span>,
-        color=[color <span style="font-weight: bold;">for</span> _ <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(median_idx)] + [<span style="font-style: italic;">"black"</span>] + [color <span style="font-weight: bold;">for</span> _ <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">range</span>(<span style="font-weight: bold;">len</span>(ages)-median_idx-1)],
-        ec=<span style="font-style: italic;">"white"</span>,
+        align=<span style="color: #CC9393;">"edge"</span>,
+        color=[color <span style="color: #F0DFAF; font-weight: bold;">for</span> _ <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(median_idx)] + [<span style="color: #CC9393;">"black"</span>] + [color <span style="color: #F0DFAF; font-weight: bold;">for</span> _ <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(<span style="color: #DCDCCC; font-weight: bold;">len</span>(ages)-median_idx-1)],
+        ec=<span style="color: #CC9393;">"white"</span>,
     )
-    <span style="font-weight: bold; font-style: italic;">#</span><span style="font-weight: bold; font-style: italic;">ax.invert_yaxis()</span>
-    ax.spines[<span style="font-style: italic;">"left"</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
-    ax.spines[<span style="font-style: italic;">"right"</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
-    ax.spines[<span style="font-style: italic;">"top"</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
+    <span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">ax.invert_yaxis()</span>
+    ax.spines[<span style="color: #CC9393;">"left"</span>].set_visible(<span style="color: #BFEBBF;">False</span>)
+    ax.spines[<span style="color: #CC9393;">"right"</span>].set_visible(<span style="color: #BFEBBF;">False</span>)
+    ax.spines[<span style="color: #CC9393;">"top"</span>].set_visible(<span style="color: #BFEBBF;">False</span>)
 </pre>
 </div>
 
@@ -239,44 +239,44 @@ Et en faire une jolie visualization.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure(figsize=(12, 8))
-<span style="font-weight: bold; font-style: italic;">gs</span> = gridspec.GridSpec(2, 1, height_ratios = [.25,1], figure=fig)
+<pre class="src src-python"><span style="color: #DFAF8F;">fig</span> = plt.figure(figsize=(12, 8))
+<span style="color: #DFAF8F;">gs</span> = gridspec.GridSpec(2, 1, height_ratios = [.25,1], figure=fig)
 
-<span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplot(gs[0, 0])
-add_title(ax, <span style="font-style: italic;">"Candidat(e) des jeunes ?"</span>)
+<span style="color: #DFAF8F;">ax</span> = plt.subplot(gs[0, 0])
+add_title(ax, <span style="color: #CC9393;">"Candidat(e) des jeunes ?"</span>)
 
-<span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplot(gs[1, 0])
-<span style="font-weight: bold; font-style: italic;">pop</span> = <span style="font-weight: bold;">list</span>(population.values())[18:]
+<span style="color: #DFAF8F;">ax</span> = plt.subplot(gs[1, 0])
+<span style="color: #DFAF8F;">pop</span> = <span style="color: #DCDCCC; font-weight: bold;">list</span>(population.values())[18:]
 ax.bar(
     ages,
     pop,
     width=1.0,
-    align=<span style="font-style: italic;">"edge"</span>,
-    color=<span style="font-style: italic;">"lightgray"</span>,
-    ec=<span style="font-style: italic;">"white"</span>,
+    align=<span style="color: #CC9393;">"edge"</span>,
+    color=<span style="color: #CC9393;">"lightgray"</span>,
+    ec=<span style="color: #CC9393;">"white"</span>,
 )
-<span style="font-weight: bold; font-style: italic;">num_votes</span> = participants
+<span style="color: #DFAF8F;">num_votes</span> = participants
 ax.bar(
     ages,
     num_votes,
     width=1.0,
-    align=<span style="font-style: italic;">"edge"</span>,
-    color=<span style="font-style: italic;">"black"</span>,
-    ec=<span style="font-style: italic;">"white"</span>,
+    align=<span style="color: #CC9393;">"edge"</span>,
+    color=<span style="color: #CC9393;">"black"</span>,
+    ec=<span style="color: #CC9393;">"white"</span>,
 )
 ax.invert_xaxis()
-ax.spines[<span style="font-style: italic;">"left"</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
-ax.spines[<span style="font-style: italic;">"right"</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
-ax.spines[<span style="font-style: italic;">"top"</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
+ax.spines[<span style="color: #CC9393;">"left"</span>].set_visible(<span style="color: #BFEBBF;">False</span>)
+ax.spines[<span style="color: #CC9393;">"right"</span>].set_visible(<span style="color: #BFEBBF;">False</span>)
+ax.spines[<span style="color: #CC9393;">"top"</span>].set_visible(<span style="color: #BFEBBF;">False</span>)
 
 gs.update(hspace=-0.1)
-plt.savefig(filename, bbox_inches=<span style="font-style: italic;">"tight"</span>)
+plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
 filename
 </pre>
 </div>
 
 
-<div id="org36fd763" class="figure">
+<div id="org5df3c68" class="figure">
 <p><img src="file:///tmp/babel-bVlA5y/figureHYdpyt.png" alt="figureHYdpyt.png" />
 </p>
 </div>
@@ -286,45 +286,45 @@ Regardons maintenant la différence entre les deux
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">idx_median</span> = bisect.bisect_left(np.cumsum(pop) / np.<span style="font-weight: bold;">sum</span>(pop), 0.5)
+<pre class="src src-python"><span style="color: #DFAF8F;">idx_median</span> = bisect.bisect_left(np.cumsum(pop) / np.<span style="color: #DCDCCC; font-weight: bold;">sum</span>(pop), 0.5)
 ages[idx_median]
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">idx_median</span> = bisect.bisect_left(np.cumsum(participants) / np.<span style="font-weight: bold;">sum</span>(participants), 0.5)
+<pre class="src src-python"><span style="color: #DFAF8F;">idx_median</span> = bisect.bisect_left(np.cumsum(participants) / np.<span style="color: #DCDCCC; font-weight: bold;">sum</span>(participants), 0.5)
 ages[idx_median]
 </pre>
 </div>
 
-<div id="outline-container-org414fb7e" class="outline-2">
-<h2 id="org414fb7e"><span class="todo TODO">TODO</span> But would that change the election?</h2>
-<div class="outline-text-2" id="text-org414fb7e">
+<div id="outline-container-org9ec0e58" class="outline-2">
+<h2 id="org9ec0e58"><span class="todo TODO">TODO</span> But would that change the election?</h2>
+<div class="outline-text-2" id="text-org9ec0e58">
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">fig</span> = plt.figure(figsize=(8, 8))
-<span style="font-weight: bold; font-style: italic;">gs</span> = gridspec.GridSpec(<span style="font-weight: bold;">len</span>(intentions)+1, 1, figure=fig)
+<pre class="src src-python"><span style="color: #DFAF8F;">fig</span> = plt.figure(figsize=(8, 8))
+<span style="color: #DFAF8F;">gs</span> = gridspec.GridSpec(<span style="color: #DCDCCC; font-weight: bold;">len</span>(intentions)+1, 1, figure=fig)
 
-<span style="font-weight: bold; font-style: italic;">sorted_names</span> = [name <span style="font-weight: bold;">for</span> name, _ <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">sorted</span>(median.items(), key=<span style="font-weight: bold;">lambda</span> item: item[1], reverse=<span style="font-weight: bold; text-decoration: underline;">True</span>)]
-<span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplot(gs[0, 0])
-add_title(ax, <span style="font-style: italic;">"Candidat(e) des jeunes ?"</span>)
-<span style="font-weight: bold;">for</span> i, name <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">enumerate</span>(sorted_names):
-    <span style="font-weight: bold; font-style: italic;">ax</span> = plt.subplot(gs[i+1, 0])
-    add_pyramide(ax, ages, votes[name], idx_median[name], <span style="font-style: italic;">"lightgray"</span>)
+<span style="color: #DFAF8F;">sorted_names</span> = [name <span style="color: #F0DFAF; font-weight: bold;">for</span> name, _ <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">sorted</span>(median.items(), key=<span style="color: #F0DFAF; font-weight: bold;">lambda</span> item: item[1], reverse=<span style="color: #BFEBBF;">True</span>)]
+<span style="color: #DFAF8F;">ax</span> = plt.subplot(gs[0, 0])
+add_title(ax, <span style="color: #CC9393;">"Candidat(e) des jeunes ?"</span>)
+<span style="color: #F0DFAF; font-weight: bold;">for</span> i, name <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">enumerate</span>(sorted_names):
+    <span style="color: #DFAF8F;">ax</span> = plt.subplot(gs[i+1, 0])
+    add_pyramide(ax, ages, votes[name], idx_median[name], <span style="color: #CC9393;">"lightgray"</span>)
     ax.set_yticks([])
-    ax.spines[<span style="font-style: italic;">"bottom"</span>].set_visible(<span style="font-weight: bold; text-decoration: underline;">False</span>)
-    <span style="font-weight: bold;">if</span> i != <span style="font-weight: bold;">len</span>(intentions)-1:
+    ax.spines[<span style="color: #CC9393;">"bottom"</span>].set_visible(<span style="color: #BFEBBF;">False</span>)
+    <span style="color: #F0DFAF; font-weight: bold;">if</span> i != <span style="color: #DCDCCC; font-weight: bold;">len</span>(intentions)-1:
        ax.set_xticks([])
-    <span style="font-weight: bold;">else</span>:
+    <span style="color: #F0DFAF; font-weight: bold;">else</span>:
        ax.set_xticks([18, 30, 40, 50, 60, 70, 100])
 
 gs.update(hspace=0.3)
-plt.savefig(filename, bbox_inches=<span style="font-style: italic;">"tight"</span>)
+plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
 filename
 </pre>
 </div>
 
 
-<div id="orgad1314d" class="figure">
+<div id="org435c599" class="figure">
 <p><img src="file:///tmp/babel-5YZCny/figurewWIjZ7.png" alt="figurewWIjZ7.png" />
 </p>
 </div>
@@ -340,15 +340,15 @@ Est-il suffisant que tous les 19-25 ans aillent voter pour équilibrer ce multip
 </div>
 
 
-<div id="outline-container-orgddf78f7" class="outline-2">
-<h2 id="orgddf78f7"><span class="todo TODO">TODO</span> Tracer la pyramide des âges des gens en âge de voter</h2>
+<div id="outline-container-orgaf3fee8" class="outline-2">
+<h2 id="orgaf3fee8"><span class="todo TODO">TODO</span> Tracer la pyramide des âges des gens en âge de voter</h2>
 </div>
-<div id="outline-container-orgea1a62b" class="outline-2">
-<h2 id="orgea1a62b"><span class="todo TODO">TODO</span> Tracer la distribution cumulative par âge</h2>
+<div id="outline-container-orgdb44b56" class="outline-2">
+<h2 id="orgdb44b56"><span class="todo TODO">TODO</span> Tracer la distribution cumulative par âge</h2>
 </div>
-<div id="outline-container-org2d4bc57" class="outline-2">
-<h2 id="org2d4bc57"><span class="todo TODO">TODO</span> Tracer la pyramide des personnes sûres de voter</h2>
-<div class="outline-text-2" id="text-org2d4bc57">
+<div id="outline-container-org664333d" class="outline-2">
+<h2 id="org664333d"><span class="todo TODO">TODO</span> Tracer la pyramide des personnes sûres de voter</h2>
+<div class="outline-text-2" id="text-org664333d">
 <p>
 On compare la pyramide des âges de la population en âge de voter avec la pyramide des âges des gens qui sont certains ou presque certains d'aller voter.
 </p>
@@ -364,16 +364,16 @@ Il est heureusement assez simple de répondre à cette question: il suffit de co
 </div>
 
 
-<div id="outline-container-org209bc41" class="outline-2">
-<h2 id="org209bc41"><span class="todo TODO">TODO</span> Superposer la cumlative sûrs de voter avec la cumulative des âges</h2>
+<div id="outline-container-orgca3fcf1" class="outline-2">
+<h2 id="orgca3fcf1"><span class="todo TODO">TODO</span> Superposer la cumlative sûrs de voter avec la cumulative des âges</h2>
 </div>
-<div id="outline-container-org12eeae9" class="outline-2">
-<h2 id="org12eeae9"><span class="todo TODO">TODO</span> Tracer la pyramide des votes mélenchon, macron, lepen, jadot, pécresse, zemmour</h2>
+<div id="outline-container-orgfd19865" class="outline-2">
+<h2 id="orgfd19865"><span class="todo TODO">TODO</span> Tracer la pyramide des votes mélenchon, macron, lepen, jadot, pécresse, zemmour</h2>
 </div>
 
-<div id="outline-container-orge18f2df" class="outline-2">
-<h2 id="orge18f2df">Data</h2>
-<div class="outline-text-2" id="text-orge18f2df">
+<div id="outline-container-orgfdc8621" class="outline-2">
+<h2 id="orgfdc8621">Data</h2>
+<div class="outline-text-2" id="text-orgfdc8621">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="http://www.commission-des-sondages.fr/notices/files/notices/2022/janvier/9303-p-ipsos-le-monde-fjj-cevipof-janvier-2022.pdf">Sondage Ipsos Janvier 2022</a></li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.insee.fr/fr/statistiques/2381472">Pyramide des âges INSEE</a></li>
@@ -384,8 +384,8 @@ J
 </div>
 </div>
 
-<div id="outline-container-orga61ef7c" class="outline-2">
-<h2 id="orga61ef7c">Links to this note</h2>
+<div id="outline-container-org23d2941" class="outline-2">
+<h2 id="org23d2941">Links to this note</h2>
 </div>
 </div>
 </body>

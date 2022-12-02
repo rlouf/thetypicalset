@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Hidden Markov Models in Aesara</title>
@@ -72,33 +72,33 @@ Where the transition matrix \(\Gamma\) is assumed to be constant.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
-<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
 
-<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
 
-<span style="font-weight: bold; font-style: italic;">N_tt</span> = at.iscalar(<span style="font-style: italic;">"N"</span>)
-<span style="font-weight: bold; font-style: italic;">M_tt</span> = at.iscalar(<span style="font-style: italic;">"M"</span>)
-<span style="font-weight: bold; font-style: italic;">Gamma_rv</span> = srng.dirichlet(at.ones((M_tt, M_tt)), name=<span style="font-style: italic;">"Gamma"</span>)
+<span style="color: #DFAF8F;">N_tt</span> = at.iscalar(<span style="color: #CC9393;">"N"</span>)
+<span style="color: #DFAF8F;">M_tt</span> = at.iscalar(<span style="color: #CC9393;">"M"</span>)
+<span style="color: #DFAF8F;">Gamma_rv</span> = srng.dirichlet(at.ones((M_tt, M_tt)), name=<span style="color: #CC9393;">"Gamma"</span>)
 
-<span style="font-weight: bold; font-style: italic;">mu_tt</span> = at.vector(<span style="font-style: italic;">"mus"</span>)
-<span style="font-weight: bold; font-style: italic;">sigma_tt</span> = 1.
+<span style="color: #DFAF8F;">mu_tt</span> = at.vector(<span style="color: #CC9393;">"mus"</span>)
+<span style="color: #DFAF8F;">sigma_tt</span> = 1.
 
-<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">scan_fn</span>(Gamma_t):
-    <span style="font-weight: bold; font-style: italic;">S_t</span> = srng.categorical(Gamma_t[0], name=<span style="font-style: italic;">"S_t"</span>)
-    <span style="font-weight: bold; font-style: italic;">Y_t</span> = srng.normal(mu_tt[S_t], sigma_tt, name=<span style="font-style: italic;">"Y_t"</span>)
-    <span style="font-weight: bold;">return</span> Y_t, S_t
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">scan_fn</span>(Gamma_t):
+    <span style="color: #DFAF8F;">S_t</span> = srng.categorical(Gamma_t[0], name=<span style="color: #CC9393;">"S_t"</span>)
+    <span style="color: #DFAF8F;">Y_t</span> = srng.normal(mu_tt[S_t], sigma_tt, name=<span style="color: #CC9393;">"Y_t"</span>)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> Y_t, S_t
 
-(Y_rv, S_rv), <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
+(Y_rv, S_rv), <span style="color: #DFAF8F;">updates</span> = aesara.scan(
     fn=scan_fn,
     non_sequences=[Gamma_rv],
     outputs_info=[{}, {}],
-    strict=<span style="font-weight: bold; text-decoration: underline;">True</span>,
+    strict=<span style="color: #BFEBBF;">True</span>,
     n_steps=N_tt
 )
 
-<span style="font-weight: bold; font-style: italic;">sample_fn</span> = aesara.function((N_tt, M_tt, mu_tt), (Y_rv, S_rv), updates=updates)
-<span style="font-weight: bold;">print</span>(sample_fn(10, 2, [-10, 10]))
+<span style="color: #DFAF8F;">sample_fn</span> = aesara.function((N_tt, M_tt, mu_tt), (Y_rv, S_rv), updates=updates)
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(sample_fn(10, 2, [-10, 10]))
 </pre>
 </div>
 
@@ -107,30 +107,30 @@ Thanks to AePPL we can compute this models' logprobability function easily:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
-<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> aeppl <span style="color: #F0DFAF; font-weight: bold;">import</span> joint_logprob
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
 
-<span style="font-weight: bold; font-style: italic;">y_vv</span> = Y_rv.clone()
-<span style="font-weight: bold; font-style: italic;">s_vv</span> = S_rv.clone()
-<span style="font-weight: bold; font-style: italic;">Gamma_vv</span> = Gamma_rv.clone()
+<span style="color: #DFAF8F;">y_vv</span> = Y_rv.clone()
+<span style="color: #DFAF8F;">s_vv</span> = S_rv.clone()
+<span style="color: #DFAF8F;">Gamma_vv</span> = Gamma_rv.clone()
 
-<span style="font-weight: bold; font-style: italic;">values</span> = {
+<span style="color: #DFAF8F;">values</span> = {
     y_vv: np.random.normal(0, 1., size=10),
-    s_vv: np.ones(10, dtype=<span style="font-style: italic;">"int"</span>),
+    s_vv: np.ones(10, dtype=<span style="color: #CC9393;">"int"</span>),
     M_tt: 2,
     N_tt: 10,
     mu_tt: [-1., 1.],
     Gamma_vv:[[.5, .5], [.5, .5]],
 }
 
-<span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({Y_rv: y_vv, S_rv: s_vv, Gamma_rv: Gamma_vv})
-<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function(<span style="font-weight: bold;">list</span>(values.keys()), logprob)
-<span style="font-weight: bold;">print</span>(logprob_fn(*values.values()))
+<span style="color: #DFAF8F;">logprob</span> = joint_logprob({Y_rv: y_vv, S_rv: s_vv, Gamma_rv: Gamma_vv})
+<span style="color: #DFAF8F;">logprob_fn</span> = aesara.function(<span style="color: #DCDCCC; font-weight: bold;">list</span>(values.keys()), logprob)
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(logprob_fn(*values.values()))
 </pre>
 </div>
 
-<div id="outline-container-org6356931" class="outline-2">
-<h2 id="org6356931">Links to this note</h2>
+<div id="outline-container-orgda13f14" class="outline-2">
+<h2 id="orgda13f14">Links to this note</h2>
 </div>
 </div>
 </body>

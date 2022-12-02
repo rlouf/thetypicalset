@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:27 -->
+<!-- 2022-12-02 Fri 09:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Choose what to work on</title>
@@ -39,40 +39,40 @@ The tool of choice here is <i>spaced repetition</i>, which is mostly used to lea
 </p>
 
 <div class="org-src-container">
-<pre class="src src-elisp">(<span style="font-weight: bold;">defun</span> <span style="font-weight: bold;">my/space-repeat-if-tag-spaced</span> (e)
-  <span style="font-style: italic;">"Resets the header on the TODO states and increases the date</span>
-<span style="font-style: italic;">according to a suggested spaced repetition interval."</span>
-  (<span style="font-weight: bold;">let*</span> ((spaced-rep-map '((0 . <span style="font-style: italic;">"++1d"</span>)
-                          (1 . <span style="font-style: italic;">"++2d"</span>)
-                          (2 . <span style="font-style: italic;">"++10d"</span>)
-                          (3 . <span style="font-style: italic;">"++30d"</span>)
-                          (4 . <span style="font-style: italic;">"++60d"</span>)
-                          (5 . <span style="font-style: italic;">"++4m"</span>)))
-         (spaced-key <span style="font-style: italic;">"spaced"</span>)
+<pre class="src src-elisp">(<span style="color: #F0DFAF; font-weight: bold;">defun</span> <span style="color: #93E0E3;">my/space-repeat-if-tag-spaced</span> (e)
+  <span style="color: #9FC59F;">"Resets the header on the TODO states and increases the date</span>
+<span style="color: #9FC59F;">according to a suggested spaced repetition interval."</span>
+  (<span style="color: #F0DFAF; font-weight: bold;">let*</span> ((spaced-rep-map '((0 . <span style="color: #CC9393;">"++1d"</span>)
+                          (1 . <span style="color: #CC9393;">"++2d"</span>)
+                          (2 . <span style="color: #CC9393;">"++10d"</span>)
+                          (3 . <span style="color: #CC9393;">"++30d"</span>)
+                          (4 . <span style="color: #CC9393;">"++60d"</span>)
+                          (5 . <span style="color: #CC9393;">"++4m"</span>)))
+         (spaced-key <span style="color: #CC9393;">"spaced"</span>)
          (tags (org-get-tags nil t))
          (spaced-todo-p (member spaced-key tags))
          (repetition-n (first (cdr spaced-todo-p)))
-         (n+1 (<span style="font-weight: bold;">if</span> repetition-n (+ 1 (string-to-number (substring repetition-n (- (length repetition-n) 1) (length repetition-n)))) 0))
+         (n+1 (<span style="color: #F0DFAF; font-weight: bold;">if</span> repetition-n (+ 1 (string-to-number (substring repetition-n (- (length repetition-n) 1) (length repetition-n)))) 0))
          (spaced-repetition-p (alist-get n+1 spaced-rep-map))
-         (new-repetition-tag (concat <span style="font-style: italic;">"repetition"</span> (number-to-string n+1)))
-         (new-tags (reverse (<span style="font-weight: bold;">if</span> repetition-n
+         (new-repetition-tag (concat <span style="color: #CC9393;">"repetition"</span> (number-to-string n+1)))
+         (new-tags (reverse (<span style="color: #F0DFAF; font-weight: bold;">if</span> repetition-n
                                 (seq-reduce
-                                 (<span style="font-weight: bold;">lambda</span> (a x) (<span style="font-weight: bold;">if</span> (string-equal x repetition-n) (cons new-repetition-tag a) (cons x a)))
+                                 (<span style="color: #F0DFAF; font-weight: bold;">lambda</span> (a x) (<span style="color: #F0DFAF; font-weight: bold;">if</span> (string-equal x repetition-n) (cons new-repetition-tag a) (cons x a)))
                                  tags
                                  '())
                               (seq-reduce
-                               (<span style="font-weight: bold;">lambda</span> (a x) (<span style="font-weight: bold;">if</span> (string-equal x spaced-key) (cons new-repetition-tag (cons x a)) (cons x a)))
+                               (<span style="color: #F0DFAF; font-weight: bold;">lambda</span> (a x) (<span style="color: #F0DFAF; font-weight: bold;">if</span> (string-equal x spaced-key) (cons new-repetition-tag (cons x a)) (cons x a)))
                                tags
                                '())))))
-    (<span style="font-weight: bold;">if</span> (<span style="font-weight: bold;">and</span> spaced-todo-p spaced-repetition-p)
-      (<span style="font-weight: bold;">progn</span>
-          <span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">avoid infinitive looping</span>
+    (<span style="color: #F0DFAF; font-weight: bold;">if</span> (<span style="color: #F0DFAF; font-weight: bold;">and</span> spaced-todo-p spaced-repetition-p)
+      (<span style="color: #F0DFAF; font-weight: bold;">progn</span>
+          <span style="color: #5F7F5F;">;; </span><span style="color: #7F9F7F;">avoid infinitive looping</span>
           (remove-hook 'org-trigger-hook 'my/space-repeat-if-tag-spaced)
-          <span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">reset to previous state</span>
+          <span style="color: #5F7F5F;">;; </span><span style="color: #7F9F7F;">reset to previous state</span>
           (org-call-with-arg 'org-todo 'left)
-          <span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">schedule to next spaced repetition</span>
+          <span style="color: #5F7F5F;">;; </span><span style="color: #7F9F7F;">schedule to next spaced repetition</span>
           (org-schedule nil (alist-get n+1 spaced-rep-map))
-          <span style="font-weight: bold; font-style: italic;">;; </span><span style="font-weight: bold; font-style: italic;">rewrite local tags</span>
+          <span style="color: #5F7F5F;">;; </span><span style="color: #7F9F7F;">rewrite local tags</span>
           (org-set-tags new-tags)
           (add-hook 'org-trigger-hook 'my/space-repeat-if-tag-spaced))
         )))
@@ -89,8 +89,8 @@ which we will need to adapt to work with zetteltasken notes in org-roam.
 <b>Note:</b> We can turn the implementation details into a <a href="blog/index.html">blog post</a>, as <a href="20220406091014-blog_posts_are_allowed_to_become_stale.html#ID-4d227966-7567-4261-a90d-ce0b27b18615">blog posts are allowed to become stale</a>. And use <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/nobiot/org-transclusion">Org-transclusion</a> to include related notes, including this one.
 </p>
 
-<div id="outline-container-org79c3120" class="outline-2">
-<h2 id="org79c3120">Links to this note</h2>
+<div id="outline-container-org3a1dd89" class="outline-2">
+<h2 id="org3a1dd89">Links to this note</h2>
 </div>
 </div>
 </body>
