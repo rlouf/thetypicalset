@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-02 Fri 09:55 -->
+<!-- 2022-12-02 Fri 10:14 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
@@ -50,9 +50,9 @@
 <b><b>Although this contains useful information, this post is a draft and will probably be integrated to Aesara's documentation</b></b>
 </p>
 
-<div id="outline-container-org9bd410c" class="outline-2">
-<h2 id="org9bd410c">A primer on random variables in Aesara</h2>
-<div class="outline-text-2" id="text-org9bd410c">
+<div id="outline-container-org6c97aec" class="outline-2">
+<h2 id="org6c97aec">A primer on random variables in Aesara</h2>
+<div class="outline-text-2" id="text-org6c97aec">
 <p>
 The <code>RandomVariable</code> operator in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> corresponds to the following mathematical function:
 </p>
@@ -69,9 +69,9 @@ Were \(\Omega\) is the set of available RNG seeds, \(\Theta\) the (potentially m
 </div>
 </div>
 
-<div id="outline-container-org9817db5" class="outline-2">
-<h2 id="org9817db5">The support shape</h2>
-<div class="outline-text-2" id="text-org9817db5">
+<div id="outline-container-org8340cba" class="outline-2">
+<h2 id="org8340cba">The support shape</h2>
+<div class="outline-text-2" id="text-org8340cba">
 <p>
 The dimensionality of the parameter space and the sample space differs depending on the distribution. For instance, the normal distribution takes scalar values for \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\) and returns a scalar \(\in \mathbb{R}\):
 </p>
@@ -152,13 +152,13 @@ We call the shape of the realizations of the random variables the <b>support sha
 </div>
 </div>
 
-<div id="outline-container-org7a209f9" class="outline-2">
-<h2 id="org7a209f9">The batch shape</h2>
-<div class="outline-text-2" id="text-org7a209f9">
+<div id="outline-container-org353a583" class="outline-2">
+<h2 id="org353a583">The batch shape</h2>
+<div class="outline-text-2" id="text-org353a583">
 </div>
-<div id="outline-container-org7df1ca4" class="outline-3">
-<h3 id="org7df1ca4">Batching by broadcasting</h3>
-<div class="outline-text-3" id="text-org7df1ca4">
+<div id="outline-container-org8159aa4" class="outline-3">
+<h3 id="org8159aa4">Batching by broadcasting</h3>
+<div class="outline-text-3" id="text-org8159aa4">
 <p>
 Say we want a sample from three independent random variables that are normally distributed with a mean of \(0\), \(3\) and \(5\) respectively. One (cumbersome) way to achieve this is:
 </p>
@@ -238,7 +238,7 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </pre>
 </div>
 
-<pre class="example" id="orgd36b087">
+<pre class="example" id="orgc6949c2">
 shape mismatch: objects cannot be broadcast to a single shape
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FDB97DFD200&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -386,9 +386,9 @@ sample<sub>shape</sub> = batch<sub>shape</sub> + support<sub>shape</sub>
 </div>
 </div>
 
-<div id="outline-container-org044b4d9" class="outline-3">
-<h3 id="org044b4d9">Batching identically distributed random variables</h3>
-<div class="outline-text-3" id="text-org044b4d9">
+<div id="outline-container-org6bde739" class="outline-3">
+<h3 id="org6bde739">Batching identically distributed random variables</h3>
+<div class="outline-text-3" id="text-org6bde739">
 <p>
 We also frequently need to define iiid random variables. We can define 3 normally-distributed random variables with mean 0 and variance 1 with:
 </p>
@@ -470,23 +470,23 @@ Since we are still talking about independent random variables, <code>batch</code
 </div>
 </div>
 
-<div id="outline-container-org4a82f5d" class="outline-3">
-<h3 id="org4a82f5d">Broadcasting and expanding</h3>
+<div id="outline-container-orgae42bb8" class="outline-3">
+<h3 id="orgae42bb8">Broadcasting and expanding</h3>
 </div>
 </div>
 
-<div id="outline-container-org984adfa" class="outline-2">
-<h2 id="org984adfa">Matching</h2>
-<div class="outline-text-2" id="text-org984adfa">
+<div id="outline-container-org009fae1" class="outline-2">
+<h2 id="org009fae1">Matching</h2>
+<div class="outline-text-2" id="text-org009fae1">
 <p>
 It gets complicated when broadcasting rules apply <i>and</i> we set the <code>size</code> parameter.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgffc329f" class="outline-2">
-<h2 id="orgffc329f">Rest</h2>
-<div class="outline-text-2" id="text-orgffc329f">
+<div id="outline-container-orgf38e2ea" class="outline-2">
+<h2 id="orgf38e2ea">Rest</h2>
+<div class="outline-text-2" id="text-orgf38e2ea">
 <p>
 The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> is partitioned in semantically different pieces, that refer to the shape of \(E\), i.e. the shape of draws we get:
 </p>
@@ -509,9 +509,9 @@ What's confusing about all this is that we are passing a single RNG state to the
 </div>
 
 
-<div id="outline-container-org18fa767" class="outline-2">
-<h2 id="org18fa767">Batch shape</h2>
-<div class="outline-text-2" id="text-org18fa767">
+<div id="outline-container-org68ff714" class="outline-2">
+<h2 id="org68ff714">Batch shape</h2>
+<div class="outline-text-2" id="text-org68ff714">
 <p>
 Let us only consider distributions over scalar values for now.
 </p>
@@ -543,9 +543,9 @@ The <code>batch shape</code> encompasses one reality: the number of independent 
 </ul>
 </div>
 
-<div id="outline-container-org298c635" class="outline-3">
-<h3 id="org298c635">Batching</h3>
-<div class="outline-text-3" id="text-org298c635">
+<div id="outline-container-org81b2572" class="outline-3">
+<h3 id="org81b2572">Batching</h3>
+<div class="outline-text-3" id="text-org81b2572">
 <p>
 If we want to take independent and indentically distributed samples from a distribution we can use the <code>size</code> keyword argument. Here we are requesting \(3\) independent and identically distributed random variables:
 </p>
@@ -601,9 +601,9 @@ sample shape: (2, 2, 2)
 </div>
 </div>
 
-<div id="outline-container-orgfc1307d" class="outline-3">
-<h3 id="orgfc1307d">Vectorizing</h3>
-<div class="outline-text-3" id="text-orgfc1307d">
+<div id="outline-container-orgc583ff6" class="outline-3">
+<h3 id="orgc583ff6">Vectorizing</h3>
+<div class="outline-text-3" id="text-orgc583ff6">
 <blockquote>
 <p>
 <b>tldr;</b> Random Variables are `Blockwise` operators
@@ -614,9 +614,9 @@ sample shape: (2, 2, 2)
 
 
 
-<div id="outline-container-orgca7ef3a" class="outline-3">
-<h3 id="orgca7ef3a">Vectorizing + Batching</h3>
-<div class="outline-text-3" id="text-orgca7ef3a">
+<div id="outline-container-orgc9bf61c" class="outline-3">
+<h3 id="orgc9bf61c">Vectorizing + Batching</h3>
+<div class="outline-text-3" id="text-orgc9bf61c">
 <p>
 It is possible to vectorize and batch at the same time. Note that <code>size</code> and that vectorized shape must be broadcastable
 </p>
@@ -663,9 +663,9 @@ It IS really simple:
 </div>
 
 
-<div id="outline-container-org5811564" class="outline-2">
-<h2 id="org5811564">All together</h2>
-<div class="outline-text-2" id="text-org5811564">
+<div id="outline-container-org7d9d769" class="outline-2">
+<h2 id="org7d9d769">All together</h2>
+<div class="outline-text-2" id="text-org7d9d769">
 <p>
 Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> will raise an exception if this is not correctly set.
 </p>
@@ -688,7 +688,7 @@ Same thing, <code>size</code> defines the batch shape, and <code>aesara</code> w
 </pre>
 </div>
 
-<pre class="example" id="orgc594f3a">
+<pre class="example" id="org44a92ae">
 sample value: [[[6 2 2]
   [4 0 5]]
 
@@ -703,9 +703,9 @@ batch shape: (3, 2)
 </pre>
 </div>
 
-<div id="outline-container-orgdb72134" class="outline-3">
-<h3 id="orgdb72134">Broadcasting</h3>
-<div class="outline-text-3" id="text-orgdb72134">
+<div id="outline-container-orge6af851" class="outline-3">
+<h3 id="orge6af851">Broadcasting</h3>
+<div class="outline-text-3" id="text-orge6af851">
 <p>
 When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
 </p>
