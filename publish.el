@@ -16,14 +16,14 @@
 (package-install 'org)
 (package-install 'org-roam)
 (package-install 's)
-(package-install 'nord-theme)
+(package-install 'zenburn-theme)
 
 (require 's)
 (require 'ox-publish)
 (require 'find-lisp)
 (require 'org-roam)
 
-(load-theme 'nord t)
+(load-theme 'zenburn t)
 
 (setq make-backup-files nil)
 
