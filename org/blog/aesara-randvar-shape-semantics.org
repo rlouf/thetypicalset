@@ -4,19 +4,39 @@
 
 **Although this contains useful information, this post is a draft and will probably be integrated to Aesara's documentation**
 
-* A primer on random variables in Aesara
+* Random variables in Aesara
 
-The =RandomVariable= operator in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] corresponds to the following mathematical function:
+Random variables are represented in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] with the =RandomVariable= operator, which corresponds to the following mathematical function:
 
 $$
-\operatorname{RandomVariable}: \Omega \times \boldsymbol{\Theta} \to E
+\operatorname{RandomVariable}: \Omega \times \Theta \to E
 $$
 
-Were $\Omega$ is the set of available RNG seeds, $\Theta$ the (potentially multi-dimensional) space in which the parameters of the distribution take their values. $E$ is the state space, also called the support of the corresponding distribution. Given a random seed and parameter values, the operator returns a *realization* of the random variable it represents, and element of $E$.
+Were $\Omega$ is the set of available RNG seeds, $\Theta$ the parameter space. $E$ is the state space, which corresponds to the support of the corresponding distribution. Given a random seed and parameter values, the operator returns a *realization* of the random variable it represents, i.e. element of $E$.
+
+The recommended way to use random variables in Aesara is via the =RandomStream= interface, which automatically seeds the random functions. Here, =srng.normal= defines a single, normally-distributed, random variable:
+
+#+begin_src python
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+x_rv = srng.normal(0, 1)
+print(x_rv.eval())
+#+end_src
+
+#+RESULTS:
+: 1.4436909546981256
+
+The shape of the output of the random functions depends on three things:
+- The /support shape/ of the random variable;
+- Broadcasting rules between the parameters of the random variable's distribution;
+- The =size= parameter passed to the random function.
+
+In this document we will make explaine the semantics of shape in Aesara, and what they represent.
 
 * The support shape
 
-The dimensionality of the parameter space and the sample space differs depending on the distribution. For instance, the normal distribution takes scalar values for $\mu \in \mathbb{R}$ and $\sigma \in \mathbb{R}^+$ and returns a scalar $\in \mathbb{R}$:
+The dimensionality of the parameter space and the sample space differs depending on the distribution. For instance, the normal distribution is parametrized by $\mu \in \mathbb{R}$ and $\sigma \in \mathbb{R}^+$ and the realizations of the corresponding random variables are scalars $\in \mathbb{R}$.
 
 #+begin_src python :results output
 import aesara.tensor as at
@@ -36,7 +56,7 @@ print(f"support shape: {sample.shape}")
 : sample value: 1.4436909546981256
 : support shape: ()
 
-The Dirichlet distribution is parametrized by a vector $\boldsymbol{\alpha} \in \mathbb{R}^k$ and returns a vector in the k-unit simplex $\operatorname{\Delta}^k$:
+We say that the support shape of =normal= is =()=. The Dirichlet distribution is slightly more complicated: it is parametrized by a vector $\boldsymbol{\alpha} \in \mathbb{R}^k$ and its realizations are vectors in the k-unit simplex $\operatorname{\Delta}^k$:
 
 #+begin_src python :results output
 import aesara.tensor as at
@@ -55,7 +75,7 @@ print(f"support shape: {sample.shape}")
 : sample value: [0.39086221 0.17265609 0.43648169]
 : support shape: (3,)
 
-The multinomial is another interesting example; it is parametrized by a probability vector $\boldsymbol{p} \in \Delta^k$, a number of trials $n \in \mathbb{N}$ and returns a vector in $\mathbb{N}^k$:
+The support shape of =dirichlet= is =(k,)=, with =k= the length of its parameter $\alpha$. The multinomial is another interesting example because the dimensionality of its parameters; it is parametrized by a probability vector $\boldsymbol{p} \in \Delta^k$, a number of trials $n \in \mathbb{N}$ and returns a vector in $\mathbb{N}^k$:
 
 #+begin_src python :results output
 import aesara.tensor as at
@@ -75,13 +95,21 @@ print(f"support shape: {sample.shape}")
 : sample value: [3 2 5]
 : support shape: (3,)
 
-We call the shape of the realizations of the random variables the *support shape*; for the normal distribution it is equal to =()=, the Dirichlet and multinomial distribution it is equal to =(k,)= where =k= is the size of the parameter $\alpha$ and $p$ respectively. Distributions can have arbitrarily complex support shapes: the random variable with a [[https://en.wikipedia.org/wiki/Wishart_distribution][Wishart density]] is a function in $\mathbb{R}^{n \times m}$, and the support shape is =(n,m)=.
+The support shape of =multinomial= is =(k,)= with =k= the length of the probability vector $p$. Here we have only considered random variables with a 0- or 1-dimensional sample space, but it can obviously be more complicated. The random variable with a [[https://en.wikipedia.org/wiki/Wishart_distribution][Wishart density]] is a function that maps to $\mathbb{R}^{n \times m}$, and the corresponding support shape is thus =(n,m)=.
+
+The support shape and how it relates to the shape of the parameters is explicited in [[https://aesara.readthedocs.io/en/latest/library/tensor/random/basic.html][the documentation]], where we attach a =signature= string to each random variable (these are [[https://numpy.org/doc/stable/reference/c-api/generalized-ufuncs.html][gufunc]]-like signatures). For instance, for the previous examples we have:
+
+- Normal: =(), () -> ()=
+- Dirichlet: =(n) -> (n)=
+- Multinomial: =(), (n) -> (n)=
 
 * The batch shape
 
+We just saw how to define a single random variables with different distributions, and how the choice of distribution determined the /support shape/. In many realistic settings, however, we would like to define several independently distributed random variables at once. Aesara provides two mechanisms to do so: broadcasting of the parameters, and the =size= parameter. The shape induced by this mechanism is called the /batch shape/.
+
 ** Batching by broadcasting
 
-Say we want a sample from three independent random variables that are normally distributed with a mean of $0$, $3$ and $5$ respectively. One (cumbersome) way to achieve this is:
+Say we want a sample from three independent, normally distributed,  random variables with a mean of $0$, $3$ and $5$ respectively. One (cumbersome) way to achieve this is:
 
 #+begin_src python
 import aesara.tensor as at
@@ -259,7 +287,7 @@ So we have the simple formula; if =support_shape= and =batch_shape= are tuples, 
 sample_shape = batch_shape + support_shape
 #+end_quote
 
-** Batching identically distributed random variables
+** Expanding to create identically distributed random variables
 
 We also frequently need to define iiid random variables. We can define 3 normally-distributed random variables with mean 0 and variance 1 with:
 
@@ -325,99 +353,9 @@ Since we are still talking about independent random variables, =batch= refers in
 
 ** Broadcasting and expanding
 
-* Matching
+*Size corresponds to the batch shape*
 
-It gets complicated when broadcasting rules apply /and/ we set the =size= parameter.
-
-* Rest
-
-The shape of random tensors in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] is partitioned in semantically different pieces, that refer to the shape of $E$, i.e. the shape of draws we get:
-- The *support shape* corresponds to the shape of one element in $E$, the support of the distribution;
-- The *batch shape* is the number $N$ of independent random variables $X_i: \Omega \to E$ where $i \in \left\{ 1 \dots N\right\}$; These can be identically or differently distributed.
-- =RandomVariable= creates /differently distributed/ random variables by passing different values of parameters to the operators. Broadcasting rules apply, and the *batch shape* (i.e. number of differently distributed random variables) is inferred from these broadcasting rules.
-- =RandomVariable= creates /identically distributed/ random variables via the =size= keyword argument. There is a level of indirection here; the shape specified by =size= must broadcast with the shape of the broadcasted arguments. So if the latter is =(a, b)=, to define =c= identically distributed RVs one must set =size= to =(c, a, b)=.
-- The shape of the array of random variables is given by =sample_shape = batch_shape + support_shape=
-
-  #+begin_quote
-What's confusing about all this is that we are passing a single RNG state to the distribution even when we are looking a realization of several different random variables. Underlying implementation must use different rng states, though, and we should probably talk about this.
-  #+end_quote
-
-
-* Batch shape
-
-Let us only consider distributions over scalar values for now.
-
-#+begin_src python
-import aesara.tensor as at
-
-srng = at.random.RandomStream(0)
-rv = srng.normal(0, 1)
-sample = rv.eval()
-
-print(f"sample value: {sample}")
-print(f"sample shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample value: 1.4436909546981256
-: sample shape: ()
-
-The =batch shape= encompasses one reality: the number of independent random variables we want to define using a probability distribution. There are two ways to arrive at the same batch shape:
-- Setting the shape explicitly;
-- Broadcasting of parameter arrays.
-
-** Batching
-
-If we want to take independent and indentically distributed samples from a distribution we can use the =size= keyword argument. Here we are requesting $3$ independent and identically distributed random variables:
-
-#+begin_src python
-import aesara.tensor as at
-
-srng = at.random.RandomStream(0)
-rv = srng.normal(0, 1, size=(3,))  # size=3 gives the same result
-sample = rv.eval()
-
-print(f"sample value: {sample}")
-print(f"sample shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample value: [ 1.44369095 -0.89594598  0.73595567]
-: sample shape: (3,)
-
-We can obviously require that these independent and identically distributed samples be returned in a tensor of any shape:
-
-#+begin_src python
-import aesara.tensor as at
-
-srng = at.random.RandomStream(0)
-batch_shape = (2, 2, 2)
-rv = srng.normal(0, 1, size=batch_shape)
-sample = rv.eval()
-
-print(f"sample value: {sample}")
-print(f"sample shape: {sample.shape}")
-#+end_src
-
-#+RESULTS:
-: sample value: [[[ 1.44369095 -0.89594598]
-:   [ 0.73595567  0.00587704]]
-:
-:  [[ 0.85338179  0.16094803]
-:   [ 0.81931469  0.80565568]]]
-: sample shape: (2, 2, 2)
-
-=Size= explicits the /batch shape/, which is the shape of the tensor of idependent random variables produced by the op. In this example the random variables are identically distributed, but this need not be the case.
-
-** Vectorizing
-
-#+begin_quote
-*tldr;* Random Variables are `Blockwise` operators
-#+end_quote
-
-
-
-** Vectorizing + Batching
+/(show an example where broadcasting and using =size= breaks)/
 
 It is possible to vectorize and batch at the same time. Note that =size= and that vectorized shape must be broadcastable
 
@@ -451,72 +389,11 @@ It IS really simple:
 =sample_shape = np.broadcast_shapes(np.broadcast(*args), size)=
 
 
-* All together
+* Summary
 
-Same thing, =size= defines the batch shape, and =aesara= will raise an exception if this is not correctly set.
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-n = np.array([10, 9])
-p = np.array([[.8, .1, .1], [.4, .1, .5]])
-
-srng = at.random.RandomStream(0)
-rv = srng.multinomial(n, p, size=(3, 2))
-
-sample = rv.eval()
-print(f"sample value: {sample}")
-print(f"sample shape: {sample.shape}")
-print(f"support shape: {sample.shape[-1:]}")
-print(f"batch shape: {sample.shape[:-1]}")
-#+end_src
-
-#+RESULTS:
-#+begin_example
-sample value: [[[6 2 2]
-  [4 0 5]]
-
- [[8 1 1]
-  [1 2 6]]
-
- [[9 0 1]
-  [5 0 4]]]
-sample shape: (3, 2, 3)
-support shape: (3,)
-batch shape: (3, 2)
-#+end_example
-
-** Broadcasting
-
-When we broadcast the parameters of a non-scalar distribution, two things need to be defined:
-1. The support shape
-2. The batch shape
-
-In the case of the multinomial distribution, the size of the last dimension of $p$ determines the support shape. Then the formula applies:
-
-=sample_shape = batch_shape + support_shape=
-
-#+begin_src python
-import aesara.tensor as at
-import numpy as np
-
-n = np.array([10, 9])
-p = np.array([[.8, .1, .1], [.4, .1, .5]])
-
-srng = at.random.RandomStream(0)
-rv = srng.multinomial(n, p)
-
-sample = rv.eval()
-print(f"sample value: {sample}")
-print(f"sample shape: {sample.shape}")
-print(f"support shape: {sample.shape[-1:]}")
-print(f"batch shape: {sample.shape[0]}")
-#+end_src
-
-#+RESULTS:
-: sample value: [[6 2 2]
-:  [4 0 5]]
-: sample shape: (2, 3)
-: support shape: (3,)
-: batch shape: 2
+The shape of random tensors in [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] is partitioned in semantically different pieces, that refer to the shape of $E$, i.e. the shape of draws we get:
+- The *support shape* corresponds to the shape of one element in $E$, the support of the distribution;
+- The *batch shape* is the number $N$ of independent random variables $X_i: \Omega \to E$ where $i \in \left\{ 1 \dots N\right\}$; These can be identically or differently distributed.
+- =RandomVariable= creates /differently distributed/ random variables by passing different values of parameters to the operators. Broadcasting rules apply, and the *batch shape* (i.e. number of differently distributed random variables) is inferred from these broadcasting rules.
+- =RandomVariable= creates /identically distributed/ random variables via the =size= keyword argument. There is a level of indirection here; the shape specified by =size= must broadcast with the shape of the broadcasted arguments. So if the latter is =(a, b)=, to define =c= identically distributed RVs one must set =size= to =(c, a, b)=.
+- The shape of the array of random variables is given by =sample_shape = batch_shape + support_shape=
