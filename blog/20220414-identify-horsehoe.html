@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 14:38 -->
+<!-- 2022-12-02 Fri 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Find horsehoe priors in an Aesara graph</title>
@@ -51,31 +51,31 @@ In this short post we will try to unify subgraphs of an <a target='_blank' rel='
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
 
-<span style="color: #24292e;">X_tt</span> = at.matrix(<span style="color: #032f62;">'X'</span>)
-<span style="color: #24292e;">h_tt</span> = at.scalar(<span style="color: #032f62;">'h'</span>, dtype=<span style="color: #032f62;">"int32"</span>)
+<span style="font-weight: bold; font-style: italic;">X_tt</span> = at.matrix(<span style="font-style: italic;">'X'</span>)
+<span style="font-weight: bold; font-style: italic;">h_tt</span> = at.scalar(<span style="font-style: italic;">'h'</span>, dtype=<span style="font-style: italic;">"int32"</span>)
 
-<span style="color: #24292e;">tau_rv</span> = srng.halfcauchy(1, size=1)
-<span style="color: #24292e;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
-<span style="color: #24292e;">beta_rv</span> = srng.normal(0, tau_rv * lmbda_rv)
+<span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(1, size=1)
+<span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
+<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.normal(0, tau_rv * lmbda_rv)
 
-<span style="color: #24292e;">eta</span> = X_tt @ beta_rv
-<span style="color: #24292e;">p</span> = at.sigmoid(-eta)
-<span style="color: #24292e;">Y_rv</span> = srng.nbinom(h_tt, p)
+<span style="font-weight: bold; font-style: italic;">eta</span> = X_tt @ beta_rv
+<span style="font-weight: bold; font-style: italic;">p</span> = at.sigmoid(-eta)
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.nbinom(h_tt, p)
 </pre>
 </div>
 
-<div id="outline-container-orgf966571" class="outline-2">
-<h2 id="orgf966571">Unification on the graphical structure</h2>
-<div class="outline-text-2" id="text-orgf966571">
+<div id="outline-container-org4fe22e9" class="outline-2">
+<h2 id="org4fe22e9">Unification on the graphical structure</h2>
+<div class="outline-text-2" id="text-org4fe22e9">
 <p>
 Remember that the horseshoe prior is mathematically defined as:
 </p>
 
-<div class="latex" id="org97e4457">
+<div class="latex" id="orgdf55c38">
 \begin{align*}
   \tau &\sim \operatorname{HalfCauchy}(0, 1)\\
   \lambda_{j} &\sim \operatorname{HalfCauchy}(0, 1)\quad j \in \left[1,\dots, k\right]\\
@@ -89,12 +89,12 @@ We would like to be able to tell whether the model that the graph implements con
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> unification <span style="color: #d73a49;">import</span> var
-<span style="color: #d73a49;">from</span> etuples <span style="color: #d73a49;">import</span> etuple, etuplize
+<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> var
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
 
-<span style="color: #24292e;">horseshoe_1_lv</span>, <span style="color: #24292e;">horseshoe_2_lv</span> = var(<span style="color: #032f62;">'horseshoe_1'</span>), var(<span style="color: #032f62;">'horsehoe_2'</span>)
-<span style="color: #24292e;">zero_lv</span> = var(<span style="color: #032f62;">'zero'</span>)
-<span style="color: #24292e;">horseshoe_pattern</span> = etuple(
+<span style="font-weight: bold; font-style: italic;">horseshoe_1_lv</span>, <span style="font-weight: bold; font-style: italic;">horseshoe_2_lv</span> = var(<span style="font-style: italic;">'horseshoe_1'</span>), var(<span style="font-style: italic;">'horsehoe_2'</span>)
+<span style="font-weight: bold; font-style: italic;">zero_lv</span> = var(<span style="font-style: italic;">'zero'</span>)
+<span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(
     etuplize(at.random.normal),
     var(),
     var(),
@@ -113,15 +113,15 @@ We can then unify this pattern with the subgraph <code>beta_rv</code> using pyth
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> unification <span style="color: #d73a49;">import</span> unify
-<span style="color: #d73a49;">from</span> IPython.lib.pretty <span style="color: #d73a49;">import</span> pprint
+<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify
+<span style="font-weight: bold;">from</span> IPython.lib.pretty <span style="font-weight: bold;">import</span> pprint
 
-<span style="color: #24292e;">s</span> = unify(horseshoe_pattern, etuplize(beta_rv))
+<span style="font-weight: bold; font-style: italic;">s</span> = unify(horseshoe_pattern, etuplize(beta_rv))
 pprint(s)
 </pre>
 </div>
 
-<pre class="example" id="org271525d">
+<pre class="example" id="org92425d2">
 {~_32: RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FCCBFFD8740&gt;),
  ~_33: TensorConstant{[]},
  ~_34: TensorConstant{11},
@@ -157,9 +157,9 @@ pprint(s)
 </div>
 
 
-<div id="outline-container-orge82508d" class="outline-2">
-<h2 id="orge82508d">Model unification</h2>
-<div class="outline-text-2" id="text-orge82508d">
+<div id="outline-container-org36fbc38" class="outline-2">
+<h2 id="org36fbc38">Model unification</h2>
+<div class="outline-text-2" id="text-org36fbc38">
 <p>
 The pattern we used in the previous section only checks that the <i>graphical structure</i> matches the horseshoe prior, but not that the correct distributions and correct parameters are used. However, we can only identify an aesara graph with the mathematical model if structure <i>and</i> distributions match (or if the pattern represents the normal form of the model under a set of rewrite rules, but we'll keep things simple for now).
 </p>
@@ -169,14 +169,14 @@ Let us thus improve the design by defining a <code>unify_horseshoe</code> functi
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> aesara.graph.unify <span style="color: #d73a49;">import</span> eval_if_etuple
-<span style="color: #d73a49;">from</span> etuples <span style="color: #d73a49;">import</span> etuple, etuplize
-<span style="color: #d73a49;">from</span> unification <span style="color: #d73a49;">import</span> unify, var
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.graph.unify <span style="font-weight: bold;">import</span> eval_if_etuple
+<span style="font-weight: bold;">from</span> etuples <span style="font-weight: bold;">import</span> etuple, etuplize
+<span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify, var
 
-<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">unify_horseshoe</span>(graph):
-    <span style="color: #24292e;">horseshoe_1_lv</span>, <span style="color: #24292e;">horseshoe_2_lv</span> = var(<span style="color: #032f62;">'horseshoe_1'</span>), var(<span style="color: #032f62;">'horsehoe_2'</span>)
-    <span style="color: #24292e;">zero_lv</span> = var(<span style="color: #032f62;">'zero'</span>)
-    <span style="color: #24292e;">horseshoe_pattern</span> = etuple(
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">unify_horseshoe</span>(graph):
+    <span style="font-weight: bold; font-style: italic;">horseshoe_1_lv</span>, <span style="font-weight: bold; font-style: italic;">horseshoe_2_lv</span> = var(<span style="font-style: italic;">'horseshoe_1'</span>), var(<span style="font-style: italic;">'horsehoe_2'</span>)
+    <span style="font-weight: bold; font-style: italic;">zero_lv</span> = var(<span style="font-style: italic;">'zero'</span>)
+    <span style="font-weight: bold; font-style: italic;">horseshoe_pattern</span> = etuple(
         etuplize(at.random.normal),
         var(),
         var(),
@@ -188,34 +188,34 @@ Let us thus improve the design by defining a <code>unify_horseshoe</code> functi
             horseshoe_2_lv)
     )
 
-    <span style="color: #24292e;">s</span> = unify(graph, horseshoe_pattern)
-    <span style="color: #d73a49;">if</span> s <span style="color: #d73a49;">is</span> <span style="color: #005cc5;">False</span>:
-        <span style="color: #d73a49;">return</span> <span style="color: #005cc5;">False</span>
+    <span style="font-weight: bold; font-style: italic;">s</span> = unify(graph, horseshoe_pattern)
+    <span style="font-weight: bold;">if</span> s <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">False</span>:
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
 
-    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Check that horseshoe_1 was unified with a half-cauchy distributed RV</span>
-    <span style="color: #24292e;">halfcauchy_1</span> = eval_if_etuple(s[horseshoe_1_lv])
-    <span style="color: #d73a49;">if</span> halfcauchy_1.owner <span style="color: #d73a49;">is</span> <span style="color: #005cc5;">None</span> <span style="color: #d73a49;">or</span> <span style="color: #d73a49;">not</span> <span style="color: #d73a49;">isinstance</span>(
-        halfcauchy_1.owner.op, <span style="color: #d73a49;">type</span>(at.random.halfcauchy)
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_1 was unified with a half-cauchy distributed RV</span>
+    <span style="font-weight: bold; font-style: italic;">halfcauchy_1</span> = eval_if_etuple(s[horseshoe_1_lv])
+    <span style="font-weight: bold;">if</span> halfcauchy_1.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
+        halfcauchy_1.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
     ):
-         <span style="color: #d73a49;">return</span> <span style="color: #005cc5;">False</span>
+         <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
 
-    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Check that horseshoe_2 was unified with a half-cauchy distributed RV</span>
-    <span style="color: #24292e;">halfcauchy_2</span> = eval_if_etuple(s[horseshoe_2_lv])
-    <span style="color: #d73a49;">if</span> halfcauchy_2.owner <span style="color: #d73a49;">is</span> <span style="color: #005cc5;">None</span> <span style="color: #d73a49;">or</span> <span style="color: #d73a49;">not</span> <span style="color: #d73a49;">isinstance</span>(
-        halfcauchy_2.owner.op, <span style="color: #d73a49;">type</span>(at.random.halfcauchy)
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that horseshoe_2 was unified with a half-cauchy distributed RV</span>
+    <span style="font-weight: bold; font-style: italic;">halfcauchy_2</span> = eval_if_etuple(s[horseshoe_2_lv])
+    <span style="font-weight: bold;">if</span> halfcauchy_2.owner <span style="font-weight: bold;">is</span> <span style="font-weight: bold; text-decoration: underline;">None</span> <span style="font-weight: bold;">or</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold;">isinstance</span>(
+        halfcauchy_2.owner.op, <span style="font-weight: bold;">type</span>(at.random.halfcauchy)
     ):
-        <span style="color: #d73a49;">return</span> <span style="color: #005cc5;">False</span>
-    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Check that at least one of the RVs is a scalar</span>
-    <span style="color: #d73a49;">if</span> halfcauchy_1.<span style="color: #d73a49;">type</span>.shape == (1,):
-        <span style="color: #24292e;">lmbda_rv</span> = halfcauchy_2
-        <span style="color: #24292e;">tau_rv</span> = halfcauchy_1
-    <span style="color: #d73a49;">elif</span> halfcauchy_2.<span style="color: #d73a49;">type</span>.shape == (1,):
-        <span style="color: #24292e;">lmbda_rv</span> = halfcauchy_1
-        <span style="color: #24292e;">tau_rv</span> = halfcauchy_2
-    <span style="color: #d73a49;">else</span>:
-        <span style="color: #d73a49;">return</span> false
+        <span style="font-weight: bold;">return</span> <span style="font-weight: bold; text-decoration: underline;">False</span>
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Check that at least one of the RVs is a scalar</span>
+    <span style="font-weight: bold;">if</span> halfcauchy_1.<span style="font-weight: bold;">type</span>.shape == (1,):
+        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_2
+        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_1
+    <span style="font-weight: bold;">elif</span> halfcauchy_2.<span style="font-weight: bold;">type</span>.shape == (1,):
+        <span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = halfcauchy_1
+        <span style="font-weight: bold; font-style: italic;">tau_rv</span> = halfcauchy_2
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span> false
 
-    <span style="color: #d73a49;">return</span> (lmbda_rv, tau_rv)
+    <span style="font-weight: bold;">return</span> (lmbda_rv, tau_rv)
 </pre>
 </div>
 
@@ -224,7 +224,7 @@ Again we check that we can unify the subgraph <code>beta_rv</code>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">print</span>(unify_horseshoe(beta_rv))
+<pre class="src src-python"><span style="font-weight: bold;">print</span>(unify_horseshoe(beta_rv))
 </pre>
 </div>
 
@@ -235,15 +235,15 @@ Again we check that we can unify the subgraph <code>beta_rv</code>:
 </div>
 
 
-<div id="outline-container-org6bd3010" class="outline-2">
-<h2 id="org6bd3010">Walk the graph</h2>
-<div class="outline-text-2" id="text-org6bd3010">
+<div id="outline-container-orgc8e34f9" class="outline-2">
+<h2 id="orgc8e34f9">Walk the graph</h2>
+<div class="outline-text-2" id="text-orgc8e34f9">
 <p>
 <code>unify_horseshoe</code> will only work if the pattern matches the whole graph. Indeed if we try to unify the horsehoe pattern with <code>Y_rv</code> we get:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">print</span>(unify_horseshoe(Y_rv))
+<pre class="src src-python"><span style="font-weight: bold;">print</span>(unify_horseshoe(Y_rv))
 </pre>
 </div>
 
@@ -257,23 +257,23 @@ To identify subgraphs we thus need to walk through the graph (here breadth-first
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> aesara.graph.basic <span style="color: #d73a49;">import</span> walk
-<span style="color: #d73a49;">from</span> aesara.tensor.random.op <span style="color: #d73a49;">import</span> RandomVariable
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara.graph.basic <span style="font-weight: bold;">import</span> walk
+<span style="font-weight: bold;">from</span> aesara.tensor.random.op <span style="font-weight: bold;">import</span> RandomVariable
 
-<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">expand</span>(var):
-    <span style="color: #d73a49;">if</span> var.owner:
-        <span style="color: #d73a49;">return</span> var.owner.inputs
-    <span style="color: #d73a49;">else</span>:
-        <span style="color: #d73a49;">return</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">expand</span>(var):
+    <span style="font-weight: bold;">if</span> var.owner:
+        <span style="font-weight: bold;">return</span> var.owner.inputs
+    <span style="font-weight: bold;">else</span>:
+        <span style="font-weight: bold;">return</span>
 
-<span style="color: #d73a49;">for</span> node <span style="color: #d73a49;">in</span> walk([Y_rv], expand, bfs=<span style="color: #005cc5;">True</span>):
-    <span style="color: #d73a49;">try</span>:
-        <span style="color: #d73a49;">if</span> <span style="color: #d73a49;">isinstance</span>(node.owner.op, RandomVariable):
-            <span style="color: #24292e;">s</span> = unify_horseshoe(node)
-            <span style="color: #d73a49;">if</span> s:
-                <span style="color: #d73a49;">break</span>
-    <span style="color: #d73a49;">except</span> <span style="color: #005cc5;">AttributeError</span>:
-        <span style="color: #d73a49;">continue</span>
+<span style="font-weight: bold;">for</span> node <span style="font-weight: bold;">in</span> walk([Y_rv], expand, bfs=<span style="font-weight: bold; text-decoration: underline;">True</span>):
+    <span style="font-weight: bold;">try</span>:
+        <span style="font-weight: bold;">if</span> <span style="font-weight: bold;">isinstance</span>(node.owner.op, RandomVariable):
+            <span style="font-weight: bold; font-style: italic;">s</span> = unify_horseshoe(node)
+            <span style="font-weight: bold;">if</span> s:
+                <span style="font-weight: bold;">break</span>
+    <span style="font-weight: bold;">except</span> <span style="font-weight: bold; text-decoration: underline;">AttributeError</span>:
+        <span style="font-weight: bold;">continue</span>
 </pre>
 </div>
 

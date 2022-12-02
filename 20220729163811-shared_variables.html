@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 14:38 -->
+<!-- 2022-12-02 Fri 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shared variables</title>
@@ -24,25 +24,25 @@ Example taken from <a target='_blank' rel='noopener noreferrer' class='external'
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> aesara <span style="color: #d73a49;">import</span> function, shared
-<span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara <span style="font-weight: bold;">import</span> function, shared
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
-<span style="color: #24292e;">state</span> = shared(0)
-<span style="color: #24292e;">inc</span> = at.iscalar(<span style="color: #032f62;">'inc'</span>)
-<span style="color: #24292e;">accumulate</span> = function([inc], state, updates=[(state, state+inc)])
+<span style="font-weight: bold; font-style: italic;">state</span> = shared(0)
+<span style="font-weight: bold; font-style: italic;">inc</span> = at.iscalar(<span style="font-style: italic;">'inc'</span>)
+<span style="font-weight: bold; font-style: italic;">accumulate</span> = function([inc], state, updates=[(state, state+inc)])
 
-<span style="color: #d73a49;">print</span>(state.get_value())
+<span style="font-weight: bold;">print</span>(state.get_value())
 accumulate(1)
-<span style="color: #d73a49;">print</span>(state.get_value())
+<span style="font-weight: bold;">print</span>(state.get_value())
 accumulate(10)
-<span style="color: #d73a49;">print</span>(state.get_value())
+<span style="font-weight: bold;">print</span>(state.get_value())
 state.set_value(0)
-<span style="color: #d73a49;">print</span>(state.get_value())
+<span style="font-weight: bold;">print</span>(state.get_value())
 
-<span style="color: #24292e;">decrement</span> = function([inc], state, updates=[(state, state-inc)])
+<span style="font-weight: bold; font-style: italic;">decrement</span> = function([inc], state, updates=[(state, state-inc)])
 
 decrement(1)
-<span style="color: #d73a49;">print</span>(state.get_value())
+<span style="font-weight: bold;">print</span>(state.get_value())
 </pre>
 </div>
 
@@ -62,9 +62,9 @@ They also allow sharing state between compiled graphs.
 <code>updates</code> parameter in <code>function</code> tells the compiler that when the function is going to be run the value of the shared variable is going to be modified in X way. They are necessary because the value of the shared variables needs to be propagated globally?
 </p>
 
-<div id="outline-container-org9f02e91" class="outline-3">
-<h3 id="org9f02e91"><span class="todo TODO">TODO</span> Conceptual understanding: what is a shared variable? Why is it not a Variable?</h3>
-<div class="outline-text-3" id="text-org9f02e91">
+<div id="outline-container-org5ac12b8" class="outline-3">
+<h3 id="org5ac12b8"><span class="todo TODO">TODO</span> Conceptual understanding: what is a shared variable? Why is it not a Variable?</h3>
+<div class="outline-text-3" id="text-org5ac12b8">
 <p>
 <b>Variables are placeholders, mere step in a computation. They are variables in the mathematical sense. Shared variables are variables in the computing sense: a value store.</b> The problem is that shared variables introduce a notion of <a href="20220729171741-control_flow_in_aesara.html#ID-8d8344ab-49e9-480d-b1d6-1336dbf60f9f">imperative programming</a> (namely "update this register in memory with this value"). Shared variables allow us to:
 </p>
@@ -90,26 +90,26 @@ optimizations don't see which variables are shared or not.
 </div>
 </div>
 
-<div id="outline-container-org7557d56" class="outline-3">
-<h3 id="org7557d56"><span class="todo TODO">TODO</span> How does <code>scan</code> work with updates?</h3>
-<div class="outline-text-3" id="text-org7557d56">
+<div id="outline-container-org484b0bd" class="outline-3">
+<h3 id="org484b0bd"><span class="todo TODO">TODO</span> How does <code>scan</code> work with updates?</h3>
+<div class="outline-text-3" id="text-org484b0bd">
 <p>
 Well, <code>scan</code> returns a graph that says how the shared variable within should be treated.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 
-<span style="color: #24292e;">a</span> = aesara.shared(1)
-<span style="color: #24292e;">values</span>, <span style="color: #24292e;">updates</span> = aesara.scan(<span style="color: #d73a49;">lambda</span>: {a: a+1}, n_steps=10)
+<span style="font-weight: bold; font-style: italic;">a</span> = aesara.shared(1)
+<span style="font-weight: bold; font-style: italic;">values</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(<span style="font-weight: bold;">lambda</span>: {a: a+1}, n_steps=10)
 aesara.dprint(updates[a])
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">b</span> = a + 1
-<span style="color: #24292e;">c</span> = updates[a] + 1
-<span style="color: #24292e;">f</span> = aesara.function([], [b, c], updates=updates)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">b</span> = a + 1
+<span style="font-weight: bold; font-style: italic;">c</span> = updates[a] + 1
+<span style="font-weight: bold; font-style: italic;">f</span> = aesara.function([], [b, c], updates=updates)
 </pre>
 </div>
 
@@ -136,15 +136,15 @@ What if we don't pass the <code>updates</code> to the function?
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> aesara <span style="color: #d73a49;">import</span> function, shared
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aesara <span style="font-weight: bold;">import</span> function, shared
 
-<span style="color: #24292e;">a</span> = shared(1)
-<span style="color: #24292e;">values</span>, <span style="color: #24292e;">updates</span> = aesara.scan(<span style="color: #d73a49;">lambda</span>: {a: a+1}, n_steps=10)
-<span style="color: #24292e;">b</span> = a + 1
-<span style="color: #24292e;">c</span> = updates[a] + 1
-<span style="color: #24292e;">f</span> = aesara.function([], [b, c])
-<span style="color: #d73a49;">print</span>(f())
-<span style="color: #d73a49;">print</span>(f())
+<span style="font-weight: bold; font-style: italic;">a</span> = shared(1)
+<span style="font-weight: bold; font-style: italic;">values</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(<span style="font-weight: bold;">lambda</span>: {a: a+1}, n_steps=10)
+<span style="font-weight: bold; font-style: italic;">b</span> = a + 1
+<span style="font-weight: bold; font-style: italic;">c</span> = updates[a] + 1
+<span style="font-weight: bold; font-style: italic;">f</span> = aesara.function([], [b, c])
+<span style="font-weight: bold;">print</span>(f())
+<span style="font-weight: bold;">print</span>(f())
 </pre>
 </div>
 
@@ -154,11 +154,11 @@ The updates were not <i>applied</i> to the shared variable. What passing the upd
 
 <div class="org-src-container">
 <pre class="src src-python">
-<span style="color: #24292e;">a</span> = shared(0)
-<span style="color: #24292e;">a</span> = a + 1
-<span style="color: #24292e;">fn</span> = aesara.function([], a)
-<span style="color: #d73a49;">print</span>(fn())
-<span style="color: #d73a49;">print</span>(fn())
+<span style="font-weight: bold; font-style: italic;">a</span> = shared(0)
+<span style="font-weight: bold; font-style: italic;">a</span> = a + 1
+<span style="font-weight: bold; font-style: italic;">fn</span> = aesara.function([], a)
+<span style="font-weight: bold;">print</span>(fn())
+<span style="font-weight: bold;">print</span>(fn())
 aesara.dprint(a)
 </pre>
 </div>
@@ -169,9 +169,9 @@ So <code>Variables</code> are placeholders, they're not variables in the sense o
 </div>
 </div>
 
-<div id="outline-container-orgf883241" class="outline-3">
-<h3 id="orgf883241"><span class="todo TODO">TODO</span> What happens to shared variables when the graph is copied?</h3>
-<div class="outline-text-3" id="text-orgf883241">
+<div id="outline-container-org3a02513" class="outline-3">
+<h3 id="org3a02513"><span class="todo TODO">TODO</span> What happens to shared variables when the graph is copied?</h3>
+<div class="outline-text-3" id="text-org3a02513">
 <p>
 If the updates still refer to the original shared variables then nothing is going to happen; so using <code>aesara.graph.basic.clone_get_equiv</code> and passing the origin updates will likely lead to buggy code since the original updates won't be applied to the cloned variable.
 </p>
@@ -182,16 +182,16 @@ Instead we need to use functions like <code>aesara.compile.function.pfunc.rebuil
 </div>
 </div>
 
-<div id="outline-container-orgdaa10d8" class="outline-3">
-<h3 id="orgdaa10d8"><span class="todo TODO">TODO</span> Why do we use <code>shared</code> variables for the <code>RandomStream</code>?</h3>
+<div id="outline-container-org8374228" class="outline-3">
+<h3 id="org8374228"><span class="todo TODO">TODO</span> Why do we use <code>shared</code> variables for the <code>RandomStream</code>?</h3>
 </div>
-<div id="outline-container-org8df7765" class="outline-3">
-<h3 id="org8df7765"><span class="todo TODO">TODO</span> Shared variables don't have a sense of scope (give example)</h3>
+<div id="outline-container-org64c0a7e" class="outline-3">
+<h3 id="org64c0a7e"><span class="todo TODO">TODO</span> Shared variables don't have a sense of scope (give example)</h3>
 </div>
 
-<div id="outline-container-org5d6a406" class="outline-2">
-<h2 id="org5d6a406">References</h2>
-<div class="outline-text-2" id="text-org5d6a406">
+<div id="outline-container-org41231d1" class="outline-2">
+<h2 id="org41231d1">References</h2>
+<div class="outline-text-2" id="text-org41231d1">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://aesara.readthedocs.io/en/latest/library/compile/shared.html?highlight=shared#module-aesara.compile.sharedvalue"><code>shared</code> in the Aesara documentation</a></li>
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/blob/8763981ca4263e153c68e6be39c03a272c027b60/aesara/compile/sharedvalue.py#L34-L221">Implementation on github</a></li>
@@ -199,9 +199,9 @@ Instead we need to use functions like <code>aesara.compile.function.pfunc.rebuil
 </div>
 </div>
 
-<div id="outline-container-org6a7e7ec" class="outline-2">
-<h2 id="org6a7e7ec">Links to this note</h2>
-<div class="outline-text-2" id="text-org6a7e7ec">
+<div id="outline-container-org9bcfe3d" class="outline-2">
+<h2 id="org9bcfe3d">Links to this note</h2>
+<div class="outline-text-2" id="text-org9bcfe3d">
 <ul class="org-ul">
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
 <li><a href="./20220729171741-control_flow_in_aesara.html">imperative concepts in Aesara</a></li>

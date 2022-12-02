@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 14:38 -->
+<!-- 2022-12-02 Fri 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>miniKanren in Python</title>
@@ -18,18 +18,18 @@
 In this article I will give an overview of the <code>kanren</code> library which is an implementation of miniKanren in python. We will go over the library's design. We assume that we are able to define <code>unify</code> and <code>reify</code> functions.
 </p>
 
-<div id="outline-container-org3132bda" class="outline-2">
-<h2 id="org3132bda">Goals</h2>
-<div class="outline-text-2" id="text-org3132bda">
+<div id="outline-container-org42630cc" class="outline-2">
+<h2 id="org42630cc">Goals</h2>
+<div class="outline-text-2" id="text-org42630cc">
 <p>
 In <code>kanren</code> we wish to express relations between variables with <i>goals</i>:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">relation</span>(s, t):
-    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">relation_goal</span>(s):
-        <span style="color: #d73a49;">pass</span>
-    <span style="color: #d73a49;">pass</span>
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">relation</span>(s, t):
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">relation_goal</span>(s):
+        <span style="font-weight: bold;">pass</span>
+    <span style="font-weight: bold;">pass</span>
 </pre>
 </div>
 
@@ -38,19 +38,19 @@ The simplest example of this is the <code>eq</code> relation, which specifies th
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> unification <span style="color: #d73a49;">import</span> unify, reify, var
+<pre class="src src-python"><span style="font-weight: bold;">from</span> unification <span style="font-weight: bold;">import</span> unify, reify, var
 
-<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">eq</span>(u, v):
-    <span style="color: #6a737d;"># </span><span style="color: #6a737d;">u and v are two variables. They can be python variables or logic variables</span>
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">eq</span>(u, v):
+    <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">u and v are two variables. They can be python variables or logic variables</span>
 
-    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">eq_goal</span>(s):
-        <span style="color: #24292e;">s</span> = unify(u, v, s)
-        <span style="color: #d73a49;">if</span> s <span style="color: #d73a49;">is</span> <span style="color: #d73a49;">not</span> <span style="color: #005cc5;">False</span>:
-            <span style="color: #d73a49;">return</span> <span style="color: #d73a49;">iter</span>((s,))
-        <span style="color: #d73a49;">else</span>:
-            <span style="color: #d73a49;">return</span> <span style="color: #d73a49;">iter</span>(())
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">eq_goal</span>(s):
+        <span style="font-weight: bold; font-style: italic;">s</span> = unify(u, v, s)
+        <span style="font-weight: bold;">if</span> s <span style="font-weight: bold;">is</span> <span style="font-weight: bold;">not</span> <span style="font-weight: bold; text-decoration: underline;">False</span>:
+            <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">iter</span>((s,))
+        <span style="font-weight: bold;">else</span>:
+            <span style="font-weight: bold;">return</span> <span style="font-weight: bold;">iter</span>(())
 
-    <span style="color: #d73a49;">return</span> eq_goal
+    <span style="font-weight: bold;">return</span> eq_goal
 </pre>
 </div>
 
@@ -59,9 +59,9 @@ Initial state is the empty dictionary <code>{}</code>. Then what <code>run</code
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">q</span> = var(<span style="color: #032f62;">'q'</span>)
-<span style="color: #24292e;">goal</span> = eq(q, 1)
-<span style="color: #24292e;">res</span> = <span style="color: #d73a49;">next</span>(goal({}))
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">q</span> = var(<span style="font-style: italic;">'q'</span>)
+<span style="font-weight: bold; font-style: italic;">goal</span> = eq(q, 1)
+<span style="font-weight: bold; font-style: italic;">res</span> = <span style="font-weight: bold;">next</span>(goal({}))
 reify(q, res)
 </pre>
 </div>
@@ -71,11 +71,11 @@ is equivalent to the following:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> kanren <span style="color: #d73a49;">import</span> var, run, eq
+<pre class="src src-python"><span style="font-weight: bold;">from</span> kanren <span style="font-weight: bold;">import</span> var, run, eq
 
-<span style="color: #24292e;">q</span> = var(<span style="color: #032f62;">'q'</span>)
-<span style="color: #24292e;">res</span> = run(0, q, eq(q, 1.))
-<span style="color: #d73a49;">print</span>(res[0])
+<span style="font-weight: bold; font-style: italic;">q</span> = var(<span style="font-style: italic;">'q'</span>)
+<span style="font-weight: bold; font-style: italic;">res</span> = run(0, q, eq(q, 1.))
+<span style="font-weight: bold;">print</span>(res[0])
 </pre>
 </div>
 
@@ -85,21 +85,21 @@ So far so good, nothing exceptional here. Difficulty comes when we add logic to 
 </div>
 </div>
 
-<div id="outline-container-orgc5787c2" class="outline-2">
-<h2 id="orgc5787c2">Combining goals</h2>
-<div class="outline-text-2" id="text-orgc5787c2">
+<div id="outline-container-org23fc0fc" class="outline-2">
+<h2 id="org23fc0fc">Combining goals</h2>
+<div class="outline-text-2" id="text-org23fc0fc">
 </div>
-<div id="outline-container-orgaa20f21" class="outline-3">
-<h3 id="orgaa20f21">Conjunction of goals</h3>
-<div class="outline-text-3" id="text-orgaa20f21">
+<div id="outline-container-orgdfcedf9" class="outline-3">
+<h3 id="orgdfcedf9">Conjunction of goals</h3>
+<div class="outline-text-3" id="text-orgdfcedf9">
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">conj</span>(goal1, goal2):
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">conj</span>(goal1, goal2):
 
-    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">and_goal</span>(S):
-        <span style="color: #24292e;">S1</span> = goal1(S)
-        <span style="color: #d73a49;">yield</span> <span style="color: #d73a49;">from</span> <span style="color: #d73a49;">map</span>(goal2, S1)
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">and_goal</span>(S):
+        <span style="font-weight: bold; font-style: italic;">S1</span> = goal1(S)
+        <span style="font-weight: bold;">yield</span> <span style="font-weight: bold;">from</span> <span style="font-weight: bold;">map</span>(goal2, S1)
 
-    <span style="color: #d73a49;">return</span> and_goal
+    <span style="font-weight: bold;">return</span> and_goal
 </pre>
 </div>
 
@@ -108,17 +108,17 @@ So we can now use our <code>eq</code> operator defined above. This is where the 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">goal1</span> = eq(q, 2)
-<span style="color: #24292e;">goal2</span> = eq(q, 3)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">goal1</span> = eq(q, 2)
+<span style="font-weight: bold; font-style: italic;">goal2</span> = eq(q, 3)
 
-<span style="color: #24292e;">state1</span> = <span style="color: #d73a49;">next</span>(goal1({}))
-<span style="color: #d73a49;">print</span>(state1)
+<span style="font-weight: bold; font-style: italic;">state1</span> = <span style="font-weight: bold;">next</span>(goal1({}))
+<span style="font-weight: bold;">print</span>(state1)
 
-<span style="color: #24292e;">state2</span> = <span style="color: #d73a49;">next</span>(goal2({}))
-<span style="color: #d73a49;">print</span>(state2)
+<span style="font-weight: bold; font-style: italic;">state2</span> = <span style="font-weight: bold;">next</span>(goal2({}))
+<span style="font-weight: bold;">print</span>(state2)
 
-<span style="color: #d73a49;">print</span>(<span style="color: #d73a49;">next</span>(goal2({q: 3})))
-<span style="color: #d73a49;">print</span>(<span style="color: #d73a49;">next</span>(goal2({q: 2})))
+<span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">next</span>(goal2({q: 3})))
+<span style="font-weight: bold;">print</span>(<span style="font-weight: bold;">next</span>(goal2({q: 2})))
 </pre>
 </div>
 
@@ -137,20 +137,20 @@ Yep, if the state is incompatible then the iterator has nothing to offer. This l
 </div>
 </div>
 
-<div id="outline-container-org558e1cd" class="outline-3">
-<h3 id="org558e1cd">Disjunctions of goals</h3>
-<div class="outline-text-3" id="text-org558e1cd">
+<div id="outline-container-orgab3a43a" class="outline-3">
+<h3 id="orgab3a43a">Disjunctions of goals</h3>
+<div class="outline-text-3" id="text-orgab3a43a">
 <p>
 Here we just interleave results. Both branches are contributing possible states. The current implementation uses a naive interleaving mechanism.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org5ab1972" class="outline-3">
-<h3 id="org5ab1972">Conditional</h3>
+<div id="outline-container-orgc638c72" class="outline-3">
+<h3 id="orgc638c72">Conditional</h3>
 </div>
-<div id="outline-container-org565eaa1" class="outline-3">
-<h3 id="org565eaa1">Negations</h3>
+<div id="outline-container-org3353d2e" class="outline-3">
+<h3 id="org3353d2e">Negations</h3>
 </div>
 </div>
 </div>

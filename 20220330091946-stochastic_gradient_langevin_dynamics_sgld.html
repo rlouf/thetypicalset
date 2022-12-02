@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 14:37 -->
+<!-- 2022-12-02 Fri 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Stochastic gradient Langevin Dynamics (SgLD)</title>
@@ -47,9 +47,9 @@
 <div id="content" class="content">
 <h1 class="title">Stochastic gradient Langevin Dynamics (SgLD)</h1>
 
-<div id="outline-container-org5bae603" class="outline-2">
-<h2 id="org5bae603">Principle and motivation</h2>
-<div class="outline-text-2" id="text-org5bae603">
+<div id="outline-container-org52ea521" class="outline-2">
+<h2 id="org52ea521">Principle and motivation</h2>
+<div class="outline-text-2" id="text-org52ea521">
 <p>
 We use the same solver for the overdamped Langevin dynamics as for the <a href="20220329092624-metropolis_adjusted_langevin_algorithm.html#ID-2b7665c9-e950-4432-b260-9e30b593b375">Metropolis-Adjusted Langevin Algorithm</a>, but we work with an <i>estimator</i> \(\hat{\nabla} \log \pi\) for the gradient of the log-probability density function instead of the gradient itself. There are two reasons why one would want to do that:
 </p>
@@ -64,9 +64,9 @@ The exposition follows [Welling &amp; Teh]. At time \(t\) a subset \(X_t = \left
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="color: #d73a49;">\begin</span>{<span style="color: #6f42c1;">equation*</span>}
-  <span style="color: #d73a49;">\hat</span>{<span style="color: #d73a49;">\nabla</span>} <span style="color: #d73a49;">\log</span> <span style="color: #d73a49;">\pi</span>(<span style="color: #d73a49;">\theta</span>_{t}) = <span style="color: #d73a49;">\nabla</span> <span style="color: #d73a49;">\log</span> p(<span style="color: #d73a49;">\theta</span>_{t}) + <span style="color: #d73a49;">\frac</span>{N}{n} <span style="color: #d73a49;">\sum</span>_{i} <span style="color: #d73a49;">\nabla</span> <span style="color: #d73a49;">\log</span> p(x_{it}|<span style="color: #d73a49;">\theta</span>_{t})
-<span style="color: #d73a49;">\end</span>{<span style="color: #6f42c1;">equation*</span>}
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation*</span>}
+  <span style="font-weight: bold;">\hat</span>{<span style="font-weight: bold;">\nabla</span>} <span style="font-weight: bold;">\log</span> <span style="font-weight: bold;">\pi</span>(<span style="font-weight: bold;">\theta</span>_{t}) = <span style="font-weight: bold;">\nabla</span> <span style="font-weight: bold;">\log</span> p(<span style="font-weight: bold;">\theta</span>_{t}) + <span style="font-weight: bold;">\frac</span>{N}{n} <span style="font-weight: bold;">\sum</span>_{i} <span style="font-weight: bold;">\nabla</span> <span style="font-weight: bold;">\log</span> p(x_{it}|<span style="font-weight: bold;">\theta</span>_{t})
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation*</span>}
 </pre>
 </div>
 <p>
@@ -74,10 +74,10 @@ So the proposed update using the Langevin dynamics is:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="color: #d73a49;">\begin</span>{<span style="color: #6f42c1;">align*</span>}
-  <span style="color: #d73a49;">\theta</span>_{t+1} &amp;= <span style="color: #d73a49;">\theta</span>_{t} + <span style="color: #d73a49;">\frac</span>{<span style="color: #d73a49;">\epsilon</span>_{t}}{2}<span style="color: #d73a49;">\;\left</span>(<span style="color: #d73a49;">\nabla</span> <span style="color: #d73a49;">\log</span> p(<span style="color: #d73a49;">\theta</span>_{t}) + <span style="color: #d73a49;">\frac</span>{N}{n} <span style="color: #d73a49;">\sum</span>_{i} <span style="color: #d73a49;">\nabla</span> <span style="color: #d73a49;">\log</span> p(x_{it}|<span style="color: #d73a49;">\theta</span>_{t})<span style="color: #d73a49;">\right</span>) + <span style="color: #d73a49;">\xi</span>_{t}<span style="color: #24292e;">\\</span>
-  <span style="color: #d73a49;">\xi</span>_t &amp;<span style="color: #d73a49;">\sim</span> <span style="color: #d73a49;">\operatorname</span>{Normal}<span style="color: #d73a49;">\left</span>(0, <span style="color: #d73a49;">\epsilon</span>_t<span style="color: #d73a49;">\right</span>)
-<span style="color: #d73a49;">\end</span>{<span style="color: #6f42c1;">align*</span>}
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">align*</span>}
+  <span style="font-weight: bold;">\theta</span>_{t+1} &amp;= <span style="font-weight: bold;">\theta</span>_{t} + <span style="font-weight: bold;">\frac</span>{<span style="font-weight: bold;">\epsilon</span>_{t}}{2}<span style="font-weight: bold;">\;\left</span>(<span style="font-weight: bold;">\nabla</span> <span style="font-weight: bold;">\log</span> p(<span style="font-weight: bold;">\theta</span>_{t}) + <span style="font-weight: bold;">\frac</span>{N}{n} <span style="font-weight: bold;">\sum</span>_{i} <span style="font-weight: bold;">\nabla</span> <span style="font-weight: bold;">\log</span> p(x_{it}|<span style="font-weight: bold;">\theta</span>_{t})<span style="font-weight: bold;">\right</span>) + <span style="font-weight: bold;">\xi</span>_{t}<span style="font-weight: bold;">\\</span>
+  <span style="font-weight: bold;">\xi</span>_t &amp;<span style="font-weight: bold;">\sim</span> <span style="font-weight: bold;">\operatorname</span>{Normal}<span style="font-weight: bold;">\left</span>(0, <span style="font-weight: bold;">\epsilon</span>_t<span style="font-weight: bold;">\right</span>)
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">align*</span>}
 </pre>
 </div>
 
@@ -88,21 +88,21 @@ So the proposed update using the Langevin dynamics is:
 </div>
 </div>
 
-<div id="outline-container-org0476847" class="outline-2">
-<h2 id="org0476847">Convergence</h2>
+<div id="outline-container-org9f81743" class="outline-2">
+<h2 id="org9f81743">Convergence</h2>
 </div>
 
-<div id="outline-container-org53c5fd4" class="outline-2">
-<h2 id="org53c5fd4">References</h2>
-<div class="outline-text-2" id="text-org53c5fd4">
+<div id="outline-container-org0d15dec" class="outline-2">
+<h2 id="org0d15dec">References</h2>
+<div class="outline-text-2" id="text-org0d15dec">
 <ul class="org-ul">
 <li>Welling &amp; Teh (2011) <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.stats.ox.ac.uk/~teh/research/compstats/WelTeh2011a.pdf">Bayesian Learning via Stochastic Gradient Langevin Dynamics</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgdb5510e" class="outline-2">
-<h2 id="orgdb5510e">Links to this note</h2>
+<div id="outline-container-org0ab78dc" class="outline-2">
+<h2 id="org0ab78dc">Links to this note</h2>
 </div>
 </div>
 </body>

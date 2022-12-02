@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 14:38 -->
+<!-- 2022-12-02 Fri 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Unify to build samplers</title>
@@ -55,13 +55,13 @@ Let us consider a simpler version of the previous model that only contains the h
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
 
-<span style="color: #24292e;">tau_rv</span> = srng.halfcauchy(1, size=1)
-<span style="color: #24292e;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
-<span style="color: #24292e;">beta_rv</span> = srng.normal(0, tau_rv * lmbda_rv)
+<span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(1, size=1)
+<span style="font-weight: bold; font-style: italic;">lmbda_rv</span> = srng.halfcauchy(1, size=10)
+<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.normal(0, tau_rv * lmbda_rv)
 </pre>
 </div>
 
@@ -70,33 +70,33 @@ The following Gibbs sampler updates the values of \(\tau\) and \(\lambda\) knowi
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> typing <span style="color: #d73a49;">import</span> Callable, Tuple
+<pre class="src src-python"><span style="font-weight: bold;">from</span> typing <span style="font-weight: bold;">import</span> Callable, Tuple
 
-<span style="color: #d73a49;">from</span> aesara.tensor.random <span style="color: #d73a49;">import</span> RandomStream
-<span style="color: #d73a49;">from</span> aesara.tensor.var <span style="color: #d73a49;">import</span> TensorVariable
+<span style="font-weight: bold;">from</span> aesara.tensor.random <span style="font-weight: bold;">import</span> RandomStream
+<span style="font-weight: bold;">from</span> aesara.tensor.var <span style="font-weight: bold;">import</span> TensorVariable
 
-<span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">step_horseshoe</span>(srng: RandomStream) -&gt; Callable:
-    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">step</span>(
+<span style="font-weight: bold;">def</span> <span style="font-weight: bold;">step_horseshoe</span>(srng: RandomStream) -&gt; Callable:
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">step</span>(
         lmbda: TensorVariable,
         tau: TensorVariable,
         beta: TensorVariable,
     ) -&gt; Tuple[TensorVariable, TensorVariable]:
-        <span style="color: #24292e;">lmbda_inv</span> = 1.0 / lmbda
-        <span style="color: #24292e;">tau_inv</span> = 1.0 / tau
+        <span style="font-weight: bold; font-style: italic;">lmbda_inv</span> = 1.0 / lmbda
+        <span style="font-weight: bold; font-style: italic;">tau_inv</span> = 1.0 / tau
 
-        <span style="color: #24292e;">upsilon_inv</span> = srng.exponential(1 + lmbda_inv)
-        <span style="color: #24292e;">zeta_inv</span> = srng.exponential(1 + tau_inv)
+        <span style="font-weight: bold; font-style: italic;">upsilon_inv</span> = srng.exponential(1 + lmbda_inv)
+        <span style="font-weight: bold; font-style: italic;">zeta_inv</span> = srng.exponential(1 + tau_inv)
 
-        <span style="color: #24292e;">beta2</span> = beta * beta
-        <span style="color: #24292e;">lmbda_inv_new</span> = srng.exponential(upsilon_inv + 0.5 * beta2 * tau_inv)
-        <span style="color: #24292e;">tau_inv_new</span> = srng.gamma(
+        <span style="font-weight: bold; font-style: italic;">beta2</span> = beta * beta
+        <span style="font-weight: bold; font-style: italic;">lmbda_inv_new</span> = srng.exponential(upsilon_inv + 0.5 * beta2 * tau_inv)
+        <span style="font-weight: bold; font-style: italic;">tau_inv_new</span> = srng.gamma(
             0.5 * (beta.shape[0] + 1),
-            zeta_inv + 0.5 * (beta2 * lmbda_inv_new).<span style="color: #d73a49;">sum</span>(),
+            zeta_inv + 0.5 * (beta2 * lmbda_inv_new).<span style="font-weight: bold;">sum</span>(),
         )
 
-        <span style="color: #d73a49;">return</span> 1.0 / lmbda_inv_new, 1.0 / tau_inv_new
+        <span style="font-weight: bold;">return</span> 1.0 / lmbda_inv_new, 1.0 / tau_inv_new
 
-    <span style="color: #d73a49;">return</span> step
+    <span style="font-weight: bold;">return</span> step
 </pre>
 </div>
 
@@ -115,18 +115,18 @@ Instead, we would like to provide a unified interface&#x2013;a single function&#
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">build_sampler</span>(srng, beta_rv, beta_vv, num_samples):
-    <span style="color: #24292e;">lmbda_rv</span>, <span style="color: #24292e;">tau_rv</span> = unify_horseshoe(beta_rv)
-    <span style="color: #24292e;">step_fn</span> = step_horseshoe(srng)
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">build_sampler</span>(srng, beta_rv, beta_vv, num_samples):
+    <span style="font-weight: bold; font-style: italic;">lmbda_rv</span>, <span style="font-weight: bold; font-style: italic;">tau_rv</span> = unify_horseshoe(beta_rv)
+    <span style="font-weight: bold; font-style: italic;">step_fn</span> = step_horseshoe(srng)
 
-    <span style="color: #24292e;">outputs</span>, <span style="color: #24292e;">updates</span> = aesara.scan(
+    <span style="font-weight: bold; font-style: italic;">outputs</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
         step_fn,
         outputs_info=(lmbda_rv, tau_rv),
         non_sequences=(beta_vv,),
         n_steps=num_samples,
     )
 
-    <span style="color: #d73a49;">return</span> outputs, updates
+    <span style="font-weight: bold;">return</span> outputs, updates
 </pre>
 </div>
 
@@ -135,13 +135,13 @@ Indeed, we can then compile a sampling function:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
 
-<span style="color: #24292e;">beta_vv</span> = beta_rv.clone()
-<span style="color: #24292e;">num_samples</span> = at.iscalar(<span style="color: #032f62;">"num_samples"</span>)
-<span style="color: #24292e;">outputs</span>, <span style="color: #24292e;">updates</span> = build_sampler(srng, beta_rv, beta_vv, num_samples)
+<span style="font-weight: bold; font-style: italic;">beta_vv</span> = beta_rv.clone()
+<span style="font-weight: bold; font-style: italic;">num_samples</span> = at.iscalar(<span style="font-style: italic;">"num_samples"</span>)
+<span style="font-weight: bold; font-style: italic;">outputs</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = build_sampler(srng, beta_rv, beta_vv, num_samples)
 
-<span style="color: #24292e;">sample_fn</span> = aesara.function((beta_vv, num_samples), outputs, updates=updates)
+<span style="font-weight: bold; font-style: italic;">sample_fn</span> = aesara.function((beta_vv, num_samples), outputs, updates=updates)
 </pre>
 </div>
 
@@ -150,10 +150,10 @@ And use it to generate samples from the posterior distribution of \(\lambda\) an
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
-<span style="color: #d73a49;">from</span> IPython.lib.pretty <span style="color: #d73a49;">import</span> pprint
+<pre class="src src-python"><span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
+<span style="font-weight: bold;">from</span> IPython.lib.pretty <span style="font-weight: bold;">import</span> pprint
 
-<span style="color: #24292e;">beta</span> = np.random.normal(size=10)
+<span style="font-weight: bold; font-style: italic;">beta</span> = np.random.normal(size=10)
 pprint(sample_fn(beta, 3))
 </pre>
 </div>

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 14:38 -->
+<!-- 2022-12-02 Fri 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Oh the objects we manipulate</title>
@@ -55,11 +55,11 @@ Sometimes, it works the other way, and it is the outside abstractions that help 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aeppl
-<span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aeppl
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
-<span style="color: #24292e;">x_rv</span> = at.random.normal(0, 1)
-<span style="color: #24292e;">y</span> = at.clip(x_rv, 0, 1)
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(0, 1)
+<span style="font-weight: bold; font-style: italic;">y</span> = at.clip(x_rv, 0, 1)
 
 logprob, (y_vv,) = aeppl.joint_logprob(y)
 </pre>
@@ -70,18 +70,18 @@ There is a little context to unpack here. In Aesara, <code>x_rv</code> is an ins
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara
-<span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
-<span style="color: #24292e;">x_rv</span> = srng.normal(0, 3)
-<span style="color: #24292e;">y</span> = at.clip(x_rv, 0, 1)
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = srng.normal(0, 3)
+<span style="font-weight: bold; font-style: italic;">y</span> = at.clip(x_rv, 0, 1)
 
-<span style="color: #24292e;">sample_fn</span> = aesara.function((), y)
-<span style="color: #d73a49;">print</span>(sample_fn())
-<span style="color: #d73a49;">print</span>(sample_fn())
-<span style="color: #d73a49;">print</span>(sample_fn())
-<span style="color: #d73a49;">print</span>(sample_fn())
+<span style="font-weight: bold; font-style: italic;">sample_fn</span> = aesara.function((), y)
+<span style="font-weight: bold;">print</span>(sample_fn())
+<span style="font-weight: bold;">print</span>(sample_fn())
+<span style="font-weight: bold;">print</span>(sample_fn())
+<span style="font-weight: bold;">print</span>(sample_fn())
 </pre>
 </div>
 
@@ -103,16 +103,16 @@ But the first snippet above tells a different story. Let's take a simpler exampl
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aeppl
-<span style="color: #d73a49;">import</span> aesara
-<span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aeppl
+<span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
 
-<span style="color: #24292e;">x_rv</span> = at.random.normal(0, 1)
-<span style="color: #24292e;">z_rv</span> = at.random.normal(x_rv, 1)
+<span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(0, 1)
+<span style="font-weight: bold; font-style: italic;">z_rv</span> = at.random.normal(x_rv, 1)
 
 logprob, (x_vv, y_vv,) = aeppl.joint_logprob(x_rv, y_rv)
-<span style="color: #24292e;">fn</span> = aesara.function((x_vv, y_vv), logprob)
-<span style="color: #d73a49;">print</span>(fn(1., 1.))
+<span style="font-weight: bold; font-style: italic;">fn</span> = aesara.function((x_vv, y_vv), logprob)
+<span style="font-weight: bold;">print</span>(fn(1., 1.))
 </pre>
 </div>
 
@@ -125,8 +125,8 @@ Have you noticed? The <i>meaning</i> of <code>x_rv</code> has suddenly changed! 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">x_rv</span> = at.random.normal(0, 1)
-<span style="color: #24292e;">y</span> = at.clip(x, 0, 1)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">x_rv</span> = at.random.normal(0, 1)
+<span style="font-weight: bold; font-style: italic;">y</span> = at.clip(x, 0, 1)
 </pre>
 </div>
 

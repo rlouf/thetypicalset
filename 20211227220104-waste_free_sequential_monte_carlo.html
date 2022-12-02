@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 14:37 -->
+<!-- 2022-12-02 Fri 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Waste-free Sequential Monte Carlo</title>
@@ -67,9 +67,9 @@ Waste-free SMC uses intermediate steps as new particles.
 </ul>
 
 
-<div id="outline-container-orgbc5d9bc" class="outline-2">
-<h2 id="orgbc5d9bc">Principle</h2>
-<div class="outline-text-2" id="text-orgbc5d9bc">
+<div id="outline-container-org7f40542" class="outline-2">
+<h2 id="org7f40542">Principle</h2>
+<div class="outline-text-2" id="text-org7f40542">
 <p>
 If there are \(N\) particles, we only resample \(M = N/P\) particles. Each resampled particle is moved \(P-1\) times and each iterate is taken to form a new sample of size \(N\).
 </p>
@@ -83,8 +83,8 @@ The implement of sequential MC first consists in a resampling step:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">resampling_idx</span> = resampling_fn(weights, rng_key, num_resampled)
-<span style="color: #24292e;">particles</span> = jax.tree_map(<span style="color: #d73a49;">lambda</span> x: x[resampling_index], particles)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">resampling_idx</span> = resampling_fn(weights, rng_key, num_resampled)
+<span style="font-weight: bold; font-style: italic;">particles</span> = jax.tree_map(<span style="font-weight: bold;">lambda</span> x: x[resampling_index], particles)
 </pre>
 </div>
 
@@ -121,9 +121,9 @@ And the transition kernel:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-latex"><span style="color: #d73a49;">\begin</span>{<span style="color: #6f42c1;">equation</span>}
- M_{t}^{wf}(z_{t-1}, <span style="color: #d73a49;">\mathrm</span>{d}z_{t}) = <span style="color: #d73a49;">\left\{\sum</span>_{p=1}^{P}<span style="color: #d73a49;">\right\}</span>
-<span style="color: #d73a49;">\end</span>{<span style="color: #6f42c1;">equation</span>}
+<pre class="src src-latex"><span style="font-weight: bold;">\begin</span>{<span style="font-weight: bold;">equation</span>}
+ M_{t}^{wf}(z_{t-1}, <span style="font-weight: bold;">\mathrm</span>{d}z_{t}) = <span style="font-weight: bold;">\left\{\sum</span>_{p=1}^{P}<span style="font-weight: bold;">\right\}</span>
+<span style="font-weight: bold;">\end</span>{<span style="font-weight: bold;">equation</span>}
 </pre>
 </div>
 
@@ -162,99 +162,99 @@ The equivalent algorithm 1 would be:
 </div>
 
 
-<div id="outline-container-org9dd1eb2" class="outline-2">
-<h2 id="org9dd1eb2">Code</h2>
-<div class="outline-text-2" id="text-org9dd1eb2">
+<div id="outline-container-org4b592f2" class="outline-2">
+<h2 id="org4b592f2">Code</h2>
+<div class="outline-text-2" id="text-org4b592f2">
 <p>
 Let us now refactor the original smc code:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">smc</span>(
+<pre class="src src-python"><span style="font-weight: bold;">def</span> <span style="font-weight: bold;">smc</span>(
     mcmc_kernel_factory: Callable,
     mcmc_state_generator: Callable,
     resampling_fn: Callable,
-    num_mcmc_iterations: <span style="color: #d73a49;">int</span>,
-    is_waste_free: <span style="color: #d73a49;">bool</span> = <span style="color: #005cc5;">False</span>,
+    num_mcmc_iterations: <span style="font-weight: bold;">int</span>,
+    is_waste_free: <span style="font-weight: bold;">bool</span> = <span style="font-weight: bold; text-decoration: underline;">False</span>,
 ):
 
-    <span style="color: #d73a49;">if</span> is_waste_free:
-        <span style="color: #24292e;">num_mcmc_iterations</span> = num_mcmc_iterations - 1
+    <span style="font-weight: bold;">if</span> is_waste_free:
+        <span style="font-weight: bold; font-style: italic;">num_mcmc_iterations</span> = num_mcmc_iterations - 1
 
-    <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">kernel</span>(
+    <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">kernel</span>(
         rng_key: PRNGKey,
         state: SMCState,
         logprob_fn: Callable,
         log_weight_fn: Callable,
     ) -&gt; Tuple[SMCState, SMCInfo]:
 
-        <span style="color: #24292e;">weights</span>, <span style="color: #24292e;">particles</span> = state
-        <span style="color: #24292e;">scan_key</span>, <span style="color: #24292e;">resampling_key</span> = jax.random.split(rng_key, 2)
+        <span style="font-weight: bold; font-style: italic;">weights</span>, <span style="font-weight: bold; font-style: italic;">particles</span> = state
+        <span style="font-weight: bold; font-style: italic;">scan_key</span>, <span style="font-weight: bold; font-style: italic;">resampling_key</span> = jax.random.split(rng_key, 2)
 
-        <span style="color: #24292e;">num_particles</span> = weights.shape[0]
-        <span style="color: #d73a49;">if</span> is_waste_free:
-            <span style="color: #24292e;">sub_num_particles</span>, <span style="color: #24292e;">remainder</span> = <span style="color: #d73a49;">divmod</span>(
+        <span style="font-weight: bold; font-style: italic;">num_particles</span> = weights.shape[0]
+        <span style="font-weight: bold;">if</span> is_waste_free:
+            <span style="font-weight: bold; font-style: italic;">sub_num_particles</span>, <span style="font-weight: bold; font-style: italic;">remainder</span> = <span style="font-weight: bold;">divmod</span>(
                 num_particles, num_mcmc_iterations + 1
             )
-            <span style="color: #d73a49;">if</span> remainder &gt; 0:
-                <span style="color: #d73a49;">raise</span> <span style="color: #005cc5;">ValueError</span>(
-                    <span style="color: #032f62;">"`num_mcmc_iterations` must be a divider "</span>
-                    f<span style="color: #032f62;">"of `num_particles`, {num_mcmc_iterations} and "</span>
-                    f<span style="color: #032f62;">"{num_particles} were given"</span>
+            <span style="font-weight: bold;">if</span> remainder &gt; 0:
+                <span style="font-weight: bold;">raise</span> <span style="font-weight: bold; text-decoration: underline;">ValueError</span>(
+                    <span style="font-style: italic;">"`num_mcmc_iterations` must be a divider "</span>
+                    f<span style="font-style: italic;">"of `num_particles`, {num_mcmc_iterations} and "</span>
+                    f<span style="font-style: italic;">"{num_particles} were given"</span>
                 )
-        <span style="color: #d73a49;">else</span>:
-            <span style="color: #24292e;">sub_num_particles</span> = num_particles
+        <span style="font-weight: bold;">else</span>:
+            <span style="font-weight: bold; font-style: italic;">sub_num_particles</span> = num_particles
 
-        <span style="color: #24292e;">resampling_index</span> = resampling_fn(weights, resampling_key, sub_num_particles)
-        <span style="color: #24292e;">particles</span> = jax.tree_map(<span style="color: #d73a49;">lambda</span> x: x[resampling_index], particles)
+        <span style="font-weight: bold; font-style: italic;">resampling_index</span> = resampling_fn(weights, resampling_key, sub_num_particles)
+        <span style="font-weight: bold; font-style: italic;">particles</span> = jax.tree_map(<span style="font-weight: bold;">lambda</span> x: x[resampling_index], particles)
 
-        <span style="color: #6a737d;"># </span><span style="color: #6a737d;">First advance the particles using the MCMC kernel</span>
-        <span style="color: #24292e;">mcmc_kernel</span> = mcmc_kernel_factory(logprob_fn)
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">First advance the particles using the MCMC kernel</span>
+        <span style="font-weight: bold; font-style: italic;">mcmc_kernel</span> = mcmc_kernel_factory(logprob_fn)
 
-        <span style="color: #d73a49;">def</span> <span style="color: #6f42c1;">mcmc_body_fn</span>(carry, curr_key):
-            <span style="color: #24292e;">curr_particles</span>, <span style="color: #24292e;">n_accepted</span> = carry
-            <span style="color: #24292e;">keys</span> = jax.random.split(curr_key, sub_num_particles)
-            <span style="color: #24292e;">new_particles</span>, <span style="color: #24292e;">mcmc_info</span> = jax.vmap(mcmc_kernel, in_axes=(0, 0))(
+        <span style="font-weight: bold;">def</span> <span style="font-weight: bold;">mcmc_body_fn</span>(carry, curr_key):
+            <span style="font-weight: bold; font-style: italic;">curr_particles</span>, <span style="font-weight: bold; font-style: italic;">n_accepted</span> = carry
+            <span style="font-weight: bold; font-style: italic;">keys</span> = jax.random.split(curr_key, sub_num_particles)
+            <span style="font-weight: bold; font-style: italic;">new_particles</span>, <span style="font-weight: bold; font-style: italic;">mcmc_info</span> = jax.vmap(mcmc_kernel, in_axes=(0, 0))(
                 keys, curr_particles
             )
-            <span style="color: #24292e;">n_accepted</span> = n_accepted + mcmc_info.is_accepted
-            <span style="color: #d73a49;">return</span> (new_particles, n_accepted), new_particles
+            <span style="font-weight: bold; font-style: italic;">n_accepted</span> = n_accepted + mcmc_info.is_accepted
+            <span style="font-weight: bold;">return</span> (new_particles, n_accepted), new_particles
 
-        <span style="color: #24292e;">mcmc_state</span> = jax.vmap(mcmc_state_generator, in_axes=(0, <span style="color: #005cc5;">None</span>))(
+        <span style="font-weight: bold; font-style: italic;">mcmc_state</span> = jax.vmap(mcmc_state_generator, in_axes=(0, <span style="font-weight: bold; text-decoration: underline;">None</span>))(
             particles, logprob_fn
         )
 
-        <span style="color: #24292e;">keys</span> = jax.random.split(scan_key, num_mcmc_iterations)
-        (proposed_states, total_accepted), <span style="color: #24292e;">proposed_states_history</span> = jax.lax.scan(
+        <span style="font-weight: bold; font-style: italic;">keys</span> = jax.random.split(scan_key, num_mcmc_iterations)
+        (proposed_states, total_accepted), <span style="font-weight: bold; font-style: italic;">proposed_states_history</span> = jax.lax.scan(
             mcmc_body_fn, (mcmc_state, jnp.zeros((sub_num_particles,))), keys
         )
-        <span style="color: #24292e;">acceptance_rate</span> = jnp.mean(total_accepted / num_mcmc_iterations)
+        <span style="font-weight: bold; font-style: italic;">acceptance_rate</span> = jnp.mean(total_accepted / num_mcmc_iterations)
 
-        <span style="color: #d73a49;">if</span> is_waste_free:
-            <span style="color: #24292e;">initial_position</span>, <span style="color: #24292e;">tree_def</span> = jax.tree_flatten(mcmc_state.position)
-            <span style="color: #24292e;">chains_history</span>, <span style="color: #24292e;">_</span> = jax.tree_flatten(proposed_states_history.position)
+        <span style="font-weight: bold;">if</span> is_waste_free:
+            <span style="font-weight: bold; font-style: italic;">initial_position</span>, <span style="font-weight: bold; font-style: italic;">tree_def</span> = jax.tree_flatten(mcmc_state.position)
+            <span style="font-weight: bold; font-style: italic;">chains_history</span>, <span style="font-weight: bold; font-style: italic;">_</span> = jax.tree_flatten(proposed_states_history.position)
 
-            <span style="color: #24292e;">position_history</span> = [
+            <span style="font-weight: bold; font-style: italic;">position_history</span> = [
                 jnp.concatenate([jnp.expand_dims(elem1, 0), elem2])
-                <span style="color: #d73a49;">for</span> elem1, elem2 <span style="color: #d73a49;">in</span> <span style="color: #d73a49;">zip</span>(initial_position, chains_history)
+                <span style="font-weight: bold;">for</span> elem1, elem2 <span style="font-weight: bold;">in</span> <span style="font-weight: bold;">zip</span>(initial_position, chains_history)
             ]
-            <span style="color: #24292e;">position_history</span> = jax.tree_unflatten(tree_def, position_history)
-            <span style="color: #24292e;">proposed_particles</span> = jax.tree_map(
-                <span style="color: #d73a49;">lambda</span> z: jnp.reshape(z, (num_particles,) + z.shape[2:]),
+            <span style="font-weight: bold; font-style: italic;">position_history</span> = jax.tree_unflatten(tree_def, position_history)
+            <span style="font-weight: bold; font-style: italic;">proposed_particles</span> = jax.tree_map(
+                <span style="font-weight: bold;">lambda</span> z: jnp.reshape(z, (num_particles,) + z.shape[2:]),
                 position_history,
             )
 
-        <span style="color: #d73a49;">else</span>:
-            <span style="color: #24292e;">proposed_particles</span> = proposed_states.position
-        <span style="color: #6a737d;"># </span><span style="color: #6a737d;">Resample the particles depending on their respective weights</span>
-        <span style="color: #24292e;">log_weights</span> = jax.vmap(log_weight_fn, in_axes=(0,))(proposed_particles)
-        <span style="color: #24292e;">weights</span>, <span style="color: #24292e;">log_likelihood_increment</span> = _normalize(log_weights)
+        <span style="font-weight: bold;">else</span>:
+            <span style="font-weight: bold; font-style: italic;">proposed_particles</span> = proposed_states.position
+        <span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">Resample the particles depending on their respective weights</span>
+        <span style="font-weight: bold; font-style: italic;">log_weights</span> = jax.vmap(log_weight_fn, in_axes=(0,))(proposed_particles)
+        <span style="font-weight: bold; font-style: italic;">weights</span>, <span style="font-weight: bold; font-style: italic;">log_likelihood_increment</span> = _normalize(log_weights)
 
-        <span style="color: #24292e;">state</span> = SMCState(weights, proposed_particles)
-        <span style="color: #24292e;">info</span> = SMCInfo(resampling_index, log_likelihood_increment, acceptance_rate)
-        <span style="color: #d73a49;">return</span> state, info
+        <span style="font-weight: bold; font-style: italic;">state</span> = SMCState(weights, proposed_particles)
+        <span style="font-weight: bold; font-style: italic;">info</span> = SMCInfo(resampling_index, log_likelihood_increment, acceptance_rate)
+        <span style="font-weight: bold;">return</span> state, info
 
-    <span style="color: #d73a49;">return</span> kernel
+    <span style="font-weight: bold;">return</span> kernel
 </pre>
 </div>
 
@@ -264,8 +264,8 @@ First separate vanilly and waste-free SMC:
 </div>
 </div>
 
-<div id="outline-container-org30d40ba" class="outline-2">
-<h2 id="org30d40ba">Links to this note</h2>
+<div id="outline-container-orge26c03e" class="outline-2">
+<h2 id="orge26c03e">Links to this note</h2>
 </div>
 </div>
 </body>

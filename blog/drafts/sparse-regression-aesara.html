@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-01 Thu 14:38 -->
+<!-- 2022-12-02 Fri 09:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sparse regression with Aesara</title>
@@ -60,17 +60,17 @@ We will first import <code>aesara</code> and initialize our RandomStream (TODO: 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">import</span> aesara
-<span style="color: #d73a49;">import</span> aesara.tensor <span style="color: #d73a49;">as</span> at
-<span style="color: #d73a49;">import</span> numpy <span style="color: #d73a49;">as</span> np
+<pre class="src src-python"><span style="font-weight: bold;">import</span> aesara
+<span style="font-weight: bold;">import</span> aesara.tensor <span style="font-weight: bold;">as</span> at
+<span style="font-weight: bold;">import</span> numpy <span style="font-weight: bold;">as</span> np
 
-<span style="color: #24292e;">srng</span> = at.random.RandomStream(0)
+<span style="font-weight: bold; font-style: italic;">srng</span> = at.random.RandomStream(0)
 </pre>
 </div>
 
-<div id="outline-container-org1981ef5" class="outline-2">
-<h2 id="org1981ef5">Horseshoe prior</h2>
-<div class="outline-text-2" id="text-org1981ef5">
+<div id="outline-container-org106bd0c" class="outline-2">
+<h2 id="org106bd0c">Horseshoe prior</h2>
+<div class="outline-text-2" id="text-org106bd0c">
 <p>
 Now we can define a simple horsehoe prior:
 </p>
@@ -90,12 +90,12 @@ The horseshoe prior is easily implemented in aesara as:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">X</span> = np.random.random((5, 10))
-<span style="color: #24292e;">k</span> = np.shape(X)[0]
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">X</span> = np.random.random((5, 10))
+<span style="font-weight: bold; font-style: italic;">k</span> = np.shape(X)[0]
 
-<span style="color: #24292e;">lambda_rv</span> = srng.halfcauchy(0, 1)
-<span style="color: #24292e;">tau_rv</span> = srng.halfcauchy(0, 1, size=k)
-<span style="color: #24292e;">beta_rv</span> = srng.normal(0, lambda_rv * tau_rv)
+<span style="font-weight: bold; font-style: italic;">lambda_rv</span> = srng.halfcauchy(0, 1)
+<span style="font-weight: bold; font-style: italic;">tau_rv</span> = srng.halfcauchy(0, 1, size=k)
+<span style="font-weight: bold; font-style: italic;">beta_rv</span> = srng.normal(0, lambda_rv * tau_rv)
 </pre>
 </div>
 
@@ -104,7 +104,7 @@ We can already check that the horsehoe prior is giving us reasonable values by c
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python">beta_rv.<span style="color: #d73a49;">eval</span>()
+<pre class="src src-python">beta_rv.<span style="font-weight: bold;">eval</span>()
 </pre>
 </div>
 
@@ -113,32 +113,32 @@ Note that every time <code>.eval()</code> is called aesara returns a different v
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python">beta_rv.<span style="color: #d73a49;">eval</span>()
+<pre class="src src-python">beta_rv.<span style="font-weight: bold;">eval</span>()
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org6ccebae" class="outline-3">
-<h3 id="org6ccebae"><span class="todo TODO">TODO</span> What can we do with this graph?</h3>
+<div id="outline-container-orgb07bc9d" class="outline-3">
+<h3 id="orgb07bc9d"><span class="todo TODO">TODO</span> What can we do with this graph?</h3>
 </div>
-<div id="outline-container-org767e9bb" class="outline-3">
-<h3 id="org767e9bb"><span class="todo TODO">TODO</span> Why is it great compared to e.g. PyMC3?</h3>
+<div id="outline-container-org3256cb6" class="outline-3">
+<h3 id="org3256cb6"><span class="todo TODO">TODO</span> Why is it great compared to e.g. PyMC3?</h3>
 </div>
-<div id="outline-container-orgffdac40" class="outline-3">
-<h3 id="orgffdac40">Prior predictive sampling</h3>
-<div class="outline-text-3" id="text-orgffdac40">
+<div id="outline-container-orgbdd13fe" class="outline-3">
+<h3 id="orgbdd13fe">Prior predictive sampling</h3>
+<div class="outline-text-3" id="text-orgbdd13fe">
 <p>
 The graph indeed carries the random number generator state with it. We can sample more of these quickly using aesara's <code>scan</code> operator. Lets take the following example that works:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">num_samples</span> = at.scalar(<span style="color: #032f62;">'num_tensor'</span>, dtype=np.int32)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">num_samples</span> = at.scalar(<span style="font-style: italic;">'num_tensor'</span>, dtype=np.int32)
 
-<span style="color: #24292e;">samples</span>, <span style="color: #24292e;">updates</span> = aesara.scan(
-    fn=<span style="color: #d73a49;">lambda</span>: beta_rv,
+<span style="font-weight: bold; font-style: italic;">samples</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
+    fn=<span style="font-weight: bold;">lambda</span>: beta_rv,
     n_steps=num_samples
 )
-<span style="color: #24292e;">sampling_fn</span> = aesara.function((num_samples,), samples, updates=updates)
+<span style="font-weight: bold; font-style: italic;">sampling_fn</span> = aesara.function((num_samples,), samples, updates=updates)
 sampling_fn(10)
 </pre>
 </div>
@@ -148,13 +148,13 @@ And this one as well:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">num_samples</span> = at.scalar(<span style="color: #032f62;">'num_tensor'</span>, dtype=np.int32)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">num_samples</span> = at.scalar(<span style="font-style: italic;">'num_tensor'</span>, dtype=np.int32)
 
-<span style="color: #24292e;">samples</span>, <span style="color: #24292e;">updates</span> = aesara.scan(
-    fn=<span style="color: #d73a49;">lambda</span>: at.random.normal(0, tau_rv * lambda_rv),
+<span style="font-weight: bold; font-style: italic;">samples</span>, <span style="font-weight: bold; font-style: italic;">updates</span> = aesara.scan(
+    fn=<span style="font-weight: bold;">lambda</span>: at.random.normal(0, tau_rv * lambda_rv),
     n_steps=num_samples
 )
-<span style="color: #24292e;">sampling_fn</span> = aesara.function((num_samples,), samples, updates=updates)
+<span style="font-weight: bold; font-style: italic;">sampling_fn</span> = aesara.function((num_samples,), samples, updates=updates)
 sampling_fn(10)
 </pre>
 </div>
@@ -162,9 +162,9 @@ sampling_fn(10)
 </div>
 
 
-<div id="outline-container-org3eb7b6e" class="outline-3">
-<h3 id="org3eb7b6e">Log-probability density function</h3>
-<div class="outline-text-3" id="text-org3eb7b6e">
+<div id="outline-container-org8a86569" class="outline-3">
+<h3 id="org8a86569">Log-probability density function</h3>
+<div class="outline-text-3" id="text-org8a86569">
 <p>
 Even though we won't need it in this blog post, we expect any PPL to be able to give the the log-probability density function (logpdf) of any model it has defined. For that we will use <code>aeppl</code>.
 </p>
@@ -174,15 +174,15 @@ The logpdf will be a function of \(\lambda\), \(\boldysmbol{\tau}\) and \(\beta\
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #d73a49;">from</span> aeppl <span style="color: #d73a49;">import</span> joint_logprob
+<pre class="src src-python"><span style="font-weight: bold;">from</span> aeppl <span style="font-weight: bold;">import</span> joint_logprob
 
-<span style="color: #24292e;">lambda_tt</span> = at.scalar(<span style="color: #032f62;">"lambda"</span>)
-<span style="color: #24292e;">tau_tt</span> = at.vector(<span style="color: #032f62;">"tau"</span>)
-<span style="color: #24292e;">beta_tt</span> = at.vector(<span style="color: #032f62;">"beta"</span>)
+<span style="font-weight: bold; font-style: italic;">lambda_tt</span> = at.scalar(<span style="font-style: italic;">"lambda"</span>)
+<span style="font-weight: bold; font-style: italic;">tau_tt</span> = at.vector(<span style="font-style: italic;">"tau"</span>)
+<span style="font-weight: bold; font-style: italic;">beta_tt</span> = at.vector(<span style="font-style: italic;">"beta"</span>)
 
-<span style="color: #6a737d;"># </span><span style="color: #6a737d;">TODO: Explain how the function stuff works</span>
-<span style="color: #24292e;">logprob</span> = joint_logprob({tau_rv: tau_tt, lambda_rv: lambda_tt, beta_rv: beta_tt})
-<span style="color: #24292e;">logprob_fn</span> = aesara.function((lambda_tt, tau_tt, beta_tt), logprob)
+<span style="font-weight: bold; font-style: italic;"># </span><span style="font-weight: bold; font-style: italic;">TODO: Explain how the function stuff works</span>
+<span style="font-weight: bold; font-style: italic;">logprob</span> = joint_logprob({tau_rv: tau_tt, lambda_rv: lambda_tt, beta_rv: beta_tt})
+<span style="font-weight: bold; font-style: italic;">logprob_fn</span> = aesara.function((lambda_tt, tau_tt, beta_tt), logprob)
 logprob_fn(1., [1, 2, 3, 4, 5], [1, 1, 1, 1, 1])
 </pre>
 </div>
@@ -194,9 +194,9 @@ Amazing!
 </div>
 </div>
 
-<div id="outline-container-orgc381dec" class="outline-2">
-<h2 id="orgc381dec">Negative Binomial regression</h2>
-<div class="outline-text-2" id="text-orgc381dec">
+<div id="outline-container-org4a88f15" class="outline-2">
+<h2 id="org4a88f15">Negative Binomial regression</h2>
+<div class="outline-text-2" id="text-org4a88f15">
 <p>
 We will now come back to the original topic, performing a /negative binomial sparse regression
 </p>
@@ -211,33 +211,33 @@ We will now come back to the original topic, performing a /negative binomial spa
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">h</span> = at.as_tensor(100)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">h</span> = at.as_tensor(100)
 
-<span style="color: #24292e;">theta_tt</span> = at.sigmoid(-at.dot(X.T, beta_rv))
-<span style="color: #24292e;">Y_rv</span> = srng.nbinom(h, theta_tt)
-Y_rv.<span style="color: #d73a49;">eval</span>()
+<span style="font-weight: bold; font-style: italic;">theta_tt</span> = at.sigmoid(-at.dot(X.T, beta_rv))
+<span style="font-weight: bold; font-style: italic;">Y_rv</span> = srng.nbinom(h, theta_tt)
+Y_rv.<span style="font-weight: bold;">eval</span>()
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org2ca1716" class="outline-2">
-<h2 id="org2ca1716"><span class="todo TODO">TODO</span> New progression</h2>
-<div class="outline-text-2" id="text-org2ca1716">
+<div id="outline-container-org85a5bfe" class="outline-2">
+<h2 id="org85a5bfe"><span class="todo TODO">TODO</span> New progression</h2>
+<div class="outline-text-2" id="text-org85a5bfe">
 <p>
 Show the whole model first, and show that we can actually sample from the prior of \(\beta\) to perform intermediate checks. Something we cannot do otherwise.
 </p>
 </div>
 </div>
-<div id="outline-container-org4bfb5bd" class="outline-2">
-<h2 id="org4bfb5bd"><span class="todo TODO">TODO</span> Sampling from the posterior</h2>
-<div class="outline-text-2" id="text-org4bfb5bd">
+<div id="outline-container-org19029e4" class="outline-2">
+<h2 id="org19029e4"><span class="todo TODO">TODO</span> Sampling from the posterior</h2>
+<div class="outline-text-2" id="text-org19029e4">
 <p>
 Sampling with <code>aemcmc</code> is great!
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">samples</span> = aemcmc.sample(Y_rv, variables, observations, num_samples)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">samples</span> = aemcmc.sample(Y_rv, variables, observations, num_samples)
 </pre>
 </div>
 
@@ -250,7 +250,7 @@ Let us now give \(h\) a prior distribution.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">samples</span> = aemcmc.sample(Y_rv, y_tt, num_samples)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">samples</span> = aemcmc.sample(Y_rv, y_tt, num_samples)
 </pre>
 </div>
 
@@ -259,20 +259,20 @@ Of course this interfaces easily with <code>ArviZ</code>
 </p>
 </div>
 
-<div id="outline-container-orgc2984e9" class="outline-3">
-<h3 id="orgc2984e9"><span class="todo TODO">TODO</span> Show trace and posterior distributions with arviz</h3>
+<div id="outline-container-orgc0a70ff" class="outline-3">
+<h3 id="orgc0a70ff"><span class="todo TODO">TODO</span> Show trace and posterior distributions with arviz</h3>
 </div>
 </div>
 
-<div id="outline-container-org8fbb81b" class="outline-2">
-<h2 id="org8fbb81b"><span class="todo TODO">TODO</span> Posterior predictive sampling</h2>
-<div class="outline-text-2" id="text-org8fbb81b">
+<div id="outline-container-org899911f" class="outline-2">
+<h2 id="org899911f"><span class="todo TODO">TODO</span> Posterior predictive sampling</h2>
+<div class="outline-text-2" id="text-org899911f">
 <p>
 Posterior predictive sampling is simply that the variables are no longer random variables but have a value. Here it is enough to specify the value of \(\beta\).
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">post_pred_fn</span> = aesara.function((beta_rv,), Y_rv)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">post_pred_fn</span> = aesara.function((beta_rv,), Y_rv)
 post_pred_fn([1., 1., 1., 1., 1.])
 </pre>
 </div>
@@ -282,7 +282,7 @@ To compute this for an array of samples, we can resort to the equivalent of JAX'
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #24292e;">vpost_pred_fn</span> = np.vectorize(post_pred_fn, signature=<span style="color: #032f62;">"(n)-&gt;(k)"</span>)
+<pre class="src src-python"><span style="font-weight: bold; font-style: italic;">vpost_pred_fn</span> = np.vectorize(post_pred_fn, signature=<span style="font-style: italic;">"(n)-&gt;(k)"</span>)
 vpost_pred_fn(beta_samples)
 </pre>
 </div>
