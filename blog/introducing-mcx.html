@@ -132,9 +132,9 @@ It has random variables, random variables that are used to define othe random va
 Welcome MCX. Well, almost.
 </p>
 
-<div id="outline-container-org3ea4d22" class="outline-2">
-<h2 id="org3ea4d22">Defining probabilistic models with MCX</h2>
-<div class="outline-text-2" id="text-org3ea4d22">
+<div id="outline-container-org55a26bd" class="outline-2">
+<h2 id="org55a26bd">Defining probabilistic models with MCX</h2>
+<div class="outline-text-2" id="text-org55a26bd">
 <p>
 Here is how you express the beta-binomial model in MCX:
 </p>
@@ -173,9 +173,9 @@ observed. While MCX models also represent a distribution, in the API we treat th
 </div>
 </div>
 
-<div id="outline-container-orgafaedc2" class="outline-2">
-<h2 id="orgafaedc2">Interacting with MCX models</h2>
-<div class="outline-text-2" id="text-orgafaedc2">
+<div id="outline-container-org3e658d1" class="outline-2">
+<h2 id="org3e658d1">Interacting with MCX models</h2>
+<div class="outline-text-2" id="text-org3e658d1">
 <p>
 Consider the following linear regression model:
 </p>
@@ -304,9 +304,9 @@ Unlike the original model, however, the evaluated program is not a distribution.
 </p>
 </div>
 
-<div id="outline-container-org353da76" class="outline-3">
-<h3 id="org353da76">Go on your own</h3>
-<div class="outline-text-3" id="text-org353da76">
+<div id="outline-container-orgf7a88a4" class="outline-3">
+<h3 id="orgf7a88a4">Go on your own</h3>
+<div class="outline-text-3" id="text-orgf7a88a4">
 <p>
 MCX provides a convenient interface to interact with the model's predictive,
 joint prior and posterior distributions, but should you want to build something
@@ -331,13 +331,13 @@ particular, allows to you to write your model with MCX and use another library
 </div>
 </div>
 </div>
-<div id="outline-container-org48fa7cf" class="outline-2">
-<h2 id="org48fa7cf">How does it work? MCX's internals</h2>
-<div class="outline-text-2" id="text-org48fa7cf">
+<div id="outline-container-orgbd1994c" class="outline-2">
+<h2 id="orgbd1994c">How does it work? MCX's internals</h2>
+<div class="outline-text-2" id="text-orgbd1994c">
 </div>
-<div id="outline-container-org128f8e8" class="outline-3">
-<h3 id="org128f8e8">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
-<div class="outline-text-3" id="text-org128f8e8">
+<div id="outline-container-org3a99d4d" class="outline-3">
+<h3 id="org3a99d4d">Representing models with graphs (as in probabilistic <i>graphical</i> model)</h3>
+<div class="outline-text-3" id="text-org3a99d4d">
 <p>
 The models' graph can be accessed interactively. It can be changed in place. It is possible to set the value of one node and see how it impacts the others, very useful to debug without re-writing the whole in scipy!
 </p>
@@ -354,7 +354,7 @@ sampling, reparametrization is trivial to do, etc. Manipulating the graph is
 pretty much akin to manipulating the mathematical object.
 </p>
 
-<pre class="example" id="org4a08fda">
+<pre class="example" id="org8668ae2">
 
                                      +----&gt; logpdf
 @mcx.model                           |
@@ -387,7 +387,7 @@ framework-agnostic. Hell, you could even write, without too much effort, an
 edward2, pymc3 or pyro compiler!
 </p>
 
-<pre class="example" id="org584bcfa">
+<pre class="example" id="orgc3c245d">
 Example with control flow and different
 </pre>
 
@@ -399,15 +399,15 @@ intermediate representation. Corner cases can also be tested as it is possible
 to output the code of the logpdfs from the model.
 </p>
 
-<pre class="example" id="orgdc7202b">
+<pre class="example" id="org6edf12a">
 model.source_logpdf
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org6bd3ffe" class="outline-3">
-<h3 id="org6bd3ffe">Inference</h3>
-<div class="outline-text-3" id="text-org6bd3ffe">
+<div id="outline-container-org4d106b5" class="outline-3">
+<h3 id="org4d106b5">Inference</h3>
+<div class="outline-text-3" id="text-org4d106b5">
 <p>
 <i>The modeling language and the inference module are completely separate.</i> The modeling language compiles to a logpdf, and that is all the samplers need.
 </p>
@@ -422,7 +422,7 @@ Inference in MCX is also very modular. The idea is that inference in traditional
 <li><i>Runtimes</i>, that tie the data, the model and the kernel together and then make the chains move forward following an execution plan.</li>
 </ol>
 
-<pre class="example" id="org5bab732">
+<pre class="example" id="orga88897f">
 Runtime (Sampling loop)
 -------------------------------------------------
 Programs (HMC)

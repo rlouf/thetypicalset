@@ -51,9 +51,9 @@ The following represents a (partially filled) grid with one row, one column, and
 Peter's solution is <i>imperative</i>: we implement a series of procedures that will give us the missing values in a Sudoku puzzle. The <i>nature</i> of the Sudoku, the rules, are hidden in this code. Here we will instead implement the rules of the Sudoku, i.e. the <i>relations</i> that the units must respect and let miniKanren search for the grids that respect these rules (given some hints) for us. Sounds too good to be true?
 </p>
 
-<div id="outline-container-org2a5ebe3" class="outline-2">
-<h2 id="org2a5ebe3">Solving sudoku rows</h2>
-<div class="outline-text-2" id="text-org2a5ebe3">
+<div id="outline-container-org87382df" class="outline-2">
+<h2 id="org87382df">Solving sudoku rows</h2>
+<div class="outline-text-2" id="text-org87382df">
 <p>
 Let us work on a simpler problem first: a sudoku row. We assume that we have a vector with 9 spaces already filled with a few hints. To represent a valid sudoku row the vector must be the permutation of the digits from 1 to 9. Let us consider the following puzzle as an example:
 </p>
@@ -209,9 +209,9 @@ As you can see, once we have described the relations, <code>kanren</code> does a
 </div>
 </div>
 
-<div id="outline-container-orga340c56" class="outline-2">
-<h2 id="orga340c56">Solving sudoku grids</h2>
-<div class="outline-text-2" id="text-orga340c56">
+<div id="outline-container-orge465816" class="outline-2">
+<h2 id="orge465816">Solving sudoku grids</h2>
+<div class="outline-text-2" id="text-orge465816">
 <p>
 We store the sudoku grid as a 81-element list. Since constraints are defined on rows, columns and squares we need to be able to extract those units from a grid:
 </p>
@@ -330,9 +330,9 @@ This actually works! And since miniKanren does the search for us our solution is
 </div>
 </div>
 
-<div id="outline-container-orgee4ba50" class="outline-2">
-<h2 id="orgee4ba50">Limitation</h2>
-<div class="outline-text-2" id="text-orgee4ba50">
+<div id="outline-container-org564def6" class="outline-2">
+<h2 id="org564def6">Limitation</h2>
+<div class="outline-text-2" id="text-org564def6">
 <p>
 While <code>kanren</code> could find the solution for a ridiculously easy grid, the computation hangs on the following (supposedly easy) problem:
 </p>
@@ -359,9 +359,9 @@ While <code>kanren</code> could find the solution for a ridiculously easy grid, 
 </div>
 </div>
 
-<div id="outline-container-orgf41ef01" class="outline-2">
-<h2 id="orgf41ef01">Conclusion</h2>
-<div class="outline-text-2" id="text-orgf41ef01">
+<div id="outline-container-org5936dc7" class="outline-2">
+<h2 id="org5936dc7">Conclusion</h2>
+<div class="outline-text-2" id="text-org5936dc7">
 <p>
 This is a toy example, and miniKanren can be used for much more than solving sudoku puzzles. In <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc">Aemcmc</a> we use miniKanren extensively for several purposes, such as:
 </p>
@@ -377,11 +377,11 @@ The possibilities are endless, and to my knowledge haven't been explored much in
 </div>
 </div>
 
-<div id="outline-container-org9f0b083" class="outline-2">
-<h2 id="org9f0b083"><span class="todo TODO">TODO</span> Improve the solver's performance</h2>
+<div id="outline-container-org51783b3" class="outline-2">
+<h2 id="org51783b3"><span class="todo TODO">TODO</span> Improve the solver's performance</h2>
 </div>
-<div id="outline-container-org427464b" class="outline-2">
-<h2 id="org427464b"><span class="todo TODO">TODO</span> Generate valid sudoku puzzle using an empty grid as an input</h2>
+<div id="outline-container-org33cd59e" class="outline-2">
+<h2 id="org33cd59e"><span class="todo TODO">TODO</span> Generate valid sudoku puzzle using an empty grid as an input</h2>
 </div>
 </div>
 </body>

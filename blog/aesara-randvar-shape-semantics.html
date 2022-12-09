@@ -50,9 +50,9 @@
 <b><b>Although this contains useful information, this post is a draft and will probably be integrated to Aesara's documentation</b></b>
 </p>
 
-<div id="outline-container-orge1b6c6c" class="outline-2">
-<h2 id="orge1b6c6c">Random variables in Aesara</h2>
-<div class="outline-text-2" id="text-orge1b6c6c">
+<div id="outline-container-org74817a5" class="outline-2">
+<h2 id="org74817a5">Random variables in Aesara</h2>
+<div class="outline-text-2" id="text-org74817a5">
 <p>
 Random variables are represented in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> with the <code>RandomVariable</code> operator, which corresponds to the following mathematical function:
 </p>
@@ -100,9 +100,9 @@ In this document we will make explaine the semantics of shape in Aesara, and wha
 </div>
 </div>
 
-<div id="outline-container-org1685c4b" class="outline-2">
-<h2 id="org1685c4b">The support shape</h2>
-<div class="outline-text-2" id="text-org1685c4b">
+<div id="outline-container-org9bf86c4" class="outline-2">
+<h2 id="org9bf86c4">The support shape</h2>
+<div class="outline-text-2" id="text-org9bf86c4">
 <p>
 The dimensionality of the parameter space and the sample space differs depending on the distribution. For instance, the normal distribution is parametrized by \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\) and the realizations of the corresponding random variables are scalars \(\in \mathbb{R}\).
 </p>
@@ -193,17 +193,17 @@ The support shape and how it relates to the shape of the parameters is explicite
 </div>
 </div>
 
-<div id="outline-container-org2e24a11" class="outline-2">
-<h2 id="org2e24a11">The batch shape</h2>
-<div class="outline-text-2" id="text-org2e24a11">
+<div id="outline-container-orgd7b6374" class="outline-2">
+<h2 id="orgd7b6374">The batch shape</h2>
+<div class="outline-text-2" id="text-orgd7b6374">
 <p>
 We just saw how to define a single random variables with different distributions, and how the choice of distribution determined the <i>support shape</i>. In many realistic settings, however, we would like to define several independently distributed random variables at once. Aesara provides two mechanisms to do so: broadcasting of the parameters, and the <code>size</code> parameter. The shape induced by this mechanism is called the <i>batch shape</i>.
 </p>
 </div>
 
-<div id="outline-container-org08979b1" class="outline-3">
-<h3 id="org08979b1">Batching by broadcasting</h3>
-<div class="outline-text-3" id="text-org08979b1">
+<div id="outline-container-orgb201c00" class="outline-3">
+<h3 id="orgb201c00">Batching by broadcasting</h3>
+<div class="outline-text-3" id="text-orgb201c00">
 <p>
 Say we want a sample from three independent, normally distributed,  random variables with a mean of \(0\), \(3\) and \(5\) respectively. One (cumbersome) way to achieve this is:
 </p>
@@ -283,7 +283,7 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </pre>
 </div>
 
-<pre class="example" id="org5210520">
+<pre class="example" id="org993cee3">
 shape mismatch: objects cannot be broadcast to a single shape
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FDB97DFD200&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -431,9 +431,9 @@ sample<sub>shape</sub> = batch<sub>shape</sub> + support<sub>shape</sub>
 </div>
 </div>
 
-<div id="outline-container-org0975f3c" class="outline-3">
-<h3 id="org0975f3c">Expanding to create identically distributed random variables</h3>
-<div class="outline-text-3" id="text-org0975f3c">
+<div id="outline-container-orga975b3b" class="outline-3">
+<h3 id="orga975b3b">Expanding to create identically distributed random variables</h3>
+<div class="outline-text-3" id="text-orga975b3b">
 <p>
 We also frequently need to define iiid random variables. We can define 3 normally-distributed random variables with mean 0 and variance 1 with:
 </p>
@@ -515,9 +515,9 @@ Since we are still talking about independent random variables, <code>batch</code
 </div>
 </div>
 
-<div id="outline-container-orgddb3d30" class="outline-3">
-<h3 id="orgddb3d30">Broadcasting and expanding</h3>
-<div class="outline-text-3" id="text-orgddb3d30">
+<div id="outline-container-org3720c3a" class="outline-3">
+<h3 id="org3720c3a">Broadcasting and expanding</h3>
+<div class="outline-text-3" id="text-org3720c3a">
 <p>
 <b>Size corresponds to the batch shape</b>
 </p>
@@ -572,9 +572,9 @@ It IS really simple:
 </div>
 
 
-<div id="outline-container-org9d10790" class="outline-2">
-<h2 id="org9d10790">Summary</h2>
-<div class="outline-text-2" id="text-org9d10790">
+<div id="outline-container-org839e67a" class="outline-2">
+<h2 id="org839e67a">Summary</h2>
+<div class="outline-text-2" id="text-org839e67a">
 <p>
 The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> is partitioned in semantically different pieces, that refer to the shape of \(E\), i.e. the shape of draws we get:
 </p>
