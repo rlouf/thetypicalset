@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-09 Fri 10:29 -->
+<!-- 2022-12-12 Mon 11:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
@@ -46,13 +46,11 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Shape semantics for random variables in Aesara</h1>
-<p>
-<b><b>Although this contains useful information, this post is a draft and will probably be integrated to Aesara's documentation</b></b>
-</p>
 
-<div id="outline-container-org74817a5" class="outline-2">
-<h2 id="org74817a5">Random variables in Aesara</h2>
-<div class="outline-text-2" id="text-org74817a5">
+
+<div id="outline-container-org24f4910" class="outline-2">
+<h2 id="org24f4910">Random variables in Aesara</h2>
+<div class="outline-text-2" id="text-org24f4910">
 <p>
 Random variables are represented in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> with the <code>RandomVariable</code> operator, which corresponds to the following mathematical function:
 </p>
@@ -64,11 +62,11 @@ Random variables are represented in <a href="../20220729163627-aesara.html#ID-5a
 </p>
 
 <p>
-Were \(\Omega\) is the set of available RNG seeds, \(\Theta\) the parameter space. \(E\) is the state space, which corresponds to the support of the corresponding distribution. Given a random seed and parameter values, the operator returns a <b>realization</b> of the random variable it represents, i.e. element of \(E\).
+Were \(\Omega\) is the set of available RNG seeds, \(\Theta\) the parameter space. \(E\) is the state space, which roughly corresponds to the support of the corresponding distribution. Given a random seed and parameter values, the operator returns a <b>realization</b> of the random variable it represents, i.e. an element of \(E\).
 </p>
 
 <p>
-The recommended way to use random variables in Aesara is via the <code>RandomStream</code> interface, which automatically seeds the random functions. Here, <code>srng.normal</code> defines a single, normally-distributed, random variable:
+The recommended way to use random variables in Aesara is via the <code>RandomStream</code> interface, which automatically seeds the random functions. Here, <code>srng.normal</code> defines a single, normally-distributed, random variable. Executing the graph returns a random value drawn from the normal distribution:
 </p>
 
 <div class="org-src-container">
@@ -86,25 +84,25 @@ The recommended way to use random variables in Aesara is via the <code>RandomStr
 
 
 <p>
-The shape of the output of the random functions depends on three things:
+Here <code>srng.normal(0,1)</code> returns a scalar, but the output of <code>RandomVariable</code> operators can have more complex shape. The shape is essentially determined by three things:
 </p>
 <ul class="org-ul">
 <li>The <i>support shape</i> of the random variable;</li>
-<li>Broadcasting rules between the parameters of the random variable's distribution;</li>
+<li><i>Broadcasting rules</i> between the parameters of the random variable's distribution;</li>
 <li>The <code>size</code> parameter passed to the random function.</li>
 </ul>
 
 <p>
-In this document we will make explaine the semantics of shape in Aesara, and what they represent.
+In this document we will explain the semantics of shapes in Aesara, and what these shapes represent.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org9bf86c4" class="outline-2">
-<h2 id="org9bf86c4">The support shape</h2>
-<div class="outline-text-2" id="text-org9bf86c4">
+<div id="outline-container-org0744ae6" class="outline-2">
+<h2 id="org0744ae6">The support shape</h2>
+<div class="outline-text-2" id="text-org0744ae6">
 <p>
-The dimensionality of the parameter space and the sample space differs depending on the distribution. For instance, the normal distribution is parametrized by \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\) and the realizations of the corresponding random variables are scalars \(\in \mathbb{R}\).
+The dimensionality of the parameter space and the sample space differ depending on the distribution. For instance, the normal distribution is parametrized by \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\) and the realizations of the corresponding random variables are scalars \(\in \mathbb{R}\).
 </p>
 
 <div class="org-src-container">
@@ -129,7 +127,7 @@ support shape: ()
 
 
 <p>
-We say that the support shape of <code>normal</code> is <code>()</code>. The Dirichlet distribution is slightly more complicated: it is parametrized by a vector \(\boldsymbol{\alpha} \in \mathbb{R}^k\) and its realizations are vectors in the k-unit simplex \(\operatorname{\Delta}^k\):
+We say that the support <code>normal</code> is 0-dimensional and that the support shape is <code>()</code>. The Dirichlet distribution is slightly more complicated: it is parametrized by a vector \(\boldsymbol{\alpha} \in \mathbb{R}^k\) and its realizations are vectors in the k-unit simplex \(\operatorname{\Delta}^k\):
 </p>
 
 <div class="org-src-container">
@@ -153,7 +151,7 @@ support shape: (3,)
 
 
 <p>
-The support shape of <code>dirichlet</code> is <code>(k,)</code>, with <code>k</code> the length of its parameter \(\alpha\). The multinomial is another interesting example because the dimensionality of its parameters; it is parametrized by a probability vector \(\boldsymbol{p} \in \Delta^k\), a number of trials \(n \in \mathbb{N}\) and returns a vector in \(\mathbb{N}^k\):
+The support shape of <code>dirichlet</code> is <code>(k,)</code>, with <code>k</code> the length of its parameter \(\alpha\). The multinomial is another interesting example because its parameters have different dimensionalities; it is parametrized by a probability vector \(\boldsymbol{p} \in \Delta^k\), a number of trials \(n \in \mathbb{N}\) and returns a vector in \(\mathbb{N}^k\):
 </p>
 
 <div class="org-src-container">
@@ -178,7 +176,7 @@ support shape: (3,)
 
 
 <p>
-The support shape of <code>multinomial</code> is <code>(k,)</code> with <code>k</code> the length of the probability vector \(p\). Here we have only considered random variables with a 0- or 1-dimensional sample space, but it can obviously be more complicated. The random variable with a <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart density</a> is a function that maps to \(\mathbb{R}^{n \times m}\), and the corresponding support shape is thus <code>(n,m)</code>.
+The support shape of <code>multinomial</code> is <code>(k,)</code> with <code>k</code> the length of the probability vector \(p\). Here we have only considered random variables with a 0- or 1-dimensional sample space, but it can obviously be more complicated. For instance, the random variable with a <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Wishart_distribution">Wishart density</a> is a function that maps \(\Sigma\) to \(\mathbb{R}^{n \times m}\), and the corresponding support shape is thus <code>(n,m)</code>. All you have to remember is that <i>the support shape is the shape of a single element of the state space \(E\)</i>.
 </p>
 
 <p>
@@ -190,20 +188,24 @@ The support shape and how it relates to the shape of the parameters is explicite
 <li>Dirichlet: <code>(n) -&gt; (n)</code></li>
 <li>Multinomial: <code>(), (n) -&gt; (n)</code></li>
 </ul>
+
+<p>
+So if you have doubts regarding the support shape of a distribution, check out the <i>signature</i>.
+</p>
 </div>
 </div>
 
-<div id="outline-container-orgd7b6374" class="outline-2">
-<h2 id="orgd7b6374">The batch shape</h2>
-<div class="outline-text-2" id="text-orgd7b6374">
+<div id="outline-container-orge20a9d2" class="outline-2">
+<h2 id="orge20a9d2">The batch shape</h2>
+<div class="outline-text-2" id="text-orge20a9d2">
 <p>
-We just saw how to define a single random variables with different distributions, and how the choice of distribution determined the <i>support shape</i>. In many realistic settings, however, we would like to define several independently distributed random variables at once. Aesara provides two mechanisms to do so: broadcasting of the parameters, and the <code>size</code> parameter. The shape induced by this mechanism is called the <i>batch shape</i>.
+We just saw how to define a single random variable, and how the choice of distribution determined the <i>support shape</i>. In many realistic settings, however, we would like to define several independently distributed random variables at once. Aesara provides two mechanisms to do so: broadcasting the parameters, and the <code>size</code> argument of the <code>RandomVariable</code> operator. The shape induced by this mechanism is called the <i>batch shape</i>.
 </p>
 </div>
 
-<div id="outline-container-orgb201c00" class="outline-3">
-<h3 id="orgb201c00">Batching by broadcasting</h3>
-<div class="outline-text-3" id="text-orgb201c00">
+<div id="outline-container-org70e9a26" class="outline-3">
+<h3 id="org70e9a26">Batching by broadcasting</h3>
+<div class="outline-text-3" id="text-org70e9a26">
 <p>
 Say we want a sample from three independent, normally distributed,  random variables with a mean of \(0\), \(3\) and \(5\) respectively. One (cumbersome) way to achieve this is:
 </p>
@@ -230,7 +232,7 @@ sample shape: (3,)
 
 
 <p>
-To simplify this common operation, we can pass arrays as parameters to Aesara's <code>RandomVariable</code>, and the <code>Op</code> will use NumPy broadcasting rules to return an array of independent random variables:
+To simplify this common operation, we can pass arrays as parameters to Aesara's <code>RandomVariable</code>, and the <code>Op</code> will use <a target='_blank' rel='noopener noreferrer' class='external' href="https://numpy.org/doc/stable/user/basics.broadcasting.html">NumPy broadcasting rules</a> to return an array of samples from independent random variables:
 </p>
 
 <div class="org-src-container">
@@ -255,15 +257,11 @@ sample shape: (3,)
 
 
 <p>
-In this case the <i>batch shape</i> is also  <code>(3,)</code>; it is the shape of the tensor that contains random variables that are independently distributed and whose distribution belong to the same family.
+In this case the <i>batch shape</i> is also  <code>(3,)</code>; it is the shape of the tensor that contains samples from random variables that are independently distributed and whose distribution belong to the same family. In other words, <code>srng.normal(mean, 1)</code> implicitly represents 3 independent random variables.
 </p>
 
 <p>
-In this case, <code>srng.normal(mean, 1)</code> implicitly represents 3 independent random variables; if it helps one can imagine it is a shortcut for the first code block of this section.
-</p>
-
-<p>
-We can also use arrays for the standard deviation in this case. Standard broadcasting rules apply to determine the batch shape. For instance, the following fails with a shape mismatch error:
+We can also use arrays for the standard deviation in this case. Standard broadcasting rules apply to determine the batch shape. For instance, the following fails with a shape mismatch error because the <code>mean</code> and <code>sigma</code> arrays cannot be broadcasted:
 </p>
 
 <div class="org-src-container">
@@ -283,7 +281,7 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </pre>
 </div>
 
-<pre class="example" id="org993cee3">
+<pre class="example" id="org5596a1e">
 shape mismatch: objects cannot be broadcast to a single shape
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FDB97DFD200&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -298,41 +296,20 @@ HINT: Use the Aesara flag `exception_verbosity=high` for a debug print-out and s
 </pre>
 
 <p>
-Indeed <code>mean</code> and <code>sigma</code> cannot be broadcast together:
+In the following they are broadcastable, and <code>np.broadcast(mean, sigma)</code> gives us the batch shape:
 </p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
 
 <span style="color: #DFAF8F;">mean</span> = np.array([0, 3, 5])
-<span style="color: #DFAF8F;">sigma</span> = np.array([1, 2])
-<span style="color: #F0DFAF; font-weight: bold;">try</span>:
-    np.broadcast(mean, sigma)  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">error</span>
-<span style="color: #F0DFAF; font-weight: bold;">except</span> <span style="color: #7CB8BB;">ValueError</span> <span style="color: #F0DFAF; font-weight: bold;">as</span> err:
-    <span style="color: #F0DFAF; font-weight: bold;">print</span>(err)
-</pre>
-</div>
-
-<pre class="example">
-shape mismatch: objects cannot be broadcast to a single shape
-</pre>
-
-
-<p>
-<code>np.broadcast(mean, sigma)</code> gives us the batch shape:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
-
-<span style="color: #DFAF8F;">mean</span> = np.array([0, 3, 5])
-<span style="color: #DFAF8F;">sigma</span> = np.array([1, 2, 7])
+<span style="color: #DFAF8F;">sigma</span> = np.array([[1, 2, 7], [4, 2, 8]])
 <span style="color: #F0DFAF; font-weight: bold;">print</span>(np.broadcast(mean, sigma).shape)
 </pre>
 </div>
 
 <pre class="example">
-(3,)
+(2, 3)
 </pre>
 
 
@@ -347,7 +324,7 @@ Indeed:
 <span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
 
 <span style="color: #DFAF8F;">mean</span> = np.array([0, 3, 5])
-<span style="color: #DFAF8F;">sigma</span> = np.array([1, 2, 3])
+<span style="color: #DFAF8F;">sigma</span> = np.array([[1, 2, 7], [4, 2, 8]])
 <span style="color: #DFAF8F;">rv</span> = srng.normal(mean, sigma)
 
 <span style="color: #DFAF8F;">sample</span> = rv.<span style="color: #DCDCCC; font-weight: bold;">eval</span>()
@@ -357,17 +334,14 @@ Indeed:
 </div>
 
 <pre class="example">
-sample values: [1.44369095 1.20810805 7.20786701]
-batch shape: (3,)
+sample values: [[ 1.44369095  1.20810805 10.15168969]
+ [ 0.02350816  4.70676358  6.28758426]]
+batch shape: (2, 3)
 </pre>
 
 
 <p>
-Since the <code>RandomVariable</code> represents a batch of random variables, we will call the resulting shape the <b>batch shape</b>.
-</p>
-
-<p>
-The normal distribution is fairly simple since its parameters and realization are 1-dimensional. Let take our dirichlet example:
+The normal distribution is fairly simple since its support is 0-dimensional. Let take thus consider the more complex Dirichlet example:
 </p>
 
 <div class="org-src-container">
@@ -420,7 +394,7 @@ sample shape: (2, 3)
 
 
 <p>
-So we have the simple formula; if <code>support_shape</code> and <code>batch_shape</code> are tuples, then:
+I said <i>more complex</i>, but we actually have a very simple formula to determine the samples shape from the support and batch shapes. If <code>support_shape</code> and <code>batch_shape</code> represent the shape tuples, then:
 </p>
 
 <blockquote>
@@ -431,11 +405,11 @@ sample<sub>shape</sub> = batch<sub>shape</sub> + support<sub>shape</sub>
 </div>
 </div>
 
-<div id="outline-container-orga975b3b" class="outline-3">
-<h3 id="orga975b3b">Expanding to create identically distributed random variables</h3>
-<div class="outline-text-3" id="text-orga975b3b">
+<div id="outline-container-org765355f" class="outline-3">
+<h3 id="org765355f">Using the <code>size</code> argument to create identically distributed random variables</h3>
+<div class="outline-text-3" id="text-org765355f">
 <p>
-We also frequently need to define iiid random variables. We can define 3 normally-distributed random variables with mean 0 and variance 1 with:
+We also frequently need to define iiid random variables. We could use the previous broadcasting rules to define 3 normally-distributed random variables with mean 0 and variance 1:
 </p>
 
 <div class="org-src-container">
@@ -460,7 +434,7 @@ sample shape: (3,)
 
 
 <p>
-But there is a shortcut: the <code>size</code> parameter of the distribution. In the following code, <code>size</code> allows us to define the same 3 random variables as above in a more concise way:
+But there is a shortcut: the <code>size</code> argument of the <code>RandomVariable</code> operator. In the following code, <code>size</code> allows us to define the same 3 random variables as above in a more concise way:
 </p>
 
 <div class="org-src-container">
@@ -484,7 +458,7 @@ sample shape: (3,)
 
 
 <p>
-We can of course do the same thing with the dirichlet distribution:
+We can of course do the same thing with the Dirichlet distribution:
 </p>
 
 <div class="org-src-container">
@@ -510,24 +484,20 @@ sample shape: (3, 3)
 
 
 <p>
-Since we are still talking about independent random variables, <code>batch</code> refers indistinctly to identifically distributed or differently distributed random variables.
+In this simple case (no broadcasting), <code>size</code> corresponds to the <i>batch shape</i>. <code>Batch</code> thus refers indistinctly to identifically distributed or differently distributed random variables.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org3720c3a" class="outline-3">
-<h3 id="org3720c3a">Broadcasting and expanding</h3>
-<div class="outline-text-3" id="text-org3720c3a">
+<div id="outline-container-orgaeab12b" class="outline-3">
+<h3 id="orgaeab12b">Broadcasting and the <code>size</code> argument</h3>
+<div class="outline-text-3" id="text-orgaeab12b">
 <p>
-<b>Size corresponds to the batch shape</b>
+The story with the <code>size</code> argument gets more complicated when the <code>RandomVariable</code> operator also needs to broadcast the distribution parameters. But luckily, despite the apparent complexity there is only one simple rule to remember: <i>the <code>size</code> argument to <code>RandomVariable</code> represents the batch shape</i>.
 </p>
 
 <p>
-<i>(show an example where broadcasting and using <code>size</code> breaks)</i>
-</p>
-
-<p>
-It is possible to vectorize and batch at the same time. Note that <code>size</code> and that vectorized shape must be broadcastable
+Let us illustrate this rule on an example where parameters are broadcasted and the <code>size</code> argument is used:
 </p>
 
 <div class="org-src-container">
@@ -557,33 +527,64 @@ batch shape: (2, 2, 3)
 
 
 <p>
-where <code>np.broadcast(mean, sigma).shape</code> must correspond to the last dimensions of <code>size</code>. Or in other words, the sample shape is <code>np.broadcast_shapes(np.broadcast(mean, sigma).shape, size)</code> if this does not raise an error.
+The batch shape here is given by <code>np.broadcast_shapes(np.broadcast(mean, sigma).shape, size)</code>. What we did here was create <code>(2, 2)</code> arrays of identically distributed random variables, one for each of the <code>3</code> parametrizations of the probability distribution.
 </p>
 
 <p>
-It IS really simple:
+To confirm that <code>size</code> only affects the batch shape, let us give an example with the Dirichlet <code>RandomVariable</code>:
 </p>
 
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">alpha</span> = np.array([[1., 2., 4.], [3., 5., 7.]])
+<span style="color: #DFAF8F;">rv</span> = srng.dirichlet(alpha, size=(5,2))
+<span style="color: #DFAF8F;">sample</span> = rv.<span style="color: #DCDCCC; font-weight: bold;">eval</span>()
+
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(f<span style="color: #CC9393;">"sample values: {sample}"</span>)
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(f<span style="color: #CC9393;">"sample shape: {sample.shape}"</span>)
+</pre>
+</div>
+
+<pre class="example" id="org86bc2d7">
+sample values: [[[0.42615878 0.09794332 0.4758979 ]
+  [0.15408529 0.34781447 0.49810024]]
+
+ [[0.0019247  0.11699742 0.88107788]
+  [0.18458045 0.34448051 0.47093904]]
+
+ [[0.03488488 0.05031013 0.914805  ]
+  [0.30760146 0.30766399 0.38473455]]
+
+ [[0.11179322 0.44319822 0.44500856]
+  [0.28814443 0.34356531 0.36829026]]
+
+ [[0.21973253 0.19563397 0.5846335 ]
+  [0.20072679 0.42110777 0.37816544]]]
+sample shape: (5, 2, 3)
+</pre>
+
 <p>
-<code>sample_shape = np.broadcast_shapes(np.broadcast(*args), size)</code>
+The batch shape is indeed given by <code>np.broadcast_shapes(alpha.shape, size)</code> (and the support shape is <code>(3,)</code>).
 </p>
 </div>
 </div>
 </div>
 
-
-<div id="outline-container-org839e67a" class="outline-2">
-<h2 id="org839e67a">Summary</h2>
-<div class="outline-text-2" id="text-org839e67a">
+<div id="outline-container-org40fdbb8" class="outline-2">
+<h2 id="org40fdbb8">Summary</h2>
+<div class="outline-text-2" id="text-org40fdbb8">
 <p>
-The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> is partitioned in semantically different pieces, that refer to the shape of \(E\), i.e. the shape of draws we get:
+The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> consists in the composition of two semantically different pieces:
 </p>
 <ul class="org-ul">
-<li>The <b>support shape</b> corresponds to the shape of one element in \(E\), the support of the distribution;</li>
-<li>The <b>batch shape</b> is the number \(N\) of independent random variables \(X_i: \Omega \to E\) where \(i \in \left\{ 1 \dots N\right\}\); These can be identically or differently distributed.</li>
-<li><code>RandomVariable</code> creates <i>differently distributed</i> random variables by passing different values of parameters to the operators. Broadcasting rules apply, and the <b>batch shape</b> (i.e. number of differently distributed random variables) is inferred from these broadcasting rules.</li>
-<li><code>RandomVariable</code> creates <i>identically distributed</i> random variables via the <code>size</code> keyword argument. There is a level of indirection here; the shape specified by <code>size</code> must broadcast with the shape of the broadcasted arguments. So if the latter is <code>(a, b)</code>, to define <code>c</code> identically distributed RVs one must set <code>size</code> to <code>(c, a, b)</code>.</li>
-<li>The shape of the array of random variables is given by <code>sample_shape = batch_shape + support_shape</code></li>
+<li>The <b>support shape</b> corresponds to the shape of one element in the state space \(E\);</li>
+<li>The <b>batch shape</b> corresponds to the shape of the array of independent random variables \(X_i: \Omega \to E\) where \(i \in \left\{ 1 \dots N\right\}\) that are implicitly created by the <code>RandomVariable</code>; These can be identically or differently distributed.</li>
+<li>There are two ways to create independent random variables: via broadcasting of the parameter arrays, or using the <code>size</code> argument to <code>RandomVariable</code>\s. When specified, the <code>size</code> argument must be the batch shape.</li>
+<li>The shape of the array returned by the <code>RandomVariable</code> operator is <code>sample_shape = batch_shape + support_shape</code></li>
 </ul>
 </div>
 </div>
