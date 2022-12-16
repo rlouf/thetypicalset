@@ -1,0 +1,301 @@
+#+TITLE: Cyclical SGLD in Blackjax
+#+DATE: <2022-12-16 Fri>
+
+** Cyclical schedule
+
+#+begin_src python :session
+from typing import NamedTuple
+
+class ScheduleState(NamedTuple):
+    step_size: float
+    do_sample: bool
+
+
+def build_schedule(
+    num_training_steps,
+    num_cycles=4,
+    initial_step_size=1e-3,
+    exploration_ratio=0.25,
+):
+    cycle_length = num_training_steps // num_cycles
+
+    def schedule_fn(step_id):
+        do_sample = False
+        if ((step_id % cycle_length)/cycle_length) >= exploration_ratio:
+            do_sample = True
+
+        cos_out = jnp.cos(jnp.pi * (step_id % cycle_length) / cycle_length) + 1
+        step_size = 0.5 * cos_out * init_learning_rate
+
+        return ScheduleState(step_size, do_sample)
+
+    return schedule_fn
+#+end_src
+
+#+RESULTS:
+
+We can now plot the schedule:
+
+#+begin_src python :session :results output
+import jax
+import jax.numpy as jnp
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+schedule_fn = build_schedule(20000, 4, 1e-1)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session :results output
+schedule = [schedule_fn(i) for i in range(20000)]
+
+step_sizes = np.array([step.step_size for step in schedule])
+do_sample = np.array([step.do_sample for step in schedule])
+
+sampling_points = np.ma.masked_where(~do_sample, step_sizes)
+
+fig, ax = plt.subplots(figsize=(12,8))
+ax.plot(step_sizes, lw=2, ls="--", color="r", label="Exploration stage")
+ax.plot(sampling_points, lw=2, ls="-", color="k", label="Sampling stage")
+
+ax.spines.right.set_visible(False)
+ax.spines.top.set_visible(False)
+
+ax.set_xlabel("Training steps", fontsize=20)
+ax.set_ylabel("Step size", fontsize=20)
+plt.legend()
+plt.show()
+#+end_src
+
+#+RESULTS:
+
+** Cyclical SGLD step
+
+
+#+RESULTS:
+
+#+begin_src python :session
+# --------------
+#  Inference
+# --------------
+rng_key = jax.random.PRNGKey(0)
+step_id = 0
+
+for epoch_id in range(num_epochs):
+    for batch_id in range(num_batches):
+        step_id += 1
+
+        minibatch = next(data)
+        rng_key, step_key = jax.random.split(rng_key)
+        schedule_state = schedule_fn(epoch_id, step_id)
+        state = cyclical_sgmcmc_step(step_key, schedule_state, state, minibatch)
+
+
+#+end_src
+
+#+RESULTS:
+
+** Sample from an array of Gaussians
+
+The first example we will look into is a standard array of 5x5 gaussian distributions:
+
+#+begin_src python :session
+import itertools
+
+import jax
+import jax.numpy as jnp
+
+
+lmbda = 1/25
+positions = [-4, -2, 0, 2, 4]
+mu = jnp.array([list(prod) for prod in itertools.product(positions, positions)])
+sigma = 0.03 * jnp.eye(2)
+
+def logprob_fn(x, *_):
+    return lmbda * jnp.sum(jax.scipy.stats.multivariate_normal.logpdf(x, mu, sigma))
+
+def sample_fn(rng_key):
+    choose_key, sample_key = jax.random.split(rng_key)
+    samples = jax.random.multivariate_normal(sample_key, mu, sigma)
+    return jax.random.choice(choose_key, samples)
+
+logprob_fn(jnp.ones(2))
+#+end_src
+
+#+RESULTS:
+: -298.33133
+
+Let's plot the model's density; we will need the plot later to evaluate the sampler
+
+#+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
+import matplotlib.pylab as plt
+
+import numpy as np
+from scipy.stats import gaussian_kde
+
+rng_key = jax.random.PRNGKey(0)
+samples = jax.vmap(sample_fn)(jax.random.split(rng_key, 10_000))
+
+xmin, ymin = -5, -5
+xmax, ymax = 5, 5
+
+nbins = 300j
+x, y = samples[:, 0], samples[:, 1]
+xx, yy = np.mgrid[xmin:xmax:nbins, ymin:ymax:nbins]
+positions = np.vstack([xx.ravel(), yy.ravel()])
+values = np.vstack([x, y])
+kernel = gaussian_kde(values)
+f = np.reshape(kernel(positions).T, xx.shape)
+
+fig, ax = plt.subplots()
+cfset = ax.contourf(xx, yy, f, cmap='Blues')
+ax.imshow(np.rot90(f), cmap='Blues', extent=[xmin, xmax, ymin, ymax])
+cset = ax.contour(xx, yy, f, colors='k')
+
+plt.rcParams['axes.titlepad'] = 15.
+plt.title("Samples from a mixture of 25 normal distributions")
+plt.show()
+# plt.savefig(filename, bbox_inches="tight")
+# filename
+#+end_src
+
+#+RESULTS:
+[[file:None]]
+
+/Mode-coverage/ metric: when the number of samples falling within the radius $r$ of a mode center is larger than $n$ when we say the mode is covered.
+
+** Sample from the mixture of gaussians
+
+The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
+
+#+begin_src python :session
+from typing import NamedTuple
+
+import blackjax
+import optax
+
+from blackjax.types import PyTree
+from optax._src.base import OptState
+
+class CyclicalSGMCMCState(NamedTuple):
+    """State of the Cyclical SGMCMC sampler.
+    """
+    position: PyTree
+    opt_state: OptState
+
+
+def cyclical_sgld(grad_estimator_fn, loglikelihood_fn):
+
+    # Initialize the SgLD step function
+    sgld = blackjax.sgld(grad_estimator_fn)
+    sgd = optax.sgd(1.)
+
+    def init_fn(position):
+        opt_state = sgd.init(position)
+        return CyclicalSGMCMCState(position, opt_state)
+
+    def step_fn(rng_key, schedule_state, state, minibatch):
+        """Cyclical SGLD kernel."""
+
+        def step_with_sgld(current_state):
+            rng_key, state, minibatch, step_size = current_state
+            new_position = sgld(rng_key, state.position, minibatch, step_size)
+            return CyclicalSGMCMCState(new_position, state.opt_state)
+
+        def step_with_sgd(current_state):
+            _, state, minibatch, step_size = current_state
+            grads = grad_estimator_fn(state.position, 0)#jax.grad(loglikelihood_fn)(state.position)
+            updates, new_opt_state = sgd.update(grads * step_size, state.opt_state, state.position)
+            new_position = optax.apply_updates(state.position, updates)
+            return CyclicalSGMCMCState(new_position, new_opt_state)
+
+        new_state = jax.lax.cond(
+            schedule_state.do_sample,
+            step_with_sgld,
+            step_with_sgd,
+            (rng_key, state, minibatch, schedule_state.step_size)
+        )
+
+        return new_state
+
+    return init_fn, step_fn
+#+end_src
+
+#+RESULTS:
+
+#+RESULTS:
+
+#+begin_src python :session
+import jax
+
+# 50k iterations
+# M = 30
+# initial step size = 0.09
+# ratio exploration = 1/4
+num_training_steps = 100
+schedule_fn = build_schedule(num_training_steps, 30, 0.09, 0.25)
+schedule = [schedule_fn(i) for i in range(num_training_steps)]
+
+grad_fn = lambda x, _: -1. * jax.grad(logprob_fn)(x)
+init, step = cyclical_sgld(grad_fn, logprob_fn)
+
+rng_key = jax.random.PRNGKey(0)
+init_position = -10 + 20 * jax.random.uniform(rng_key, shape=(2,))
+init_state = init(init_position)
+
+
+state = init_state
+samples = []
+for i in range(num_training_steps):
+    _, rng_key = jax.random.split(rng_key)
+    state = step(rng_key, schedule[i], state, 0)
+    # if schedule[i].do_sample:
+    samples.append(state.position)
+#+end_src
+
+#+RESULTS:
+
+#+begin_src python :session
+x = [sample[0] for sample in samples]
+y = [sample[1] for sample in samples]
+plt.plot(x[0:50_000:100], y[0:50_000:100], 'ko')
+plt.show()
+#+end_src
+
+#+RESULTS:
+: None
+
+#+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
+import matplotlib.pylab as plt
+
+import numpy as np
+from scipy.stats import gaussian_kde
+
+xmin, ymin = -5, -5
+xmax, ymax = 5, 5
+
+nbins = 300j
+x = [sample[0] for sample in samples]
+y = [sample[1] for sample in samples]
+xx, yy = np.mgrid[xmin:xmax:nbins, ymin:ymax:nbins]
+positions = np.vstack([xx.ravel(), yy.ravel()])
+values = np.vstack([x, y])
+kernel = gaussian_kde(values)
+f = np.reshape(kernel(positions).T, xx.shape)
+
+fig, ax = plt.subplots()
+cfset = ax.contourf(xx, yy, f, cmap='Blues')
+ax.imshow(np.rot90(f), cmap='Blues', extent=[xmin, xmax, ymin, ymax])
+cset = ax.contour(xx, yy, f, colors='k')
+
+plt.rcParams['axes.titlepad'] = 15.
+plt.title("Samples from a mixture of 25 normal distributions")
+plt.show()
+# plt.savefig(filename, bbox_inches="tight")
+# filename
+#+end_src
+
+#+RESULTS:
+[[file:None]]

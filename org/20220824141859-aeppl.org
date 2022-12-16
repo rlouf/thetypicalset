@@ -4,3 +4,18 @@
 #+title: AePPL
 
 [[https://github.com/aesara-devs/aeppl]]
+
+* Condition on transformed variables
+
+Examples of people confused by the inability to condition on deterministic random variables:
+
+- http://www.awebb.info/probability/inference/mcmc/2017/02/22/observing-functions-of-random-variables-in-pymc.html
+- https://groups.google.com/g/pymc/c/gAImsliT34o
+- https://stats.stackexchange.com/questions/56543/pymc-how-can-i-define-a-function-of-two-stochastic-variables-with-no-closed-fo
+- https://stackoverflow.com/questions/26397835/pymc-observed-data-for-a-sum-of-random-variables
+- https://stackoverflow.com/questions/24379868/estimate-the-parameters-of-a-random-variable-which-is-the-sum-of-uniform-random?rq=1
+
+
+There are two cases:
+1. Transformation that only involved a single variable, in which case we need to compute the pushforward measure;
+1. Transformations that involve several random variables, in which case we need to do some random variable algebra to find a closed form solution if it exists.
