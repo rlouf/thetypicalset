@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-12-16 Fri 17:02 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cyclical SGLD in Blackjax</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Cyclical SGLD in Blackjax</h1>
+
+<div id="outline-container-org52b601e" class="outline-2">
+<h2 id="org52b601e">Cyclical schedule</h2>
+<div class="outline-text-2" id="text-org52b601e">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">ScheduleState</span>(NamedTuple):
+    step_size: <span style="color: #DCDCCC; font-weight: bold;">float</span>
+    do_sample: <span style="color: #DCDCCC; font-weight: bold;">bool</span>
+
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">build_schedule</span>(
+    num_training_steps,
+    num_cycles=4,
+    initial_step_size=1e-3,
+    exploration_ratio=0.25,
+):
+    <span style="color: #DFAF8F;">cycle_length</span> = num_training_steps // num_cycles
+
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">schedule_fn</span>(step_id):
+        <span style="color: #DFAF8F;">do_sample</span> = <span style="color: #BFEBBF;">False</span>
+        <span style="color: #F0DFAF; font-weight: bold;">if</span> ((step_id % cycle_length)/cycle_length) &gt;= exploration_ratio:
+            <span style="color: #DFAF8F;">do_sample</span> = <span style="color: #BFEBBF;">True</span>
+
+        <span style="color: #DFAF8F;">cos_out</span> = jnp.cos(jnp.pi * (step_id % cycle_length) / cycle_length) + 1
+        <span style="color: #DFAF8F;">step_size</span> = 0.5 * cos_out * init_learning_rate
+
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> ScheduleState(step_size, do_sample)
+
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> schedule_fn
+</pre>
+</div>
+
+<p>
+We can now plot the schedule:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax.numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> jnp
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.pyplot <span style="color: #F0DFAF; font-weight: bold;">as</span> plt
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+
+<span style="color: #DFAF8F;">schedule_fn</span> = build_schedule(20000, 4, 1e-1)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #DFAF8F;">schedule</span> = [schedule_fn(i) <span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(20000)]
+
+<span style="color: #DFAF8F;">step_sizes</span> = np.array([step.step_size <span style="color: #F0DFAF; font-weight: bold;">for</span> step <span style="color: #F0DFAF; font-weight: bold;">in</span> schedule])
+<span style="color: #DFAF8F;">do_sample</span> = np.array([step.do_sample <span style="color: #F0DFAF; font-weight: bold;">for</span> step <span style="color: #F0DFAF; font-weight: bold;">in</span> schedule])
+
+<span style="color: #DFAF8F;">sampling_points</span> = np.ma.masked_where(~do_sample, step_sizes)
+
+<span style="color: #DFAF8F;">fig</span>, <span style="color: #DFAF8F;">ax</span> = plt.subplots(figsize=(12,8))
+ax.plot(step_sizes, lw=2, ls=<span style="color: #CC9393;">"--"</span>, color=<span style="color: #CC9393;">"r"</span>, label=<span style="color: #CC9393;">"Exploration stage"</span>)
+ax.plot(sampling_points, lw=2, ls=<span style="color: #CC9393;">"-"</span>, color=<span style="color: #CC9393;">"k"</span>, label=<span style="color: #CC9393;">"Sampling stage"</span>)
+
+ax.spines.right.set_visible(<span style="color: #BFEBBF;">False</span>)
+ax.spines.top.set_visible(<span style="color: #BFEBBF;">False</span>)
+
+ax.set_xlabel(<span style="color: #CC9393;">"Training steps"</span>, fontsize=20)
+ax.set_ylabel(<span style="color: #CC9393;">"Step size"</span>, fontsize=20)
+plt.legend()
+plt.show()
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7f8d4f5" class="outline-2">
+<h2 id="org7f8d4f5">Cyclical SGLD step</h2>
+<div class="outline-text-2" id="text-org7f8d4f5">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">--------------</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">Inference</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">--------------</span>
+<span style="color: #DFAF8F;">rng_key</span> = jax.random.PRNGKey(0)
+<span style="color: #DFAF8F;">step_id</span> = 0
+
+<span style="color: #F0DFAF; font-weight: bold;">for</span> epoch_id <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(num_epochs):
+    <span style="color: #F0DFAF; font-weight: bold;">for</span> batch_id <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(num_batches):
+        <span style="color: #DFAF8F;">step_id</span> += 1
+
+        <span style="color: #DFAF8F;">minibatch</span> = <span style="color: #DCDCCC; font-weight: bold;">next</span>(data)
+        <span style="color: #DFAF8F;">rng_key</span>, <span style="color: #DFAF8F;">step_key</span> = jax.random.split(rng_key)
+        <span style="color: #DFAF8F;">schedule_state</span> = schedule_fn(epoch_id, step_id)
+        <span style="color: #DFAF8F;">state</span> = cyclical_sgmcmc_step(step_key, schedule_state, state, minibatch)
+
+
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org57617d7" class="outline-2">
+<h2 id="org57617d7">Sample from an array of Gaussians</h2>
+<div class="outline-text-2" id="text-org57617d7">
+<p>
+The first example we will look into is a standard array of 5x5 gaussian distributions:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> itertools
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax.numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> jnp
+
+
+<span style="color: #DFAF8F;">lmbda</span> = 1/25
+<span style="color: #DFAF8F;">positions</span> = [-4, -2, 0, 2, 4]
+<span style="color: #DFAF8F;">mu</span> = jnp.array([<span style="color: #DCDCCC; font-weight: bold;">list</span>(prod) <span style="color: #F0DFAF; font-weight: bold;">for</span> prod <span style="color: #F0DFAF; font-weight: bold;">in</span> itertools.product(positions, positions)])
+<span style="color: #DFAF8F;">sigma</span> = 0.03 * jnp.eye(2)
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">logprob_fn</span>(x, *_):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> lmbda * jnp.<span style="color: #DCDCCC; font-weight: bold;">sum</span>(jax.scipy.stats.multivariate_normal.logpdf(x, mu, sigma))
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">sample_fn</span>(rng_key):
+    <span style="color: #DFAF8F;">choose_key</span>, <span style="color: #DFAF8F;">sample_key</span> = jax.random.split(rng_key)
+    <span style="color: #DFAF8F;">samples</span> = jax.random.multivariate_normal(sample_key, mu, sigma)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> jax.random.choice(choose_key, samples)
+
+logprob_fn(jnp.ones(2))
+</pre>
+</div>
+
+<p>
+Let's plot the model's density; we will need the plot later to evaluate the sampler
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.pylab <span style="color: #F0DFAF; font-weight: bold;">as</span> plt
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+<span style="color: #F0DFAF; font-weight: bold;">from</span> scipy.stats <span style="color: #F0DFAF; font-weight: bold;">import</span> gaussian_kde
+
+<span style="color: #DFAF8F;">rng_key</span> = jax.random.PRNGKey(0)
+<span style="color: #DFAF8F;">samples</span> = jax.vmap(sample_fn)(jax.random.split(rng_key, 10_000))
+
+<span style="color: #DFAF8F;">xmin</span>, <span style="color: #DFAF8F;">ymin</span> = -5, -5
+<span style="color: #DFAF8F;">xmax</span>, <span style="color: #DFAF8F;">ymax</span> = 5, 5
+
+<span style="color: #DFAF8F;">nbins</span> = 300j
+<span style="color: #DFAF8F;">x</span>, <span style="color: #DFAF8F;">y</span> = samples[:, 0], samples[:, 1]
+<span style="color: #DFAF8F;">xx</span>, <span style="color: #DFAF8F;">yy</span> = np.mgrid[xmin:xmax:nbins, ymin:ymax:nbins]
+<span style="color: #DFAF8F;">positions</span> = np.vstack([xx.ravel(), yy.ravel()])
+<span style="color: #DFAF8F;">values</span> = np.vstack([x, y])
+<span style="color: #DFAF8F;">kernel</span> = gaussian_kde(values)
+<span style="color: #DFAF8F;">f</span> = np.reshape(kernel(positions).T, xx.shape)
+
+<span style="color: #DFAF8F;">fig</span>, <span style="color: #DFAF8F;">ax</span> = plt.subplots()
+<span style="color: #DFAF8F;">cfset</span> = ax.contourf(xx, yy, f, cmap=<span style="color: #CC9393;">'Blues'</span>)
+ax.imshow(np.rot90(f), cmap=<span style="color: #CC9393;">'Blues'</span>, extent=[xmin, xmax, ymin, ymax])
+<span style="color: #DFAF8F;">cset</span> = ax.contour(xx, yy, f, colors=<span style="color: #CC9393;">'k'</span>)
+
+<span style="color: #DFAF8F;">plt.rcParams</span>[<span style="color: #CC9393;">'axes.titlepad'</span>] = 15.
+plt.title(<span style="color: #CC9393;">"Samples from a mixture of 25 normal distributions"</span>)
+plt.show()
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">plt.savefig(filename, bbox_inches="tight")</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">filename</span>
+</pre>
+</div>
+
+<p>
+<a href="None">None</a>
+</p>
+
+<p>
+<i>Mode-coverage</i> metric: when the number of samples falling within the radius \(r\) of a mode center is larger than \(n\) when we say the mode is covered.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd6175c9" class="outline-2">
+<h2 id="orgd6175c9">Sample from the mixture of gaussians</h2>
+<div class="outline-text-2" id="text-orgd6175c9">
+<p>
+The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> blackjax
+<span style="color: #F0DFAF; font-weight: bold;">import</span> optax
+
+<span style="color: #F0DFAF; font-weight: bold;">from</span> blackjax.types <span style="color: #F0DFAF; font-weight: bold;">import</span> PyTree
+<span style="color: #F0DFAF; font-weight: bold;">from</span> optax._src.base <span style="color: #F0DFAF; font-weight: bold;">import</span> OptState
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">CyclicalSGMCMCState</span>(NamedTuple):
+    <span style="color: #9FC59F;">"""State of the Cyclical SGMCMC sampler.</span>
+<span style="color: #9FC59F;">    """</span>
+    position: PyTree
+    opt_state: OptState
+
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">cyclical_sgld</span>(grad_estimator_fn, loglikelihood_fn):
+
+    <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Initialize the SgLD step function</span>
+    <span style="color: #DFAF8F;">sgld</span> = blackjax.sgld(grad_estimator_fn)
+    <span style="color: #DFAF8F;">sgd</span> = optax.sgd(1.)
+
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">init_fn</span>(position):
+        <span style="color: #DFAF8F;">opt_state</span> = sgd.init(position)
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> CyclicalSGMCMCState(position, opt_state)
+
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_fn</span>(rng_key, schedule_state, state, minibatch):
+        <span style="color: #9FC59F;">"""Cyclical SGLD kernel."""</span>
+
+        <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_with_sgld</span>(current_state):
+            <span style="color: #DFAF8F;">rng_key</span>, <span style="color: #DFAF8F;">state</span>, <span style="color: #DFAF8F;">minibatch</span>, <span style="color: #DFAF8F;">step_size</span> = current_state
+            <span style="color: #DFAF8F;">new_position</span> = sgld(rng_key, state.position, minibatch, step_size)
+            <span style="color: #F0DFAF; font-weight: bold;">return</span> CyclicalSGMCMCState(new_position, state.opt_state)
+
+        <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_with_sgd</span>(current_state):
+            <span style="color: #DFAF8F;">_</span>, <span style="color: #DFAF8F;">state</span>, <span style="color: #DFAF8F;">minibatch</span>, <span style="color: #DFAF8F;">step_size</span> = current_state
+            <span style="color: #DFAF8F;">grads</span> = grad_estimator_fn(state.position, 0)<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">jax.grad(loglikelihood_fn)(state.position)</span>
+            <span style="color: #DFAF8F;">updates</span>, <span style="color: #DFAF8F;">new_opt_state</span> = sgd.update(grads * step_size, state.opt_state, state.position)
+            <span style="color: #DFAF8F;">new_position</span> = optax.apply_updates(state.position, updates)
+            <span style="color: #F0DFAF; font-weight: bold;">return</span> CyclicalSGMCMCState(new_position, new_opt_state)
+
+        <span style="color: #DFAF8F;">new_state</span> = jax.lax.cond(
+            schedule_state.do_sample,
+            step_with_sgld,
+            step_with_sgd,
+            (rng_key, state, minibatch, schedule_state.step_size)
+        )
+
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> new_state
+
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> init_fn, step_fn
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">50k iterations</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">M = 30</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">initial step size = 0.09</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">ratio exploration = 1/4</span>
+<span style="color: #DFAF8F;">num_training_steps</span> = 100
+<span style="color: #DFAF8F;">schedule_fn</span> = build_schedule(num_training_steps, 30, 0.09, 0.25)
+<span style="color: #DFAF8F;">schedule</span> = [schedule_fn(i) <span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(num_training_steps)]
+
+<span style="color: #DFAF8F;">grad_fn</span> = <span style="color: #F0DFAF; font-weight: bold;">lambda</span> x, _: -1. * jax.grad(logprob_fn)(x)
+<span style="color: #DFAF8F;">init</span>, <span style="color: #DFAF8F;">step</span> = cyclical_sgld(grad_fn, logprob_fn)
+
+<span style="color: #DFAF8F;">rng_key</span> = jax.random.PRNGKey(0)
+<span style="color: #DFAF8F;">init_position</span> = -10 + 20 * jax.random.uniform(rng_key, shape=(2,))
+<span style="color: #DFAF8F;">init_state</span> = init(init_position)
+
+
+<span style="color: #DFAF8F;">state</span> = init_state
+<span style="color: #DFAF8F;">samples</span> = []
+<span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(num_training_steps):
+    <span style="color: #DFAF8F;">_</span>, <span style="color: #DFAF8F;">rng_key</span> = jax.random.split(rng_key)
+    <span style="color: #DFAF8F;">state</span> = step(rng_key, schedule[i], state, 0)
+    <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">if schedule[i].do_sample:</span>
+    samples.append(state.position)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> samples]
+<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> samples]
+plt.plot(x[0:50_000:100], y[0:50_000:100], <span style="color: #CC9393;">'ko'</span>)
+plt.show()
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.pylab <span style="color: #F0DFAF; font-weight: bold;">as</span> plt
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+<span style="color: #F0DFAF; font-weight: bold;">from</span> scipy.stats <span style="color: #F0DFAF; font-weight: bold;">import</span> gaussian_kde
+
+<span style="color: #DFAF8F;">xmin</span>, <span style="color: #DFAF8F;">ymin</span> = -5, -5
+<span style="color: #DFAF8F;">xmax</span>, <span style="color: #DFAF8F;">ymax</span> = 5, 5
+
+<span style="color: #DFAF8F;">nbins</span> = 300j
+<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> samples]
+<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> samples]
+<span style="color: #DFAF8F;">xx</span>, <span style="color: #DFAF8F;">yy</span> = np.mgrid[xmin:xmax:nbins, ymin:ymax:nbins]
+<span style="color: #DFAF8F;">positions</span> = np.vstack([xx.ravel(), yy.ravel()])
+<span style="color: #DFAF8F;">values</span> = np.vstack([x, y])
+<span style="color: #DFAF8F;">kernel</span> = gaussian_kde(values)
+<span style="color: #DFAF8F;">f</span> = np.reshape(kernel(positions).T, xx.shape)
+
+<span style="color: #DFAF8F;">fig</span>, <span style="color: #DFAF8F;">ax</span> = plt.subplots()
+<span style="color: #DFAF8F;">cfset</span> = ax.contourf(xx, yy, f, cmap=<span style="color: #CC9393;">'Blues'</span>)
+ax.imshow(np.rot90(f), cmap=<span style="color: #CC9393;">'Blues'</span>, extent=[xmin, xmax, ymin, ymax])
+<span style="color: #DFAF8F;">cset</span> = ax.contour(xx, yy, f, colors=<span style="color: #CC9393;">'k'</span>)
+
+<span style="color: #DFAF8F;">plt.rcParams</span>[<span style="color: #CC9393;">'axes.titlepad'</span>] = 15.
+plt.title(<span style="color: #CC9393;">"Samples from a mixture of 25 normal distributions"</span>)
+plt.show()
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">plt.savefig(filename, bbox_inches="tight")</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">filename</span>
+</pre>
+</div>
+
+<p>
+<a href="None">None</a>
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>

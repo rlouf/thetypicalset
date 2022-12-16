@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-12 Mon 11:49 -->
+<!-- 2022-12-16 Fri 17:02 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Aesara's Intermediate representation</title>
@@ -47,69 +47,69 @@
 <div id="content" class="content">
 <h1 class="title">Aesara's Intermediate representation</h1>
 
-<div id="outline-container-org2e8f1e9" class="outline-2">
-<h2 id="org2e8f1e9">Requirements</h2>
-<div class="outline-text-2" id="text-org2e8f1e9">
+<div id="outline-container-org4f3de00" class="outline-2">
+<h2 id="org4f3de00">Requirements</h2>
+<div class="outline-text-2" id="text-org4f3de00">
 </div>
-<div id="outline-container-org42c738e" class="outline-3">
-<h3 id="org42c738e">Graph introspection</h3>
-<div class="outline-text-3" id="text-org42c738e">
+<div id="outline-container-org7e1afe3" class="outline-3">
+<h3 id="org7e1afe3">Graph introspection</h3>
+<div class="outline-text-3" id="text-org7e1afe3">
 </div>
-<div id="outline-container-orged4031a" class="outline-4">
-<h4 id="orged4031a">At different levels of abstraction</h4>
-</div>
-</div>
-<div id="outline-container-org6631ad6" class="outline-3">
-<h3 id="org6631ad6">Graph rewrites</h3>
-<div class="outline-text-3" id="text-org6631ad6">
-</div>
-<div id="outline-container-org98e73d4" class="outline-4">
-<h4 id="org98e73d4">At different levels of abstraction</h4>
+<div id="outline-container-orgbe5ffa6" class="outline-4">
+<h4 id="orgbe5ffa6">At different levels of abstraction</h4>
 </div>
 </div>
-<div id="outline-container-org5c59fed" class="outline-3">
-<h3 id="org5c59fed">Automatic differentiation through control flow</h3>
-<div class="outline-text-3" id="text-org5c59fed">
+<div id="outline-container-org3482b12" class="outline-3">
+<h3 id="org3482b12">Graph rewrites</h3>
+<div class="outline-text-3" id="text-org3482b12">
+</div>
+<div id="outline-container-org7062b18" class="outline-4">
+<h4 id="org7062b18">At different levels of abstraction</h4>
+</div>
+</div>
+<div id="outline-container-orgd033358" class="outline-3">
+<h3 id="orgd033358">Automatic differentiation through control flow</h3>
+<div class="outline-text-3" id="text-orgd033358">
 <p>
 Which means breaking from the quasi-static assumption.
 </p>
 </div>
 </div>
-<div id="outline-container-org40bd5b5" class="outline-3">
-<h3 id="org40bd5b5">Transpilation to different backends</h3>
+<div id="outline-container-org5f02f89" class="outline-3">
+<h3 id="org5f02f89">Transpilation to different backends</h3>
 </div>
 </div>
-<div id="outline-container-org2b6b546" class="outline-2">
-<h2 id="org2b6b546">Elements of representation</h2>
-<div class="outline-text-2" id="text-org2b6b546">
+<div id="outline-container-org6dc421e" class="outline-2">
+<h2 id="org6dc421e">Elements of representation</h2>
+<div class="outline-text-2" id="text-org6dc421e">
 </div>
-<div id="outline-container-orgad2cd85" class="outline-3">
-<h3 id="orgad2cd85"><code>Scalar</code></h3>
+<div id="outline-container-orgb805bb9" class="outline-3">
+<h3 id="orgb805bb9"><code>Scalar</code></h3>
 </div>
-<div id="outline-container-org0f6f951" class="outline-3">
-<h3 id="org0f6f951"><code>TensorVariable</code></h3>
+<div id="outline-container-orge550b08" class="outline-3">
+<h3 id="orge550b08"><code>TensorVariable</code></h3>
 </div>
-<div id="outline-container-orgd6289d8" class="outline-3">
-<h3 id="orgd6289d8"><code>Op</code>\s</h3>
+<div id="outline-container-orgc6964a5" class="outline-3">
+<h3 id="orgc6964a5"><code>Op</code>\s</h3>
 </div>
-<div id="outline-container-orgb6bbaba" class="outline-3">
-<h3 id="orgb6bbaba"><code>OpFromGraph</code>\s</h3>
+<div id="outline-container-orgc4810a4" class="outline-3">
+<h3 id="orgc4810a4"><code>OpFromGraph</code>\s</h3>
 </div>
-<div id="outline-container-orga787688" class="outline-3">
-<h3 id="orga787688"><code>FunctionGraph</code></h3>
+<div id="outline-container-orge01889d" class="outline-3">
+<h3 id="orge01889d"><code>FunctionGraph</code></h3>
 </div>
-<div id="outline-container-orgccd5c86" class="outline-3">
-<h3 id="orgccd5c86">Loops</h3>
-<div class="outline-text-3" id="text-orgccd5c86">
+<div id="outline-container-orgdfc9784" class="outline-3">
+<h3 id="orgdfc9784">Loops</h3>
+<div class="outline-text-3" id="text-orgdfc9784">
 <p>
 The difficulty of differentiating through loops and the necessity to model them in a better IR is motivated by?
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgd215a34" class="outline-3">
-<h3 id="orgd215a34">Conditionals</h3>
-<div class="outline-text-3" id="text-orgd215a34">
+<div id="outline-container-org90dea32" class="outline-3">
+<h3 id="org90dea32">Conditionals</h3>
+<div class="outline-text-3" id="text-org90dea32">
 <p>
 A motivation for implementation a new control flow IR in Aesara comes from the desire to differentiate through expressions like:
 </p>
@@ -163,9 +163,9 @@ What is the fundamental different between <code>ifelse</code> and a <code>phi</c
 </div>
 
 
-<div id="outline-container-orgae7628c" class="outline-2">
-<h2 id="orgae7628c">The pitfalls</h2>
-<div class="outline-text-2" id="text-orgae7628c">
+<div id="outline-container-orgb2a9319" class="outline-2">
+<h2 id="orgb2a9319">The pitfalls</h2>
+<div class="outline-text-2" id="text-orgb2a9319">
 <p>
 We need to balance relational programming and differentiation. Note that the papers below complain about "black-box operators", and point at JAX's `while<sub>loop</sub>`. Aesara operators are different though, as they allow us to translate concepts people are used to to a flexible IR. We could achieve the same thing that Julia does by parsing the AST, but providing `switch`, `cond`, `while`, `fori` etc operators is as efficient, if not more in python (parsing the AST is possible but tedious)
 </p>
@@ -178,9 +178,9 @@ We need to balance relational programming and differentiation. Note that the pap
 </div>
 </div>
 
-<div id="outline-container-orgd9e9909" class="outline-2">
-<h2 id="orgd9e9909">References</h2>
-<div class="outline-text-2" id="text-orgd9e9909">
+<div id="outline-container-orgb301b40" class="outline-2">
+<h2 id="orgb301b40">References</h2>
+<div class="outline-text-2" id="text-orgb301b40">
 <ul class="org-ul">
 <li><p>
 "Don't unroll adjoint: differentiating SSA-form programs" (<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1810.07951">paper</a>)
@@ -245,8 +245,8 @@ On the other hand, there is little incentive to build high quality back ends tha
 </div>
 </div>
 
-<div id="outline-container-org64436d6" class="outline-2">
-<h2 id="org64436d6">Links to this note</h2>
+<div id="outline-container-org7160653" class="outline-2">
+<h2 id="org7160653">Links to this note</h2>
 </div>
 </div>
 </body>
