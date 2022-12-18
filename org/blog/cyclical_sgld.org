@@ -6,6 +6,7 @@
 #+begin_src python :session
 from typing import NamedTuple
 
+
 class ScheduleState(NamedTuple):
     step_size: float
     do_sample: bool
@@ -25,7 +26,7 @@ def build_schedule(
             do_sample = True
 
         cos_out = jnp.cos(jnp.pi * (step_id % cycle_length) / cycle_length) + 1
-        step_size = 0.5 * cos_out * init_learning_rate
+        step_size = 0.5 * cos_out * initial_step_size
 
         return ScheduleState(step_size, do_sample)
 
@@ -34,9 +35,9 @@ def build_schedule(
 
 #+RESULTS:
 
-We can now plot the schedule:
+Let us visualize the schedule for 200k training steps divided in 4 cycles. At each cycle 1/4th of the steps are dedicated to exploration.
 
-#+begin_src python :session :results output
+#+begin_src python :session :results file
 import jax
 import jax.numpy as jnp
 
@@ -44,11 +45,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 schedule_fn = build_schedule(20000, 4, 1e-1)
-#+end_src
-
-#+RESULTS:
-
-#+begin_src python :session :results output
 schedule = [schedule_fn(i) for i in range(20000)]
 
 step_sizes = np.array([step.step_size for step in schedule])
@@ -66,40 +62,21 @@ ax.spines.top.set_visible(False)
 ax.set_xlabel("Training steps", fontsize=20)
 ax.set_ylabel("Step size", fontsize=20)
 plt.legend()
-plt.show()
+plt.title("Training schedule for Cyclical SGLD")
+
+filename = "img/cyclical_sgld_schedule.png"
+plt.savefig(filename)
+filename
 #+end_src
 
+#+ATTR_ORG: :width 700
+#+ATTR_HTML: :width 100%
 #+RESULTS:
+[[file:img/cyclical_sgld_schedule.png]]
 
 ** Cyclical SGLD step
 
-
-#+RESULTS:
-
-#+begin_src python :session
-# --------------
-#  Inference
-# --------------
-rng_key = jax.random.PRNGKey(0)
-step_id = 0
-
-for epoch_id in range(num_epochs):
-    for batch_id in range(num_batches):
-        step_id += 1
-
-        minibatch = next(data)
-        rng_key, step_key = jax.random.split(rng_key)
-        schedule_state = schedule_fn(epoch_id, step_id)
-        state = cyclical_sgmcmc_step(step_key, schedule_state, state, minibatch)
-
-
-#+end_src
-
-#+RESULTS:
-
-** Sample from an array of Gaussians
-
-The first example we will look into is a standard array of 5x5 gaussian distributions:
+We will reproduce one of the paper's example, sampling from an array of 25 gaussians.
 
 #+begin_src python :session
 import itertools
@@ -129,7 +106,7 @@ logprob_fn(jnp.ones(2))
 
 Let's plot the model's density; we will need the plot later to evaluate the sampler
 
-#+begin_src python :session :results file :exports both :var filename=(org-babel-temp-file "figure" ".png")
+#+begin_src python :session :results file :exports both
 import matplotlib.pylab as plt
 
 import numpy as np
@@ -156,13 +133,15 @@ cset = ax.contour(xx, yy, f, colors='k')
 
 plt.rcParams['axes.titlepad'] = 15.
 plt.title("Samples from a mixture of 25 normal distributions")
-plt.show()
-# plt.savefig(filename, bbox_inches="tight")
-# filename
+
+filename = "img/cyclical_sgld_array_gaussians.png"
+plt.savefig(filename, bbox_inches="tight")
+filename
 #+end_src
 
+#+ATTR_HTML: :width 100%
 #+RESULTS:
-[[file:None]]
+[[file:img/cyclical_sgld_array_gaussians.png]]
 
 /Mode-coverage/ metric: when the number of samples falling within the radius $r$ of a mode center is larger than $n$ when we say the mode is covered.
 
@@ -207,7 +186,8 @@ def cyclical_sgld(grad_estimator_fn, loglikelihood_fn):
         def step_with_sgd(current_state):
             _, state, minibatch, step_size = current_state
             grads = grad_estimator_fn(state.position, 0)#jax.grad(loglikelihood_fn)(state.position)
-            updates, new_opt_state = sgd.update(grads * step_size, state.opt_state, state.position)
+            rescaled_grads = - 1. * step_size * grads
+            updates, new_opt_state = sgd.update(rescaled_grads, state.opt_state, state.position)
             new_position = optax.apply_updates(state.position, updates)
             return CyclicalSGMCMCState(new_position, new_opt_state)
 
@@ -234,14 +214,14 @@ import jax
 # M = 30
 # initial step size = 0.09
 # ratio exploration = 1/4
-num_training_steps = 100
+num_training_steps = 10000
 schedule_fn = build_schedule(num_training_steps, 30, 0.09, 0.25)
 schedule = [schedule_fn(i) for i in range(num_training_steps)]
 
-grad_fn = lambda x, _: -1. * jax.grad(logprob_fn)(x)
+grad_fn = lambda x, _: jax.grad(logprob_fn)(x)
 init, step = cyclical_sgld(grad_fn, logprob_fn)
 
-rng_key = jax.random.PRNGKey(0)
+rng_key = jax.random.PRNGKey(3)
 init_position = -10 + 20 * jax.random.uniform(rng_key, shape=(2,))
 init_state = init(init_position)
 
@@ -250,17 +230,21 @@ state = init_state
 samples = []
 for i in range(num_training_steps):
     _, rng_key = jax.random.split(rng_key)
-    state = step(rng_key, schedule[i], state, 0)
-    # if schedule[i].do_sample:
-    samples.append(state.position)
+    state = jax.jit(step)(rng_key, schedule[i], state, 0)
+    if schedule[i].do_sample:
+        samples.append(state.position)
 #+end_src
 
 #+RESULTS:
 
 #+begin_src python :session
+fig = plt.figure()
+ax = fig.add_subplot(111)
 x = [sample[0] for sample in samples]
 y = [sample[1] for sample in samples]
-plt.plot(x[0:50_000:100], y[0:50_000:100], 'ko')
+ax.set_xlim([-5, 5])
+ax.set_ylim([-5, 5])
+plt.plot(x, y, 'ko')
 plt.show()
 #+end_src
 

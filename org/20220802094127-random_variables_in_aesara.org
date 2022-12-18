@@ -439,6 +439,35 @@ Y_et = etuple(
 
 Which is guaranteed to be collision-free by construction of the =split= operator, as long as the PRNG state used by the original normal distribution isn't passed to a =split= operator somewhere else in the original graph (*todo:* specify API requirements to guarantee uniqueness of the random numbers).
 
+** Playground
+
+We would like to be able to control randomness from outside of Aesara. From JAX it is rather clear how that would work:
+
+#+begin_src python
+import aesara
+
+rng = at.random.RNGState()
+result = at.random.normal(rng, 0, 1)
+
+# JAX compilation
+import jax
+
+fn = aesara.function([rng], result, mode="JAX")
+rng_key = jax.random.PRNGKey(0)
+fn(rng_key)
+#+end_src
+
+But for NumPy/Numba it is not as clear what we should be using.
+
+#+begin_src python
+# Numba compilation
+import numpy as np
+
+fn = aesara.function([rng], result, mode="JAX")
+rng_key = np.random.default_rng(0)
+fn(rng_key)
+
+#+end_src
 
 * RandomVariable Ops
 
