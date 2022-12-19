@@ -2,3 +2,16 @@
 :ID:       630773fc-fe6e-4a2b-a191-2c984c27f963
 :END:
 #+title: Marginalize over discrete parameters
+
+Marginalization is a something that happens at the level of the /density/. Here we would need to implement a =marginalize= function in AePPL that takes a density, a set of value variables and rewrites it into the corresponding marginalized density:
+
+#+begin_src python
+logprob, (y_vv, i_vv, n_vv) = aeppl.joint_logprob(Y_rv, I_rv, N_rv)
+marginalized_logprob = aeppl.marginalize(logprob, i_vv)
+#+end_src
+
+This can happen for random variable with a =Counting= base measure and a finite support:
+- [[id:82cc8d0e-682d-4082-90ac-36cf7fadcb72][Bernoulli]]
+- Binomial
+- Multinomial
+- Categorical

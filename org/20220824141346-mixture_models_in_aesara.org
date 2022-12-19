@@ -3,9 +3,12 @@
 :END:
 #+title: Mixture models in Aesara
 
-Probabilistic Programming Languages in Python ask you to use a ad-hoc =Mixture= distribution object to build mixture distributions. In [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]] you just tell it like it is:
+Probabilistic Programming Languages in Python ask you to use a ad-hoc =Mixture= [[https://docs.pymc.io/en/v5.0.0/api/distributions/generated/pymc.Mixture.html#pymc.Mixture][distribution object]] to build mixture distributions. In [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]]/[[id:e18d689a-392a-407a-941a-f0ad2d2dc43e][AePPL]] you can express the mixture in different ways.
 
-#+begin_src python :session :results output
+* Indexing an array
+
+#+begin_src python :results output
+import aeppl
 import aesara
 import aesara.tensor as at
 import numpy as np
@@ -22,25 +25,44 @@ Y_rv = N_rv[I_rv]
 
 sample_fn = aesara.function((), Y_rv)
 print(sample_fn())
-#+end_src
 
-#+RESULTS:
-: 2.0058770404050943
 
-And you can easily build the logprob graph with [[id:e18d689a-392a-407a-941a-f0ad2d2dc43e][AePPL]]:
-
-#+begin_src python :session :results output
-from aeppl import joint_logprob
-
-y_vv = Y_rv.clone()
-i_vv = I_rv.clone()
-logprob = joint_logprob({Y_rv: y_vv, I_rv: i_vv})
-
+logprob, (y_vv, i_vv) = aeppl.joint_logprob(Y_rv, I_rv)
 logprob_fn = aesara.function((y_vv, i_vv), logprob)
 print(logprob_fn(10, 0))
 #+end_src
 
 #+RESULTS:
+: 2.0058770404050943
 : -63.02837644563878
 
-It would be nice if we were able to [[id:630773fc-fe6e-4a2b-a191-2c984c27f963][marginalize over discrete parameters]] with AePPL; we do not care about posterior distribution of =I_rv=.
+
+* Using =aesara.tensor.where=
+
+#+begin_src python
+import aeppl
+import aesata.tensor as at
+
+
+srng = at.random.RandomStream(0)
+
+x_rv = srng.normal(0, 1)
+y_rv = srng.cauchy(0, 1)
+i_rv = srng.bernoulli(0.5)
+
+z_rv = at.where(i_rv, x_rv, y_rv)
+
+
+logprob, vvs = aeppl.joint_logprob(z_rv, )
+#+end_src
+
+
+* TODO Using =aeara.ifelse.ifelse=
+* Marginalize
+
+It would be nice if we were able to [[id:630773fc-fe6e-4a2b-a191-2c984c27f963][marginalize over discrete parameters]] with AePPL; we do not care about posterior distribution of =I_rv=. This is one "advantage" other PPLs have using a =Mixture= distribution, as the marginalization is harcoded. Here we would need to implement a =marginalize= function:
+
+#+begin_src python
+logprob, (y_vv, i_vv, n_vv) = aeppl.joint_logprob(Y_rv, I_rv, N_rv)
+marginalized_logprob = aeppl.marginalize(logprob, )
+#+end_src
