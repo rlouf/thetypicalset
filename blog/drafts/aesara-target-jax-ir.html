@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-19 Mon 20:18 -->
+<!-- 2022-12-19 Mon 20:19 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Target JAX's intermediate representation with Aesara</title>
@@ -25,9 +25,9 @@ There are several questions we need to answer:
 <li>Can we <code>grad</code> the following functions?</li>
 </ol>
 
-<div id="outline-container-org67759af" class="outline-2">
-<h2 id="org67759af">Issues we'd like to solve</h2>
-<div class="outline-text-2" id="text-org67759af">
+<div id="outline-container-orgd2037be" class="outline-2">
+<h2 id="orgd2037be">Issues we'd like to solve</h2>
+<div class="outline-text-2" id="text-orgd2037be">
 <p>
 The following fails even though it has static shape:
 </p>
@@ -101,9 +101,9 @@ a_jaxpr
 </div>
 </div>
 
-<div id="outline-container-org0d148f1" class="outline-2">
-<h2 id="org0d148f1"><span class="todo TODO">TODO</span> Can we use dyanic values as arguments to <code>reshape</code> in the JAXprs?</h2>
-<div class="outline-text-2" id="text-org0d148f1">
+<div id="outline-container-org7563011" class="outline-2">
+<h2 id="org7563011"><span class="todo TODO">TODO</span> Can we use dyanic values as arguments to <code>reshape</code> in the JAXprs?</h2>
+<div class="outline-text-2" id="text-org7563011">
 <p>
 Take this one:
 </p>
@@ -127,9 +127,9 @@ Take this one:
 </div>
 
 
-<div id="outline-container-orgb875637" class="outline-2">
-<h2 id="orgb875637">JIT-ing functions built from JAXprs</h2>
-<div class="outline-text-2" id="text-orgb875637">
+<div id="outline-container-org4e0e5f0" class="outline-2">
+<h2 id="org4e0e5f0">JIT-ing functions built from JAXprs</h2>
+<div class="outline-text-2" id="text-org4e0e5f0">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
 <span style="color: #F0DFAF; font-weight: bold;">from</span> jax <span style="color: #F0DFAF; font-weight: bold;">import</span> lax
@@ -161,9 +161,9 @@ Take this one:
 </div>
 </div>
 
-<div id="outline-container-orgeb2eaff" class="outline-2">
-<h2 id="orgeb2eaff">VMAP-ing functions built from JAXprs</h2>
-<div class="outline-text-2" id="text-orgeb2eaff">
+<div id="outline-container-org203db50" class="outline-2">
+<h2 id="org203db50">VMAP-ing functions built from JAXprs</h2>
+<div class="outline-text-2" id="text-org203db50">
 <p>
 We can vmap the function produced by <code>jaxpr_as_fun</code>, <i>but</i> we cannot indicate vmapped in Jaxpr
 </p>
@@ -193,9 +193,9 @@ We can vmap the function produced by <code>jaxpr_as_fun</code>, <i>but</i> we ca
 </div>
 </div>
 
-<div id="outline-container-orgc78e581" class="outline-2">
-<h2 id="orgc78e581">Grad-ing functions built from Jaxprs</h2>
-<div class="outline-text-2" id="text-orgc78e581">
+<div id="outline-container-org8ce728a" class="outline-2">
+<h2 id="org8ce728a">Grad-ing functions built from Jaxprs</h2>
+<div class="outline-text-2" id="text-org8ce728a">
 <p>
 This one is interesting, but less critical since Aesara can compile gradient graphs.
 </p>
