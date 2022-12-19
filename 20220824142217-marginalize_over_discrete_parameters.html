@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-19 Mon 20:19 -->
+<!-- 2022-12-19 Mon 21:36 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Marginalize over discrete parameters</title>
@@ -14,10 +14,29 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Marginalize over discrete parameters</h1>
+<p>
+Marginalization is a something that happens at the level of the <i>density</i>. Here we would need to implement a <code>marginalize</code> function in AePPL that takes a density, a set of value variables and rewrites it into the corresponding marginalized density:
+</p>
 
-<div id="outline-container-orgf59991f" class="outline-2">
-<h2 id="orgf59991f">Links to this note</h2>
-<div class="outline-text-2" id="text-orgf59991f">
+<div class="org-src-container">
+<pre class="src src-python">logprob, (y_vv, i_vv, n_vv) = aeppl.joint_logprob(Y_rv, I_rv, N_rv)
+<span style="color: #DFAF8F;">marginalized_logprob</span> = aeppl.marginalize(logprob, i_vv)
+</pre>
+</div>
+
+<p>
+This can happen for random variable with a <code>Counting</code> base measure and a finite support:
+</p>
+<ul class="org-ul">
+<li><a href="20220729104422-bernoulli_distribution.html#ID-82cc8d0e-682d-4082-90ac-36cf7fadcb72">Bernoulli</a></li>
+<li>Binomial</li>
+<li>Multinomial</li>
+<li>Categorical</li>
+</ul>
+
+<div id="outline-container-org45e56b6" class="outline-2">
+<h2 id="org45e56b6">Links to this note</h2>
+<div class="outline-text-2" id="text-org45e56b6">
 <ul class="org-ul">
 <li><a href="./20220824141346-mixture_models_in_aesara.html">Mixture models in Aesara</a></li>
 </ul>
