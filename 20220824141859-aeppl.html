@@ -3,13 +3,45 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-18 Sun 09:21 -->
+<!-- 2022-12-19 Mon 20:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AePPL</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
@@ -18,35 +50,171 @@
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aeppl">https://github.com/aesara-devs/aeppl</a>
 </p>
 
-<div id="outline-container-org9136a35" class="outline-2">
-<h2 id="org9136a35">Condition on transformed variables</h2>
-<div class="outline-text-2" id="text-org9136a35">
 <p>
-Examples of people confused by the inability to condition on deterministic random variables:
+In this page you will find a pot-pourri of examples that I think AePPL should support (or already supports).
 </p>
 
-<ul class="org-ul">
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="http://www.awebb.info/probability/inference/mcmc/2017/02/22/observing-functions-of-random-variables-in-pymc.html">http://www.awebb.info/probability/inference/mcmc/2017/02/22/observing-functions-of-random-variables-in-pymc.html</a></li>
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://groups.google.com/g/pymc/c/gAImsliT34o">https://groups.google.com/g/pymc/c/gAImsliT34o</a></li>
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://stats.stackexchange.com/questions/56543/pymc-how-can-i-define-a-function-of-two-stochastic-variables-with-no-closed-fo">https://stats.stackexchange.com/questions/56543/pymc-how-can-i-define-a-function-of-two-stochastic-variables-with-no-closed-fo</a></li>
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://stackoverflow.com/questions/26397835/pymc-observed-data-for-a-sum-of-random-variables">https://stackoverflow.com/questions/26397835/pymc-observed-data-for-a-sum-of-random-variables</a></li>
-<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://stackoverflow.com/questions/24379868/estimate-the-parameters-of-a-random-variable-which-is-the-sum-of-uniform-random?rq=1">https://stackoverflow.com/questions/24379868/estimate-the-parameters-of-a-random-variable-which-is-the-sum-of-uniform-random?rq=1</a></li>
-</ul>
-
+<div id="outline-container-org7f85263" class="outline-2">
+<h2 id="org7f85263">Condition on transformed variables</h2>
+<div class="outline-text-2" id="text-org7f85263">
+</div>
+<div id="outline-container-org229ae8f" class="outline-3">
+<h3 id="org229ae8f">The lighthouse problem</h3>
+<div class="outline-text-3" id="text-org229ae8f">
+<p>
+Consider the <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.awebb.info/probability/inference/mcmc/2017/02/22/observing-functions-of-random-variables-in-pymc.html">lighthouse problem</a>: there exists a lighthouse \(\alpha\) miles along a straight coastline, and \(\beta\) miles offshore. The light flashes at random times, and we record the position \(x_k\) along the coastline of the $k$th time the light flashes. Infer \(\alpha\) and \(\beta\).
+</p>
 
 <p>
-There are two cases:
+Let's call \(\theta_k\) the angle the beam makes with the shortest line joining the lighthouse to the coast. Then:
 </p>
-<ol class="org-ol">
-<li>Transformation that only involved a single variable, in which case we need to compute the pushforward measure;</li>
-<li>Transformations that involve several random variables, in which case we need to do some random variable algebra to find a closed form solution if it exists.</li>
-</ol>
+
+<p>
+\[
+x_k = \alpha + \beta\, \tan \theta_k
+\]
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">alpha_rv</span> = at.normal(0, 50)
+<span style="color: #DFAF8F;">beta_rv</span> = at.exponential(0, 100)
+
+<span style="color: #DFAF8F;">num_flashes</span> = at.iscalar(<span style="color: #CC9393;">'num_flashes'</span>)
+<span style="color: #DFAF8F;">theta_rv</span> = at.uniform(lower=-np.pi/2, upper=np.pi/2, size=num_flashes)
+
+<span style="color: #DFAF8F;">X_rv</span> = alpha_rv + beta_rv * at.tan(theta_rv)
+</pre>
+</div>
+
+<p>
+And we would like to be able to compute the joint density conditioning on the \(x_k\) instead of the \(\theta_k\):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+
+<span style="color: #DFAF8F;">x_obs</span> = at.vector(<span style="color: #CC9393;">"X"</span>)
+logprob, (alpha_vv, beta_vv) = aeppl.joint_logprob(alpha_rv, beta_rv, realized={X_rv, x_obs})
+</pre>
+</div>
 </div>
 </div>
 
-<div id="outline-container-org8b94922" class="outline-2">
-<h2 id="org8b94922">Links to this note</h2>
-<div class="outline-text-2" id="text-org8b94922">
+<div id="outline-container-orgd2501de" class="outline-3">
+<h3 id="orgd2501de">The sum of random variables</h3>
+<div class="outline-text-3" id="text-orgd2501de">
+<p>
+What to do when the sum has no closed-form posterior?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">x_rv</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">y_rv</span> = srng.lognormal(0, 1)
+<span style="color: #DFAF8F;">z</span> = x_rv + y_rv
+
+logprob, (x_vv, z_vv) = aeppl.joint_logprob(x_rv, z)
+</pre>
+</div>
+
+<p>
+In this case we should be able to compute the density by binding \(x_{vv}\) to the density of \(x_rv\), and binding \(z_{vv} - x_{vv}\) to the density of \(y_{rv}\).
+</p>
+
+<p>
+Now slightly more complicated. Is this defined without \(x_{rv}\) or \(y_{rv}\) being stochastic? (I don't think so). And if it is not, then how do we proceed about tying the values taken by \(x_{rv}\) and \(y_{rv}\) together?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">mu_rv</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">sigma_rv</span> = srng.halfcauchy(1)
+
+<span style="color: #DFAF8F;">x_rv</span> = srng.normal(mu_rv, 1)
+<span style="color: #DFAF8F;">y_rv</span> = srng.lognormal(0, sigma_rv)
+
+<span style="color: #DFAF8F;">z</span> = x_rv + y_rv
+
+logprob, (mu_vv, sigma_vv, z_vv) = aeppl.joint_logprob(x_rv, z)
+</pre>
+</div>
+
+<p>
+Finally the following example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">a</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">b</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">c</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">d</span> = srng.normal(0, 1)
+
+<span style="color: #DFAF8F;">X_rv</span> = at.uniform(a, b)
+<span style="color: #DFAF8F;">Y_rv</span> = at.uniform(c, d)
+<span style="color: #DFAF8F;">Z_rv</span> = X_rv + Y_rv
+
+<span style="color: #DFAF8F;">logprob</span>, <span style="color: #DFAF8F;">value_variables</span> = aeppl.joint_logprob(a, b, c, d, Z_rv)
+</pre>
+</div>
+
+<p>
+In this case \(Z\)'s density has a closed-form expression; \(Z_{rv}\) has a <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Trapezoidal_distribution">trapezoidal distribution</a>. So we should be able to replace this sum with this distribution directly.
+</p>
+
+<p>
+<a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions">A list</a> of cases where the convolution of two or more random variables has a closed-form solutions, or rather is a known measure, is available on Wikipedia.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org287ade7" class="outline-2">
+<h2 id="org287ade7">Condition on some elements of a multivariate distribution</h2>
+<div class="outline-text-2" id="text-org287ade7">
+<p>
+See <a target='_blank' rel='noopener noreferrer' class='external' href="https://cdn.discordapp.com/attachments/894592276184043570/1054454175502704751/doucet_simulationconditionalgaussian.pdf">these notes</a>. With AePPL/AeMCMC one should be able to condition on <i>some</i> components of a multivariate distribution:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">mu</span> = at.vector(<span style="color: #CC9393;">"mu"</span>)
+<span style="color: #DFAF8F;">sigma</span> = at.matrix(<span style="color: #CC9393;">"sigma"</span>)
+<span style="color: #DFAF8F;">idx</span> = at.iscalar(<span style="color: #CC9393;">"i"</span>)
+<span style="color: #DFAF8F;">X_rv</span> = at.random.multivariate_normal(mu, sigma)
+
+<span style="color: #DFAF8F;">Z_rv</span> = X_rv[:idx]
+<span style="color: #DFAF8F;">Y_rv</span> = X_rv[idx:]
+
+logprob, (z_vv,) = aeppl.joint_logprob(Z_rv, realized={Y_rv: y_obs})
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org881f935" class="outline-2">
+<h2 id="org881f935">Links to this note</h2>
+<div class="outline-text-2" id="text-org881f935">
 <ul class="org-ul">
 <li><a href="./20220824141346-mixture_models_in_aesara.html">Mixture models in Aesara</a></li>
 </ul>
