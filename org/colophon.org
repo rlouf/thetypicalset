@@ -4,7 +4,7 @@
 #+ATTR_HTML: :width 100%
 [[file:img/sisyphus.gif]]
 
-* Credits
+* Colophon
 
 These notes are generated with [[https://www.orgroam.com/][Org-roam]], are automatically published with [[https://www.orgmode.org/fr/][Org Mode]]. They're infused with a healthy dose of nostalgia for [[https://www.spacejam.com/1996/][the]] old [[http://info.cern.ch/hypertext/WWW/TheProject.html][web]]; the design is essentially the same as this [[https://motherfuckingwebsite.com/][motherfucking website]], with 4 lines of CSS to improve readability. I was heavily inspired by [[https://notes.andymatuschak.org/About_these_notes][Andy Matuschak's notes]] and [[https://commonplace.doubleloop.net/][Neil Mather's digital garden]].
 
@@ -14,29 +14,26 @@ The typical set is forever a work in progress, on two fronts:
 - The /technical solution/: [[id:7dae4406-eb94-4496-93e1-a989cab14729][Navigate linked notes]], [[id:9b92383e-727d-4d16-9591-9730222e2d5c][Publish your notes instantly]], [[id:86cc91ce-eb0d-4d42-ac5b-38f6bcbfe678][Reference other people's notes]]
 
 ** TODO Display last update on note
-** TODO Include larger projects to the typical set
-Such as my notes on The Reasoned Schemer. The idea is to have on =publish.el= file per project; all org files in the =/org= directory, and a site map is generated at the root folder as =index.html=.
-
-Which projects to include is listed in the =Makefile=. I don't even need to list the projects as submodules.
 ** TODO Handle literature notes
 Should have list of authors, link to article (if availabae), etc.
-
+** TODO Citations
+I should be able to cite papers, books, etc. contained in a central BiTeX file.
 ** TODO Better URLS for notes
-
 The current template for naming notes in org-roam is great to avoid conflicts, but it does not make for memorable/pleasant URLS. We should change the notes' slug.
-
 ** TODO Improve navigation
 
 See [[id:7dae4406-eb94-4496-93e1-a989cab14729][Navigate linked notes]]
 
 *** TODO Show the full graph
 
-[[https://hugocisneros.com/blog/my-org-roam-notes-workflow/][Hugo Cisneros]] vizualises the graph stored in the Org-roam db with a javascript animation.
+I can start with a new =graph.html= page that displays the graph and links to the notes. Some inspiration:
+
+- [[https://hugocisneros.com/blog/my-org-roam-notes-workflow/][Hugo Cisneros]] vizualises the graph stored in the Org-roam db with a javascript animation.
+- My [[https://github.com/rlouf/fondation][fondation]] project also visualizes the graph in full-screen with a D3.js animation.
 
 *** TODO Miller Columns
-See [[https://notes.andymatuschak.org/About_these_notes][Andy Matuschak's notes]] for a great implementation, Jethro Kuan and Neil Mather also use this.
 
-My concern is that Miller columns were designed to navigate trees, but the typical set is more like a directed graph. Apparently Miller worked on a generalized version to browse directed graphs, but could not find more than a mention.
+See [[https://notes.andymatuschak.org/About_these_notes][Andy Matuschak's notes]] for a great implementation, Jethro Kuan and Neil Mather also use this to navigate their digital garden. My concern is that Miller columns were designed to navigate trees, while the typical set is a directed graph. Apparently Miller worked on a generalization of his method, but could not find mode information online.
 
 Found [[https://www2.eecs.berkeley.edu/Pubs/TechRpts/1986/CSD-86-292.pdf][this report]] from 1986 written at the CS division at UC Berkeley.
 
@@ -44,8 +41,8 @@ Found [[https://www2.eecs.berkeley.edu/Pubs/TechRpts/1986/CSD-86-292.pdf][this r
 
 *** TODO Show graph neighbourhood in addition to / instead of backlinks
 
-The graph could be shown ont
+We currently only display pages that link to the current note. There's however a lot of information in the slightly more extended neighbourhood, and it would be nice to display this neighbourhood instead of this first-order approximation.
 
 *** TODO Page preview when hovering on a link
-CLOSED: [2022-04-06 Wed 10:47]
-Build time is reasonable for now, but I expect it to increase quickly (Neil Mather talks about 50 minute long builds...)
+
+This is done well in Andy Matuschak's notes.

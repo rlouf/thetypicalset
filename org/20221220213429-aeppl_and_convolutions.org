@@ -1,0 +1,64 @@
+:PROPERTIES:
+:ID:       19a28994-247b-40bf-8d9f-55b65edab3f1
+:END:
+#+title: AePPL and convolutions
+
+What to do when the sum has no closed-form posterior?
+
+#+begin_src python
+import aeppl
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+x_rv = srng.normal(0, 1)
+y_rv = srng.lognormal(0, 1)
+z = x_rv + y_rv
+
+logprob, (x_vv, z_vv) = aeppl.joint_logprob(x_rv, z)
+#+end_src
+
+In this case we should be able to compute the density by binding $x_{vv}$ to the density of $x_rv$, and binding $z_{vv} - x_{vv}$ to the density of $y_{rv}$.
+
+Now slightly more complicated. Is this defined without $x_{rv}$ or $y_{rv}$ being stochastic? (I don't think so). And if it is not, then how do we proceed about tying the values taken by $x_{rv}$ and $y_{rv}$ together?
+
+#+begin_src python
+import aeppl
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+mu_rv = srng.normal(0, 1)
+sigma_rv = srng.halfcauchy(1)
+
+x_rv = srng.normal(mu_rv, 1)
+y_rv = srng.lognormal(0, sigma_rv)
+
+z = x_rv + y_rv
+
+logprob, (mu_vv, sigma_vv, z_vv) = aeppl.joint_logprob(x_rv, z)
+#+end_src
+
+Finally the following example:
+
+#+begin_src python
+import aeppl
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+a = srng.normal(0, 1)
+b = srng.normal(0, 1)
+c = srng.normal(0, 1)
+d = srng.normal(0, 1)
+
+X_rv = at.uniform(a, b)
+Y_rv = at.uniform(c, d)
+Z_rv = X_rv + Y_rv
+
+logprob, value_variables = aeppl.joint_logprob(a, b, c, d, Z_rv)
+#+end_src
+
+In this case $Z$'s density has a closed-form expression; $Z_{rv}$ has a [[https://en.wikipedia.org/wiki/Trapezoidal_distribution][trapezoidal distribution]]. So we should be able to replace this sum with this distribution directly.
+
+[[https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions][A list]] of cases where the convolution of two or more random variables has a closed-form solutions, or rather is a known measure, is available on Wikipedia.

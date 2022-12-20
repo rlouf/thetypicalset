@@ -3,125 +3,58 @@
 :END:
 #+title: AePPL
 
-AePPL is a set of tools to build A[e]PPL with [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]].
+AePPL is a set of tools to build A[e]PPL with [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]]. The code is available [[https://github.com/aesara-devs/aeppl][on Github]]. AePPL takes any Aesara graph that contains [[id:2e41e200-be7a-482b-8cfe-d0d67df26920][random variables]], such as:
 
-[[https://github.com/aesara-devs/aeppl]]
-
-In this page you will find a pot-pourri of examples that I think AePPL should support (or already supports).
-
-* Condition on transformed variables
-** The lighthouse problem
-
-Consider the [[http://www.awebb.info/probability/inference/mcmc/2017/02/22/observing-functions-of-random-variables-in-pymc.html][lighthouse problem]]: there exists a lighthouse $\alpha$ miles along a straight coastline, and $\beta$ miles offshore. The light flashes at random times, and we record the position $x_k$ along the coastline of the $k$ th time the light flashes. Infer $\alpha$ and $\beta$.
-
-Let's call $\theta_k$ the angle the beam makes with the shortest line joining the lighthouse to the coast. Then:
-
-$$
-x_k = \alpha + \beta\, \tan \theta_k
-$$
-
-#+begin_src python
-import aeara.tensor as at
-import numpy as np
-
-srng = at.random.RandomStream(0)
-
-alpha_rv = at.normal(0, 50)
-beta_rv = at.exponential(0, 100)
-
-num_flashes = at.iscalar('num_flashes')
-theta_rv = at.uniform(lower=-np.pi/2, upper=np.pi/2, size=num_flashes)
-
-X_rv = alpha_rv + beta_rv * at.tan(theta_rv)
-#+end_src
-
-And we would like to be able to compute the joint density conditioning on the $x_k$ instead of the $\theta_k$:
-
-#+begin_src python
-import aeppl
-
-x_obs = at.vector("X")
-logprob, (alpha_vv, beta_vv) = aeppl.joint_logprob(alpha_rv, beta_rv, realized={X_rv, x_obs})
-#+end_src
-
-** The sum of random variables
-
-What to do when the sum has no closed-form posterior?
-
-#+begin_src python
-import aeppl
-import aesara.tensor as at
-
-srng = at.random.RandomStream(0)
-
-x_rv = srng.normal(0, 1)
-y_rv = srng.lognormal(0, 1)
-z = x_rv + y_rv
-
-logprob, (x_vv, z_vv) = aeppl.joint_logprob(x_rv, z)
-#+end_src
-
-In this case we should be able to compute the density by binding $x_{vv}$ to the density of $x_rv$, and binding $z_{vv} - x_{vv}$ to the density of $y_{rv}$.
-
-Now slightly more complicated. Is this defined without $x_{rv}$ or $y_{rv}$ being stochastic? (I don't think so). And if it is not, then how do we proceed about tying the values taken by $x_{rv}$ and $y_{rv}$ together?
-
-#+begin_src python
-import aeppl
+#+begin_src python :results output :session
+import aesara
 import aesara.tensor as at
 
 srng = at.random.RandomStream(0)
 
 mu_rv = srng.normal(0, 1)
 sigma_rv = srng.halfcauchy(1)
+x_rv = srng.normal(mu_rv, sigma_rv)
 
-x_rv = srng.normal(mu_rv, 1)
-y_rv = srng.lognormal(0, sigma_rv)
-
-z = x_rv + y_rv
-
-logprob, (mu_vv, sigma_vv, z_vv) = aeppl.joint_logprob(x_rv, z)
+fn = aesara.function([], [mu_rv, sigma_rv, x_rv])
+samples = fn()
+print(samples)
 #+end_src
 
-Finally the following example:
+#+RESULTS:
+: [array(1.44369095), array(2.80017179), array(4.08173001)]
 
-#+begin_src python
+and constructs graphs that compute the joint log-density:
+
+#+begin_src python :session :results output
 import aeppl
-import aesara.tensor as at
 
-srng = at.random.RandomStream(0)
-
-a = srng.normal(0, 1)
-b = srng.normal(0, 1)
-c = srng.normal(0, 1)
-d = srng.normal(0, 1)
-
-X_rv = at.uniform(a, b)
-Y_rv = at.uniform(c, d)
-Z_rv = X_rv + Y_rv
-
-logprob, value_variables = aeppl.joint_logprob(a, b, c, d, Z_rv)
+logprob, (mu_vv, sigma_vv, x_vv) = aeppl.joint_logprob(mu_rv, sigma_rv, x_rv)
+fn = aesara.function([mu_vv, sigma_vv, x_vv], logprob)
+print(fn(*samples))
 #+end_src
 
-In this case $Z$'s density has a closed-form expression; $Z_{rv}$ has a [[https://en.wikipedia.org/wiki/Trapezoidal_distribution][trapezoidal distribution]]. So we should be able to replace this sum with this distribution directly.
+#+RESULTS:
+: -6.249746713886573
 
-[[https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions][A list]] of cases where the convolution of two or more random variables has a closed-form solutions, or rather is a known measure, is available on Wikipedia.
-* Condition on some elements of a multivariate distribution
+Or conditional log-densities:
 
-See [[https://cdn.discordapp.com/attachments/894592276184043570/1054454175502704751/doucet_simulationconditionalgaussian.pdf][these notes]]. With AePPL/AeMCMC one should be able to condition on /some/ components of a multivariate distribution:
-
-#+begin_src python
+#+begin_src python :session :results output
 import aeppl
-import aesara.tensor as at
 
-srng = at.random.RandomStream(0)
-
-mu = at.vector("mu")
-sigma = at.matrix("sigma")
-idx = at.iscalar("i")
-X_rv = at.random.multivariate_normal(mu, sigma)
-
-Z_rv = X_rv[:idx]
-Y_rv = X_rv[idx:]
-
-logprob, (z_vv,) = aeppl.joint_logprob(Z_rv, realized={Y_rv: y_obs})
+logprobs, (mu_vv, sigma_vv, x_vv) = aeppl.conditional_logprob(mu_rv, sigma_rv, x_rv)
+fn = aesara.function([mu_vv, sigma_vv, x_vv], logprobs[x_rv])
+print(fn(*samples))
 #+end_src
+
+#+RESULTS:
+: -2.3923945677716345
+
+AePPL is designed to support every model that is mathematically well-defined, and provides support for the following:
+
+- [[id:caa7788c-f2ce-42ba-a712-73fd69c93a1d][Transformed variables]]
+- [[id:19a28994-247b-40bf-8d9f-55b65edab3f1][Convolutions]]
+- [[id:c57dd926-5e8a-46c0-8af2-44e0dde4beb7][Elements of multi-dimensional random variables]]
+- [[id:c40d2cd2-cd16-4e9c-baab-93e368eb3c0e][Mixtures]]
+- [[id:b67c225f-72bc-434d-89fc-3a8d7e1d9859][Variables defined by a loop]]
+- [[id:8ab6423e-5ec1-489c-919b-c41b84ee8715][Marginalization]]
+- [[id:44a13f71-9216-41af-88b9-25459ef40e83][Algebra of random variables]]
