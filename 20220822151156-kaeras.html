@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-20 Tue 14:30 -->
+<!-- 2022-12-20 Tue 19:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AeNN</title>
@@ -50,9 +50,9 @@
 AeNN would be a deep-learning API that sits on top of Aesara. It is inspired by <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io">Keras</a> (which used to be built on top of Theano), Flax (NN library built with JAX), and of course <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/Lasagne/Lasagne">Lasagne</a>. It would make full use of Aesara's graph and rewrite capabilities.
 </p>
 
-<div id="outline-container-org56d3d91" class="outline-2">
-<h2 id="org56d3d91">Inspiration</h2>
-<div class="outline-text-2" id="text-org56d3d91">
+<div id="outline-container-org6054910" class="outline-2">
+<h2 id="org6054910">Inspiration</h2>
+<div class="outline-text-2" id="text-org6054910">
 <p>
 A minimum viable library could be to be able to reproduce <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io/">Keras' documentation</a> examples. For instance the MNIST convnet:
 </p>
@@ -106,9 +106,9 @@ I find Keras' API to be sometimes too high-level. In particular, I am not a big 
 </div>
 </div>
 
-<div id="outline-container-orgc10a54b" class="outline-2">
-<h2 id="orgc10a54b">Building a simple MLP model</h2>
-<div class="outline-text-2" id="text-orgc10a54b">
+<div id="outline-container-orge70ce87" class="outline-2">
+<h2 id="orge70ce87">Building a simple MLP model</h2>
+<div class="outline-text-2" id="text-orge70ce87">
 <p>
 Let's take and try to reproduce a simpler example, the MLP example taken from the Flax documentation:
 </p>
@@ -130,9 +130,9 @@ Let's take and try to reproduce a simpler example, the MLP example taken from th
 </div>
 </div>
 
-<div id="outline-container-org2bc2f3e" class="outline-3">
-<h3 id="org2bc2f3e">Activation Function</h3>
-<div class="outline-text-3" id="text-org2bc2f3e">
+<div id="outline-container-org73571a8" class="outline-3">
+<h3 id="org73571a8">Activation Function</h3>
+<div class="outline-text-3" id="text-org73571a8">
 <p>
 The first approach to implementing the activation function \(\operatorname{Relu}\) is to define it as a function:
 </p>
@@ -168,9 +168,9 @@ So <code>relu</code> will need to be implemented as an <code>OpFromGraph</code>,
 </div>
 </div>
 
-<div id="outline-container-org16f0961" class="outline-3">
-<h3 id="org16f0961">Dense layer</h3>
-<div class="outline-text-3" id="text-org16f0961">
+<div id="outline-container-org8bb3cd1" class="outline-3">
+<h3 id="org8bb3cd1">Dense layer</h3>
+<div class="outline-text-3" id="text-org8bb3cd1">
 <p>
 Layers are best implemented as =OpFromGraph=s for several reasons:
 </p>
@@ -215,13 +215,13 @@ Layers are best implemented as =OpFromGraph=s for several reasons:
 </div>
 </div>
 
-<div id="outline-container-orgf8fe2e1" class="outline-3">
-<h3 id="orgf8fe2e1">Module</h3>
+<div id="outline-container-org23ba9f4" class="outline-3">
+<h3 id="org23ba9f4">Module</h3>
 </div>
 
-<div id="outline-container-org1b56d90" class="outline-3">
-<h3 id="org1b56d90">Training</h3>
-<div class="outline-text-3" id="text-org1b56d90">
+<div id="outline-container-org8eddae2" class="outline-3">
+<h3 id="org8eddae2">Training</h3>
+<div class="outline-text-3" id="text-org8eddae2">
 <p>
 We need to be able to call the model with <code>model(batch, parameters)</code>, then compute the loss, then update the parameter values using an optimizer.
 </p>
@@ -229,9 +229,9 @@ We need to be able to call the model with <code>model(batch, parameters)</code>,
 </div>
 </div>
 
-<div id="outline-container-orga327f90" class="outline-2">
-<h2 id="orga327f90">Graph rewriting</h2>
-<div class="outline-text-2" id="text-orga327f90">
+<div id="outline-container-orga6ff722" class="outline-2">
+<h2 id="orga6ff722">Graph rewriting</h2>
+<div class="outline-text-2" id="text-orga6ff722">
 <p>
 We can perform rewriting at the layer semantic level. For instance, the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/uwplse/tensat">TENSAT</a> library adds equality saturation to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jiazhihao/TASO">TASO</a> library. There are a list of rewrites that operate on a so-called <i>layer algebra</i>. Here are a few examples:
 </p>
@@ -246,9 +246,9 @@ relu(input_8)==conv2d(1,1,0,2,input_8,Iconv(3,3))
 </div>
 </div>
 
-<div id="outline-container-org602c7f4" class="outline-2">
-<h2 id="org602c7f4">Links to this note</h2>
-<div class="outline-text-2" id="text-org602c7f4">
+<div id="outline-container-org5d58037" class="outline-2">
+<h2 id="org5d58037">Links to this note</h2>
+<div class="outline-text-2" id="text-org5d58037">
 <ul class="org-ul">
 <li><a href="./20220823090532-ops.html">Ops</a></li>
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
