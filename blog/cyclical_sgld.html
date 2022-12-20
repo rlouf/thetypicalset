@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-20 Tue 13:43 -->
+<!-- 2022-12-20 Tue 14:17 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cyclical SGLD in Blackjax</title>
@@ -47,9 +47,9 @@
 <div id="content" class="content">
 <h1 class="title">Cyclical SGLD in Blackjax</h1>
 
-<div id="outline-container-orga9f834e" class="outline-2">
-<h2 id="orga9f834e">Cyclical schedule</h2>
-<div class="outline-text-2" id="text-orga9f834e">
+<div id="outline-container-org79ba582" class="outline-2">
+<h2 id="org79ba582">Cyclical schedule</h2>
+<div class="outline-text-2" id="text-org79ba582">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
 
@@ -120,9 +120,9 @@ filename
 </div>
 </div>
 
-<div id="outline-container-org079e39f" class="outline-2">
-<h2 id="org079e39f">Cyclical SGLD step</h2>
-<div class="outline-text-2" id="text-org079e39f">
+<div id="outline-container-org2a03972" class="outline-2">
+<h2 id="org2a03972">Cyclical SGLD step</h2>
+<div class="outline-text-2" id="text-org2a03972">
 <p>
 We will reproduce one of the paper's example, sampling from an array of 25 gaussians.
 </p>
@@ -131,6 +131,7 @@ We will reproduce one of the paper's example, sampling from an array of 25 gauss
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> itertools
 
 <span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax.scipy <span style="color: #F0DFAF; font-weight: bold;">as</span> jsp
 <span style="color: #F0DFAF; font-weight: bold;">import</span> jax.numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> jnp
 
 
@@ -140,14 +141,14 @@ We will reproduce one of the paper's example, sampling from an array of 25 gauss
 <span style="color: #DFAF8F;">sigma</span> = 0.03 * jnp.eye(2)
 
 <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">logprob_fn</span>(x, *_):
-    <span style="color: #F0DFAF; font-weight: bold;">return</span> lmbda * jnp.logaddexp(jax.scipy.stats.multivariate_normal.logpdf(x, mu, sigma))
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> lmbda * jsp.special.logsumexp(jax.scipy.stats.multivariate_normal.logpdf(x, mu, sigma))
 
 <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">sample_fn</span>(rng_key):
     <span style="color: #DFAF8F;">choose_key</span>, <span style="color: #DFAF8F;">sample_key</span> = jax.random.split(rng_key)
     <span style="color: #DFAF8F;">samples</span> = jax.random.multivariate_normal(sample_key, mu, sigma)
     <span style="color: #F0DFAF; font-weight: bold;">return</span> jax.random.choice(choose_key, samples)
 
-logprob_fn(jnp.ones(2))
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(logprob_fn(2*jnp.ones(2)))
 </pre>
 </div>
 
@@ -190,7 +191,7 @@ filename
 </div>
 
 
-<div id="orgd08d669" class="figure">
+<div id="org610be78" class="figure">
 <p><img src="img/cyclical_sgld_array_gaussians.png" alt="cyclical_sgld_array_gaussians.png" width="100%" />
 </p>
 </div>
@@ -201,9 +202,9 @@ filename
 </div>
 </div>
 
-<div id="outline-container-org514543e" class="outline-2">
-<h2 id="org514543e">Sample from the mixture of gaussians</h2>
-<div class="outline-text-2" id="text-org514543e">
+<div id="outline-container-org5bd440a" class="outline-2">
+<h2 id="org5bd440a">Sample from the mixture of gaussians</h2>
+<div class="outline-text-2" id="text-org5bd440a">
 <p>
 The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
 </p>
@@ -262,15 +263,81 @@ The sampling kernel must be able to alternate between sampling and optimization 
     <span style="color: #F0DFAF; font-weight: bold;">return</span> init_fn, step_fn
 </pre>
 </div>
+</div>
+</div>
+
+<div id="outline-container-org6fddc42" class="outline-2">
+<h2 id="org6fddc42">SGLD</h2>
+<div class="outline-text-2" id="text-org6fddc42">
+<p>
+Let's start with SGLD:
+</p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">from</span> fastprogress <span style="color: #F0DFAF; font-weight: bold;">import</span> progress_bar
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">50k iterations</span>
+<span style="color: #DFAF8F;">num_training_steps</span> = 50000
+<span style="color: #DFAF8F;">schedule_fn</span> = <span style="color: #F0DFAF; font-weight: bold;">lambda</span> k: 0.05 * k ** (-0.55)
+<span style="color: #DFAF8F;">schedule</span> = [schedule_fn(i) <span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(1, num_training_steps+1)]
+
+<span style="color: #DFAF8F;">grad_fn</span> = <span style="color: #F0DFAF; font-weight: bold;">lambda</span> x, _: jax.grad(logprob_fn)(x)
+<span style="color: #DFAF8F;">sgld</span> = blackjax.sgld(grad_fn)
+
+<span style="color: #DFAF8F;">rng_key</span> = jax.random.PRNGKey(3)
+<span style="color: #DFAF8F;">init_position</span> = -10 + 20 * jax.random.uniform(rng_key, shape=(2,))
+
+<span style="color: #DFAF8F;">position</span> = init_position
+<span style="color: #DFAF8F;">sgld_samples</span> = []
+<span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> progress_bar(<span style="color: #DCDCCC; font-weight: bold;">range</span>(num_training_steps)):
+    <span style="color: #DFAF8F;">_</span>, <span style="color: #DFAF8F;">rng_key</span> = jax.random.split(rng_key)
+    <span style="color: #DFAF8F;">position</span> = jax.jit(sgld)(rng_key, position, 0, schedule[i])
+    sgld_samples.append(position)
+</pre>
+</div>
+
+<p>
+Let's plot the trajectory:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #DFAF8F;">fig</span> = plt.figure()
+<span style="color: #DFAF8F;">ax</span> = fig.add_subplot(111)
+<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> sgld_samples]
+<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> sgld_samples]
+
+ax.plot(x, y, <span style="color: #CC9393;">'k-'</span>, lw=0.1, alpha=0.5)
+ax.set_xlim([-8, 8])
+ax.set_ylim([-8, 8])
+
+plt.axis(<span style="color: #CC9393;">'off'</span>)
+plt.title(<span style="color: #CC9393;">"Trajectory with SGLD"</span>)
+<span style="color: #DFAF8F;">filename</span> =<span style="color: #CC9393;">"img/cyclical_sgld_sgld_samples.png"</span>
+plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
+filename
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgfbf9bcc" class="outline-2">
+<h2 id="orgfbf9bcc">Cyclical SGLD</h2>
+<div class="outline-text-2" id="text-orgfbf9bcc">
+<p>
+Now let's sample using Cyclical SGLD.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">from</span> fastprogress <span style="color: #F0DFAF; font-weight: bold;">import</span> progress_bar
 
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">50k iterations</span>
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">M = 30</span>
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">initial step size = 0.09</span>
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">ratio exploration = 1/4</span>
-<span style="color: #DFAF8F;">num_training_steps</span> = 10000
+<span style="color: #DFAF8F;">num_training_steps</span> = 50000
 <span style="color: #DFAF8F;">schedule_fn</span> = build_schedule(num_training_steps, 30, 0.09, 0.25)
 <span style="color: #DFAF8F;">schedule</span> = [schedule_fn(i) <span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(num_training_steps)]
 
@@ -283,26 +350,40 @@ The sampling kernel must be able to alternate between sampling and optimization 
 
 
 <span style="color: #DFAF8F;">state</span> = init_state
-<span style="color: #DFAF8F;">samples</span> = []
-<span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(num_training_steps):
+<span style="color: #DFAF8F;">cyclical_samples</span> = []
+<span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> progress_bar(<span style="color: #DCDCCC; font-weight: bold;">range</span>(num_training_steps)):
     <span style="color: #DFAF8F;">_</span>, <span style="color: #DFAF8F;">rng_key</span> = jax.random.split(rng_key)
     <span style="color: #DFAF8F;">state</span> = jax.jit(step)(rng_key, schedule[i], state, 0)
     <span style="color: #F0DFAF; font-weight: bold;">if</span> schedule[i].do_sample:
-        samples.append(state.position)
+        cyclical_samples.append(state.position)
 </pre>
 </div>
+
+<p>
+It looks from the trajectory that the distribution is better explored:
+</p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #DFAF8F;">fig</span> = plt.figure()
 <span style="color: #DFAF8F;">ax</span> = fig.add_subplot(111)
-<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> samples]
-<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> samples]
-ax.set_xlim([-5, 5])
-ax.set_ylim([-5, 5])
-plt.plot(x, y, <span style="color: #CC9393;">'ko'</span>)
-plt.show()
+<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> cyclical_samples]
+<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> cyclical_samples]
+
+ax.plot(x, y, <span style="color: #CC9393;">'k-'</span>, lw=0.1, alpha=0.5)
+ax.set_xlim([-8, 8])
+ax.set_ylim([-8, 8])
+
+plt.axis(<span style="color: #CC9393;">'off'</span>)
+plt.title(<span style="color: #CC9393;">"Trajectory with Cyclical SGLD"</span>)
+<span style="color: #DFAF8F;">filename</span> =<span style="color: #CC9393;">"img/cyclical_sgld_samples.png"</span>
+plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
+filename
 </pre>
 </div>
+
+<p>
+Let's look at the distribution:
+</p>
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.pylab <span style="color: #F0DFAF; font-weight: bold;">as</span> plt
@@ -314,8 +395,8 @@ plt.show()
 <span style="color: #DFAF8F;">xmax</span>, <span style="color: #DFAF8F;">ymax</span> = 5, 5
 
 <span style="color: #DFAF8F;">nbins</span> = 300j
-<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> samples]
-<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> samples]
+<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> cyclical_samples]
+<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> cyclical_samples]
 <span style="color: #DFAF8F;">xx</span>, <span style="color: #DFAF8F;">yy</span> = np.mgrid[xmin:xmax:nbins, ymin:ymax:nbins]
 <span style="color: #DFAF8F;">positions</span> = np.vstack([xx.ravel(), yy.ravel()])
 <span style="color: #DFAF8F;">values</span> = np.vstack([x, y])
@@ -329,15 +410,16 @@ ax.imshow(np.rot90(f), cmap=<span style="color: #CC9393;">'Blues'</span>, extent
 
 <span style="color: #DFAF8F;">plt.rcParams</span>[<span style="color: #CC9393;">'axes.titlepad'</span>] = 15.
 plt.title(<span style="color: #CC9393;">"Samples from a mixture of 25 normal distributions"</span>)
-plt.show()
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">plt.savefig(filename, bbox_inches="tight")</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">filename</span>
+plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
+filename
 </pre>
 </div>
 
-<p>
-<a href="None">None</a>
+
+<div id="org25caa15" class="figure">
+<p><img src="img/cyclical_sgld_distribution.png" alt="cyclical_sgld_distribution.png" width="100%" />
 </p>
+</div>
 </div>
 </div>
 </div>
