@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-20 Tue 14:22 -->
+<!-- 2022-12-20 Tue 14:30 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mixture models in Aesara</title>
@@ -18,9 +18,9 @@
 Probabilistic Programming Languages in Python ask you to use a ad-hoc <code>Mixture</code> <a target='_blank' rel='noopener noreferrer' class='external' href="https://docs.pymc.io/en/v5.0.0/api/distributions/generated/pymc.Mixture.html#pymc.Mixture">distribution object</a> to build mixture distributions. In <a href="20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a>/<a href="20220824141859-aeppl.html#ID-e18d689a-392a-407a-941a-f0ad2d2dc43e">AePPL</a> you can express the mixture in different ways.
 </p>
 
-<div id="outline-container-orgf1f6d8b" class="outline-2">
-<h2 id="orgf1f6d8b">Indexing an array</h2>
-<div class="outline-text-2" id="text-orgf1f6d8b">
+<div id="outline-container-orgcfc1e07" class="outline-2">
+<h2 id="orgcfc1e07">Indexing an array</h2>
+<div class="outline-text-2" id="text-orgcfc1e07">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
 <span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
@@ -50,9 +50,9 @@ logprob, (y_vv, i_vv) = aeppl.joint_logprob(Y_rv, I_rv)
 </div>
 
 
-<div id="outline-container-org9d2b01a" class="outline-2">
-<h2 id="org9d2b01a">Using <code>aesara.tensor.where</code></h2>
-<div class="outline-text-2" id="text-org9d2b01a">
+<div id="outline-container-org2271d5a" class="outline-2">
+<h2 id="org2271d5a">Using <code>aesara.tensor.where</code></h2>
+<div class="outline-text-2" id="text-org2271d5a">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
 <span style="color: #F0DFAF; font-weight: bold;">import</span> aesata.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
@@ -74,12 +74,12 @@ logprob, (y_vv, i_vv) = aeppl.joint_logprob(Y_rv, I_rv)
 </div>
 
 
-<div id="outline-container-orgf9836e9" class="outline-2">
-<h2 id="orgf9836e9"><span class="todo TODO">TODO</span> Using <code>aeara.ifelse.ifelse</code></h2>
+<div id="outline-container-org7694716" class="outline-2">
+<h2 id="org7694716"><span class="todo TODO">TODO</span> Using <code>aeara.ifelse.ifelse</code></h2>
 </div>
-<div id="outline-container-org7f33a3a" class="outline-2">
-<h2 id="org7f33a3a">Marginalize</h2>
-<div class="outline-text-2" id="text-org7f33a3a">
+<div id="outline-container-org2ab1c73" class="outline-2">
+<h2 id="org2ab1c73">Marginalize</h2>
+<div class="outline-text-2" id="text-org2ab1c73">
 <p>
 It would be nice if we were able to <a href="20220824142217-marginalize_over_discrete_parameters.html#ID-630773fc-fe6e-4a2b-a191-2c984c27f963">marginalize over discrete parameters</a> with AePPL; we do not care about posterior distribution of <code>I_rv</code>. This is one "advantage" other PPLs have using a <code>Mixture</code> distribution, as the marginalization is harcoded. Here we would need to implement a <code>marginalize</code> function:
 </p>
@@ -92,9 +92,9 @@ It would be nice if we were able to <a href="20220824142217-marginalize_over_dis
 </div>
 </div>
 
-<div id="outline-container-orga82ae75" class="outline-2">
-<h2 id="orga82ae75">Links to this note</h2>
-<div class="outline-text-2" id="text-orga82ae75">
+<div id="outline-container-org5be6b86" class="outline-2">
+<h2 id="org5be6b86">Links to this note</h2>
+<div class="outline-text-2" id="text-org5be6b86">
 <ul class="org-ul">
 <li><a href="./20220824143353-hidden_markov_models_in_aesara.html">Hidden Markov Models in Aesara</a></li>
 </ul>

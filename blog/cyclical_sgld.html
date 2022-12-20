@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-20 Tue 14:22 -->
+<!-- 2022-12-20 Tue 14:31 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cyclical SGLD in Blackjax</title>
@@ -47,9 +47,9 @@
 <div id="content" class="content">
 <h1 class="title">Cyclical SGLD in Blackjax</h1>
 
-<div id="outline-container-orgbc64559" class="outline-2">
-<h2 id="orgbc64559">Cyclical schedule</h2>
-<div class="outline-text-2" id="text-orgbc64559">
+<div id="outline-container-org998048e" class="outline-2">
+<h2 id="org998048e">Cyclical schedule</h2>
+<div class="outline-text-2" id="text-org998048e">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
 
@@ -85,44 +85,17 @@
 Let us visualize the schedule for 200k training steps divided in 4 cycles. At each cycle 1/4th of the steps are dedicated to exploration.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> jax
-<span style="color: #F0DFAF; font-weight: bold;">import</span> jax.numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> jnp
 
-<span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.pyplot <span style="color: #F0DFAF; font-weight: bold;">as</span> plt
-<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
-
-<span style="color: #DFAF8F;">schedule_fn</span> = build_schedule(20000, 4, 1e-1)
-<span style="color: #DFAF8F;">schedule</span> = [schedule_fn(i) <span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(20000)]
-
-<span style="color: #DFAF8F;">step_sizes</span> = np.array([step.step_size <span style="color: #F0DFAF; font-weight: bold;">for</span> step <span style="color: #F0DFAF; font-weight: bold;">in</span> schedule])
-<span style="color: #DFAF8F;">do_sample</span> = np.array([step.do_sample <span style="color: #F0DFAF; font-weight: bold;">for</span> step <span style="color: #F0DFAF; font-weight: bold;">in</span> schedule])
-
-<span style="color: #DFAF8F;">sampling_points</span> = np.ma.masked_where(~do_sample, step_sizes)
-
-<span style="color: #DFAF8F;">fig</span>, <span style="color: #DFAF8F;">ax</span> = plt.subplots(figsize=(12,8))
-ax.plot(step_sizes, lw=2, ls=<span style="color: #CC9393;">"--"</span>, color=<span style="color: #CC9393;">"r"</span>, label=<span style="color: #CC9393;">"Exploration stage"</span>)
-ax.plot(sampling_points, lw=2, ls=<span style="color: #CC9393;">"-"</span>, color=<span style="color: #CC9393;">"k"</span>, label=<span style="color: #CC9393;">"Sampling stage"</span>)
-
-ax.spines.right.set_visible(<span style="color: #BFEBBF;">False</span>)
-ax.spines.top.set_visible(<span style="color: #BFEBBF;">False</span>)
-
-ax.set_xlabel(<span style="color: #CC9393;">"Training steps"</span>, fontsize=20)
-ax.set_ylabel(<span style="color: #CC9393;">"Step size"</span>, fontsize=20)
-plt.legend()
-plt.title(<span style="color: #CC9393;">"Training schedule for Cyclical SGLD"</span>)
-
-<span style="color: #DFAF8F;">filename</span> = <span style="color: #CC9393;">"img/cyclical_sgld_schedule.png"</span>
-plt.savefig(filename)
-filename
-</pre>
+<div id="org055342f" class="figure">
+<p><img src="img/cyclical_sgld_schedule.png" alt="cyclical_sgld_schedule.png" width="100%" />
+</p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgf974014" class="outline-2">
-<h2 id="orgf974014">Cyclical SGLD step</h2>
-<div class="outline-text-2" id="text-orgf974014">
+<div id="outline-container-orgb86dde2" class="outline-2">
+<h2 id="orgb86dde2">Cyclical SGLD step</h2>
+<div class="outline-text-2" id="text-orgb86dde2">
 <p>
 We will reproduce one of the paper's example, sampling from an array of 25 gaussians.
 </p>
@@ -191,7 +164,7 @@ filename
 </div>
 
 
-<div id="org6c3fd6b" class="figure">
+<div id="org8f5b839" class="figure">
 <p><img src="img/cyclical_sgld_array_gaussians.png" alt="cyclical_sgld_array_gaussians.png" width="100%" />
 </p>
 </div>
@@ -202,9 +175,9 @@ filename
 </div>
 </div>
 
-<div id="outline-container-orgee6fc34" class="outline-2">
-<h2 id="orgee6fc34">Sample from the mixture of gaussians</h2>
-<div class="outline-text-2" id="text-orgee6fc34">
+<div id="outline-container-org2f85ff9" class="outline-2">
+<h2 id="org2f85ff9">Sample from the mixture of gaussians</h2>
+<div class="outline-text-2" id="text-org2f85ff9">
 <p>
 The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
 </p>
@@ -266,9 +239,9 @@ The sampling kernel must be able to alternate between sampling and optimization 
 </div>
 </div>
 
-<div id="outline-container-orgb5abf24" class="outline-2">
-<h2 id="orgb5abf24">SGLD</h2>
-<div class="outline-text-2" id="text-orgb5abf24">
+<div id="outline-container-orgb901b3e" class="outline-2">
+<h2 id="orgb901b3e">SGLD</h2>
+<div class="outline-text-2" id="text-orgb901b3e">
 <p>
 Let's start with SGLD:
 </p>
@@ -302,7 +275,7 @@ Let's plot the trajectory:
 </p>
 
 
-<div id="orgfb94f65" class="figure">
+<div id="org47f4249" class="figure">
 <p><img src="img/cyclical_sgld_sgld_samples.png" alt="cyclical_sgld_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -310,9 +283,9 @@ Let's plot the trajectory:
 </div>
 
 
-<div id="outline-container-org0a3383e" class="outline-2">
-<h2 id="org0a3383e">Cyclical SGLD</h2>
-<div class="outline-text-2" id="text-org0a3383e">
+<div id="outline-container-org7318c90" class="outline-2">
+<h2 id="org7318c90">Cyclical SGLD</h2>
+<div class="outline-text-2" id="text-org7318c90">
 <p>
 Now let's sample using Cyclical SGLD.
 </p>
@@ -352,7 +325,7 @@ It looks from the trajectory that the distribution is better explored:
 </p>
 
 
-<div id="org68e45f2" class="figure">
+<div id="orgfcee0e7" class="figure">
 <p><img src="img/cyclical_sgld_samples.png" alt="cyclical_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -392,7 +365,7 @@ filename
 </div>
 
 
-<div id="org61c76d4" class="figure">
+<div id="org7d7f0aa" class="figure">
 <p><img src="img/cyclical_sgld_distribution.png" alt="cyclical_sgld_distribution.png" width="70%" />
 </p>
 </div>

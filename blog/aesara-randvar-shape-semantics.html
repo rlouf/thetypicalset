@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-20 Tue 14:22 -->
+<!-- 2022-12-20 Tue 14:31 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shape semantics for random variables in Aesara</title>
@@ -48,9 +48,9 @@
 <h1 class="title">Shape semantics for random variables in Aesara</h1>
 
 
-<div id="outline-container-orgb40310e" class="outline-2">
-<h2 id="orgb40310e">Random variables in Aesara</h2>
-<div class="outline-text-2" id="text-orgb40310e">
+<div id="outline-container-orgdc16b7b" class="outline-2">
+<h2 id="orgdc16b7b">Random variables in Aesara</h2>
+<div class="outline-text-2" id="text-orgdc16b7b">
 <p>
 Random variables are represented in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> with the <code>RandomVariable</code> operator, which corresponds to the following mathematical function:
 </p>
@@ -98,9 +98,9 @@ In this document we will explain the semantics of shapes in Aesara, and what the
 </div>
 </div>
 
-<div id="outline-container-org89469f9" class="outline-2">
-<h2 id="org89469f9">The support shape</h2>
-<div class="outline-text-2" id="text-org89469f9">
+<div id="outline-container-org69e42d8" class="outline-2">
+<h2 id="org69e42d8">The support shape</h2>
+<div class="outline-text-2" id="text-org69e42d8">
 <p>
 The dimensionality of the parameter space and the sample space differ depending on the distribution. For instance, the normal distribution is parametrized by \(\mu \in \mathbb{R}\) and \(\sigma \in \mathbb{R}^+\) and the realizations of the corresponding random variables are scalars \(\in \mathbb{R}\).
 </p>
@@ -195,17 +195,17 @@ So if you have doubts regarding the support shape of a distribution, check out t
 </div>
 </div>
 
-<div id="outline-container-orgb7f524a" class="outline-2">
-<h2 id="orgb7f524a">The batch shape</h2>
-<div class="outline-text-2" id="text-orgb7f524a">
+<div id="outline-container-org8fc1bed" class="outline-2">
+<h2 id="org8fc1bed">The batch shape</h2>
+<div class="outline-text-2" id="text-org8fc1bed">
 <p>
 We just saw how to define a single random variable, and how the choice of distribution determined the <i>support shape</i>. In many realistic settings, however, we would like to define several independently distributed random variables at once. Aesara provides two mechanisms to do so: broadcasting the parameters, and the <code>size</code> argument of the <code>RandomVariable</code> operator. The shape induced by this mechanism is called the <i>batch shape</i>.
 </p>
 </div>
 
-<div id="outline-container-org2eae2eb" class="outline-3">
-<h3 id="org2eae2eb">Batching by broadcasting</h3>
-<div class="outline-text-3" id="text-org2eae2eb">
+<div id="outline-container-org3626a03" class="outline-3">
+<h3 id="org3626a03">Batching by broadcasting</h3>
+<div class="outline-text-3" id="text-org3626a03">
 <p>
 Say we want a sample from three independent, normally distributed,  random variables with a mean of \(0\), \(3\) and \(5\) respectively. One (cumbersome) way to achieve this is:
 </p>
@@ -281,7 +281,7 @@ We can also use arrays for the standard deviation in this case. Standard broadca
 </pre>
 </div>
 
-<pre class="example" id="orgc986200">
+<pre class="example" id="org996a997">
 shape mismatch: objects cannot be broadcast to a single shape
 Apply node that caused the error: normal_rv{0, (0, 0), floatX, True}(RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FDB97DFD200&gt;), TensorConstant{[]}, TensorConstant{11}, TensorConstant{[0 3 5]}, TensorConstant{[1 2]})
 Toposort index: 0
@@ -405,9 +405,9 @@ sample<sub>shape</sub> = batch<sub>shape</sub> + support<sub>shape</sub>
 </div>
 </div>
 
-<div id="outline-container-orgea6a446" class="outline-3">
-<h3 id="orgea6a446">Using the <code>size</code> argument to create identically distributed random variables</h3>
-<div class="outline-text-3" id="text-orgea6a446">
+<div id="outline-container-orgf5a90ac" class="outline-3">
+<h3 id="orgf5a90ac">Using the <code>size</code> argument to create identically distributed random variables</h3>
+<div class="outline-text-3" id="text-orgf5a90ac">
 <p>
 We also frequently need to define iiid random variables. We could use the previous broadcasting rules to define 3 normally-distributed random variables with mean 0 and variance 1:
 </p>
@@ -489,9 +489,9 @@ In this simple case (no broadcasting), <code>size</code> corresponds to the <i>b
 </div>
 </div>
 
-<div id="outline-container-org5deec16" class="outline-3">
-<h3 id="org5deec16">Broadcasting and the <code>size</code> argument</h3>
-<div class="outline-text-3" id="text-org5deec16">
+<div id="outline-container-orgebf2dfc" class="outline-3">
+<h3 id="orgebf2dfc">Broadcasting and the <code>size</code> argument</h3>
+<div class="outline-text-3" id="text-orgebf2dfc">
 <p>
 The story with the <code>size</code> argument gets more complicated when the <code>RandomVariable</code> operator also needs to broadcast the distribution parameters. But luckily, despite the apparent complexity there is only one simple rule to remember: <i>the <code>size</code> argument to <code>RandomVariable</code> represents the batch shape</i>.
 </p>
@@ -549,7 +549,7 @@ To confirm that <code>size</code> only affects the batch shape, let us give an e
 </pre>
 </div>
 
-<pre class="example" id="org021cfcc">
+<pre class="example" id="orgeecf7fa">
 sample values: [[[0.42615878 0.09794332 0.4758979 ]
   [0.15408529 0.34781447 0.49810024]]
 
@@ -574,9 +574,9 @@ The batch shape is indeed given by <code>np.broadcast_shapes(alpha.shape, size)<
 </div>
 </div>
 
-<div id="outline-container-org85fed7a" class="outline-2">
-<h2 id="org85fed7a">Summary</h2>
-<div class="outline-text-2" id="text-org85fed7a">
+<div id="outline-container-org05655ad" class="outline-2">
+<h2 id="org05655ad">Summary</h2>
+<div class="outline-text-2" id="text-org05655ad">
 <p>
 The shape of random tensors in <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a> consists in the composition of two semantically different pieces:
 </p>
