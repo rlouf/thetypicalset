@@ -3,26 +3,26 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-19 Mon 21:36 -->
+<!-- 2022-12-20 Tue 08:46 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Kaeras</title>
+<title>AeNN</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Kaeras</h1>
+<h1 class="title">AeNN</h1>
 <p>
 Kaeras is a deep-learning API that sits on top of Aesara. It is heavily inspired by <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io">Keras</a>, which used to be built on top of Theano, but now on top of Tensorflow 2.
 </p>
 
-<div id="outline-container-org61a1290" class="outline-2">
-<h2 id="org61a1290">Minimum Viable Project</h2>
-<div class="outline-text-2" id="text-org61a1290">
+<div id="outline-container-org965e8bd" class="outline-2">
+<h2 id="org965e8bd">Inspiration</h2>
+<div class="outline-text-2" id="text-org965e8bd">
 <p>
-A minimum viable library could be to be able to reproduce Keras' documentation' examples. For instance the MNIST convnet:
+A minimum viable library could be to be able to reproduce <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io/">Keras' documentation</a> examples. For instance the MNIST convnet:
 </p>
 
 <div class="org-src-container">
@@ -42,24 +42,158 @@ A minimum viable library could be to be able to reproduce Keras' documentation' 
 </div>
 
 <p>
+This might be a bit too high-level. In particular, I am not a big fan of the activation being a property of layers. <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/google/flax">Flax</a>'s example is nicer (and more modular):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> flax.linen <span style="color: #F0DFAF; font-weight: bold;">as</span> nn
+
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">CNN</span>(nn.Module):
+  <span style="color: #7CB8BB;">@nn.compact</span>
+  <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">__call__</span>(<span style="color: #F0DFAF; font-weight: bold;">self</span>, x):
+    <span style="color: #DFAF8F;">x</span> = nn.Conv(features=32, kernel_size=(3, 3))(x)
+    <span style="color: #DFAF8F;">x</span> = nn.relu(x)
+    <span style="color: #DFAF8F;">x</span> = nn.avg_pool(x, window_shape=(2, 2), strides=(2, 2))
+    <span style="color: #DFAF8F;">x</span> = nn.Conv(features=64, kernel_size=(3, 3))(x)
+    <span style="color: #DFAF8F;">x</span> = nn.relu(x)
+    <span style="color: #DFAF8F;">x</span> = nn.avg_pool(x, window_shape=(2, 2), strides=(2, 2))
+    <span style="color: #DFAF8F;">x</span> = x.reshape((x.shape[0], -1))  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">flatten</span>
+    <span style="color: #DFAF8F;">x</span> = nn.Dense(features=256)(x)
+    <span style="color: #DFAF8F;">x</span> = nn.relu(x)
+    <span style="color: #DFAF8F;">x</span> = nn.Dense(features=10)(x)
+    <span style="color: #DFAF8F;">x</span> = nn.log_softmax(x)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> x
+
+<span style="color: #DFAF8F;">model</span> = CNN()
+<span style="color: #DFAF8F;">batch</span> = jnp.ones((32, 10))
+<span style="color: #DFAF8F;">variables</span> = model.init(jax.random.PRNGKey(0), batch)
+<span style="color: #DFAF8F;">output</span> = model.<span style="color: #DCDCCC; font-weight: bold;">apply</span>(variables, batch)
+</pre>
+</div>
+
+
+<p>
 Which requires the implementation of the following:
 </p>
 
 <ul class="org-ul">
-<li>layers.Dense</li>
-<li>layers.Activation</li>
-<li>layers.BatchNormalization</li>
-<li>layers.Conv2D</li>
-<li>layers.MaxPooling2D</li>
-<li>layers.Dropout</li>
-<li>layers.Flatten</li>
+<li>nn.Dense</li>
+<li>nn.BatchNormalization</li>
+<li>nn.relu</li>
+<li>nn.log<sub>softmax</sub></li>
+<li>nn.avg<sub>pool</sub></li>
 </ul>
+
+<p>
+And we could also aim to having the following API:
+</p>
+
+<p>
+Or a simple MLP example, still from the Flax documentation:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> Sequence
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aenn.nn <span style="color: #F0DFAF; font-weight: bold;">as</span> nn
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">MLP</span>(Layer):
+    features: Sequence[<span style="color: #DCDCCC; font-weight: bold;">int</span>]
+
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">__call__</span>(<span style="color: #F0DFAF; font-weight: bold;">self</span>, x):
+        <span style="color: #F0DFAF; font-weight: bold;">for</span> feature <span style="color: #F0DFAF; font-weight: bold;">in</span> features[:-1]:
+            <span style="color: #DFAF8F;">x</span> = nn.Dense(feature)(x)
+            <span style="color: #DFAF8F;">x</span> = nn.relu(x)
+        <span style="color: #DFAF8F;">x</span> = nn.Dense(features[-1])(x)
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> x
+</pre>
+</div>
+
+<p>
+We should be using <code>OpFromGraph</code> instead of storing extra information in a class:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> Optional
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">from</span> aesara.graph.<span style="color: #DCDCCC; font-weight: bold;">compile</span> <span style="color: #F0DFAF; font-weight: bold;">import</span> OpFromGraph
+<span style="color: #F0DFAF; font-weight: bold;">from</span> aesara.tensor.var <span style="color: #F0DFAF; font-weight: bold;">import</span> TensorVariable
+
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">relu</span>(x):
+    <span style="color: #9FC59F;">"""Rectified linear unit activation function.</span>
+
+<span style="color: #9FC59F;">     JAX's documentation for `jax.nn.relu`:</span>
+
+<span style="color: #9FC59F;">    .. math::</span>
+
+<span style="color: #9FC59F;">        \operatorname{relu}(x) = \max(0, x)</span>
+
+<span style="color: #9FC59F;">     Except the gradient is:</span>
+
+<span style="color: #9FC59F;">     .. math::</span>
+
+<span style="color: #9FC59F;">        \nabla \operatorname{relu}(0) = 0</span>
+
+<span style="color: #9FC59F;">    So this needs to be an `OpFromGraph` with a custom gradient. If we ever use</span>
+<span style="color: #9FC59F;">    implicit gradients we can always use `jax.grad` directly on this as</span>
+<span style="color: #9FC59F;">    `jax.nn.relu` registers a custom gradient for this function.</span>
+
+<span style="color: #9FC59F;">    """</span>
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> at.<span style="color: #DCDCCC; font-weight: bold;">max</span>(0, x)
+
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">Layer</span>(OpFromGraph):
+    <span style="color: #9FC59F;">"""Represents a Layer.</span>
+
+<span style="color: #9FC59F;">    The difference between layers and transformations is that the former</span>
+<span style="color: #9FC59F;">    hold (potentially trainable) parameter values.</span>
+<span style="color: #9FC59F;">    """</span>
+
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">DenseLayer</span>(Layer):
+    <span style="color: #9FC59F;">"""`Op` that represents a Dense Layer"""</span>
+
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">Dense</span>(Op):
+    features: <span style="color: #DCDCCC; font-weight: bold;">int</span>
+    b: <span style="color: #DFAF8F;">Optional</span>[TensorVariable] = <span style="color: #BFEBBF;">None</span>
+    W: <span style="color: #DFAF8F;">Optional</span>[TensorVariable] = <span style="color: #BFEBBF;">None</span>
+
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">__call__</span>(<span style="color: #F0DFAF; font-weight: bold;">self</span>, x):
+
+        <span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #F0DFAF; font-weight: bold;">self</span>.W <span style="color: #F0DFAF; font-weight: bold;">is</span> <span style="color: #BFEBBF;">None</span>:
+            <span style="color: #F0DFAF; font-weight: bold;">self</span>.W = at.random.uniform(size=(x.shape[0], features))
+
+        <span style="color: #DFAF8F;">output</span> = at.dot(x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W)
+        <span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #F0DFAF; font-weight: bold;">self</span>.b <span style="color: #F0DFAF; font-weight: bold;">is</span> <span style="color: #F0DFAF; font-weight: bold;">not</span> <span style="color: #BFEBBF;">None</span>:
+            <span style="color: #DFAF8F;">output</span> = output + <span style="color: #F0DFAF; font-weight: bold;">self</span>.b
+
+        <span style="color: #DFAF8F;">dense</span> = DenseLayer(output, [x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W, <span style="color: #F0DFAF; font-weight: bold;">self</span>.b])
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> dense(parameters, x)
+</pre>
+</div>
+
+<p>
+Using graph types is nice because:
+</p>
+<ol class="org-ol">
+<li>No need to do anything fancy to retrieve the parameter. They are in the graph and all we need to do is walk through the graph and recover the inputs of nodes whose <code>Op</code> is a <code>Layer</code>.</li>
+<li>We can distinguish between trainable, normalizable parameters using types as well.</li>
+<li>Pretty-printing the graphs; network structure is directly visible with <code>aesara.dprint</code></li>
+<li>Graph manipulation.</li>
+</ol>
+
+<p>
+The <code>Module</code> class needs
+</p>
 </div>
 </div>
 
-<div id="outline-container-org1cbaf32" class="outline-2">
-<h2 id="org1cbaf32">Graph rewriting</h2>
-<div class="outline-text-2" id="text-org1cbaf32">
+<div id="outline-container-orgc42b7d0" class="outline-2">
+<h2 id="orgc42b7d0">Graph rewriting</h2>
+<div class="outline-text-2" id="text-orgc42b7d0">
 <p>
 We can perform rewriting at the layer semantic level. For instance, the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/uwplse/tensat">TENSAT</a> library adds equality saturation to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jiazhihao/TASO">TASO</a> library. There are a list of rewrites that operate on a so-called <i>layer algebra</i>. Here are a few examples:
 </p>
@@ -74,9 +208,9 @@ relu(input_8)==conv2d(1,1,0,2,input_8,Iconv(3,3))
 </div>
 </div>
 
-<div id="outline-container-orge71c63e" class="outline-2">
-<h2 id="orge71c63e">Links to this note</h2>
-<div class="outline-text-2" id="text-orge71c63e">
+<div id="outline-container-org7c6280c" class="outline-2">
+<h2 id="org7c6280c">Links to this note</h2>
+<div class="outline-text-2" id="text-org7c6280c">
 <ul class="org-ul">
 <li><a href="./20220823090532-ops.html">Ops</a></li>
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
