@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-20 Tue 14:17 -->
+<!-- 2022-12-20 Tue 14:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cyclical SGLD in Blackjax</title>
@@ -47,9 +47,9 @@
 <div id="content" class="content">
 <h1 class="title">Cyclical SGLD in Blackjax</h1>
 
-<div id="outline-container-org79ba582" class="outline-2">
-<h2 id="org79ba582">Cyclical schedule</h2>
-<div class="outline-text-2" id="text-org79ba582">
+<div id="outline-container-orgbc64559" class="outline-2">
+<h2 id="orgbc64559">Cyclical schedule</h2>
+<div class="outline-text-2" id="text-orgbc64559">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
 
@@ -120,9 +120,9 @@ filename
 </div>
 </div>
 
-<div id="outline-container-org2a03972" class="outline-2">
-<h2 id="org2a03972">Cyclical SGLD step</h2>
-<div class="outline-text-2" id="text-org2a03972">
+<div id="outline-container-orgf974014" class="outline-2">
+<h2 id="orgf974014">Cyclical SGLD step</h2>
+<div class="outline-text-2" id="text-orgf974014">
 <p>
 We will reproduce one of the paper's example, sampling from an array of 25 gaussians.
 </p>
@@ -191,7 +191,7 @@ filename
 </div>
 
 
-<div id="org610be78" class="figure">
+<div id="org6c3fd6b" class="figure">
 <p><img src="img/cyclical_sgld_array_gaussians.png" alt="cyclical_sgld_array_gaussians.png" width="100%" />
 </p>
 </div>
@@ -202,9 +202,9 @@ filename
 </div>
 </div>
 
-<div id="outline-container-org5bd440a" class="outline-2">
-<h2 id="org5bd440a">Sample from the mixture of gaussians</h2>
-<div class="outline-text-2" id="text-org5bd440a">
+<div id="outline-container-orgee6fc34" class="outline-2">
+<h2 id="orgee6fc34">Sample from the mixture of gaussians</h2>
+<div class="outline-text-2" id="text-orgee6fc34">
 <p>
 The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
 </p>
@@ -266,9 +266,9 @@ The sampling kernel must be able to alternate between sampling and optimization 
 </div>
 </div>
 
-<div id="outline-container-org6fddc42" class="outline-2">
-<h2 id="org6fddc42">SGLD</h2>
-<div class="outline-text-2" id="text-org6fddc42">
+<div id="outline-container-orgb5abf24" class="outline-2">
+<h2 id="orgb5abf24">SGLD</h2>
+<div class="outline-text-2" id="text-orgb5abf24">
 <p>
 Let's start with SGLD:
 </p>
@@ -301,30 +301,18 @@ Let's start with SGLD:
 Let's plot the trajectory:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #DFAF8F;">fig</span> = plt.figure()
-<span style="color: #DFAF8F;">ax</span> = fig.add_subplot(111)
-<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> sgld_samples]
-<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> sgld_samples]
 
-ax.plot(x, y, <span style="color: #CC9393;">'k-'</span>, lw=0.1, alpha=0.5)
-ax.set_xlim([-8, 8])
-ax.set_ylim([-8, 8])
-
-plt.axis(<span style="color: #CC9393;">'off'</span>)
-plt.title(<span style="color: #CC9393;">"Trajectory with SGLD"</span>)
-<span style="color: #DFAF8F;">filename</span> =<span style="color: #CC9393;">"img/cyclical_sgld_sgld_samples.png"</span>
-plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
-filename
-</pre>
+<div id="orgfb94f65" class="figure">
+<p><img src="img/cyclical_sgld_sgld_samples.png" alt="cyclical_sgld_sgld_samples.png" width="70%" />
+</p>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-orgfbf9bcc" class="outline-2">
-<h2 id="orgfbf9bcc">Cyclical SGLD</h2>
-<div class="outline-text-2" id="text-orgfbf9bcc">
+<div id="outline-container-org0a3383e" class="outline-2">
+<h2 id="org0a3383e">Cyclical SGLD</h2>
+<div class="outline-text-2" id="text-org0a3383e">
 <p>
 Now let's sample using Cyclical SGLD.
 </p>
@@ -363,22 +351,10 @@ Now let's sample using Cyclical SGLD.
 It looks from the trajectory that the distribution is better explored:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #DFAF8F;">fig</span> = plt.figure()
-<span style="color: #DFAF8F;">ax</span> = fig.add_subplot(111)
-<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> cyclical_samples]
-<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> cyclical_samples]
 
-ax.plot(x, y, <span style="color: #CC9393;">'k-'</span>, lw=0.1, alpha=0.5)
-ax.set_xlim([-8, 8])
-ax.set_ylim([-8, 8])
-
-plt.axis(<span style="color: #CC9393;">'off'</span>)
-plt.title(<span style="color: #CC9393;">"Trajectory with Cyclical SGLD"</span>)
-<span style="color: #DFAF8F;">filename</span> =<span style="color: #CC9393;">"img/cyclical_sgld_samples.png"</span>
-plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
-filename
-</pre>
+<div id="org68e45f2" class="figure">
+<p><img src="img/cyclical_sgld_samples.png" alt="cyclical_sgld_samples.png" width="70%" />
+</p>
 </div>
 
 <p>
@@ -416,8 +392,8 @@ filename
 </div>
 
 
-<div id="org25caa15" class="figure">
-<p><img src="img/cyclical_sgld_distribution.png" alt="cyclical_sgld_distribution.png" width="100%" />
+<div id="org61c76d4" class="figure">
+<p><img src="img/cyclical_sgld_distribution.png" alt="cyclical_sgld_distribution.png" width="70%" />
 </p>
 </div>
 </div>
