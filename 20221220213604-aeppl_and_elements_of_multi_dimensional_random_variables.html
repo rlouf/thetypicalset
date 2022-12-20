@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-12-20 Tue 21:09 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AePPL and elements of multi-dimensional random variables</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">AePPL and elements of multi-dimensional random variables</h1>
+<p>
+See <a target='_blank' rel='noopener noreferrer' class='external' href="https://cdn.discordapp.com/attachments/894592276184043570/1054454175502704751/doucet_simulationconditionalgaussian.pdf">these notes</a>. With AePPL/AeMCMC one should be able to condition on <i>some</i> components of a multivariate distribution:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">mu</span> = at.vector(<span style="color: #CC9393;">"mu"</span>)
+<span style="color: #DFAF8F;">sigma</span> = at.matrix(<span style="color: #CC9393;">"sigma"</span>)
+<span style="color: #DFAF8F;">idx</span> = at.iscalar(<span style="color: #CC9393;">"i"</span>)
+<span style="color: #DFAF8F;">X_rv</span> = at.random.multivariate_normal(mu, sigma)
+
+<span style="color: #DFAF8F;">Z_rv</span> = X_rv[:idx]
+<span style="color: #DFAF8F;">Y_rv</span> = X_rv[idx:]
+
+logprob, (z_vv,) = aeppl.joint_logprob(Z_rv, realized={Y_rv: y_obs})
+</pre>
+</div>
+
+<div id="outline-container-org76eac62" class="outline-2">
+<h2 id="org76eac62">Links to this note</h2>
+<div class="outline-text-2" id="text-org76eac62">
+<ul class="org-ul">
+<li><a href="./20220824141859-aeppl.html">AePPL</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

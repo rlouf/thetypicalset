@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-12-20 Tue 21:09 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AePPL and convolutions</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">AePPL and convolutions</h1>
+<p>
+What to do when the sum has no closed-form posterior?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">x_rv</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">y_rv</span> = srng.lognormal(0, 1)
+<span style="color: #DFAF8F;">z</span> = x_rv + y_rv
+
+logprob, (x_vv, z_vv) = aeppl.joint_logprob(x_rv, z)
+</pre>
+</div>
+
+<p>
+In this case we should be able to compute the density by binding \(x_{vv}\) to the density of \(x_rv\), and binding \(z_{vv} - x_{vv}\) to the density of \(y_{rv}\).
+</p>
+
+<p>
+Now slightly more complicated. Is this defined without \(x_{rv}\) or \(y_{rv}\) being stochastic? (I don't think so). And if it is not, then how do we proceed about tying the values taken by \(x_{rv}\) and \(y_{rv}\) together?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">mu_rv</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">sigma_rv</span> = srng.halfcauchy(1)
+
+<span style="color: #DFAF8F;">x_rv</span> = srng.normal(mu_rv, 1)
+<span style="color: #DFAF8F;">y_rv</span> = srng.lognormal(0, sigma_rv)
+
+<span style="color: #DFAF8F;">z</span> = x_rv + y_rv
+
+logprob, (mu_vv, sigma_vv, z_vv) = aeppl.joint_logprob(x_rv, z)
+</pre>
+</div>
+
+<p>
+Finally the following example:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">a</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">b</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">c</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">d</span> = srng.normal(0, 1)
+
+<span style="color: #DFAF8F;">X_rv</span> = at.uniform(a, b)
+<span style="color: #DFAF8F;">Y_rv</span> = at.uniform(c, d)
+<span style="color: #DFAF8F;">Z_rv</span> = X_rv + Y_rv
+
+<span style="color: #DFAF8F;">logprob</span>, <span style="color: #DFAF8F;">value_variables</span> = aeppl.joint_logprob(a, b, c, d, Z_rv)
+</pre>
+</div>
+
+<p>
+In this case \(Z\)'s density has a closed-form expression; \(Z_{rv}\) has a <a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/Trapezoidal_distribution">trapezoidal distribution</a>. So we should be able to replace this sum with this distribution directly.
+</p>
+
+<p>
+<a target='_blank' rel='noopener noreferrer' class='external' href="https://en.wikipedia.org/wiki/List_of_convolutions_of_probability_distributions">A list</a> of cases where the convolution of two or more random variables has a closed-form solutions, or rather is a known measure, is available on Wikipedia.
+</p>
+
+<div id="outline-container-orgd1a37cc" class="outline-2">
+<h2 id="orgd1a37cc">Links to this note</h2>
+<div class="outline-text-2" id="text-orgd1a37cc">
+<ul class="org-ul">
+<li><a href="./20220824141859-aeppl.html">AePPL</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

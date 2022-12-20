@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-20 Tue 19:52 -->
+<!-- 2022-12-20 Tue 21:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cyclical SGLD in Blackjax</title>
@@ -47,9 +47,9 @@
 <div id="content" class="content">
 <h1 class="title">Cyclical SGLD in Blackjax</h1>
 
-<div id="outline-container-org5566976" class="outline-2">
-<h2 id="org5566976">Cyclical schedule</h2>
-<div class="outline-text-2" id="text-org5566976">
+<div id="outline-container-orged1487e" class="outline-2">
+<h2 id="orged1487e">Cyclical schedule</h2>
+<div class="outline-text-2" id="text-orged1487e">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
 
@@ -86,16 +86,16 @@ Let us visualize the schedule for 200k training steps divided in 4 cycles. At ea
 </p>
 
 
-<div id="org9060c4f" class="figure">
+<div id="orgf75b129" class="figure">
 <p><img src="img/cyclical_sgld_schedule.png" alt="cyclical_sgld_schedule.png" width="100%" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org8aa746e" class="outline-2">
-<h2 id="org8aa746e">Cyclical SGLD step</h2>
-<div class="outline-text-2" id="text-org8aa746e">
+<div id="outline-container-org64b4109" class="outline-2">
+<h2 id="org64b4109">Cyclical SGLD step</h2>
+<div class="outline-text-2" id="text-org64b4109">
 <p>
 We will reproduce one of the paper's example, sampling from an array of 25 gaussians.
 </p>
@@ -164,7 +164,7 @@ filename
 </div>
 
 
-<div id="org5a811cd" class="figure">
+<div id="org3331016" class="figure">
 <p><img src="img/cyclical_sgld_array_gaussians.png" alt="cyclical_sgld_array_gaussians.png" width="100%" />
 </p>
 </div>
@@ -175,9 +175,9 @@ filename
 </div>
 </div>
 
-<div id="outline-container-org5299bc5" class="outline-2">
-<h2 id="org5299bc5">Sample from the mixture of gaussians</h2>
-<div class="outline-text-2" id="text-org5299bc5">
+<div id="outline-container-org089105c" class="outline-2">
+<h2 id="org089105c">Sample from the mixture of gaussians</h2>
+<div class="outline-text-2" id="text-org089105c">
 <p>
 The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
 </p>
@@ -239,9 +239,9 @@ The sampling kernel must be able to alternate between sampling and optimization 
 </div>
 </div>
 
-<div id="outline-container-org630a503" class="outline-2">
-<h2 id="org630a503">SGLD</h2>
-<div class="outline-text-2" id="text-org630a503">
+<div id="outline-container-orge31869b" class="outline-2">
+<h2 id="orge31869b">SGLD</h2>
+<div class="outline-text-2" id="text-orge31869b">
 <p>
 Let's start with SGLD:
 </p>
@@ -275,7 +275,7 @@ Let's plot the trajectory:
 </p>
 
 
-<div id="orga75eb92" class="figure">
+<div id="org2c66e3a" class="figure">
 <p><img src="img/cyclical_sgld_sgld_samples.png" alt="cyclical_sgld_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -283,9 +283,9 @@ Let's plot the trajectory:
 </div>
 
 
-<div id="outline-container-org558372a" class="outline-2">
-<h2 id="org558372a">Cyclical SGLD</h2>
-<div class="outline-text-2" id="text-org558372a">
+<div id="outline-container-orgacec721" class="outline-2">
+<h2 id="orgacec721">Cyclical SGLD</h2>
+<div class="outline-text-2" id="text-orgacec721">
 <p>
 Now let's sample using Cyclical SGLD.
 </p>
@@ -325,7 +325,7 @@ It looks from the trajectory that the distribution is better explored:
 </p>
 
 
-<div id="org0752ce2" class="figure">
+<div id="orge51c3c4" class="figure">
 <p><img src="img/cyclical_sgld_samples.png" alt="cyclical_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -365,7 +365,7 @@ filename
 </div>
 
 
-<div id="org221b0aa" class="figure">
+<div id="org0992127" class="figure">
 <p><img src="img/cyclical_sgld_distribution.png" alt="cyclical_sgld_distribution.png" width="70%" />
 </p>
 </div>
