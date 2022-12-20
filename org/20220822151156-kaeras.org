@@ -4,7 +4,7 @@
 #+title: AeNN
 
 
-Kaeras is a deep-learning API that sits on top of Aesara. It is heavily inspired by [[https://keras.io][Keras]], which used to be built on top of Theano, but now on top of Tensorflow 2.
+AeNN would be a deep-learning API that sits on top of Aesara. It is inspired by [[https://keras.io][Keras]] (which used to be built on top of Theano), Flax (NN library built with JAX), and of course [[https://github.com/Lasagne/Lasagne][Lasagne]]. It would make full use of Aesara's graph and rewrite capabilities.
 
 * Inspiration
 
@@ -25,7 +25,7 @@ model = keras.Sequential(
 )
 #+end_src
 
-This might be a bit too high-level. In particular, I am not a big fan of the activation being a property of layers. [[https://github.com/google/flax][Flax]]'s example is nicer (and more modular):
+I find Keras' API to be sometimes too high-level. In particular, I am not a big fan of the activation being a property of layers, and passed as a keyword argument. Activation functions are just functions, and we should allow users to use custom operators. [[https://github.com/google/flax][Flax]]'s API is more on point with that respect. I also like the =flax.linen.Module= interface to define blocks a lot:
 
 #+begin_src python
 import flax.linen as nn
@@ -53,26 +53,17 @@ variables = model.init(jax.random.PRNGKey(0), batch)
 output = model.apply(variables, batch)
 #+end_src
 
+* Building a simple MLP model
 
-Which requires the implementation of the following:
-
-- nn.Dense
-- nn.BatchNormalization
-- nn.relu
-- nn.log_softmax
-- nn.avg_pool
-
-And we could also aim to having the following API:
-
-Or a simple MLP example, still from the Flax documentation:
+Let's take and try to reproduce a simpler example, the MLP example taken from the Flax documentation:
 
 #+begin_src python
 from typing import Sequence
-import aenn.nn as nn
+import flax.linen as nn
 
-class MLP(Layer):
+class MLP(nn.Module):
     features: Sequence[int]
-
+    @nn.compact
     def __call__(self, x):
         for feature in features[:-1]:
             x = nn.Dense(feature)(x)
@@ -81,39 +72,41 @@ class MLP(Layer):
         return x
 #+end_src
 
-We should be using =OpFromGraph= instead of storing extra information in a class:
+** Activation Function
+
+The first approach to implementing the activation function $\operatorname{Relu}$ is to define it as a function:
 
 #+begin_src python
-from typing import Optional
-
 import aesara.tensor as at
-from aesara.graph.compile import OpFromGraph
-from aesara.tensor.var import TensorVariable
-
 
 def relu(x):
     """Rectified linear unit activation function.
-
-     JAX's documentation for `jax.nn.relu`:
 
     .. math::
 
         \operatorname{relu}(x) = \max(0, x)
 
-     Except the gradient is:
-
-     .. math::
-
-        \nabla \operatorname{relu}(0) = 0
-
-    So this needs to be an `OpFromGraph` with a custom gradient. If we ever use
-    implicit gradients we can always use `jax.grad` directly on this as
-    `jax.nn.relu` registers a custom gradient for this function.
-
     """
     return at.max(0, x)
+#+end_src
 
+However, we need the gradient at $0$ to be:
 
+$$
+\nabla \operatorname{Relu}(0) = 0
+$$
+
+So =relu= will need to be implemented as an =OpFromGraph=, with a custom gradient. The upside of using =OpFromGraph= in this case is that the =Op=\s it builds are directly identifiable in the graph.
+
+** Dense layer
+
+Layers are best implemented as =OpFromGraph=s for several reasons:
+
+1. We can target layers with rewrites; This can be useful for AutoML, or optimization at the mathematical level.
+2. We can retrieve the layer's parameters by walking the graph and looking at the inputs of =Apply= nodes whose =Op= is of =Layer= type. We can even add type parameters to indicate which are trainable, regularizable, etc.
+3. =aesara.dprint= shows the graph structure directly.
+
+#+begin_src python
 class Layer(OpFromGraph):
     """Represents a Layer.
 
@@ -144,13 +137,13 @@ class Dense(Op):
         return dense(parameters, x)
 #+end_src
 
-Using graph types is nice because:
-1. No need to do anything fancy to retrieve the parameter. They are in the graph and all we need to do is walk through the graph and recover the inputs of nodes whose =Op= is a =Layer=.
-2. We can distinguish between trainable, normalizable parameters using types as well.
-3. Pretty-printing the graphs; network structure is directly visible with =aesara.dprint=
-4. Graph manipulation.
+#+RESULTS:
 
-The =Module= class needs
+** Module
+
+** Training
+
+We need to be able to call the model with =model(batch, parameters)=, then compute the loss, then update the parameter values using an optimizer.
 
 * Graph rewriting
 
