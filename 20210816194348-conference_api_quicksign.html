@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-21 Wed 08:53 -->
+<!-- 2022-12-21 Wed 08:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>API design</title>
@@ -15,9 +15,9 @@
 <div id="content" class="content">
 <h1 class="title">API design</h1>
 
-<div id="outline-container-org6c3c60e" class="outline-2">
-<h2 id="org6c3c60e">A little friction in your design is good.</h2>
-<div class="outline-text-2" id="text-org6c3c60e">
+<div id="outline-container-org00f095c" class="outline-2">
+<h2 id="org00f095c">A little friction in your design is good.</h2>
+<div class="outline-text-2" id="text-org00f095c">
 <p>
 In python there are two ways to enforce this. First with keyword-only arguments:
 </p>
@@ -48,18 +48,18 @@ Then with namedtuples or dataclasses:
 </div>
 </div>
 
-<div id="outline-container-orgac56f22" class="outline-2">
-<h2 id="orgac56f22">Avoid **kwargs at all cost</h2>
-<div class="outline-text-2" id="text-orgac56f22">
+<div id="outline-container-org13c0524" class="outline-2">
+<h2 id="org13c0524">Avoid **kwargs at all cost</h2>
+<div class="outline-text-2" id="text-org13c0524">
 <p>
 They are hard to document. Use dataclasses or namedtuples instead (similar to the Go way of doing things). This also has the advantage of putting the emphasis on your data structure, the interface with the outside world. A way to control the data (can add validation when initializing a dataclass for instance)
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgff8b552" class="outline-2">
-<h2 id="orgff8b552">Difference between a framework and a library</h2>
-<div class="outline-text-2" id="text-orgff8b552">
+<div id="outline-container-orgbf2d98c" class="outline-2">
+<h2 id="orgbf2d98c">Difference between a framework and a library</h2>
+<div class="outline-text-2" id="text-orgbf2d98c">
 <ul class="org-ul">
 <li>Designed to do specific things</li>
 <li>Composes with other libraries (composability)</li>
@@ -69,57 +69,57 @@ They are hard to document. Use dataclasses or namedtuples instead (similar to th
 </div>
 </div>
 
-<div id="outline-container-org627125a" class="outline-2">
-<h2 id="org627125a">Build the conceptually right thing first, the abstraction later</h2>
+<div id="outline-container-orgab82ce7" class="outline-2">
+<h2 id="orgab82ce7">Build the conceptually right thing first, the abstraction later</h2>
 </div>
-<div id="outline-container-orgff28891" class="outline-2">
-<h2 id="orgff28891">Naming is 90% of the work</h2>
-<div class="outline-text-2" id="text-orgff28891">
+<div id="outline-container-org6c180ab" class="outline-2">
+<h2 id="org6c180ab">Naming is 90% of the work</h2>
+<div class="outline-text-2" id="text-org6c180ab">
 <p>
 Take it seriously.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1a035c1" class="outline-2">
-<h2 id="org1a035c1">Always be thinking "How much documentation am I going to have to write for this?"</h2>
-<div class="outline-text-2" id="text-org1a035c1">
+<div id="outline-container-org3e8d5cc" class="outline-2">
+<h2 id="org3e8d5cc">Always be thinking "How much documentation am I going to have to write for this?"</h2>
+<div class="outline-text-2" id="text-org3e8d5cc">
 <p>
 This is linked to naming. Ideally function name and name of the arguments should suffice.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1ee6504" class="outline-2">
-<h2 id="org1ee6504">Writig the function is only 50% of the work</h2>
-<div class="outline-text-2" id="text-org1ee6504">
+<div id="outline-container-org6c53eb0" class="outline-2">
+<h2 id="org6c53eb0">Writig the function is only 50% of the work</h2>
+<div class="outline-text-2" id="text-org6c53eb0">
 <p>
 This is junior's most frequent error. Once the code has been written they consider their job done. But you need to keep re-writing the code until it makes sense to someone else.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orga8f3d98" class="outline-2">
-<h2 id="orga8f3d98">Programming is <i>writing</i></h2>
-<div class="outline-text-2" id="text-orga8f3d98">
+<div id="outline-container-org7d816a1" class="outline-2">
+<h2 id="org7d816a1">Programming is <i>writing</i></h2>
+<div class="outline-text-2" id="text-org7d816a1">
 <p>
 Hunmanities students make better programmers. Stop thinking of programming as a scientific discipline (I mean it slightly is for machine learning). You are <i>writing</i>.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org2160b4c" class="outline-2">
-<h2 id="org2160b4c">But mostly <i>reading</i></h2>
-<div class="outline-text-2" id="text-org2160b4c">
+<div id="outline-container-org962cac9" class="outline-2">
+<h2 id="org962cac9">But mostly <i>reading</i></h2>
+<div class="outline-text-2" id="text-org962cac9">
 <p>
 Code is read more often than written.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orge9f92d2" class="outline-2">
-<h2 id="orge9f92d2">OOP is usually the path to broken abstractions</h2>
-<div class="outline-text-2" id="text-orge9f92d2">
+<div id="outline-container-org23585b3" class="outline-2">
+<h2 id="org23585b3">OOP is usually the path to broken abstractions</h2>
+<div class="outline-text-2" id="text-org23585b3">
 <p>
 When you create objects, you are populating a world. Bad APIs create a fantasy world, a collections of objects that have no bearing on reality.
 </p>
@@ -138,36 +138,36 @@ Sometimes combinations of transformations are useful and we give them a name: a 
 </div>
 </div>
 
-<div id="outline-container-org9ea5b2f" class="outline-2">
-<h2 id="org9ea5b2f">What are you preventing your users from doing?</h2>
-<div class="outline-text-2" id="text-org9ea5b2f">
+<div id="outline-container-orgfdba101" class="outline-2">
+<h2 id="orgfdba101">What are you preventing your users from doing?</h2>
+<div class="outline-text-2" id="text-orgfdba101">
 <p>
 We are often thinking in terms of what our API allows users to do, less in terms about what it prevents them from doing. In some cases creating a sandbox is good (framework), but sometimes it is frustrating (library).
 </p>
 </div>
 </div>
-<div id="outline-container-org0245b26" class="outline-2">
-<h2 id="org0245b26">You need to have trap doors, way to escape your leaky abstractions</h2>
-<div class="outline-text-2" id="text-org0245b26">
+<div id="outline-container-org801e26e" class="outline-2">
+<h2 id="org801e26e">You need to have trap doors, way to escape your leaky abstractions</h2>
+<div class="outline-text-2" id="text-org801e26e">
 <p>
 The Julia language is great with that. You can always act on the abstraction layer below.
 </p>
 </div>
 </div>
-<div id="outline-container-orgf3170a8" class="outline-2">
-<h2 id="orgf3170a8">A model is a combination of arrays and operations on arrays.</h2>
-<div class="outline-text-2" id="text-orgf3170a8">
+<div id="outline-container-org8c07d83" class="outline-2">
+<h2 id="org8c07d83">A model is a combination of arrays and operations on arrays.</h2>
+<div class="outline-text-2" id="text-org8c07d83">
 <p>
 Write that first.
 </p>
 </div>
 </div>
-<div id="outline-container-org5e9e337" class="outline-2">
-<h2 id="org5e9e337">API = abstraction. All abstractions suck.</h2>
+<div id="outline-container-org94f1248" class="outline-2">
+<h2 id="org94f1248">API = abstraction. All abstractions suck.</h2>
 </div>
-<div id="outline-container-org051bff0" class="outline-2">
-<h2 id="org051bff0">Naming</h2>
-<div class="outline-text-2" id="text-org051bff0">
+<div id="outline-container-org50a7d61" class="outline-2">
+<h2 id="org50a7d61">Naming</h2>
+<div class="outline-text-2" id="text-org50a7d61">
 <p>
 There is a joke in CS that naming is the hardest thing in programming along with cache invalidation. Except it is not a joke. Naming is hard, and good names go a loooong way.
 </p>
@@ -178,9 +178,9 @@ Why do poiticians use vague terms? Allow people to project whatever people want 
 </div>
 </div>
 
-<div id="outline-container-org8c3bc02" class="outline-2">
-<h2 id="org8c3bc02">Favorite APIs</h2>
-<div class="outline-text-2" id="text-org8c3bc02">
+<div id="outline-container-orgbb56ba4" class="outline-2">
+<h2 id="orgbb56ba4">Favorite APIs</h2>
+<div class="outline-text-2" id="text-orgbb56ba4">
 <ul class="org-ul">
 <li><code>numpy</code>, I rarely have any surprises with functions I discover for the first time;</li>
 <li><code>schedule</code></li>
@@ -189,15 +189,15 @@ Why do poiticians use vague terms? Allow people to project whatever people want 
 </div>
 </div>
 
-<div id="outline-container-org6514004" class="outline-2">
-<h2 id="org6514004">Choose COMPOSITION OVER CONFIGURATION</h2>
+<div id="outline-container-org83dc810" class="outline-2">
+<h2 id="org83dc810">Choose COMPOSITION OVER CONFIGURATION</h2>
 </div>
-<div id="outline-container-org0b98135" class="outline-2">
-<h2 id="org0b98135">Interchangeable elements should have the same signature</h2>
+<div id="outline-container-org4429852" class="outline-2">
+<h2 id="org4429852">Interchangeable elements should have the same signature</h2>
 </div>
-<div id="outline-container-org5969e0d" class="outline-2">
-<h2 id="org5969e0d">Please do not reinvent the wheel!</h2>
-<div class="outline-text-2" id="text-org5969e0d">
+<div id="outline-container-orgfb84f49" class="outline-2">
+<h2 id="orgfb84f49">Please do not reinvent the wheel!</h2>
+<div class="outline-text-2" id="text-orgfb84f49">
 <p>
 In doubt do like numpy. Example of theano is partially hard to use because it uses different naming and type casting conventions.
 </p>
@@ -228,13 +228,13 @@ JAX feels like the natural extension of numpy to which it adds:
 </div>
 </div>
 
-<div id="outline-container-org40405e9" class="outline-2">
-<h2 id="org40405e9">Modular internals may not make a difference to end users, but it does to maintainer. Do not only think about the user!</h2>
+<div id="outline-container-org4f42cba" class="outline-2">
+<h2 id="org4f42cba">Modular internals may not make a difference to end users, but it does to maintainer. Do not only think about the user!</h2>
 </div>
 
-<div id="outline-container-orgb99224f" class="outline-2">
-<h2 id="orgb99224f">Links to this note</h2>
-<div class="outline-text-2" id="text-orgb99224f">
+<div id="outline-container-org9b8254c" class="outline-2">
+<h2 id="org9b8254c">Links to this note</h2>
+<div class="outline-text-2" id="text-org9b8254c">
 <ul class="org-ul">
 <li><a href="./inbox.html">Writing inbox</a></li>
 </ul>
