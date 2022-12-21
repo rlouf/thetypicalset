@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-21 Wed 19:05 -->
+<!-- 2022-12-21 Wed 21:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AeMCMC</title>
@@ -18,9 +18,46 @@
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aemcmc">https://github.com/aesara-devs/aemcmc</a>
 </p>
 
-<div id="outline-container-orgff19c77" class="outline-2">
-<h2 id="orgff19c77">Rewrites on the <code>logprob</code></h2>
-<div class="outline-text-2" id="text-orgff19c77">
+<p>
+Bases on the intermediate representation built by <a href="20220824141859-aeppl.html#ID-e18d689a-392a-407a-941a-f0ad2d2dc43e">AePPL</a>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aemcmc
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">X</span> = at.matrix(<span style="color: #CC9393;">"X"</span>)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Horseshoe prior for `beta_rv`</span>
+<span style="color: #DFAF8F;">tau_rv</span> = srng.halfcauchy(0, 1, name=<span style="color: #CC9393;">"tau"</span>)
+<span style="color: #DFAF8F;">lmbda_rv</span> = srng.halfcauchy(0, 1, size=X.shape[1], name=<span style="color: #CC9393;">"lambda"</span>)
+<span style="color: #DFAF8F;">beta_rv</span> = srng.normal(0, lmbda_rv * tau_rv, size=X.shape[1], name=<span style="color: #CC9393;">"beta"</span>)
+
+<span style="color: #DFAF8F;">a</span> = at.scalar(<span style="color: #CC9393;">"a"</span>)
+<span style="color: #DFAF8F;">b</span> = at.scalar(<span style="color: #CC9393;">"b"</span>)
+<span style="color: #DFAF8F;">h_rv</span> = srng.gamma(a, b, name=<span style="color: #CC9393;">"h"</span>)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Negative-binomial regression</span>
+<span style="color: #DFAF8F;">eta</span> = X @ beta_rv
+<span style="color: #DFAF8F;">p</span> = at.sigmoid(-eta)
+<span style="color: #DFAF8F;">Y_rv</span> = srng.nbinom(h_rv, p, name=<span style="color: #CC9393;">"Y"</span>)
+
+<span style="color: #DFAF8F;">y_vv</span> = Y_rv.clone()
+<span style="color: #DFAF8F;">y_vv.name</span> = <span style="color: #CC9393;">"y"</span>
+
+<span style="color: #DFAF8F;">sampler</span>, <span style="color: #DFAF8F;">initial_values</span> = aemcmc.construct_sampler({Y_rv: y_vv}, srng)
+
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(sampler.sample_steps[h_rv])
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(sampler.stages)
+</pre>
+</div>
+
+<div id="outline-container-org2ce0d6f" class="outline-2">
+<h2 id="org2ce0d6f">Rewrites on the <code>logprob</code></h2>
+<div class="outline-text-2" id="text-org2ce0d6f">
 <p>
 We've discussed this and it should happen, as some people will have bad geometry that's induced by a big function they're using.
 (see models used by Marcus who wrote the MUSE paper)
@@ -28,18 +65,18 @@ We've discussed this and it should happen, as some people will have bad geometry
 </div>
 </div>
 
-<div id="outline-container-orgc44ee6c" class="outline-2">
-<h2 id="orgc44ee6c">Using copulas</h2>
-<div class="outline-text-2" id="text-orgc44ee6c">
+<div id="outline-container-org939e170" class="outline-2">
+<h2 id="org939e170">Using copulas</h2>
+<div class="outline-text-2" id="text-org939e170">
 <ul class="org-ul">
 <li><a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/pdf/1901.11033.pdf">https://arxiv.org/pdf/1901.11033.pdf</a> that references this paper on copulas: <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.archiv.stochastik.uni-freiburg.de/homepages/rueschendorf/papers/DistributionalTransform-Tartu.pdf">http://www.archiv.stochastik.uni-freiburg.de/homepages/rueschendorf/papers/DistributionalTransform-Tartu.pdf</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org8b17873" class="outline-2">
-<h2 id="org8b17873">Links to this note</h2>
-<div class="outline-text-2" id="text-org8b17873">
+<div id="outline-container-org772231b" class="outline-2">
+<h2 id="org772231b">Links to this note</h2>
+<div class="outline-text-2" id="text-org772231b">
 <ul class="org-ul">
 <li><a href="./20220823093551-rewrites_implement_facts.html">Rewrites implement facts</a></li>
 </ul>

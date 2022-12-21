@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-21 Wed 19:05 -->
+<!-- 2022-12-21 Wed 21:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Find horsehoe priors in an Aesara graph</title>
@@ -68,14 +68,14 @@ In this short post we will try to unify subgraphs of an <a target='_blank' rel='
 </pre>
 </div>
 
-<div id="outline-container-orgf2d9fe6" class="outline-2">
-<h2 id="orgf2d9fe6">Unification on the graphical structure</h2>
-<div class="outline-text-2" id="text-orgf2d9fe6">
+<div id="outline-container-org0854608" class="outline-2">
+<h2 id="org0854608">Unification on the graphical structure</h2>
+<div class="outline-text-2" id="text-org0854608">
 <p>
 Remember that the horseshoe prior is mathematically defined as:
 </p>
 
-<div class="latex" id="orge27064c">
+<div class="latex" id="org7b98f0f">
 \begin{align*}
   \tau &\sim \operatorname{HalfCauchy}(0, 1)\\
   \lambda_{j} &\sim \operatorname{HalfCauchy}(0, 1)\quad j \in \left[1,\dots, k\right]\\
@@ -121,7 +121,7 @@ pprint(s)
 </pre>
 </div>
 
-<pre class="example" id="org0ff4f03">
+<pre class="example" id="org7c1ad0a">
 {~_32: RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FCCBFFD8740&gt;),
  ~_33: TensorConstant{[]},
  ~_34: TensorConstant{11},
@@ -157,9 +157,9 @@ pprint(s)
 </div>
 
 
-<div id="outline-container-org3567e00" class="outline-2">
-<h2 id="org3567e00">Model unification</h2>
-<div class="outline-text-2" id="text-org3567e00">
+<div id="outline-container-org791dd9d" class="outline-2">
+<h2 id="org791dd9d">Model unification</h2>
+<div class="outline-text-2" id="text-org791dd9d">
 <p>
 The pattern we used in the previous section only checks that the <i>graphical structure</i> matches the horseshoe prior, but not that the correct distributions and correct parameters are used. However, we can only identify an aesara graph with the mathematical model if structure <i>and</i> distributions match (or if the pattern represents the normal form of the model under a set of rewrite rules, but we'll keep things simple for now).
 </p>
@@ -235,9 +235,9 @@ Again we check that we can unify the subgraph <code>beta_rv</code>:
 </div>
 
 
-<div id="outline-container-orgdc9e582" class="outline-2">
-<h2 id="orgdc9e582">Walk the graph</h2>
-<div class="outline-text-2" id="text-orgdc9e582">
+<div id="outline-container-org0f73d11" class="outline-2">
+<h2 id="org0f73d11">Walk the graph</h2>
+<div class="outline-text-2" id="text-org0f73d11">
 <p>
 <code>unify_horseshoe</code> will only work if the pattern matches the whole graph. Indeed if we try to unify the horsehoe pattern with <code>Y_rv</code> we get:
 </p>
