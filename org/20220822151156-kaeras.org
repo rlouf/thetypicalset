@@ -183,6 +183,12 @@ DenseLayer{inline=False} [id A]
 [X, W, b]
 #+end_example
 
+Representing layers as =Ops= has several advantages:
+1. More readable =aesara.dprint= outputs;
+2. Parameters can be directly recovered by walking the graphs;
+3. Layers can be targetted by rewrites, which opens possibilities for optimizations and also AutoML (we can replace layers);
+4. We can have layer-specific rules for transpilation. XLA has convolution-specific Ops.
+
 ** TODO Module
 
 How do we define a module in a similar way we defined =MLP= above with Flax? Is there anything special about modules compared to normal layers? Should we attribute a specific =Module= type to them, as opposed to =Layer=? If we consider they're merely a way to define a new layer they should be implemented as =OpFromGraph= as well. In this case we should have a general way to define layers so the code looks like:

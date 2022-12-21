@@ -92,7 +92,9 @@ mu = jnp.array([list(prod) for prod in itertools.product(positions, positions)])
 sigma = 0.03 * jnp.eye(2)
 
 def logprob_fn(x, *_):
-    return lmbda * jsp.special.logsumexp(jax.scipy.stats.multivariate_normal.logpdf(x, mu, sigma))
+    return lmbda * jsp.special.logsumexp(
+        jax.scipy.stats.multivariate_normal.logpdf(x, mu, sigma)
+    )
 
 def sample_fn(rng_key):
     choose_key, sample_key = jax.random.split(rng_key)
@@ -173,7 +175,12 @@ def cyclical_sgld(grad_estimator_fn, loglikelihood_fn):
         opt_state = sgd.init(position)
         return CyclicalSGMCMCState(position, opt_state)
 
-    def step_fn(rng_key, schedule_state: ScheduleState, state: CyclicalSGMCMCState, minibatch: PyTree):
+    def step_fn(
+        rng_key,
+        schedule_state: ScheduleState,
+        state: CyclicalSGMCMCState,
+        minibatch: PyTree
+    ):
         """Cyclical SGLD kernel.
 
         TODO: Organize the inputs to match the SGLD API better.
@@ -181,13 +188,13 @@ def cyclical_sgld(grad_estimator_fn, loglikelihood_fn):
         rng_key
             Key for JAX's pseudo-random number generator.
         schedule_state
-            The current state of the scheduler. Indicates whether the kernel should be sampling
-            or optimizing, and the current step size.
+            The current state of the scheduler. Indicates whether the kernel
+            should be sampling or optimizing, and the current step size.
         state
             The current state of the Cyclical SGLD sampler.
         minibatch
-            Not used in the mixture example, but this is where you would pass batches of data
-            in any real application.
+            Not used in the mixture example, but this is where you would pass
+            batches of data in any real application.
 
         """
 
