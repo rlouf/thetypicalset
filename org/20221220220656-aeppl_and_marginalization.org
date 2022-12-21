@@ -2,3 +2,91 @@
 :ID:       8ab6423e-5ec1-489c-919b-c41b84ee8715
 :END:
 #+title: AePPL and marginalization
+
+In some cases, like for [[id:c40d2cd2-cd16-4e9c-baab-93e368eb3c0e][mixture models]], we are not interested in the posterior distribution of some discrete random variables:
+
+#+begin_src python :results output
+import aeppl
+import aesara
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+x_rv = srng.normal(0, 1, size=(2,), name="X")
+i_rv = srng.bernoulli(0.5, name="I")
+y_rv = x_rv[i_rv]
+
+logprob, (y_vv, i_vv) = aeppl.joint_logprob(y_rv, i_rv)
+
+aesara.dprint(logprob)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Sum{acc_dtype=float64} [id A]
+ |MakeVector{dtype='float64'} [id B]
+   |Sum{acc_dtype=float64} [id C]
+   | |Check{sigma > 0} [id D]
+   |   |Elemwise{sub,no_inplace} [id E]
+   |   | |Elemwise{sub,no_inplace} [id F]
+   |   | | |Elemwise{mul,no_inplace} [id G]
+   |   | | | |TensorConstant{-0.5} [id H]
+   |   | | | |Elemwise{pow,no_inplace} [id I]
+   |   | | |   |Elemwise{true_div,no_inplace} [id J]
+   |   | | |   | |Elemwise{sub,no_inplace} [id K]
+   |   | | |   | | |<TensorType(float64, ())> [id L]
+   |   | | |   | | |TensorConstant{0} [id M]
+   |   | | |   | |TensorConstant{1} [id N]
+   |   | | |   |TensorConstant{2} [id O]
+   |   | | |Elemwise{log,no_inplace} [id P]
+   |   | |   |Elemwise{sqrt,no_inplace} [id Q]
+   |   | |     |TensorConstant{6.283185307179586} [id R]
+   |   | |Elemwise{log,no_inplace} [id S]
+   |   |   |TensorConstant{1} [id N]
+   |   |All [id T]
+   |     |Elemwise{gt,no_inplace} [id U]
+   |       |TensorConstant{1} [id N]
+   |       |TensorConstant{0.0} [id V]
+   |Elemwise{Cast{float64}} [id W]
+     |Sum{acc_dtype=float64} [id X]
+       |Check{0 <= p <= 1} [id Y] 'I_logprob'
+         |Elemwise{switch,no_inplace} [id Z]
+         | |Elemwise{and_,no_inplace} [id BA]
+         | | |Elemwise{le,no_inplace} [id BB]
+         | | | |TensorConstant{0} [id BC]
+         | | | |I_vv [id BD]
+         | | |Elemwise{le,no_inplace} [id BE]
+         | |   |I_vv [id BD]
+         | |   |TensorConstant{1} [id BF]
+         | |Elemwise{switch,no_inplace} [id BG]
+         | | |I_vv [id BD]
+         | | |Elemwise{log,no_inplace} [id BH]
+         | | | |TensorConstant{0.5} [id BI]
+         | | |Elemwise{log,no_inplace} [id BJ]
+         | |   |Elemwise{sub,no_inplace} [id BK]
+         | |     |TensorConstant{1.0} [id BL]
+         | |     |TensorConstant{0.5} [id BI]
+         | |TensorConstant{-inf} [id BM]
+         |All [id BN]
+         | |Elemwise{le,no_inplace} [id BO]
+         |   |TensorConstant{0.0} [id BP]
+         |   |TensorConstant{0.5} [id BI]
+         |All [id BQ]
+           |Elemwise{le,no_inplace} [id BR]
+             |TensorConstant{0.5} [id BI]
+             |TensorConstant{1.0} [id BS]
+#+end_example
+
+Marginalization is an action that is performed on the logprob. The previous model can be written as:
+
+\begin{align*}
+\mathbf{X} &\sim \operatorname{Normal}(0, 1)\\
+I &\sim \operatorname{Bernoulli}(\pi)\\
+Y &= \mathbf{X}[I]
+\end{align*}
+
+And if we write $\operatorname{dnorm(0,1)}$ and $\operatorname{dbern}(\pi)$ the density functions of $\mathbf{X}$ and $I$ respectively, the marginalized joint density $\operatorname{djoint}$ reads as:
+
+$$
+\operatorname{djoint}(x) = \pi \operatorname{dnorm}(0, 1)(x_0) + \left(1 - \pi\right) \operatorname{dnorm}(0, 1)(x_1)
+$$
