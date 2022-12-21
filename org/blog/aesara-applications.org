@@ -18,6 +18,8 @@ First, deep learning frameworks come and go, and it is not uncommon to have to r
 
 But the biggest benefits come from the ability to give layers a /type/ by creating =Op=\s from their Aesara implementation. Having layer types means you can target them with rewrites, and I see two exciting possibilities coming from this.
 
+See [[id:ee2b16f2-0d64-4172-90bb-fa3f6dab3eac][AeNN]] for the current status of my thinking on this topic.
+
 ** AutoML
 
 Tired of always making small changes to your models to get an increase in performance? Aesara can automate that! Implement what you manually do as rewrites (increasing the layer size, adding dropout, etc.) and Aesara will output different versions of your model. This means you will only ever have to touch the model implementation once, but also now you can re-use your rewrites for your next models. You are making cumulative progress instead of having to do the same thing over and over. In addition, Aesara's rewrite system will soon include a form of [[https://arxiv.org/abs/1012.1802][equality saturation]], which means that it will be able to return all the possible models that are defined by your rewrite rules. Now that's /true automation/.

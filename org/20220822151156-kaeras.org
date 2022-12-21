@@ -106,7 +106,14 @@ Layers are best implemented as =OpFromGraph=s for several reasons:
 2. We can retrieve the layer's parameters by walking the graph and looking at the inputs of =Apply= nodes whose =Op= is of =Layer= type. We can even add type parameters to indicate which are trainable, regularizable, etc.
 3. =aesara.dprint= shows the graph structure directly.
 
-#+begin_src python
+#+begin_src python :results output
+from typing import Optional
+
+import aesara
+import aesara.tensor as at
+from aesara.tensor.var import TensorVariable
+from aesara.compile.builders import OpFromGraph
+
 class Layer(OpFromGraph):
     """Represents a Layer.
 
@@ -119,35 +126,91 @@ class DenseLayer(Layer):
     """`Op` that represents a Dense Layer"""
 
 
-class Dense(Op):
-    features: int
-    b: Optional[TensorVariable] = None
-    W: Optional[TensorVariable] = None
+class Dense():
+
+    def __init__(self, features: int, W: Optional[TensorVariable], b: Optional[TensorVariable]):
+        self.features = features
+        self.W = W
+        self.b = b
 
     def __call__(self, x):
+        output = at.dot(x, self.W) + self.b
+        dense = DenseLayer([x, self.W, self.b], [output])
+        return dense(x, self.W, self.b)
 
-        if self.W is None:
-            self.W = at.random.uniform(size=(x.shape[0], features))
 
-        output = at.dot(x, self.W)
-        if self.b is not None:
-            output = output + self.b
+x = at.matrix("X")
+W = at.vector("W")
+b = at.scalar("b")
 
-        dense = DenseLayer(output, [x, self.W, self.b])
-        return dense(parameters, x)
+out = Dense(x.shape[1], W, b)(x)
+
+aesara.dprint(out)
+# DenseLayer{inline=False} [id A]
+#  |X [id B]
+#  |W [id C]
+#  |b [id D]
+#
+# DenseLayer{inline=False} [id A]
+#  >Elemwise{add,no_inplace} [id E]
+#  > |dot [id F]
+#  > | |*0-<TensorType(float64, (None, None))> [id G]
+#  > | |*1-<TensorType(float64, (None,))> [id H]
+#  > |InplaceDimShuffle{x} [id I]
+#  >   |*2-<TensorType(float64, ())> [id J]
+
+assert isinstance(out.owner.op, Layer)
+print(out.owner.inputs)
+# [X, W, b]
 #+end_src
 
 #+RESULTS:
+#+begin_example
+DenseLayer{inline=False} [id A]
+ |X [id B]
+ |W [id C]
+ |b [id D]
 
-** Module
+Inner graphs:
+
+DenseLayer{inline=False} [id A]
+ >Elemwise{add,no_inplace} [id E]
+ > |dot [id F]
+ > | |*0-<TensorType(float64, (None, None))> [id G]
+ > | |*1-<TensorType(float64, (None,))> [id H]
+ > |InplaceDimShuffle{x} [id I]
+ >   |*2-<TensorType(float64, ())> [id J]
+[X, W, b]
+#+end_example
+
+** TODO Module
+
+How do we define a module in a similar way we defined =MLP= above with Flax? Is there anything special about modules compared to normal layers? Should we attribute a specific =Module= type to them, as opposed to =Layer=? If we consider they're merely a way to define a new layer they should be implemented as =OpFromGraph= as well. In this case we should have a general way to define layers so the code looks like:
 
 ** Training
 
 We need to be able to call the model with =model(batch, parameters)=, then compute the loss, then update the parameter values using an optimizer.
 
+#+begin_src python
+class MLP(nn.Module):
+    features: Sequence[int]
+
+    @nn.module.from_graph
+    def __call__(self, x):
+        """This returns a layer as an `Op` named `MLP`.
+        """
+        for feature in features[:-1]:
+            x = nn.Dense(feature)(x)
+            x = nn.relu(x)
+        x = nn.Dense(features[-1])(x)
+        return x
+#+end_src
+
 * Graph rewriting
 
-We can perform rewriting at the layer semantic level. For instance, the [[https://github.com/uwplse/tensat][TENSAT]] library adds equality saturation to the [[https://github.com/jiazhihao/TASO][TASO]] library. There are a list of rewrites that operate on a so-called /layer algebra/. Here are a few examples:
+We can perform rewriting at the layer semantic level, for two reasons:
+1. **AutoML:** We can swap activation functions, layer sizes, etc.
+2. **Performance:** For instance, the [[https://github.com/uwplse/tensat][TENSAT]] library adds equality saturation to the [[https://github.com/jiazhihao/TASO][TASO]] library. There are a list of rewrites that operate on a so-called /layer algebra/. Here are a few examples:
 
 #+begin_src ascii
 matmul(matmul(input_1,input_4),input_5)==matmul(input_1,matmul(input_4,input_5))
