@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-21 Wed 13:32 -->
+<!-- 2022-12-21 Wed 14:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cyclical SGLD in Blackjax</title>
@@ -47,9 +47,9 @@
 <div id="content" class="content">
 <h1 class="title">Cyclical SGLD in Blackjax</h1>
 
-<div id="outline-container-org472d563" class="outline-3">
-<h3 id="org472d563">Cyclical schedule</h3>
-<div class="outline-text-3" id="text-org472d563">
+<div id="outline-container-org68f5cd6" class="outline-3">
+<h3 id="org68f5cd6">Cyclical schedule</h3>
+<div class="outline-text-3" id="text-org68f5cd6">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
 
@@ -86,16 +86,16 @@ Let us visualize the schedule for 200k training steps divided in 4 cycles. At ea
 </p>
 
 
-<div id="org9988195" class="figure">
+<div id="org1a993a4" class="figure">
 <p><img src="img/cyclical_sgld_schedule.png" alt="cyclical_sgld_schedule.png" width="100%" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org78506d6" class="outline-3">
-<h3 id="org78506d6">Cyclical SGLD step</h3>
-<div class="outline-text-3" id="text-org78506d6">
+<div id="outline-container-orgd9fe179" class="outline-3">
+<h3 id="orgd9fe179">Cyclical SGLD step</h3>
+<div class="outline-text-3" id="text-orgd9fe179">
 <p>
 We will reproduce one of the paper's example, sampling from an array of 25 gaussians.
 </p>
@@ -114,7 +114,9 @@ We will reproduce one of the paper's example, sampling from an array of 25 gauss
 <span style="color: #DFAF8F;">sigma</span> = 0.03 * jnp.eye(2)
 
 <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">logprob_fn</span>(x, *_):
-    <span style="color: #F0DFAF; font-weight: bold;">return</span> lmbda * jsp.special.logsumexp(jax.scipy.stats.multivariate_normal.logpdf(x, mu, sigma))
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> lmbda * jsp.special.logsumexp(
+        jax.scipy.stats.multivariate_normal.logpdf(x, mu, sigma)
+    )
 
 <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">sample_fn</span>(rng_key):
     <span style="color: #DFAF8F;">choose_key</span>, <span style="color: #DFAF8F;">sample_key</span> = jax.random.split(rng_key)
@@ -128,7 +130,7 @@ Let's plot the model's density; we will need the plot later to evaluate the samp
 </p>
 
 
-<div id="orgf1a8c74" class="figure">
+<div id="org0e06f98" class="figure">
 <p><img src="img/cyclical_sgld_array_gaussians.png" alt="cyclical_sgld_array_gaussians.png" width="100%" />
 </p>
 </div>
@@ -136,9 +138,9 @@ Let's plot the model's density; we will need the plot later to evaluate the samp
 </div>
 
 
-<div id="outline-container-orgf5d9091" class="outline-3">
-<h3 id="orgf5d9091">Sample from the mixture of gaussians</h3>
-<div class="outline-text-3" id="text-orgf5d9091">
+<div id="outline-container-org4e08d86" class="outline-3">
+<h3 id="org4e08d86">Sample from the mixture of gaussians</h3>
+<div class="outline-text-3" id="text-org4e08d86">
 <p>
 The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
 </p>
@@ -169,7 +171,12 @@ The sampling kernel must be able to alternate between sampling and optimization 
         <span style="color: #DFAF8F;">opt_state</span> = sgd.init(position)
         <span style="color: #F0DFAF; font-weight: bold;">return</span> CyclicalSGMCMCState(position, opt_state)
 
-    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_fn</span>(rng_key, schedule_state: ScheduleState, state: CyclicalSGMCMCState, minibatch: PyTree):
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_fn</span>(
+        rng_key,
+        schedule_state: ScheduleState,
+        state: CyclicalSGMCMCState,
+        minibatch: PyTree
+    ):
         <span style="color: #9FC59F;">"""Cyclical SGLD kernel.</span>
 
 <span style="color: #9FC59F;">        TODO: Organize the inputs to match the SGLD API better.</span>
@@ -177,13 +184,13 @@ The sampling kernel must be able to alternate between sampling and optimization 
 <span style="color: #9FC59F;">        rng_key</span>
 <span style="color: #9FC59F;">            Key for JAX's pseudo-random number generator.</span>
 <span style="color: #9FC59F;">        schedule_state</span>
-<span style="color: #9FC59F;">            The current state of the scheduler. Indicates whether the kernel should be sampling</span>
-<span style="color: #9FC59F;">            or optimizing, and the current step size.</span>
+<span style="color: #9FC59F;">            The current state of the scheduler. Indicates whether the kernel</span>
+<span style="color: #9FC59F;">            should be sampling or optimizing, and the current step size.</span>
 <span style="color: #9FC59F;">        state</span>
 <span style="color: #9FC59F;">            The current state of the Cyclical SGLD sampler.</span>
 <span style="color: #9FC59F;">        minibatch</span>
-<span style="color: #9FC59F;">            Not used in the mixture example, but this is where you would pass batches of data</span>
-<span style="color: #9FC59F;">            in any real application.</span>
+<span style="color: #9FC59F;">            Not used in the mixture example, but this is where you would pass</span>
+<span style="color: #9FC59F;">            batches of data in any real application.</span>
 
 <span style="color: #9FC59F;">        """</span>
 
@@ -216,9 +223,9 @@ The sampling kernel must be able to alternate between sampling and optimization 
 </div>
 
 
-<div id="outline-container-org09a3a58" class="outline-3">
-<h3 id="org09a3a58">SGLD</h3>
-<div class="outline-text-3" id="text-org09a3a58">
+<div id="outline-container-orgae595e2" class="outline-3">
+<h3 id="orgae595e2">SGLD</h3>
+<div class="outline-text-3" id="text-orgae595e2">
 <p>
 Let's start with SGLD:
 </p>
@@ -253,7 +260,7 @@ Let's plot the trajectory:
 </p>
 
 
-<div id="orgd322f1e" class="figure">
+<div id="orgf962453" class="figure">
 <p><img src="img/cyclical_sgld_sgld_samples.png" alt="cyclical_sgld_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -261,9 +268,9 @@ Let's plot the trajectory:
 </div>
 
 
-<div id="outline-container-org1aeb479" class="outline-3">
-<h3 id="org1aeb479">Cyclical SGLD</h3>
-<div class="outline-text-3" id="text-org1aeb479">
+<div id="outline-container-org7b7f6f0" class="outline-3">
+<h3 id="org7b7f6f0">Cyclical SGLD</h3>
+<div class="outline-text-3" id="text-org7b7f6f0">
 <p>
 Now let's sample using Cyclical SGLD.
 </p>
@@ -304,7 +311,7 @@ It looks from the trajectory that the distribution is better explored:
 </p>
 
 
-<div id="orgceb7ee8" class="figure">
+<div id="orgb1f9d59" class="figure">
 <p><img src="img/cyclical_sgld_samples.png" alt="cyclical_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -314,16 +321,16 @@ Let's look at the distribution:
 </p>
 
 
-<div id="org03bfeea" class="figure">
+<div id="orgb1fe943" class="figure">
 <p><img src="img/cyclical_sgld_distribution.png" alt="cyclical_sgld_distribution.png" width="70%" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org95b8453" class="outline-2">
-<h2 id="org95b8453">What's next</h2>
-<div class="outline-text-2" id="text-org95b8453">
+<div id="outline-container-org90c7895" class="outline-2">
+<h2 id="org90c7895">What's next</h2>
+<div class="outline-text-2" id="text-org90c7895">
 <ul class="org-ul">
 <li>As Adrien Corenflos noted, Scott's rule for KDE assumes that the total number of points is the sample size, so is not fit for MCMC samples. We should instead pass the bandwidth manually \(n_{eff}^{(-1/(d+4))}\) with \(d=2\); It should capture more modes.</li>
 <li>Compute the paper's <i>Mode-coverage</i> metric: when the number of samples falling within the radius \(r\) of a mode center is larger than a number \(N\) when we say the mode is covered;</li>
