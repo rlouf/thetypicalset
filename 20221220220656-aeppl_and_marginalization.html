@@ -3,21 +3,93 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-21 Wed 08:55 -->
+<!-- 2022-12-21 Wed 09:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AePPL and marginalization</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
 <h1 class="title">AePPL and marginalization</h1>
+<p>
+In some cases, like for <a href="20221220213622-aeppl_and_mixtures.html#ID-c40d2cd2-cd16-4e9c-baab-93e368eb3c0e">mixture models</a>, we are not interested in the posterior distribution of some discrete random variables:
+</p>
 
-<div id="outline-container-org908c883" class="outline-2">
-<h2 id="org908c883">Links to this note</h2>
-<div class="outline-text-2" id="text-org908c883">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">x_rv</span> = srng.normal(0, 1, size=(2,), name=<span style="color: #CC9393;">"X"</span>)
+<span style="color: #DFAF8F;">i_rv</span> = srng.bernoulli(0.5, name=<span style="color: #CC9393;">"I"</span>)
+<span style="color: #DFAF8F;">y_rv</span> = x_rv[i_rv]
+
+logprob, (y_vv, i_vv) = aeppl.joint_logprob(y_rv, i_rv)
+
+aesara.dprint(logprob)
+</pre>
+</div>
+
+<p>
+Marginalization is an action that is performed on the logprob. The previous model can be written as:
+</p>
+
+\begin{align*}
+\mathbf{X} &\sim \operatorname{Normal}(0, 1)\\
+I &\sim \operatorname{Bernoulli}(\pi)\\
+Y &= \mathbf{X}[I]
+\end{align*}
+
+<p>
+And if we write \(\operatorname{dnorm(0,1)}\) and \(\operatorname{dbern}(\pi)\) the density functions of \(\mathbf{X}\) and \(I\) respectively, the marginalized joint density \(\operatorname{djoint}\) reads as:
+</p>
+
+<p>
+\[
+\operatorname{djoint}(x) = \pi \operatorname{dnorm}(0, 1)(x_0) + \left(1 - \pi\right) \operatorname{dnorm}(0, 1)(x_1)
+\]
+</p>
+
+<div id="outline-container-org502f73b" class="outline-2">
+<h2 id="org502f73b">Links to this note</h2>
+<div class="outline-text-2" id="text-org502f73b">
 <ul class="org-ul">
 <li><a href="./20220824141859-aeppl.html">AePPL</a></li>
 </ul>
