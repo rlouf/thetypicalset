@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-21 Wed 09:11 -->
+<!-- 2022-12-21 Wed 13:32 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cyclical SGLD in Blackjax</title>
@@ -47,9 +47,9 @@
 <div id="content" class="content">
 <h1 class="title">Cyclical SGLD in Blackjax</h1>
 
-<div id="outline-container-org090be63" class="outline-2">
-<h2 id="org090be63">Cyclical schedule</h2>
-<div class="outline-text-2" id="text-org090be63">
+<div id="outline-container-org472d563" class="outline-3">
+<h3 id="org472d563">Cyclical schedule</h3>
+<div class="outline-text-3" id="text-org472d563">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
 
@@ -86,16 +86,16 @@ Let us visualize the schedule for 200k training steps divided in 4 cycles. At ea
 </p>
 
 
-<div id="orgeb29709" class="figure">
+<div id="org9988195" class="figure">
 <p><img src="img/cyclical_sgld_schedule.png" alt="cyclical_sgld_schedule.png" width="100%" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org05152c3" class="outline-2">
-<h2 id="org05152c3">Cyclical SGLD step</h2>
-<div class="outline-text-2" id="text-org05152c3">
+<div id="outline-container-org78506d6" class="outline-3">
+<h3 id="org78506d6">Cyclical SGLD step</h3>
+<div class="outline-text-3" id="text-org78506d6">
 <p>
 We will reproduce one of the paper's example, sampling from an array of 25 gaussians.
 </p>
@@ -120,8 +120,6 @@ We will reproduce one of the paper's example, sampling from an array of 25 gauss
     <span style="color: #DFAF8F;">choose_key</span>, <span style="color: #DFAF8F;">sample_key</span> = jax.random.split(rng_key)
     <span style="color: #DFAF8F;">samples</span> = jax.random.multivariate_normal(sample_key, mu, sigma)
     <span style="color: #F0DFAF; font-weight: bold;">return</span> jax.random.choice(choose_key, samples)
-
-<span style="color: #F0DFAF; font-weight: bold;">print</span>(logprob_fn(2*jnp.ones(2)))
 </pre>
 </div>
 
@@ -129,55 +127,18 @@ We will reproduce one of the paper's example, sampling from an array of 25 gauss
 Let's plot the model's density; we will need the plot later to evaluate the sampler
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.pylab <span style="color: #F0DFAF; font-weight: bold;">as</span> plt
 
-<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
-<span style="color: #F0DFAF; font-weight: bold;">from</span> scipy.stats <span style="color: #F0DFAF; font-weight: bold;">import</span> gaussian_kde
-
-<span style="color: #DFAF8F;">rng_key</span> = jax.random.PRNGKey(0)
-<span style="color: #DFAF8F;">samples</span> = jax.vmap(sample_fn)(jax.random.split(rng_key, 10_000))
-
-<span style="color: #DFAF8F;">xmin</span>, <span style="color: #DFAF8F;">ymin</span> = -5, -5
-<span style="color: #DFAF8F;">xmax</span>, <span style="color: #DFAF8F;">ymax</span> = 5, 5
-
-<span style="color: #DFAF8F;">nbins</span> = 300j
-<span style="color: #DFAF8F;">x</span>, <span style="color: #DFAF8F;">y</span> = samples[:, 0], samples[:, 1]
-<span style="color: #DFAF8F;">xx</span>, <span style="color: #DFAF8F;">yy</span> = np.mgrid[xmin:xmax:nbins, ymin:ymax:nbins]
-<span style="color: #DFAF8F;">positions</span> = np.vstack([xx.ravel(), yy.ravel()])
-<span style="color: #DFAF8F;">values</span> = np.vstack([x, y])
-<span style="color: #DFAF8F;">kernel</span> = gaussian_kde(values)
-<span style="color: #DFAF8F;">f</span> = np.reshape(kernel(positions).T, xx.shape)
-
-<span style="color: #DFAF8F;">fig</span>, <span style="color: #DFAF8F;">ax</span> = plt.subplots()
-<span style="color: #DFAF8F;">cfset</span> = ax.contourf(xx, yy, f, cmap=<span style="color: #CC9393;">'Blues'</span>)
-ax.imshow(np.rot90(f), cmap=<span style="color: #CC9393;">'Blues'</span>, extent=[xmin, xmax, ymin, ymax])
-<span style="color: #DFAF8F;">cset</span> = ax.contour(xx, yy, f, colors=<span style="color: #CC9393;">'k'</span>)
-
-<span style="color: #DFAF8F;">plt.rcParams</span>[<span style="color: #CC9393;">'axes.titlepad'</span>] = 15.
-plt.title(<span style="color: #CC9393;">"Samples from a mixture of 25 normal distributions"</span>)
-
-<span style="color: #DFAF8F;">filename</span> = <span style="color: #CC9393;">"img/cyclical_sgld_array_gaussians.png"</span>
-plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
-filename
-</pre>
-</div>
-
-
-<div id="org287db5f" class="figure">
+<div id="orgf1a8c74" class="figure">
 <p><img src="img/cyclical_sgld_array_gaussians.png" alt="cyclical_sgld_array_gaussians.png" width="100%" />
 </p>
 </div>
-
-<p>
-<i>Mode-coverage</i> metric: when the number of samples falling within the radius \(r\) of a mode center is larger than \(n\) when we say the mode is covered.
-</p>
 </div>
 </div>
 
-<div id="outline-container-org2b0768c" class="outline-2">
-<h2 id="org2b0768c">Sample from the mixture of gaussians</h2>
-<div class="outline-text-2" id="text-org2b0768c">
+
+<div id="outline-container-orgf5d9091" class="outline-3">
+<h3 id="orgf5d9091">Sample from the mixture of gaussians</h3>
+<div class="outline-text-3" id="text-orgf5d9091">
 <p>
 The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
 </p>
@@ -191,25 +152,40 @@ The sampling kernel must be able to alternate between sampling and optimization 
 <span style="color: #F0DFAF; font-weight: bold;">from</span> blackjax.types <span style="color: #F0DFAF; font-weight: bold;">import</span> PyTree
 <span style="color: #F0DFAF; font-weight: bold;">from</span> optax._src.base <span style="color: #F0DFAF; font-weight: bold;">import</span> OptState
 
+
 <span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">CyclicalSGMCMCState</span>(NamedTuple):
-    <span style="color: #9FC59F;">"""State of the Cyclical SGMCMC sampler.</span>
-<span style="color: #9FC59F;">    """</span>
+    <span style="color: #9FC59F;">"""State of the Cyclical SGMCMC sampler."""</span>
     position: PyTree
     opt_state: OptState
 
 
 <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">cyclical_sgld</span>(grad_estimator_fn, loglikelihood_fn):
 
-    <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Initialize the SgLD step function</span>
     <span style="color: #DFAF8F;">sgld</span> = blackjax.sgld(grad_estimator_fn)
     <span style="color: #DFAF8F;">sgd</span> = optax.sgd(1.)
 
     <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">init_fn</span>(position):
+        <span style="color: #9FC59F;">"""Initialize Cyclical SGLD's state."""</span>
         <span style="color: #DFAF8F;">opt_state</span> = sgd.init(position)
         <span style="color: #F0DFAF; font-weight: bold;">return</span> CyclicalSGMCMCState(position, opt_state)
 
-    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_fn</span>(rng_key, schedule_state, state, minibatch):
-        <span style="color: #9FC59F;">"""Cyclical SGLD kernel."""</span>
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_fn</span>(rng_key, schedule_state: ScheduleState, state: CyclicalSGMCMCState, minibatch: PyTree):
+        <span style="color: #9FC59F;">"""Cyclical SGLD kernel.</span>
+
+<span style="color: #9FC59F;">        TODO: Organize the inputs to match the SGLD API better.</span>
+
+<span style="color: #9FC59F;">        rng_key</span>
+<span style="color: #9FC59F;">            Key for JAX's pseudo-random number generator.</span>
+<span style="color: #9FC59F;">        schedule_state</span>
+<span style="color: #9FC59F;">            The current state of the scheduler. Indicates whether the kernel should be sampling</span>
+<span style="color: #9FC59F;">            or optimizing, and the current step size.</span>
+<span style="color: #9FC59F;">        state</span>
+<span style="color: #9FC59F;">            The current state of the Cyclical SGLD sampler.</span>
+<span style="color: #9FC59F;">        minibatch</span>
+<span style="color: #9FC59F;">            Not used in the mixture example, but this is where you would pass batches of data</span>
+<span style="color: #9FC59F;">            in any real application.</span>
+
+<span style="color: #9FC59F;">        """</span>
 
         <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_with_sgld</span>(current_state):
             <span style="color: #DFAF8F;">rng_key</span>, <span style="color: #DFAF8F;">state</span>, <span style="color: #DFAF8F;">minibatch</span>, <span style="color: #DFAF8F;">step_size</span> = current_state
@@ -218,7 +194,7 @@ The sampling kernel must be able to alternate between sampling and optimization 
 
         <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">step_with_sgd</span>(current_state):
             <span style="color: #DFAF8F;">_</span>, <span style="color: #DFAF8F;">state</span>, <span style="color: #DFAF8F;">minibatch</span>, <span style="color: #DFAF8F;">step_size</span> = current_state
-            <span style="color: #DFAF8F;">grads</span> = grad_estimator_fn(state.position, 0)<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">jax.grad(loglikelihood_fn)(state.position)</span>
+            <span style="color: #DFAF8F;">grads</span> = grad_estimator_fn(state.position, minibatch)
             <span style="color: #DFAF8F;">rescaled_grads</span> = - 1. * step_size * grads
             <span style="color: #DFAF8F;">updates</span>, <span style="color: #DFAF8F;">new_opt_state</span> = sgd.update(rescaled_grads, state.opt_state, state.position)
             <span style="color: #DFAF8F;">new_position</span> = optax.apply_updates(state.position, updates)
@@ -239,9 +215,10 @@ The sampling kernel must be able to alternate between sampling and optimization 
 </div>
 </div>
 
-<div id="outline-container-org07d5c25" class="outline-2">
-<h2 id="org07d5c25">SGLD</h2>
-<div class="outline-text-2" id="text-org07d5c25">
+
+<div id="outline-container-org09a3a58" class="outline-3">
+<h3 id="org09a3a58">SGLD</h3>
+<div class="outline-text-3" id="text-org09a3a58">
 <p>
 Let's start with SGLD:
 </p>
@@ -253,6 +230,7 @@ Let's start with SGLD:
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">50k iterations</span>
 <span style="color: #DFAF8F;">num_training_steps</span> = 50000
 <span style="color: #DFAF8F;">schedule_fn</span> = <span style="color: #F0DFAF; font-weight: bold;">lambda</span> k: 0.05 * k ** (-0.55)
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">TODO: There is no need to pre-compute the schedule</span>
 <span style="color: #DFAF8F;">schedule</span> = [schedule_fn(i) <span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(1, num_training_steps+1)]
 
 <span style="color: #DFAF8F;">grad_fn</span> = <span style="color: #F0DFAF; font-weight: bold;">lambda</span> x, _: jax.grad(logprob_fn)(x)
@@ -275,7 +253,7 @@ Let's plot the trajectory:
 </p>
 
 
-<div id="orgceddd3e" class="figure">
+<div id="orgd322f1e" class="figure">
 <p><img src="img/cyclical_sgld_sgld_samples.png" alt="cyclical_sgld_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -283,9 +261,9 @@ Let's plot the trajectory:
 </div>
 
 
-<div id="outline-container-org260db4a" class="outline-2">
-<h2 id="org260db4a">Cyclical SGLD</h2>
-<div class="outline-text-2" id="text-org260db4a">
+<div id="outline-container-org1aeb479" class="outline-3">
+<h3 id="org1aeb479">Cyclical SGLD</h3>
+<div class="outline-text-3" id="text-org1aeb479">
 <p>
 Now let's sample using Cyclical SGLD.
 </p>
@@ -300,6 +278,7 @@ Now let's sample using Cyclical SGLD.
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">ratio exploration = 1/4</span>
 <span style="color: #DFAF8F;">num_training_steps</span> = 50000
 <span style="color: #DFAF8F;">schedule_fn</span> = build_schedule(num_training_steps, 30, 0.09, 0.25)
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">TODO: There is no need to pre-compute the schedule</span>
 <span style="color: #DFAF8F;">schedule</span> = [schedule_fn(i) <span style="color: #F0DFAF; font-weight: bold;">for</span> i <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #DCDCCC; font-weight: bold;">range</span>(num_training_steps)]
 
 <span style="color: #DFAF8F;">grad_fn</span> = <span style="color: #F0DFAF; font-weight: bold;">lambda</span> x, _: jax.grad(logprob_fn)(x)
@@ -325,7 +304,7 @@ It looks from the trajectory that the distribution is better explored:
 </p>
 
 
-<div id="org5448a73" class="figure">
+<div id="orgceb7ee8" class="figure">
 <p><img src="img/cyclical_sgld_samples.png" alt="cyclical_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -334,41 +313,22 @@ It looks from the trajectory that the distribution is better explored:
 Let's look at the distribution:
 </p>
 
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> matplotlib.pylab <span style="color: #F0DFAF; font-weight: bold;">as</span> plt
 
-<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
-<span style="color: #F0DFAF; font-weight: bold;">from</span> scipy.stats <span style="color: #F0DFAF; font-weight: bold;">import</span> gaussian_kde
-
-<span style="color: #DFAF8F;">xmin</span>, <span style="color: #DFAF8F;">ymin</span> = -5, -5
-<span style="color: #DFAF8F;">xmax</span>, <span style="color: #DFAF8F;">ymax</span> = 5, 5
-
-<span style="color: #DFAF8F;">nbins</span> = 300j
-<span style="color: #DFAF8F;">x</span> = [sample[0] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> cyclical_samples]
-<span style="color: #DFAF8F;">y</span> = [sample[1] <span style="color: #F0DFAF; font-weight: bold;">for</span> sample <span style="color: #F0DFAF; font-weight: bold;">in</span> cyclical_samples]
-<span style="color: #DFAF8F;">xx</span>, <span style="color: #DFAF8F;">yy</span> = np.mgrid[xmin:xmax:nbins, ymin:ymax:nbins]
-<span style="color: #DFAF8F;">positions</span> = np.vstack([xx.ravel(), yy.ravel()])
-<span style="color: #DFAF8F;">values</span> = np.vstack([x, y])
-<span style="color: #DFAF8F;">kernel</span> = gaussian_kde(values)
-<span style="color: #DFAF8F;">f</span> = np.reshape(kernel(positions).T, xx.shape)
-
-<span style="color: #DFAF8F;">fig</span>, <span style="color: #DFAF8F;">ax</span> = plt.subplots()
-<span style="color: #DFAF8F;">cfset</span> = ax.contourf(xx, yy, f, cmap=<span style="color: #CC9393;">'Blues'</span>)
-ax.imshow(np.rot90(f), cmap=<span style="color: #CC9393;">'Blues'</span>, extent=[xmin, xmax, ymin, ymax])
-<span style="color: #DFAF8F;">cset</span> = ax.contour(xx, yy, f, colors=<span style="color: #CC9393;">'k'</span>)
-
-<span style="color: #DFAF8F;">plt.rcParams</span>[<span style="color: #CC9393;">'axes.titlepad'</span>] = 15.
-plt.title(<span style="color: #CC9393;">"Samples from a mixture of 25 normal distributions"</span>)
-plt.savefig(filename, bbox_inches=<span style="color: #CC9393;">"tight"</span>)
-filename
-</pre>
-</div>
-
-
-<div id="org2b99821" class="figure">
+<div id="org03bfeea" class="figure">
 <p><img src="img/cyclical_sgld_distribution.png" alt="cyclical_sgld_distribution.png" width="70%" />
 </p>
 </div>
+</div>
+</div>
+
+<div id="outline-container-org95b8453" class="outline-2">
+<h2 id="org95b8453">What's next</h2>
+<div class="outline-text-2" id="text-org95b8453">
+<ul class="org-ul">
+<li>As Adrien Corenflos noted, Scott's rule for KDE assumes that the total number of points is the sample size, so is not fit for MCMC samples. We should instead pass the bandwidth manually \(n_{eff}^{(-1/(d+4))}\) with \(d=2\); It should capture more modes.</li>
+<li>Compute the paper's <i>Mode-coverage</i> metric: when the number of samples falling within the radius \(r\) of a mode center is larger than a number \(N\) when we say the mode is covered;</li>
+<li>Use on a "real" problem: CIFAR-100 with Resnet18 for instance;</li>
+</ul>
 </div>
 </div>
 </div>
