@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-20 Tue 21:09 -->
+<!-- 2022-12-21 Wed 08:53 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AeNN</title>
@@ -50,9 +50,9 @@
 AeNN would be a deep-learning API that sits on top of Aesara. It is inspired by <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io">Keras</a> (which used to be built on top of Theano), Flax (NN library built with JAX), and of course <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/Lasagne/Lasagne">Lasagne</a>. It would make full use of Aesara's graph and rewrite capabilities.
 </p>
 
-<div id="outline-container-orgae05ef5" class="outline-2">
-<h2 id="orgae05ef5">Inspiration</h2>
-<div class="outline-text-2" id="text-orgae05ef5">
+<div id="outline-container-orgb76730c" class="outline-2">
+<h2 id="orgb76730c">Inspiration</h2>
+<div class="outline-text-2" id="text-orgb76730c">
 <p>
 A minimum viable library could be to be able to reproduce <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io/">Keras' documentation</a> examples. For instance the MNIST convnet:
 </p>
@@ -106,9 +106,9 @@ I find Keras' API to be sometimes too high-level. In particular, I am not a big 
 </div>
 </div>
 
-<div id="outline-container-orgec5f5b2" class="outline-2">
-<h2 id="orgec5f5b2">Building a simple MLP model</h2>
-<div class="outline-text-2" id="text-orgec5f5b2">
+<div id="outline-container-org189c37a" class="outline-2">
+<h2 id="org189c37a">Building a simple MLP model</h2>
+<div class="outline-text-2" id="text-org189c37a">
 <p>
 Let's take and try to reproduce a simpler example, the MLP example taken from the Flax documentation:
 </p>
@@ -130,9 +130,9 @@ Let's take and try to reproduce a simpler example, the MLP example taken from th
 </div>
 </div>
 
-<div id="outline-container-org0fc81df" class="outline-3">
-<h3 id="org0fc81df">Activation Function</h3>
-<div class="outline-text-3" id="text-org0fc81df">
+<div id="outline-container-org391e61d" class="outline-3">
+<h3 id="org391e61d">Activation Function</h3>
+<div class="outline-text-3" id="text-org391e61d">
 <p>
 The first approach to implementing the activation function \(\operatorname{Relu}\) is to define it as a function:
 </p>
@@ -168,9 +168,9 @@ So <code>relu</code> will need to be implemented as an <code>OpFromGraph</code>,
 </div>
 </div>
 
-<div id="outline-container-orgc56240d" class="outline-3">
-<h3 id="orgc56240d">Dense layer</h3>
-<div class="outline-text-3" id="text-orgc56240d">
+<div id="outline-container-orgc590581" class="outline-3">
+<h3 id="orgc590581">Dense layer</h3>
+<div class="outline-text-3" id="text-orgc590581">
 <p>
 Layers are best implemented as =OpFromGraph=s for several reasons:
 </p>
@@ -182,7 +182,14 @@ Layers are best implemented as =OpFromGraph=s for several reasons:
 </ol>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">Layer</span>(OpFromGraph):
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> Optional
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">from</span> aesara.tensor.var <span style="color: #F0DFAF; font-weight: bold;">import</span> TensorVariable
+<span style="color: #F0DFAF; font-weight: bold;">from</span> aesara.<span style="color: #DCDCCC; font-weight: bold;">compile</span>.builders <span style="color: #F0DFAF; font-weight: bold;">import</span> OpFromGraph
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">Layer</span>(OpFromGraph):
     <span style="color: #9FC59F;">"""Represents a Layer.</span>
 
 <span style="color: #9FC59F;">    The difference between layers and transformations is that the former</span>
@@ -194,47 +201,92 @@ Layers are best implemented as =OpFromGraph=s for several reasons:
     <span style="color: #9FC59F;">"""`Op` that represents a Dense Layer"""</span>
 
 
-<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">Dense</span>(Op):
-    features: <span style="color: #DCDCCC; font-weight: bold;">int</span>
-    b: <span style="color: #DFAF8F;">Optional</span>[TensorVariable] = <span style="color: #BFEBBF;">None</span>
-    W: <span style="color: #DFAF8F;">Optional</span>[TensorVariable] = <span style="color: #BFEBBF;">None</span>
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">Dense</span>():
+
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">__init__</span>(<span style="color: #F0DFAF; font-weight: bold;">self</span>, features: <span style="color: #DCDCCC; font-weight: bold;">int</span>, W: Optional[TensorVariable], b: Optional[TensorVariable]):
+        <span style="color: #F0DFAF; font-weight: bold;">self</span>.features = features
+        <span style="color: #F0DFAF; font-weight: bold;">self</span>.W = W
+        <span style="color: #F0DFAF; font-weight: bold;">self</span>.b = b
 
     <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">__call__</span>(<span style="color: #F0DFAF; font-weight: bold;">self</span>, x):
+        <span style="color: #DFAF8F;">output</span> = at.dot(x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W) + <span style="color: #F0DFAF; font-weight: bold;">self</span>.b
+        <span style="color: #DFAF8F;">dense</span> = DenseLayer([x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W, <span style="color: #F0DFAF; font-weight: bold;">self</span>.b], [output])
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> dense(x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W, <span style="color: #F0DFAF; font-weight: bold;">self</span>.b)
 
-        <span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #F0DFAF; font-weight: bold;">self</span>.W <span style="color: #F0DFAF; font-weight: bold;">is</span> <span style="color: #BFEBBF;">None</span>:
-            <span style="color: #F0DFAF; font-weight: bold;">self</span>.W = at.random.uniform(size=(x.shape[0], features))
 
-        <span style="color: #DFAF8F;">output</span> = at.dot(x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W)
-        <span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #F0DFAF; font-weight: bold;">self</span>.b <span style="color: #F0DFAF; font-weight: bold;">is</span> <span style="color: #F0DFAF; font-weight: bold;">not</span> <span style="color: #BFEBBF;">None</span>:
-            <span style="color: #DFAF8F;">output</span> = output + <span style="color: #F0DFAF; font-weight: bold;">self</span>.b
+<span style="color: #DFAF8F;">x</span> = at.matrix(<span style="color: #CC9393;">"X"</span>)
+<span style="color: #DFAF8F;">W</span> = at.vector(<span style="color: #CC9393;">"W"</span>)
+<span style="color: #DFAF8F;">b</span> = at.scalar(<span style="color: #CC9393;">"b"</span>)
 
-        <span style="color: #DFAF8F;">dense</span> = DenseLayer(output, [x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W, <span style="color: #F0DFAF; font-weight: bold;">self</span>.b])
-        <span style="color: #F0DFAF; font-weight: bold;">return</span> dense(parameters, x)
+<span style="color: #DFAF8F;">out</span> = Dense(x.shape[1], W, b)(x)
+
+aesara.dprint(out)
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">DenseLayer{inline=False} [id A]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">|X [id B]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">|W [id C]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">|b [id D]</span>
+<span style="color: #5F7F5F;">#</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">DenseLayer{inline=False} [id A]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">&gt;Elemwise{add,no_inplace} [id E]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">&gt; |dot [id F]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">&gt; | |*0-&lt;TensorType(float64, (None, None))&gt; [id G]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">&gt; | |*1-&lt;TensorType(float64, (None,))&gt; [id H]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">&gt; |InplaceDimShuffle{x} [id I]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">&gt;   |*2-&lt;TensorType(float64, ())&gt; [id J]</span>
+
+<span style="color: #F0DFAF; font-weight: bold;">assert</span> <span style="color: #DCDCCC; font-weight: bold;">isinstance</span>(out.owner.op, Layer)
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(out.owner.inputs)
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">[X, W, b]</span>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org3154307" class="outline-3">
-<h3 id="org3154307">Module</h3>
+<div id="outline-container-org41a1238" class="outline-3">
+<h3 id="org41a1238"><span class="todo TODO">TODO</span> Module</h3>
+<div class="outline-text-3" id="text-org41a1238">
+<p>
+How do we define a module in a similar way we defined <code>MLP</code> above with Flax? Is there anything special about modules compared to normal layers? Should we attribute a specific <code>Module</code> type to them, as opposed to <code>Layer</code>? If we consider they're merely a way to define a new layer they should be implemented as <code>OpFromGraph</code> as well. In this case we should have a general way to define layers so the code looks like:
+</p>
+</div>
 </div>
 
-<div id="outline-container-orgdb19ec6" class="outline-3">
-<h3 id="orgdb19ec6">Training</h3>
-<div class="outline-text-3" id="text-orgdb19ec6">
+<div id="outline-container-orge4f7768" class="outline-3">
+<h3 id="orge4f7768">Training</h3>
+<div class="outline-text-3" id="text-orge4f7768">
 <p>
 We need to be able to call the model with <code>model(batch, parameters)</code>, then compute the loss, then update the parameter values using an optimizer.
 </p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">MLP</span>(nn.Module):
+    features: Sequence[<span style="color: #DCDCCC; font-weight: bold;">int</span>]
+
+    <span style="color: #7CB8BB;">@nn.module.from_graph</span>
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">__call__</span>(<span style="color: #F0DFAF; font-weight: bold;">self</span>, x):
+        <span style="color: #9FC59F;">"""This returns a layer as an `Op` named `MLP`.</span>
+<span style="color: #9FC59F;">        """</span>
+        <span style="color: #F0DFAF; font-weight: bold;">for</span> feature <span style="color: #F0DFAF; font-weight: bold;">in</span> features[:-1]:
+            <span style="color: #DFAF8F;">x</span> = nn.Dense(feature)(x)
+            <span style="color: #DFAF8F;">x</span> = nn.relu(x)
+        <span style="color: #DFAF8F;">x</span> = nn.Dense(features[-1])(x)
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> x
+</pre>
+</div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgca7afa9" class="outline-2">
-<h2 id="orgca7afa9">Graph rewriting</h2>
-<div class="outline-text-2" id="text-orgca7afa9">
+<div id="outline-container-orgee098b3" class="outline-2">
+<h2 id="orgee098b3">Graph rewriting</h2>
+<div class="outline-text-2" id="text-orgee098b3">
 <p>
-We can perform rewriting at the layer semantic level. For instance, the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/uwplse/tensat">TENSAT</a> library adds equality saturation to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jiazhihao/TASO">TASO</a> library. There are a list of rewrites that operate on a so-called <i>layer algebra</i>. Here are a few examples:
+We can perform rewriting at the layer semantic level, for two reasons:
 </p>
+<ol class="org-ol">
+<li><b><b>AutoML:</b></b> We can swap activation functions, layer sizes, etc.</li>
+<li><b><b>Performance:</b></b> For instance, the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/uwplse/tensat">TENSAT</a> library adds equality saturation to the <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jiazhihao/TASO">TASO</a> library. There are a list of rewrites that operate on a so-called <i>layer algebra</i>. Here are a few examples:</li>
+</ol>
 
 <div class="org-src-container">
 <pre class="src src-ascii">matmul(matmul(input_1,input_4),input_5)==matmul(input_1,matmul(input_4,input_5))
@@ -246,9 +298,9 @@ relu(input_8)==conv2d(1,1,0,2,input_8,Iconv(3,3))
 </div>
 </div>
 
-<div id="outline-container-org7d3b7a1" class="outline-2">
-<h2 id="org7d3b7a1">Links to this note</h2>
-<div class="outline-text-2" id="text-org7d3b7a1">
+<div id="outline-container-orgf843877" class="outline-2">
+<h2 id="orgf843877">Links to this note</h2>
+<div class="outline-text-2" id="text-orgf843877">
 <ul class="org-ul">
 <li><a href="./20220823090532-ops.html">Ops</a></li>
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
