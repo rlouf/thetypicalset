@@ -98,16 +98,13 @@ def sample_fn(rng_key):
     choose_key, sample_key = jax.random.split(rng_key)
     samples = jax.random.multivariate_normal(sample_key, mu, sigma)
     return jax.random.choice(choose_key, samples)
-
-print(logprob_fn(2*jnp.ones(2)))
 #+end_src
 
 #+RESULTS:
-: None
 
 Let's plot the model's density; we will need the plot later to evaluate the sampler
 
-#+begin_src python :session :results file :exports both
+#+begin_src python :session :results file :exports results
 import matplotlib.pylab as plt
 
 import numpy as np
@@ -145,7 +142,6 @@ filename
 #+RESULTS:
 [[file:img/cyclical_sgld_array_gaussians.png]]
 
-/Mode-coverage/ metric: when the number of samples falling within the radius $r$ of a mode center is larger than $n$ when we say the mode is covered.
 
 ** Sample from the mixture of gaussians
 
@@ -160,25 +156,40 @@ import optax
 from blackjax.types import PyTree
 from optax._src.base import OptState
 
+
 class CyclicalSGMCMCState(NamedTuple):
-    """State of the Cyclical SGMCMC sampler.
-    """
+    """State of the Cyclical SGMCMC sampler."""
     position: PyTree
     opt_state: OptState
 
 
 def cyclical_sgld(grad_estimator_fn, loglikelihood_fn):
 
-    # Initialize the SgLD step function
     sgld = blackjax.sgld(grad_estimator_fn)
     sgd = optax.sgd(1.)
 
     def init_fn(position):
+        """Initialize Cyclical SGLD's state."""
         opt_state = sgd.init(position)
         return CyclicalSGMCMCState(position, opt_state)
 
-    def step_fn(rng_key, schedule_state, state, minibatch):
-        """Cyclical SGLD kernel."""
+    def step_fn(rng_key, schedule_state: ScheduleState, state: CyclicalSGMCMCState, minibatch: PyTree):
+        """Cyclical SGLD kernel.
+
+        TODO: Organize the inputs to match the SGLD API better.
+
+        rng_key
+            Key for JAX's pseudo-random number generator.
+        schedule_state
+            The current state of the scheduler. Indicates whether the kernel should be sampling
+            or optimizing, and the current step size.
+        state
+            The current state of the Cyclical SGLD sampler.
+        minibatch
+            Not used in the mixture example, but this is where you would pass batches of data
+            in any real application.
+
+        """
 
         def step_with_sgld(current_state):
             rng_key, state, minibatch, step_size = current_state
@@ -187,7 +198,7 @@ def cyclical_sgld(grad_estimator_fn, loglikelihood_fn):
 
         def step_with_sgd(current_state):
             _, state, minibatch, step_size = current_state
-            grads = grad_estimator_fn(state.position, 0)#jax.grad(loglikelihood_fn)(state.position)
+            grads = grad_estimator_fn(state.position, minibatch)
             rescaled_grads = - 1. * step_size * grads
             updates, new_opt_state = sgd.update(rescaled_grads, state.opt_state, state.position)
             new_position = optax.apply_updates(state.position, updates)
@@ -207,7 +218,6 @@ def cyclical_sgld(grad_estimator_fn, loglikelihood_fn):
 
 #+RESULTS:
 
-#+RESULTS:
 
 ** SGLD
 
@@ -220,6 +230,7 @@ from fastprogress import progress_bar
 # 50k iterations
 num_training_steps = 50000
 schedule_fn = lambda k: 0.05 * k ** (-0.55)
+# TODO: There is no need to pre-compute the schedule
 schedule = [schedule_fn(i) for i in range(1, num_training_steps+1)]
 
 grad_fn = lambda x, _: jax.grad(logprob_fn)(x)
@@ -235,6 +246,8 @@ for i in progress_bar(range(num_training_steps)):
     position = jax.jit(sgld)(rng_key, position, 0, schedule[i])
     sgld_samples.append(position)
 #+end_src
+
+#+RESULTS:
 
 Let's plot the trajectory:
 
@@ -275,6 +288,7 @@ from fastprogress import progress_bar
 # ratio exploration = 1/4
 num_training_steps = 50000
 schedule_fn = build_schedule(num_training_steps, 30, 0.09, 0.25)
+# TODO: There is no need to pre-compute the schedule
 schedule = [schedule_fn(i) for i in range(num_training_steps)]
 
 grad_fn = lambda x, _: jax.grad(logprob_fn)(x)
@@ -322,7 +336,7 @@ filename
 
 Let's look at the distribution:
 
-#+begin_src python :session :results file :exports both :var filename="img/cyclical_sgld_distribution.png"
+#+begin_src python :session :results file :exports results :var filename="img/cyclical_sgld_distribution.png"
 import matplotlib.pylab as plt
 
 import numpy as np
@@ -355,3 +369,9 @@ filename
 #+ATTR_HTML: :width 70%
 #+RESULTS:
 [[file:img/cyclical_sgld_distribution.png]]
+
+* What's next
+
+- As Adrien Corenflos noted, Scott's rule for KDE assumes that the total number of points is the sample size, so is not fit for MCMC samples. We should instead pass the bandwidth manually $n_{eff}^{(-1/(d+4))}$ with $d=2$; It should capture more modes.
+- Compute the paper's /Mode-coverage/ metric: when the number of samples falling within the radius $r$ of a mode center is larger than a number $N$ when we say the mode is covered;
+- Use on a "real" problem: CIFAR-100 with Resnet18 for instance;
