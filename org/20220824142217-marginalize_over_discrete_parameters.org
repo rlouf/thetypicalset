@@ -15,3 +15,35 @@ This can happen for random variable with a =Counting= base measure and a finite 
 - Binomial
 - Multinomial
 - Categorical
+
+* Change point model
+
+Consider the following example from the [[https://mc-stan.org/docs/2_20/stan-users-guide/change-point-section.html][Stan documentation]]:
+
+#+begin_src python :results output
+import aesara
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+r_e = at.scalar('r_e')
+r_l = at.scalar('r_l')
+T = at.iscalar('T')
+
+e_rv = srng.exponential(r_e)
+l_rv = srng.exponential(r_l)
+s_rv = srng.integers(1, T)
+
+t = at.arange(1, T)
+rate = at.where(at.ge(s_rv, t), e_rv, l_rv)
+D_rv = srng.poisson(rate)
+
+# Draw from the prior predictive distribution
+fn = aesara.function([r_e, r_l, T], D_rv)
+print(fn(1., 3., 10))
+#+end_src
+
+#+RESULTS:
+: [3 4 4 3 4 3 2 0 5]
+
+Here we can marginalize over =integers= to ease sampling, and recover the posterior distribution using posterior predictive sampling.
