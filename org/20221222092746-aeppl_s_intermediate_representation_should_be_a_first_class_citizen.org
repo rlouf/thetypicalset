@@ -1,0 +1,8 @@
+:PROPERTIES:
+:ID:       e6355555-c54b-46c1-8dde-d8608bb2a4ba
+:END:
+#+title: #+title: AePPL's intermediate representation should be a first-class citizen
+
+Many model transformations (including marginalization) happen at the /measure/ level, AeMCMC needs the representation in terms of measure to build samplers. We should thus have a user-facing function that takes an Aesara graph with random variable and returns a graph with the corresponding measures.
+
+=joint_logprob= can thus be a high-level function that delegates to this function and another one that computes the conditional density from that representation, and adds transformations like /marginalization/ between these two steps.

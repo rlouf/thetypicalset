@@ -3,20 +3,45 @@
 :END:
 #+title: Marginalize over discrete parameters
 
-Marginalization is a something that happens at the level of the /density/. Here we would need to implement a =marginalize= function in AePPL that takes a density, a set of value variables and rewrites it into the corresponding marginalized density:
+* Design in [[id:e18d689a-392a-407a-941a-f0ad2d2dc43e][AePPL]]
+
+Marginalization is an operation that happens at the level of the /probability density/. First, we could add a =marginalize= function that takes a density and a set of values to marginalize out, and rewrites the density to return its marginalized counterpart:
 
 #+begin_src python
-logprob, (y_vv, i_vv, n_vv) = aeppl.joint_logprob(Y_rv, I_rv, N_rv)
+import aeppl
+
+logprob, (y_vv, i_vv) = aeppl.joint_logprob(Y_rv, i_rv)
 marginalized_logprob = aeppl.marginalize(logprob, i_vv)
 #+end_src
 
-This can happen for random variable with a =Counting= base measure and a finite support:
-- [[id:82cc8d0e-682d-4082-90ac-36cf7fadcb72][Bernoulli]]
-- Binomial
-- Multinomial
-- Categorical
+Another solution is to add =marginalize= keyword to =joint_logprob=:
 
-* Change point model
+#+begin_src python
+import aeppl
+
+logprob, (y_vv,) = aeppl.joint_logprob(Y_rv, i_rv, marginalize=(i_rv,))
+#+end_src
+
+What this keyword hides is a function that acts at the /measure/ level in AePPL's intermediate representation. The availability of this intermediate representation in =joint_logprob= makes it easier to perform marginalization at this level. The internals of =joint_logprob= would then look like in pseudo-code:
+
+#+begin_src python
+def joint_logprob(*rvs, *, to_marginalize):
+    rvs_to_values = aeppl.internals.create_value_variables(rvs)
+    measures = aeppl.internals.to_ir(rvs_to_values)
+    marginalized_measures = aeppl.internals.marginalize(measures, to_marginalize)
+    logdensity = aeppl.internals.disintegrate(marginalized_measures)
+#+end_src
+
+This makes me think that [[id:e6355555-c54b-46c1-8dde-d8608bb2a4ba][AePPL's intermediate representation should be a first-class citizen]].
+
+* Related issues
+
+- https://github.com/aesara-devs/aeppl/issues/21
+
+* Different examples of marginalization
+
+** TODO Discrete mixtures
+** Switchpoint model
 
 Consider the following example from the [[https://mc-stan.org/docs/2_20/stan-users-guide/change-point-section.html][Stan documentation]]:
 

@@ -1,9 +1,25 @@
 :PROPERTIES:
 :ID:       c40d2cd2-cd16-4e9c-baab-93e368eb3c0e
 :END:
-#+title: AePPL, mixtures and conditionals
+#+title: AePPL, discrete mixtures and conditionals
 
-Probabilistic Programming Languages in Python ask you to use a ad-hoc =Mixture= [[https://docs.pymc.io/en/v5.0.0/api/distributions/generated/pymc.Mixture.html#pymc.Mixture][distribution object]] to build mixture distributions. In [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]]/[[id:e18d689a-392a-407a-941a-f0ad2d2dc43e][AePPL]] you can express the mixture in different ways.
+Let us consider a family of probability distributions $\left\{\mathbb{P}_\mu : \mu \in \mathcal{M} \right\}$ where $\mathcal{M} = \left\{1, \dots, K\right\}$ and $\mathbb{Q}$ a probability distribution on the domain $\mathcal{M}$. A discrete mixture model assumes that the value of a random variable $Y$ can be drawm from one of the $\mathbb{P}_\mu$: at each step we draw one value $m \in \mathcal{M}$  from $\mathbb{Q}$, and then draw from $\mathbb{P}_m$.
+
+We can then write the likelihood of $Y$ conditional on $m$ as:
+
+$$
+\mathbb{P}(Y \mid  z) = \mathbb{P}_z(Y)
+$$
+
+Many probabilistic programming languages implement mixture via an ad-hoc =Mixture= [[https://docs.pymc.io/en/v5.0.0/api/distributions/generated/pymc.Mixture.html#pymc.Mixture][distribution object]]. In [[id:5a5e87b1-558c-43db-ad38-32a073b10351][Aesara]]/[[id:e18d689a-392a-407a-941a-f0ad2d2dc43e][AePPL]] mixtures are expressed via the generative process described above, using the following Aesara constructs:
+- Indexing an array with a random variable;
+- =aesara.tensor.where=;
+- =aesara.ifelse.ifelse=.
+
+#+begin_comment
+Discrete assignments lead to posteriors that are difficult to sample, and we rarely care about their posterior distribution. In this case we can [[id:630773fc-fe6e-4a2b-a191-2c984c27f963][marginalize over this discrete parameter]].
+#+end_comment
+
 
 * Indexing an array
 
@@ -90,9 +106,3 @@ Y_rv = aesara.ifelse(i_rv, x_rv, y_rv)
 
 logprob, (y_vv, i_vv) = aeppl.joint_logprob(Y_rv, i_rv)
 #+end_src
-
-* Marginalize
-
-In the case of a mixture (where we select a random variable according to probabilities of selection), we often do not care about the posterior distribution of the indexing variable, and would thus like to [[id:630773fc-fe6e-4a2b-a191-2c984c27f963][marginalize over this discrete parameter]].
-
-This is why other PPLs use a =Mixture= distribution to represent mixtures, as the marginalization is baked in the expression of the logdensity.
