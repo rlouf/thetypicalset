@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-12-22 Thu 09:39 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>#+title: AePPL's intermediate representation should be a first-class citizen</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">#+title: AePPL's intermediate representation should be a first-class citizen</h1>
+<p>
+Many model transformations (including marginalization) happen at the <i>measure</i> level, AeMCMC needs the representation in terms of measure to build samplers. We should thus have a user-facing function that takes an Aesara graph with random variable and returns a graph with the corresponding measures.
+</p>
+
+<p>
+<code>joint_logprob</code> can thus be a high-level function that delegates to this function and another one that computes the conditional density from that representation, and adds transformations like <i>marginalization</i> between these two steps.
+</p>
+
+<div id="outline-container-org64c3c6c" class="outline-2">
+<h2 id="org64c3c6c">Links to this note</h2>
+<div class="outline-text-2" id="text-org64c3c6c">
+<ul class="org-ul">
+<li><a href="./20220824142217-marginalize_over_discrete_parameters.html">Marginalize over discrete parameters</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-12-22 Thu 09:39 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AePPL and custom distributions</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">AePPL and custom distributions</h1>
+<p>
+Linked to <a href="20221220213241-condition_on_transformed_variables.html#ID-caa7788c-f2ce-42ba-a712-73fd69c93a1d">AePPL and transformed variables</a>. But we should also investigate the idea of having a <code>RandomVariableFromGraph</code> operator, that works similarly to <code>OpFromGraph</code>.
+</p>
+
+<p>
+We can already condition on and sample from the following:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream()
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">pert</span>(srng, a, b, c):
+    r<span style="color: #9FC59F;">"""Construct a random variable that is PERT-distributed."""</span>
+    <span style="color: #DFAF8F;">alpha</span> = 1 + 4 * (b - a) / (c - a)
+    <span style="color: #DFAF8F;">beta</span> = 1 + 4 * (c - b) / (c - a)
+    <span style="color: #DFAF8F;">X_rv</span> = srng.beta(alpha, beta)
+    <span style="color: #DFAF8F;">z</span> = a + (b - a) * X_rv
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> z
+
+<span style="color: #DFAF8F;">A_rv</span> = srng.uniform(10, 20, name=<span style="color: #CC9393;">"A"</span>)
+<span style="color: #DFAF8F;">B_rv</span> = srng.uniform(20, 65, name=<span style="color: #CC9393;">"B"</span>)
+<span style="color: #DFAF8F;">C_rv</span> = srng.uniform(65, 100, name=<span style="color: #CC9393;">"C"</span>)
+<span style="color: #DFAF8F;">Y_rv</span> = pert(srng, A_rv, B_rv, C_rv)
+
+logprob, (y_vv, a_vv, b_vv, c_vv) = aeppl.joint_logprob(Y_rv, A_rv, B_rv, C_rv)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Compile a function that samples from the prior predictive distribution</span>
+<span style="color: #DFAF8F;">sample_fn</span> = aesara.function([], [Y_rv, A_rv, B_rv, C_rv])
+<span style="color: #DFAF8F;">sample</span> = sample_fn()
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(sample)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Compile the joint log-density function</span>
+<span style="color: #DFAF8F;">logprob_fn</span> = aesara.function([y_vv, a_vv, b_vv, c_vv], logprob)
+<span style="color: #F0DFAF; font-weight: bold;">print</span>(logprob_fn(*sample))
+</pre>
+</div>
+
+<p>
+This would allow us to reduce the number of elementary distributions in Aesara/AePPL, and allow users to quickly add the distributions they need. By giving them a type we can use them in RV algebra relations.
+</p>
+
+<div id="outline-container-org5d74c99" class="outline-2">
+<h2 id="org5d74c99">Links to this note</h2>
+<div class="outline-text-2" id="text-org5d74c99">
+<ul class="org-ul">
+<li><a href="./20220824141859-aeppl.html">AePPL</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

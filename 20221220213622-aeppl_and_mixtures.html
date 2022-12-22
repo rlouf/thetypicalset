@@ -3,24 +3,76 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-22 Thu 06:16 -->
+<!-- 2022-12-22 Thu 09:39 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AePPL, mixtures and conditionals</title>
+<title>AePPL, discrete mixtures and conditionals</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">AePPL, mixtures and conditionals</h1>
+<h1 class="title">AePPL, discrete mixtures and conditionals</h1>
 <p>
-Probabilistic Programming Languages in Python ask you to use a ad-hoc <code>Mixture</code> <a target='_blank' rel='noopener noreferrer' class='external' href="https://docs.pymc.io/en/v5.0.0/api/distributions/generated/pymc.Mixture.html#pymc.Mixture">distribution object</a> to build mixture distributions. In <a href="20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a>/<a href="20220824141859-aeppl.html#ID-e18d689a-392a-407a-941a-f0ad2d2dc43e">AePPL</a> you can express the mixture in different ways.
+Let us consider a family of probability distributions \(\left\{\mathbb{P}_\mu : \mu \in \mathcal{M} \right\}\) where \(\mathcal{M} = \left\{1, \dots, K\right\}\) and \(\mathbb{Q}\) a probability distribution on the domain \(\mathcal{M}\). A discrete mixture model assumes that the value of a random variable \(Y\) can be drawm from one of the \(\mathbb{P}_\mu\): at each step we draw one value \(m \in \mathcal{M}\)  from \(\mathbb{Q}\), and then draw from \(\mathbb{P}_m\).
 </p>
 
-<div id="outline-container-org70a3dcc" class="outline-2">
-<h2 id="org70a3dcc">Indexing an array</h2>
-<div class="outline-text-2" id="text-org70a3dcc">
+<p>
+We can then write the likelihood of \(Y\) conditional on \(m\) as:
+</p>
+
+<p>
+\[
+\mathbb{P}(Y \mid  z) = \mathbb{P}_z(Y)
+\]
+</p>
+
+<p>
+Many probabilistic programming languages implement mixture via an ad-hoc <code>Mixture</code> <a target='_blank' rel='noopener noreferrer' class='external' href="https://docs.pymc.io/en/v5.0.0/api/distributions/generated/pymc.Mixture.html#pymc.Mixture">distribution object</a>. In <a href="20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a073b10351">Aesara</a>/<a href="20220824141859-aeppl.html#ID-e18d689a-392a-407a-941a-f0ad2d2dc43e">AePPL</a> mixtures are expressed via the generative process described above, using the following Aesara constructs:
+</p>
+<ul class="org-ul">
+<li>Indexing an array with a random variable;</li>
+<li><code>aesara.tensor.where</code>;</li>
+<li><code>aesara.ifelse.ifelse</code>.</li>
+</ul>
+
+
+<div id="outline-container-org5321e70" class="outline-2">
+<h2 id="org5321e70">Indexing an array</h2>
+<div class="outline-text-2" id="text-org5321e70">
 <p>
 We can define mixture by using a random variable with a discrete support (<code>Bernoulli</code>, <code>Categorical</code>, etc.) to index an array of random variables:
 </p>
@@ -54,9 +106,9 @@ logprob, (y_vv, i_vv) = aeppl.joint_logprob(Y_rv, I_rv)
 </div>
 
 
-<div id="outline-container-orgd0f104d" class="outline-2">
-<h2 id="orgd0f104d">Using <code>aesara.tensor.where</code></h2>
-<div class="outline-text-2" id="text-orgd0f104d">
+<div id="outline-container-org7440522" class="outline-2">
+<h2 id="org7440522">Using <code>aesara.tensor.where</code></h2>
+<div class="outline-text-2" id="text-org7440522">
 <p>
 We can also define mixtures using <code>aesara.tensor.where</code>; the conditional can be based on other random variables:
 </p>
@@ -87,9 +139,9 @@ logprob, (y_vv, i_vv) = aeppl.joint_logprob(y_rv, i_rv)
 </div>
 
 
-<div id="outline-container-org9d23a03" class="outline-2">
-<h2 id="org9d23a03"><span class="todo TODO">TODO</span> Using <code>aeara.ifelse.ifelse</code></h2>
-<div class="outline-text-2" id="text-org9d23a03">
+<div id="outline-container-org0a242c7" class="outline-2">
+<h2 id="org0a242c7"><span class="todo TODO">TODO</span> Using <code>aeara.ifelse.ifelse</code></h2>
+<div class="outline-text-2" id="text-org0a242c7">
 <p>
 We also <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aeppl/pull/169">soon</a> be able to use <code>aesara.ifelse</code> to define mixures in the same way we use <code>aesara.tensor.where</code>:
 </p>
@@ -114,22 +166,9 @@ logprob, (y_vv, i_vv) = aeppl.joint_logprob(Y_rv, i_rv)
 </div>
 </div>
 
-<div id="outline-container-org54b37fa" class="outline-2">
-<h2 id="org54b37fa">Marginalize</h2>
-<div class="outline-text-2" id="text-org54b37fa">
-<p>
-In the case of a mixture (where we select a random variable according to probabilities of selection), we often do not care about the posterior distribution of the indexing variable, and would thus like to <a href="20220824142217-marginalize_over_discrete_parameters.html#ID-630773fc-fe6e-4a2b-a191-2c984c27f963">marginalize over this discrete parameter</a>.
-</p>
-
-<p>
-This is why other PPLs use a <code>Mixture</code> distribution to represent mixtures, as the marginalization is baked in the expression of the logdensity.
-</p>
-</div>
-</div>
-
-<div id="outline-container-org47a1d1e" class="outline-2">
-<h2 id="org47a1d1e">Links to this note</h2>
-<div class="outline-text-2" id="text-org47a1d1e">
+<div id="outline-container-orga4638c8" class="outline-2">
+<h2 id="orga4638c8">Links to this note</h2>
+<div class="outline-text-2" id="text-orga4638c8">
 <ul class="org-ul">
 <li><a href="./20221220220656-aeppl_and_marginalization.html">AePPL and marginalization</a></li>
 <li><a href="./20220824141859-aeppl.html">AePPL</a></li>

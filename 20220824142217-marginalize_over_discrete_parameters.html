@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-12-22 Thu 06:16 -->
+<!-- 2022-12-22 Thu 09:39 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Marginalize over discrete parameters</title>
@@ -14,29 +14,71 @@
 <body>
 <div id="content" class="content">
 <h1 class="title">Marginalize over discrete parameters</h1>
+
+<div id="outline-container-org0c22644" class="outline-2">
+<h2 id="org0c22644">Design in <a href="20220824141859-aeppl.html#ID-e18d689a-392a-407a-941a-f0ad2d2dc43e">AePPL</a></h2>
+<div class="outline-text-2" id="text-org0c22644">
 <p>
-Marginalization is a something that happens at the level of the <i>density</i>. Here we would need to implement a <code>marginalize</code> function in AePPL that takes a density, a set of value variables and rewrites it into the corresponding marginalized density:
+Marginalization is an operation that happens at the level of the <i>probability density</i>. First, we could add a <code>marginalize</code> function that takes a density and a set of values to marginalize out, and rewrites the density to return its marginalized counterpart:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python">logprob, (y_vv, i_vv, n_vv) = aeppl.joint_logprob(Y_rv, I_rv, N_rv)
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+
+logprob, (y_vv, i_vv) = aeppl.joint_logprob(Y_rv, i_rv)
 <span style="color: #DFAF8F;">marginalized_logprob</span> = aeppl.marginalize(logprob, i_vv)
 </pre>
 </div>
 
 <p>
-This can happen for random variable with a <code>Counting</code> base measure and a finite support:
+Another solution is to add <code>marginalize</code> keyword to <code>joint_logprob</code>:
 </p>
-<ul class="org-ul">
-<li><a href="20220729104422-bernoulli_distribution.html#ID-82cc8d0e-682d-4082-90ac-36cf7fadcb72">Bernoulli</a></li>
-<li>Binomial</li>
-<li>Multinomial</li>
-<li>Categorical</li>
-</ul>
 
-<div id="outline-container-orge1bac74" class="outline-2">
-<h2 id="orge1bac74">Change point model</h2>
-<div class="outline-text-2" id="text-orge1bac74">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+
+logprob, (y_vv,) = aeppl.joint_logprob(Y_rv, i_rv, marginalize=(i_rv,))
+</pre>
+</div>
+
+<p>
+What this keyword hides is a function that acts at the <i>measure</i> level in AePPL's intermediate representation. The availability of this intermediate representation in <code>joint_logprob</code> makes it easier to perform marginalization at this level. The internals of <code>joint_logprob</code> would then look like in pseudo-code:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">joint_logprob</span>(*rvs, *, to_marginalize):
+    <span style="color: #DFAF8F;">rvs_to_values</span> = aeppl.internals.create_value_variables(rvs)
+    <span style="color: #DFAF8F;">measures</span> = aeppl.internals.to_ir(rvs_to_values)
+    <span style="color: #DFAF8F;">marginalized_measures</span> = aeppl.internals.marginalize(measures, to_marginalize)
+    <span style="color: #DFAF8F;">logdensity</span> = aeppl.internals.disintegrate(marginalized_measures)
+</pre>
+</div>
+
+<p>
+This makes me think that <a href="20221222092746-aeppl_s_intermediate_representation_should_be_a_first_class_citizen.html#ID-e6355555-c54b-46c1-8dde-d8608bb2a4ba">AePPL's intermediate representation should be a first-class citizen</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge2cb62c" class="outline-2">
+<h2 id="orge2cb62c">Related issues</h2>
+<div class="outline-text-2" id="text-orge2cb62c">
+<ul class="org-ul">
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aeppl/issues/21">https://github.com/aesara-devs/aeppl/issues/21</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgee4a060" class="outline-2">
+<h2 id="orgee4a060">Different examples of marginalization</h2>
+<div class="outline-text-2" id="text-orgee4a060">
+</div>
+<div id="outline-container-orgfdf4f57" class="outline-3">
+<h3 id="orgfdf4f57"><span class="todo TODO">TODO</span> Discrete mixtures</h3>
+</div>
+<div id="outline-container-org60f99b6" class="outline-3">
+<h3 id="org60f99b6">Switchpoint model</h3>
+<div class="outline-text-3" id="text-org60f99b6">
 <p>
 Consider the following example from the <a target='_blank' rel='noopener noreferrer' class='external' href="https://mc-stan.org/docs/2_20/stan-users-guide/change-point-section.html">Stan documentation</a>:
 </p>
@@ -70,14 +112,10 @@ Here we can marginalize over <code>integers</code> to ease sampling, and recover
 </p>
 </div>
 </div>
-
-<div id="outline-container-org9cce860" class="outline-2">
-<h2 id="org9cce860">Links to this note</h2>
-<div class="outline-text-2" id="text-org9cce860">
-<ul class="org-ul">
-<li><a href="./20221220213622-aeppl_and_mixtures.html">AePPL, mixtures and conditionals</a></li>
-</ul>
 </div>
+
+<div id="outline-container-org201a086" class="outline-2">
+<h2 id="org201a086">Links to this note</h2>
 </div>
 </div>
 </body>
