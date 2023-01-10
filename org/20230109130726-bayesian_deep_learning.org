@@ -1,0 +1,50 @@
+:PROPERTIES:
+:ID:       9944cedc-2e0a-40a7-a8db-4e6da04fef28
+:END:
+#+title: Bayesian Deep Learning
+
+This [[https://www.youtube.com/watch?v=GXs9Pmp6IKQ][talk]] by Andrew Gordon Wilson (2019).
+[[https://www.youtube.com/watch?v=lhwk4ESlyMA&t=951s][Other talk]] by Andrew Gordon Wilson (2022).
+
+The following notes are taken from his slides:
+
+* Why Bayesian Deep learning?
+
+- Model construction and understand generalization
+- Decision making
+- Better point estimates. Marginalization integrates away the posterior vs optimization.
+
+  \begin{align*}
+  P(y|x_*, y, X) &= \int P(y|x_*, w)p(w|y, X)\mathrm{d}w\\
+                 &\approx \frac{1}{N_{samp}} \sum_i P(y|x_*, w_i)\\
+  \end{align*}
+- Intepretability, incorporate expert knowledge
+- Successful in the second wave of DL
+- NN are less mysterious under the lens of probability theory
+- Bayesian neural network, by averaging over the posterior, take into account the fact that wide basin of attractions generalize better.
+
+Why not?
+- Computationally intractable. **BUT** all we care about is /averages over the posteriors/; we don't need to keep all the samples to do this.
+- Involves a lot of moving parts
+
+* Some practical stuff
+
+More principled [[id:e45c91db-b41a-4777-b0ad-6f3991c30db9][Fast Geometric Ensembling]]
+
+[[id:d939cc67-768c-46b6-9ca9-fa4f8f01ad65][Stochastic weight averaging]] allows to compute an approximation in weight space from which we can sample;
+
+
+Random low-dimensional subspace
+
+$$
+\omega = P z + \hat{\omega}
+$$
+
+- Run SGD with high LR
+- Collect snapshots $\omega_i$
+- Use SWA solution as weights $\hat{\omega} = \frac{1}{M} \sum_i \omega_i$
+- Find the first $k$ PCA components of $\hat{\omega} - \omega_i$
+
+* Are these approaches practical?
+
+HMC works better than everything else **out of the box**.

@@ -1,0 +1,26 @@
+:PROPERTIES:
+:ID:       d939cc67-768c-46b6-9ca9-fa4f8f01ad65
+:END:
+#+title: Stochastic weight averaging
+
+* Stochastic Weight Averaging
+
+
+- Drop-in replacements for SGD (or other optimizers);
+- Finds flat surfaces of the loss surfaces
+  The idea is that there is no gradient information inside flat regions for SGD to explore, so SGD will explore /around/ these regions. Averaging gets us inside this flat region.
+
+
+* SWAG (SWAG-Gaussian)
+
+https://arxiv.org/abs/1902.02476
+
+#+begin_quote
+We propose SWA-Gaussian (SWAG), a simple, scalable, and general purpose approach for uncertainty representation and calibration in deep learning. Stochastic Weight Averaging (SWA), which computes the first moment of stochastic gradient descent (SGD) iterates with a modified learning rate schedule, has recently been shown to improve generalization in deep learning. With SWAG, we fit a Gaussian using the SWA solution as the first moment and a low rank plus diagonal covariance also derived from the SGD iterates, forming an approximate posterior distribution over neural network weights; we then sample from this Gaussian distribution to perform Bayesian model averaging. We empirically find that SWAG approximates the shape of the true posterior, in accordance with results describing the stationary distribution of SGD iterates. Moreover, we demonstrate that SWAG performs well on a wide variety of tasks, including out of sample detection, calibration, and transfer learning, in comparison to many popular alternatives including MC dropout, KFAC Laplace, SGLD, and temperature scaling.
+#+end_quote
+
+Averaging the weights is an approximation of averaging the models?
+
+- Learn the firs two moments of SGD
+- Construct a gaussian approximation in weight space
+- Sample from this gaussian distribution, sample through predictive distribution and average.
