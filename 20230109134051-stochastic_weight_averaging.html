@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-01-10 Tue 08:44 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Stochastic weight averaging</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Stochastic weight averaging</h1>
+
+<div id="outline-container-orga59071d" class="outline-2">
+<h2 id="orga59071d">Stochastic Weight Averaging</h2>
+<div class="outline-text-2" id="text-orga59071d">
+<ul class="org-ul">
+<li>Drop-in replacements for SGD (or other optimizers);</li>
+<li>Finds flat surfaces of the loss surfaces
+The idea is that there is no gradient information inside flat regions for SGD to explore, so SGD will explore <i>around</i> these regions. Averaging gets us inside this flat region.</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgb024d5b" class="outline-2">
+<h2 id="orgb024d5b">SWAG (SWAG-Gaussian)</h2>
+<div class="outline-text-2" id="text-orgb024d5b">
+<p>
+<a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1902.02476">https://arxiv.org/abs/1902.02476</a>
+</p>
+
+<blockquote>
+<p>
+We propose SWA-Gaussian (SWAG), a simple, scalable, and general purpose approach for uncertainty representation and calibration in deep learning. Stochastic Weight Averaging (SWA), which computes the first moment of stochastic gradient descent (SGD) iterates with a modified learning rate schedule, has recently been shown to improve generalization in deep learning. With SWAG, we fit a Gaussian using the SWA solution as the first moment and a low rank plus diagonal covariance also derived from the SGD iterates, forming an approximate posterior distribution over neural network weights; we then sample from this Gaussian distribution to perform Bayesian model averaging. We empirically find that SWAG approximates the shape of the true posterior, in accordance with results describing the stationary distribution of SGD iterates. Moreover, we demonstrate that SWAG performs well on a wide variety of tasks, including out of sample detection, calibration, and transfer learning, in comparison to many popular alternatives including MC dropout, KFAC Laplace, SGLD, and temperature scaling.
+</p>
+</blockquote>
+
+<p>
+Averaging the weights is an approximation of averaging the models?
+</p>
+
+<ul class="org-ul">
+<li>Learn the firs two moments of SGD</li>
+<li>Construct a gaussian approximation in weight space</li>
+<li>Sample from this gaussian distribution, sample through predictive distribution and average.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1f10d95" class="outline-2">
+<h2 id="org1f10d95">Links to this note</h2>
+<div class="outline-text-2" id="text-org1f10d95">
+<ul class="org-ul">
+<li><a href="./20230109130726-bayesian_deep_learning.html">Bayesian Deep Learning</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

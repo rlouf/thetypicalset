@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-01-10 Tue 08:44 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bayesian Deep Learning</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Bayesian Deep Learning</h1>
+<p>
+This <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.youtube.com/watch?v=GXs9Pmp6IKQ">talk</a> by Andrew Gordon Wilson (2019).
+<a target='_blank' rel='noopener noreferrer' class='external' href="https://www.youtube.com/watch?v=lhwk4ESlyMA&amp;t=951s">Other talk</a> by Andrew Gordon Wilson (2022).
+</p>
+
+<p>
+The following notes are taken from his slides:
+</p>
+
+<div id="outline-container-orge8ba639" class="outline-2">
+<h2 id="orge8ba639">Why Bayesian Deep learning?</h2>
+<div class="outline-text-2" id="text-orge8ba639">
+<ul class="org-ul">
+<li>Model construction and understand generalization</li>
+<li>Decision making</li>
+<li><p>
+Better point estimates. Marginalization integrates away the posterior vs optimization.
+</p>
+
+\begin{align*}
+P(y|x_*, y, X) &= \int P(y|x_*, w)p(w|y, X)\mathrm{d}w\\
+               &\approx \frac{1}{N_{samp}} \sum_i P(y|x_*, w_i)\\
+\end{align*}</li>
+<li>Intepretability, incorporate expert knowledge</li>
+<li>Successful in the second wave of DL</li>
+<li>NN are less mysterious under the lens of probability theory</li>
+<li>Bayesian neural network, by averaging over the posterior, take into account the fact that wide basin of attractions generalize better.</li>
+</ul>
+
+<p>
+Why not?
+</p>
+<ul class="org-ul">
+<li>Computationally intractable. <b><b>BUT</b></b> all we care about is <i>averages over the posteriors</i>; we don't need to keep all the samples to do this.</li>
+<li>Involves a lot of moving parts</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org92610fa" class="outline-2">
+<h2 id="org92610fa">Some practical stuff</h2>
+<div class="outline-text-2" id="text-org92610fa">
+<p>
+More principled <a href="20230109134119-fast_geometric_ensembling.html#ID-e45c91db-b41a-4777-b0ad-6f3991c30db9">Fast Geometric Ensembling</a>
+</p>
+
+<p>
+<a href="20230109134051-stochastic_weight_averaging.html#ID-d939cc67-768c-46b6-9ca9-fa4f8f01ad65">Stochastic weight averaging</a> allows to compute an approximation in weight space from which we can sample;
+</p>
+
+
+<p>
+Random low-dimensional subspace
+</p>
+
+<p>
+\[
+\omega = P z + \hat{\omega}
+\]
+</p>
+
+<ul class="org-ul">
+<li>Run SGD with high LR</li>
+<li>Collect snapshots \(\omega_i\)</li>
+<li>Use SWA solution as weights \(\hat{\omega} = \frac{1}{M} \sum_i \omega_i\)</li>
+<li>Find the first \(k\) PCA components of \(\hat{\omega} - \omega_i\)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org26331f8" class="outline-2">
+<h2 id="org26331f8">Are these approaches practical?</h2>
+<div class="outline-text-2" id="text-org26331f8">
+<p>
+HMC works better than everything else <b><b>out of the box</b></b>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfa9b03e" class="outline-2">
+<h2 id="orgfa9b03e">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>
