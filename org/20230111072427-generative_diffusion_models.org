@@ -1,0 +1,35 @@
+:PROPERTIES:
+:ID:       8a51bcc1-fe81-4708-8b46-1f114e698066
+:END:
+#+title: Generative Diffusion Models
+
+
+/Noising diffusion/ process, the goal is to get from $P_{data}$ that we don't know and from which we'd like to sample to $P_0$ from which we can sample:
+
+\begin{equation*}
+\mathrm{d}Y_t = b(Y_t, t)\,\mathrm{d}t + \mathrm{d}\operatorname{B}_t
+\end{equation*}
+
+Where $b: \mathbb{R}^d \times \left[0, T\right] \to \mathrm{R}^d$ and $\operatorname{B}$ is a Brownian motion ([[id:1a08425d-1fa8-4f9f-98d0-423b0d5c0991][Ornstein-Uhlenbeck process]]). In practice we apply a time-rescaling to the noise process to apply less noise at small time (where we assume most information to reconstruct images is contained, and move quickly from reference distribution at large times?)
+
+\begin{equation*}
+\mathrm{d}Y_t = -\frac{1}{2}\beta(t)\,\mathrm{d}t + \sqrt{\beta(t)}\mathrm{d}\operatorname{B}_t
+\end{equation*}
+
+And then solve the reverse equation (/denoising generation/):
+
+\begin{equation*}
+\mathrm{d}X_t = \left\{b(X_t{T-t}, t) + \nabla_x \log q_{T-t}(x)\right\} \mathrm{d}t + \mathrm{d}\hat{\operatorname{B}}_t
+\end{equation*}
+
+
+Where $q_{t}$ is the marginal distribution of $Y_t$. $\nabla_x \log q$ is unknown, and we look to approximate it with the score function $s_\theta(x, t)$. We have two degrees of freedom in this scheme:
+
+- The functional form of $b$;
+- The functional form of $s_{\theta}$.
+
+Everything else is determined by mathematics of SDEs.
+
+* References
+
+- /From denoising diffusions to Denoising Markov Models/ https://arxiv.org/abs/2211.03595
