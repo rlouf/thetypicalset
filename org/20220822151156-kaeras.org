@@ -106,7 +106,7 @@ Layers are best implemented as =OpFromGraph=s for several reasons:
 2. We can retrieve the layer's parameters by walking the graph and looking at the inputs of =Apply= nodes whose =Op= is of =Layer= type. We can even add type parameters to indicate which are trainable, regularizable, etc.
 3. =aesara.dprint= shows the graph structure directly.
 
-#+begin_src python :results output
+#+begin_src python :results output :session
 from typing import Optional
 
 import aesara
@@ -192,6 +192,47 @@ Representing layers as =Ops= has several advantages:
 ** TODO Module
 
 How do we define a module in a similar way we defined =MLP= above with Flax? Is there anything special about modules compared to normal layers? Should we attribute a specific =Module= type to them, as opposed to =Layer=? If we consider they're merely a way to define a new layer they should be implemented as =OpFromGraph= as well. In this case we should have a general way to define layers so the code looks like:
+
+** TODO Bayesian Neural Network
+
+PPLs typically require you to define /probabilistic layers/, but this approach is not general as you cannot define an arbitrary prior structure on the weights. With Aesara/AeNN/AePPL it is fairly simple; you just initialize the weights as random variables:
+
+#+begin_src python :session
+srng = at.random.RandomStream(0)
+
+num_units = at.scalar("N")
+X = at.matrix("X")
+W = srng.normal(0, 1, size=(X.shape[1], num_units))
+b = at.scalar("b")
+
+out = Dense(x.shape[1], W, b)(x)
+
+aesara.dprint(out)
+# DenseLayer{inline=False} [id A]
+#  |X [id B]
+#  |normal_rv{0, (0, 0), floatX, False}.1 [id C]
+#  | |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FE904AED660>) [id D]
+#  | |SpecifyShape [id E]
+#  | | |Elemwise{Cast{int64}} [id F]
+#  | | | |MakeVector{dtype='float64'} [id G]
+#  | | |   |Elemwise{Cast{float64}} [id H]
+#  | | |   | |Subtensor{int64} [id I]
+#  | | |   |   |Shape [id J]
+#  | | |   |   | |X [id K]
+#  | | |   |   |ScalarConstant{1} [id L]
+#  | | |   |N [id M]
+#  | | |TensorConstant{2} [id N]
+#  | |TensorConstant{11} [id O]
+#  | |TensorConstant{0} [id P]
+#  | |TensorConstant{1} [id Q]
+#  |b [id R]
+#  |RandomGeneratorSharedVariable(<Generator(PCG64) at 0x7FE904AED660>) [id D]
+#+end_src
+
+One interesting thing to note is that since the operations performed inside layers are deterministic, AePPL won't need to see "inside" the layer Ops to compute the models' log-density.
+
+/Q: What if I want to initialize some weights randomly but not consider them as random variables?/
+A: Don't pass them to AePPL's =joint_logprob=!
 
 ** Training
 
