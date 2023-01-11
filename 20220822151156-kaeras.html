@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-01-10 Tue 08:44 -->
+<!-- 2023-01-11 Wed 06:26 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AeNN</title>
@@ -50,9 +50,9 @@
 AeNN would be a deep-learning API that sits on top of Aesara. It is inspired by <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io">Keras</a> (which used to be built on top of Theano), Flax (NN library built with JAX), and of course <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/Lasagne/Lasagne">Lasagne</a>. It would make full use of Aesara's graph and rewrite capabilities.
 </p>
 
-<div id="outline-container-orgff2feb3" class="outline-2">
-<h2 id="orgff2feb3">Inspiration</h2>
-<div class="outline-text-2" id="text-orgff2feb3">
+<div id="outline-container-orgf3be687" class="outline-2">
+<h2 id="orgf3be687">Inspiration</h2>
+<div class="outline-text-2" id="text-orgf3be687">
 <p>
 A minimum viable library could be to be able to reproduce <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io/">Keras' documentation</a> examples. For instance the MNIST convnet:
 </p>
@@ -106,9 +106,9 @@ I find Keras' API to be sometimes too high-level. In particular, I am not a big 
 </div>
 </div>
 
-<div id="outline-container-orgde8647c" class="outline-2">
-<h2 id="orgde8647c">Building a simple MLP model</h2>
-<div class="outline-text-2" id="text-orgde8647c">
+<div id="outline-container-orgaf151ff" class="outline-2">
+<h2 id="orgaf151ff">Building a simple MLP model</h2>
+<div class="outline-text-2" id="text-orgaf151ff">
 <p>
 Let's take and try to reproduce a simpler example, the MLP example taken from the Flax documentation:
 </p>
@@ -130,9 +130,9 @@ Let's take and try to reproduce a simpler example, the MLP example taken from th
 </div>
 </div>
 
-<div id="outline-container-org663110a" class="outline-3">
-<h3 id="org663110a">Activation Function</h3>
-<div class="outline-text-3" id="text-org663110a">
+<div id="outline-container-orgf2bd4db" class="outline-3">
+<h3 id="orgf2bd4db">Activation Function</h3>
+<div class="outline-text-3" id="text-orgf2bd4db">
 <p>
 The first approach to implementing the activation function \(\operatorname{Relu}\) is to define it as a function:
 </p>
@@ -168,9 +168,9 @@ So <code>relu</code> will need to be implemented as an <code>OpFromGraph</code>,
 </div>
 </div>
 
-<div id="outline-container-org9974b7f" class="outline-3">
-<h3 id="org9974b7f">Dense layer</h3>
-<div class="outline-text-3" id="text-org9974b7f">
+<div id="outline-container-org9508fac" class="outline-3">
+<h3 id="org9508fac">Dense layer</h3>
+<div class="outline-text-3" id="text-org9508fac">
 <p>
 Layers are best implemented as =OpFromGraph=s for several reasons:
 </p>
@@ -252,18 +252,69 @@ Representing layers as <code>Ops</code> has several advantages:
 </div>
 </div>
 
-<div id="outline-container-org80655ac" class="outline-3">
-<h3 id="org80655ac"><span class="todo TODO">TODO</span> Module</h3>
-<div class="outline-text-3" id="text-org80655ac">
+<div id="outline-container-org6d1d603" class="outline-3">
+<h3 id="org6d1d603"><span class="todo TODO">TODO</span> Module</h3>
+<div class="outline-text-3" id="text-org6d1d603">
 <p>
 How do we define a module in a similar way we defined <code>MLP</code> above with Flax? Is there anything special about modules compared to normal layers? Should we attribute a specific <code>Module</code> type to them, as opposed to <code>Layer</code>? If we consider they're merely a way to define a new layer they should be implemented as <code>OpFromGraph</code> as well. In this case we should have a general way to define layers so the code looks like:
 </p>
 </div>
 </div>
 
-<div id="outline-container-org018684e" class="outline-3">
-<h3 id="org018684e">Training</h3>
-<div class="outline-text-3" id="text-org018684e">
+<div id="outline-container-orgf989b94" class="outline-3">
+<h3 id="orgf989b94"><span class="todo TODO">TODO</span> Bayesian Neural Network</h3>
+<div class="outline-text-3" id="text-orgf989b94">
+<p>
+PPLs typically require you to define <i>probabilistic layers</i>, but this approach is not general as you cannot define an arbitrary prior structure on the weights. With Aesara/AeNN/AePPL it is fairly simple; you just initialize the weights as random variables:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">num_units</span> = at.scalar(<span style="color: #CC9393;">"N"</span>)
+<span style="color: #DFAF8F;">X</span> = at.matrix(<span style="color: #CC9393;">"X"</span>)
+<span style="color: #DFAF8F;">W</span> = srng.normal(0, 1, size=(X.shape[1], num_units))
+<span style="color: #DFAF8F;">b</span> = at.scalar(<span style="color: #CC9393;">"b"</span>)
+
+<span style="color: #DFAF8F;">out</span> = Dense(x.shape[1], W, b)(x)
+
+aesara.dprint(out)
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">DenseLayer{inline=False} [id A]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">|X [id B]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">|normal_rv{0, (0, 0), floatX, False}.1 [id C]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| |RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FE904AED660&gt;) [id D]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| |SpecifyShape [id E]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | |Elemwise{Cast{int64}} [id F]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | | |MakeVector{dtype='float64'} [id G]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | |   |Elemwise{Cast{float64}} [id H]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | |   | |Subtensor{int64} [id I]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | |   |   |Shape [id J]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | |   |   | |X [id K]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | |   |   |ScalarConstant{1} [id L]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | |   |N [id M]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| | |TensorConstant{2} [id N]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| |TensorConstant{11} [id O]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| |TensorConstant{0} [id P]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">| |TensorConstant{1} [id Q]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">|b [id R]</span>
+<span style="color: #5F7F5F;">#  </span><span style="color: #7F9F7F;">|RandomGeneratorSharedVariable(&lt;Generator(PCG64) at 0x7FE904AED660&gt;) [id D]</span>
+</pre>
+</div>
+
+<p>
+One interesting thing to note is that since the operations performed inside layers are deterministic, AePPL won't need to see "inside" the layer Ops to compute the models' log-density.
+</p>
+
+<p>
+<i>Q: What if I want to initialize some weights randomly but not consider them as random variables?</i>
+A: Don't pass them to AePPL's <code>joint_logprob</code>!
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga2e9686" class="outline-3">
+<h3 id="orga2e9686">Training</h3>
+<div class="outline-text-3" id="text-orga2e9686">
 <p>
 We need to be able to call the model with <code>model(batch, parameters)</code>, then compute the loss, then update the parameter values using an optimizer.
 </p>
@@ -287,9 +338,9 @@ We need to be able to call the model with <code>model(batch, parameters)</code>,
 </div>
 </div>
 
-<div id="outline-container-org1ecfe8a" class="outline-2">
-<h2 id="org1ecfe8a">Graph rewriting</h2>
-<div class="outline-text-2" id="text-org1ecfe8a">
+<div id="outline-container-org949ddaa" class="outline-2">
+<h2 id="org949ddaa">Graph rewriting</h2>
+<div class="outline-text-2" id="text-org949ddaa">
 <p>
 We can perform rewriting at the layer semantic level, for two reasons:
 </p>
@@ -308,9 +359,9 @@ relu(input_8)==conv2d(1,1,0,2,input_8,Iconv(3,3))
 </div>
 </div>
 
-<div id="outline-container-org23455f5" class="outline-2">
-<h2 id="org23455f5">Links to this note</h2>
-<div class="outline-text-2" id="text-org23455f5">
+<div id="outline-container-orga31915b" class="outline-2">
+<h2 id="orga31915b">Links to this note</h2>
+<div class="outline-text-2" id="text-orga31915b">
 <ul class="org-ul">
 <li><a href="./20220823090532-ops.html">Ops</a></li>
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
