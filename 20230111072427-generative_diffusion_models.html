@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-01-11 Wed 07:01 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Generative Diffusion Models</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Generative Diffusion Models</h1>
+<p>
+<i>Noising diffusion</i> process, the goal is to get from \(P_{data}\) that we don't know and from which we'd like to sample to \(P_0\) from which we can sample:
+</p>
+
+\begin{equation*}
+\mathrm{d}Y_t = b(Y_t, t)\,\mathrm{d}t + \mathrm{d}\operatorname{B}_t
+\end{equation*}
+
+<p>
+Where \(b: \mathbb{R}^d \times \left[0, T\right] \to \mathrm{R}^d\) and \(\operatorname{B}\) is a Brownian motion (<a href="20211129200726-gaussian_noise_kernel.html#ID-1a08425d-1fa8-4f9f-98d0-423b0d5c0991">Ornstein-Uhlenbeck process</a>). In practice we apply a time-rescaling to the noise process to apply less noise at small time (where we assume most information to reconstruct images is contained, and move quickly from reference distribution at large times?)
+</p>
+
+\begin{equation*}
+\mathrm{d}Y_t = -\frac{1}{2}\beta(t)\,\mathrm{d}t + \sqrt{\beta(t)}\mathrm{d}\operatorname{B}_t
+\end{equation*}
+
+<p>
+And then solve the reverse equation (<i>denoising generation</i>):
+</p>
+
+\begin{equation*}
+\mathrm{d}X_t = \left\{b(X_t{T-t}, t) + \nabla_x \log q_{T-t}(x)\right\} \mathrm{d}t + \mathrm{d}\hat{\operatorname{B}}_t
+\end{equation*}
+
+
+<p>
+Where \(q_{t}\) is the marginal distribution of \(Y_t\). \(\nabla_x \log q\) is unknown, and we look to approximate it with the score function \(s_\theta(x, t)\). We have two degrees of freedom in this scheme:
+</p>
+
+<ul class="org-ul">
+<li>The functional form of \(b\);</li>
+<li>The functional form of \(s_{\theta}\).</li>
+</ul>
+
+<p>
+Everything else is determined by mathematics of SDEs.
+</p>
+
+<div id="outline-container-org8be4af7" class="outline-2">
+<h2 id="org8be4af7">References</h2>
+<div class="outline-text-2" id="text-org8be4af7">
+<ul class="org-ul">
+<li><i>From denoising diffusions to Denoising Markov Models</i> <a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/2211.03595">https://arxiv.org/abs/2211.03595</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org0080b94" class="outline-2">
+<h2 id="org0080b94">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>
