@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-01-12 Thu 08:06 -->
+<!-- 2023-01-19 Thu 17:07 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AeNN</title>
@@ -50,9 +50,9 @@
 AeNN would be a deep-learning API that sits on top of Aesara. It is inspired by <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io">Keras</a> (which used to be built on top of Theano), Flax (NN library built with JAX), and of course <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/Lasagne/Lasagne">Lasagne</a>. It would make full use of Aesara's graph and rewrite capabilities.
 </p>
 
-<div id="outline-container-org065447a" class="outline-2">
-<h2 id="org065447a">Inspiration</h2>
-<div class="outline-text-2" id="text-org065447a">
+<div id="outline-container-org4e1c889" class="outline-2">
+<h2 id="org4e1c889">Inspiration</h2>
+<div class="outline-text-2" id="text-org4e1c889">
 <p>
 A minimum viable library could be to be able to reproduce <a target='_blank' rel='noopener noreferrer' class='external' href="https://keras.io/">Keras' documentation</a> examples. For instance the MNIST convnet:
 </p>
@@ -106,9 +106,9 @@ I find Keras' API to be sometimes too high-level. In particular, I am not a big 
 </div>
 </div>
 
-<div id="outline-container-orge704339" class="outline-2">
-<h2 id="orge704339">Building a simple MLP model</h2>
-<div class="outline-text-2" id="text-orge704339">
+<div id="outline-container-orgb1ddc7b" class="outline-2">
+<h2 id="orgb1ddc7b">Building a simple MLP model</h2>
+<div class="outline-text-2" id="text-orgb1ddc7b">
 <p>
 Let's take and try to reproduce a simpler example, the MLP example taken from the Flax documentation:
 </p>
@@ -130,9 +130,9 @@ Let's take and try to reproduce a simpler example, the MLP example taken from th
 </div>
 </div>
 
-<div id="outline-container-orgdc09426" class="outline-3">
-<h3 id="orgdc09426">Activation Function</h3>
-<div class="outline-text-3" id="text-orgdc09426">
+<div id="outline-container-orgec11421" class="outline-3">
+<h3 id="orgec11421">Activation Function</h3>
+<div class="outline-text-3" id="text-orgec11421">
 <p>
 The first approach to implementing the activation function \(\operatorname{Relu}\) is to define it as a function:
 </p>
@@ -168,9 +168,9 @@ So <code>relu</code> will need to be implemented as an <code>OpFromGraph</code>,
 </div>
 </div>
 
-<div id="outline-container-org36bc381" class="outline-3">
-<h3 id="org36bc381">Dense layer</h3>
-<div class="outline-text-3" id="text-org36bc381">
+<div id="outline-container-orge316670" class="outline-3">
+<h3 id="orge316670">Dense layer</h3>
+<div class="outline-text-3" id="text-orge316670">
 <p>
 Layers are best implemented as =OpFromGraph=s for several reasons:
 </p>
@@ -252,18 +252,163 @@ Representing layers as <code>Ops</code> has several advantages:
 </div>
 </div>
 
-<div id="outline-container-orgc2e623d" class="outline-3">
-<h3 id="orgc2e623d"><span class="todo TODO">TODO</span> Module</h3>
-<div class="outline-text-3" id="text-orgc2e623d">
+<div id="outline-container-org10a098a" class="outline-3">
+<h3 id="org10a098a">Management of parameters</h3>
+<div class="outline-text-3" id="text-org10a098a">
+<p>
+Neural network libraries typically initialize the parameters for the users, and they provide them with a way to access their values.
+</p>
+</div>
+
+<div id="outline-container-org13d859a" class="outline-4">
+<h4 id="org13d859a">Lasagne</h4>
+<div class="outline-text-4" id="text-org13d859a">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">from</span> lasagne.layers <span style="color: #F0DFAF; font-weight: bold;">import</span> InputLayer, DenseLayer, get_all_params, get_output
+<span style="color: #F0DFAF; font-weight: bold;">from</span> lasagne.updates <span style="color: #F0DFAF; font-weight: bold;">import</span> nesterov_momentum
+<span style="color: #F0DFAF; font-weight: bold;">from</span> lasagme.objectives <span style="color: #F0DFAF; font-weight: bold;">import</span> categorical_crossentropy
+
+<span style="color: #DFAF8F;">x</span> = at.matrix(<span style="color: #CC9393;">'x'</span>)
+<span style="color: #DFAF8F;">y</span> = at.matrix(<span style="color: #CC9393;">'y'</span>)
+
+<span style="color: #DFAF8F;">l_in</span> = InputLayer((100, 20), x)
+<span style="color: #DFAF8F;">l1</span> = DenseLayer(l_in, num_units=50)
+<span style="color: #DFAF8F;">l2</span> = DenseLayer(l1, num_units=30)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">compue loss</span>
+<span style="color: #DFAF8F;">prediction</span> = get_output(l2)
+<span style="color: #DFAF8F;">loss</span> = categorical_crossentropy(prediction, y)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">get parameter updates</span>
+<span style="color: #DFAF8F;">all_params</span> = get_all_params(l2)
+<span style="color: #F0DFAF; font-weight: bold;">assert</span> all_params ==[l1.W, l1.b, l2.W, l2.b]
+
+<span style="color: #DFAF8F;">updates</span> = nesterov_momentum(loss, params, learning_rate=0.01, momentum=0.9)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge8f863f" class="outline-4">
+<h4 id="orge8f863f">Flax</h4>
+<div class="outline-text-4" id="text-orge8f863f">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> Sequence
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax.numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> jnp
+<span style="color: #F0DFAF; font-weight: bold;">import</span> flax.linen <span style="color: #F0DFAF; font-weight: bold;">as</span> nn
+
+<span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">MLP</span>(nn.Module):
+  features: Sequence[<span style="color: #DCDCCC; font-weight: bold;">int</span>]
+
+  <span style="color: #7CB8BB;">@nn.compact</span>
+  <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">__call__</span>(<span style="color: #F0DFAF; font-weight: bold;">self</span>, x):
+    <span style="color: #F0DFAF; font-weight: bold;">for</span> feat <span style="color: #F0DFAF; font-weight: bold;">in</span> <span style="color: #F0DFAF; font-weight: bold;">self</span>.features[:-1]:
+      <span style="color: #DFAF8F;">x</span> = nn.relu(nn.Dense(feat)(x))
+    <span style="color: #DFAF8F;">x</span> = nn.Dense(<span style="color: #F0DFAF; font-weight: bold;">self</span>.features[-1])(x)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> x
+
+<span style="color: #DFAF8F;">model</span> = MLP([12, 8, 4])
+<span style="color: #DFAF8F;">batch</span> = jnp.ones((32, 10))
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Get the parameter values</span>
+<span style="color: #DFAF8F;">variables</span> = model.init(jax.random.PRNGKey(0), batch)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Get model prediction</span>
+<span style="color: #DFAF8F;">output</span> = model.<span style="color: #DCDCCC; font-weight: bold;">apply</span>(variables, batch)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org45e943a" class="outline-3">
+<h3 id="org45e943a">Equinox</h3>
+<div class="outline-text-3" id="text-org45e943a">
+<p>
+Equinox uses the <code>model(x)</code>  and <code>equinox.update(model, updates)</code> pattern (where <code>updates</code> are gradient updates) to avoid having to deal with parameters explicitly
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #DFAF8F;">linear</span> = equinox.nn.Linear(in_features, out_features)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org249d118" class="outline-3">
+<h3 id="org249d118">AeNN</h3>
+<div class="outline-text-3" id="text-org249d118">
+<p>
+A few notes:
+</p>
+<ul class="org-ul">
+<li>Only the number of units need be specified</li>
+<li>In some situations (BNN) we'd like to specify the units themselves</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aenn <span style="color: #F0DFAF; font-weight: bold;">as</span> nn
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">multiple dispatch</span>
+<span style="color: #DFAF8F;">x</span> = nn.Dense(50)(x)
+<span style="color: #DFAF8F;">x</span> = nn.Dense(W, b)(x)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Lasagne currently does this</span>
+<span style="color: #DFAF8F;">x</span> = nn.Dense(50, W, b)(x)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> flax.linen <span style="color: #F0DFAF; font-weight: bold;">as</span> nn
+
+
+<span style="color: #DFAF8F;">x</span> = nn.Dense(50, bias=<span style="color: #BFEBBF;">False</span>)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">class</span> <span style="color: #7CB8BB;">Dense</span>():
+
+    <span style="color: #DFAF8F;">__init__</span> = MethodDispatcher(<span style="color: #CC9393;">'f'</span>)
+
+    <span style="color: #7CB8BB;">@__init__.register</span>(<span style="color: #DCDCCC; font-weight: bold;">int</span>)
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">_init_units</span>(units: <span style="color: #DCDCCC; font-weight: bold;">int</span>):
+        <span style="color: #F0DFAF; font-weight: bold;">self</span>.units = units
+        <span style="color: #F0DFAF; font-weight: bold;">self</span>.W = <span style="color: #BFEBBF;">None</span>
+        <span style="color: #F0DFAF; font-weight: bold;">self</span>.b = <span style="color: #BFEBBF;">None</span>
+
+    <span style="color: #7CB8BB;">@__init__.register</span>(TensorVariable)
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">_init_W</span>(W = <span style="color: #BFEBBF;">None</span>, b=<span style="color: #BFEBBF;">None</span>):
+        <span style="color: #F0DFAF; font-weight: bold;">self</span>.W = W
+        <span style="color: #F0DFAF; font-weight: bold;">self</span>.b = b
+
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">__call__</span>(<span style="color: #F0DFAF; font-weight: bold;">self</span>, x):
+        <span style="color: #DFAF8F;">num_inputs</span> = x.shape[0]
+
+        <span style="color: #DFAF8F;">output</span> = at.dot(x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W) + <span style="color: #F0DFAF; font-weight: bold;">self</span>.b
+        <span style="color: #DFAF8F;">dense</span> = DenseLayer([x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W, <span style="color: #F0DFAF; font-weight: bold;">self</span>.b], [output])
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> dense(x, <span style="color: #F0DFAF; font-weight: bold;">self</span>.W, <span style="color: #F0DFAF; font-weight: bold;">self</span>.b)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7b1e004" class="outline-3">
+<h3 id="org7b1e004"><span class="todo TODO">TODO</span> Module</h3>
+<div class="outline-text-3" id="text-org7b1e004">
 <p>
 How do we define a module in a similar way we defined <code>MLP</code> above with Flax? Is there anything special about modules compared to normal layers? Should we attribute a specific <code>Module</code> type to them, as opposed to <code>Layer</code>? If we consider they're merely a way to define a new layer they should be implemented as <code>OpFromGraph</code> as well. In this case we should have a general way to define layers so the code looks like:
 </p>
 </div>
 </div>
 
-<div id="outline-container-org82fa671" class="outline-3">
-<h3 id="org82fa671"><span class="todo TODO">TODO</span> Bayesian Neural Network</h3>
-<div class="outline-text-3" id="text-org82fa671">
+<div id="outline-container-org9b83afd" class="outline-3">
+<h3 id="org9b83afd"><span class="todo TODO">TODO</span> Bayesian Neural Network</h3>
+<div class="outline-text-3" id="text-org9b83afd">
 <p>
 PPLs typically require you to define <i>probabilistic layers</i>, but this approach is not general as you cannot define an arbitrary prior structure on the weights. With Aesara/AeNN/AePPL it is fairly simple; you just initialize the weights as random variables:
 </p>
@@ -312,9 +457,9 @@ A: Don't pass them to AePPL's <code>joint_logprob</code>!
 </div>
 </div>
 
-<div id="outline-container-orgc123765" class="outline-3">
-<h3 id="orgc123765">Training</h3>
-<div class="outline-text-3" id="text-orgc123765">
+<div id="outline-container-org8e9921a" class="outline-3">
+<h3 id="org8e9921a">Training</h3>
+<div class="outline-text-3" id="text-org8e9921a">
 <p>
 We need to be able to call the model with <code>model(batch, parameters)</code>, then compute the loss, then update the parameter values using an optimizer.
 </p>
@@ -338,9 +483,9 @@ We need to be able to call the model with <code>model(batch, parameters)</code>,
 </div>
 </div>
 
-<div id="outline-container-org13423ac" class="outline-2">
-<h2 id="org13423ac">Graph rewriting</h2>
-<div class="outline-text-2" id="text-org13423ac">
+<div id="outline-container-org743982e" class="outline-2">
+<h2 id="org743982e">Graph rewriting</h2>
+<div class="outline-text-2" id="text-org743982e">
 <p>
 We can perform rewriting at the layer semantic level, for two reasons:
 </p>
@@ -359,9 +504,9 @@ relu(input_8)==conv2d(1,1,0,2,input_8,Iconv(3,3))
 </div>
 </div>
 
-<div id="outline-container-org357b5b6" class="outline-2">
-<h2 id="org357b5b6">Links to this note</h2>
-<div class="outline-text-2" id="text-org357b5b6">
+<div id="outline-container-org5f48fc7" class="outline-2">
+<h2 id="org5f48fc7">Links to this note</h2>
+<div class="outline-text-2" id="text-org5f48fc7">
 <ul class="org-ul">
 <li><a href="./20220823090532-ops.html">Ops</a></li>
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>

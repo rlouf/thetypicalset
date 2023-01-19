@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-01-19 Thu 17:06 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Adoption of MCMC methods</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Adoption of MCMC methods</h1>
+<p>
+<a href="20220306194751-markov_chain_monte_carlo_new.html#ID-5acc4f0f-417e-424f-95a5-1c95e7e822ff">Markov Chain Monte Carlo</a> methods <a target='_blank' rel='noopener noreferrer' class='external' href="https://twitter.com/remilouf/status/1611805780784873472?s=20&amp;t=3Nv6QxqIbRLmW8Ukp2Kfsg">suffer from several issues</a> among which:
+</p>
+
+<ul class="org-ul">
+<li>Getting MCMC to work out of the box is hard;</li>
+<li>Current frameworks are not built for production;</li>
+<li>Hard to express models in a PPL-friendly way;</li>
+<li>No easy-to-use software to cover most common use cases (Bambi);</li>
+</ul>
+
+<p>
+It would be rather nice to have a tool like
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aemcmc
+<span style="color: #F0DFAF; font-weight: bold;">import</span> daeploy
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">mu_rv</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">s_rv</span> = srng.halfnormal(1.)
+<span style="color: #DFAF8F;">Y_t</span> = srng.normal(0, s_rv)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">samples locally</span>
+<span style="color: #DFAF8F;">results</span> = aemcmc.sample(
+    {Y_t: data},
+    num_warmup=1000,
+    num_samples=1000
+)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">samples automatically, on the cloud</span>
+<span style="color: #DFAF8F;">results</span> = deploy.sample(
+    {Y_t: data},
+    num_warmup=1000,
+    num_samples=1000
+)
+</pre>
+</div>
+
+<div id="outline-container-org4bcac12" class="outline-2">
+<h2 id="org4bcac12">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>
