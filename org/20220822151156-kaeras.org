@@ -189,6 +189,122 @@ Representing layers as =Ops= has several advantages:
 3. Layers can be targetted by rewrites, which opens possibilities for optimizations and also AutoML (we can replace layers);
 4. We can have layer-specific rules for transpilation. XLA has convolution-specific Ops.
 
+** Management of parameters
+
+Neural network libraries typically initialize the parameters for the users, and they provide them with a way to access their values.
+
+*** Lasagne
+
+#+begin_src python
+import aesara.tensor as at
+from lasagne.layers import InputLayer, DenseLayer, get_all_params, get_output
+from lasagne.updates import nesterov_momentum
+from lasagme.objectives import categorical_crossentropy
+
+x = at.matrix('x')
+y = at.matrix('y')
+
+l_in = InputLayer((100, 20), x)
+l1 = DenseLayer(l_in, num_units=50)
+l2 = DenseLayer(l1, num_units=30)
+
+# compue loss
+prediction = get_output(l2)
+loss = categorical_crossentropy(prediction, y)
+
+# get parameter updates
+all_params = get_all_params(l2)
+assert all_params ==[l1.W, l1.b, l2.W, l2.b]
+
+updates = nesterov_momentum(loss, params, learning_rate=0.01, momentum=0.9)
+#+end_src
+
+*** Flax
+
+#+begin_src python
+from typing import Sequence
+
+import numpy as np
+import jax
+import jax.numpy as jnp
+import flax.linen as nn
+
+class MLP(nn.Module):
+  features: Sequence[int]
+
+  @nn.compact
+  def __call__(self, x):
+    for feat in self.features[:-1]:
+      x = nn.relu(nn.Dense(feat)(x))
+    x = nn.Dense(self.features[-1])(x)
+    return x
+
+model = MLP([12, 8, 4])
+batch = jnp.ones((32, 10))
+
+# Get the parameter values
+variables = model.init(jax.random.PRNGKey(0), batch)
+
+# Get model prediction
+output = model.apply(variables, batch)
+#+end_src
+
+** Equinox
+
+Equinox uses the =model(x)=  and =equinox.update(model, updates)= pattern (where =updates= are gradient updates) to avoid having to deal with parameters explicitly
+
+#+begin_src python
+linear = equinox.nn.Linear(in_features, out_features)
+#+end_src
+
+** AeNN
+
+A few notes:
+- Only the number of units need be specified
+- In some situations (BNN) we'd like to specify the units themselves
+
+#+begin_src python
+import aenn as nn
+
+# multiple dispatch
+x = nn.Dense(50)(x)
+x = nn.Dense(W, b)(x)
+
+# Lasagne currently does this
+x = nn.Dense(50, W, b)(x)
+#+end_src
+
+#+begin_src python
+import flax.linen as nn
+
+
+x = nn.Dense(50, bias=False)
+#+end_src
+
+#+begin_src python
+class Dense():
+
+    __init__ = MethodDispatcher('f')
+
+    @__init__.register(int)
+    def _init_units(units: int):
+        self.units = units
+        self.W = None
+        self.b = None
+
+    @__init__.register(TensorVariable)
+    def _init_W(W = None, b=None):
+        self.W = W
+        self.b = b
+
+    def __call__(self, x):
+        num_inputs = x.shape[0]
+
+        output = at.dot(x, self.W) + self.b
+        dense = DenseLayer([x, self.W, self.b], [output])
+        return dense(x, self.W, self.b)
+#+end_src
+
 ** TODO Module
 
 How do we define a module in a similar way we defined =MLP= above with Flax? Is there anything special about modules compared to normal layers? Should we attribute a specific =Module= type to them, as opposed to =Layer=? If we consider they're merely a way to define a new layer they should be implemented as =OpFromGraph= as well. In this case we should have a general way to define layers so the code looks like:

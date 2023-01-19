@@ -468,6 +468,64 @@ rng_key = np.random.default_rng(0)
 fn(rng_key)
 
 #+end_src
+* AeP: New abstraction for =RandomVariable=s
+
+** Problem
+
+Truncation is an operator that operates on a random variable and returns a new random variable, so we would intuitively want to write it like:
+
+#+begin_src python
+x_rv = truncate(at.random.normal(0, 1), lower=0)
+#+end_src
+
+Although this would currently be an function of elements of the event space $E$.
+
+** We
+
+Solutions can take inspiration from the [[https://probprog.github.io/anglican/][Anglican]] probabilistic programming language implemented in Clojure. It makes $(X, \mathbb{P})$ couples like the one implicitly defined by $\operatorname{normal}(0, 1)$ first-class citizens:
+
+#+begin_src python
+import aesara.tensor.random as ar
+
+x_rv = ar.normal(0, 1)
+x = ar.sample(rng, x_rv)  # x is a `RandomVariable`
+#+end_src
+
+=sample(rng, \mathcal{F})= takes a rng key $\in \Omega$, a couple $(X, \mathbb{P})$ and returns an element of $E$. =x_rv= is of type =Measure= and
+
+#+begin_src haskell
+sample :: Key -> Measure -> RandomVariable
+#+end_src
+
+Which with the =RandomStream= API could be written as:
+
+#+begin_src python
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+srng = at.random.RandomStream(0)
+x = srng.sample(ar.normal(0, 1))  # x is a `RandomVariable`
+#+end_src
+
+The log-density it returned by AePPL's =logdensity= function:
+
+#+begin_src python
+import aeppl
+
+aeppl.logdensity(ar.normal, x, 0, 1)
+#+end_src
+
+*** The original problem
+
+#+begin_src python
+import aesara.tensor.random as ar
+import aeppl
+
+x_rv = ar.normal(0, 1)
+x_tr = aeppl.truncate(x_rv, lower=0)
+x = ar.sample(rng, x_tr)
+#+end_src
+
 
 * RandomVariable Ops
 

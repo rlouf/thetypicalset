@@ -1,0 +1,39 @@
+:PROPERTIES:
+:ID:       8ae65226-ff46-4463-80c9-9cca3546bb52
+:END:
+#+title: Adoption of MCMC methods
+
+[[id:5acc4f0f-417e-424f-95a5-1c95e7e822ff][Markov Chain Monte Carlo]] methods [[https://twitter.com/remilouf/status/1611805780784873472?s=20&t=3Nv6QxqIbRLmW8Ukp2Kfsg][suffer from several issues]] among which:
+
+- Getting MCMC to work out of the box is hard;
+- Current frameworks are not built for production;
+- Hard to express models in a PPL-friendly way;
+- No easy-to-use software to cover most common use cases (Bambi);
+
+It would be rather nice to have a tool like
+
+#+begin_src python
+import aesara.tensor as at
+import aemcmc
+import daeploy
+
+srng = at.random.RandomStream(0)
+
+mu_rv = srng.normal(0, 1)
+s_rv = srng.halfnormal(1.)
+Y_t = srng.normal(0, s_rv)
+
+# samples locally
+results = aemcmc.sample(
+    {Y_t: data},
+    num_warmup=1000,
+    num_samples=1000
+)
+
+# samples automatically, on the cloud
+results = deploy.sample(
+    {Y_t: data},
+    num_warmup=1000,
+    num_samples=1000
+)
+#+end_src
