@@ -480,7 +480,7 @@ x_rv = truncate(at.random.normal(0, 1), lower=0)
 
 Although this would currently be an function of elements of the event space $E$.
 
-** We
+** Possible solution
 
 Solutions can take inspiration from the [[https://probprog.github.io/anglican/][Anglican]] probabilistic programming language implemented in Clojure. It makes $(X, \mathbb{P})$ couples like the one implicitly defined by $\operatorname{normal}(0, 1)$ first-class citizens:
 
@@ -507,15 +507,28 @@ srng = at.random.RandomStream(0)
 x = srng.sample(ar.normal(0, 1))  # x is a `RandomVariable`
 #+end_src
 
+*** Logdensity
+
 The log-density it returned by AePPL's =logdensity= function:
 
 #+begin_src python
 import aeppl
 
-aeppl.logdensity(ar.normal, x, 0, 1)
+aeppl.logdensity(ar.normal(0, 1), x)
 #+end_src
 
-*** The original problem
+*** Summary
+
+#+begin_src python
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+x_rv = ar.normal(0, 1)
+x = ar.sample(rng, x_rv)
+logdensity = ar.logdensity(x_rv, x)
+#+end_src
+
+*** Back to the original problem & random variable algebra
 
 #+begin_src python
 import aesara.tensor.random as ar
@@ -524,6 +537,50 @@ import aeppl
 x_rv = ar.normal(0, 1)
 x_tr = aeppl.truncate(x_rv, lower=0)
 x = ar.sample(rng, x_tr)
+#+end_src
+
+**** Mixtures
+
+It is not completely obvious how we could define mixtures, however:
+
+#+begin_src python
+import aeppl
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+srng = at.random.RandomStream(0)
+
+i = srng.sample(ar.bernoulli(0.5))
+w = srng.sample(at.dirac(1.))
+x = srng.sample(ar.normal(0, 1))
+y = srng.sample(ar.normal(1, 1))
+
+z = at.stack([w, x, y])
+out = z[i]
+
+logprob = aeppl.joint_logdensity(out)
+#+end_src
+
+#+begin_src python
+import aeppl.random as ar  # includes Aesara random variables
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+i_rv = ar.bernoulli(0.5)
+w_rv = ar.dirac(1)
+x_rv = ar.normal(0, 1)
+y_rv = ar.normal(1, 1)
+
+z_rv = at.stack([w_rv, x_rv, y_rv])
+out_rv = z_rv[i_rv]
+
+logprob, value_variables = aeppl.logprob(z_rv, i_rv, x_rv, w_rv, y_rv)
+
+# How do we sample?
+# Does this transform the graph in the same way `logdensity` does?
+out = ar.sample(srng, out_rv)
+
 #+end_src
 
 
