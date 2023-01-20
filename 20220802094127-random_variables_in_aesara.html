@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-01-19 Thu 17:07 -->
+<!-- 2023-01-20 Fri 09:52 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Random Variables in Aesara</title>
@@ -52,22 +52,22 @@
 <li><code>RandomStream</code></li>
 </ul>
 
-<div id="outline-container-org497c412" class="outline-2">
-<h2 id="org497c412">AeP: PRNG and <code>RandomVariable</code> representation in Aesara</h2>
-<div class="outline-text-2" id="text-org497c412">
+<div id="outline-container-orgfa30dde" class="outline-2">
+<h2 id="orgfa30dde">AeP: PRNG and <code>RandomVariable</code> representation in Aesara</h2>
+<div class="outline-text-2" id="text-orgfa30dde">
 </div>
-<div id="outline-container-org744a88f" class="outline-3">
-<h3 id="org744a88f">Summary</h3>
-<div class="outline-text-3" id="text-org744a88f">
+<div id="outline-container-orgea88243" class="outline-3">
+<h3 id="orgea88243">Summary</h3>
+<div class="outline-text-3" id="text-orgea88243">
 <p>
 I propose a new approach to represent <code>RandomVariable</code> and PRNG states in Aesara's IR, based on the design of splittable PRNGs. The representation introduces minimal change to the existing <code>RandomVariable</code> interface while being more expressive. It should be easy to transpile to Aesara's current compilation target, and is compatible with the higher-level <code>RandomStream</code> interface.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orge589cc5" class="outline-3">
-<h3 id="orge589cc5">References</h3>
-<div class="outline-text-3" id="text-orge589cc5">
+<div id="outline-container-org19e794b" class="outline-3">
+<h3 id="org19e794b">References</h3>
+<div class="outline-text-3" id="text-org19e794b">
 <p>
 On counter-based PRNGs:
 </p>
@@ -85,9 +85,9 @@ On splittable PRNG design for functional programs:
 </div>
 </div>
 
-<div id="outline-container-org061c21d" class="outline-3">
-<h3 id="org061c21d">Desiderata</h3>
-<div class="outline-text-3" id="text-org061c21d">
+<div id="outline-container-org1d3bfdb" class="outline-3">
+<h3 id="org1d3bfdb">Desiderata</h3>
+<div class="outline-text-3" id="text-org1d3bfdb">
 <p>
 A good PRNG design satisfies the following conditions:
 </p>
@@ -102,9 +102,9 @@ A good PRNG design satisfies the following conditions:
 </div>
 </div>
 
-<div id="outline-container-org17f7549" class="outline-3">
-<h3 id="org17f7549">Motivation behind this proposal</h3>
-<div class="outline-text-3" id="text-org17f7549">
+<div id="outline-container-orgff4ff78" class="outline-3">
+<h3 id="orgff4ff78">Motivation behind this proposal</h3>
+<div class="outline-text-3" id="text-orgff4ff78">
 <p>
 This proposal is motivated by two issues that illustrate the shortcomings of the current representation of <code>RandomVariable</code>\s and PRNG states in Aesara:
 </p>
@@ -170,9 +170,9 @@ It is indeed not clear what the values of <code>rng_x</code> and <code>rng_y</co
 </div>
 </div>
 
-<div id="outline-container-orga8eb8c5" class="outline-3">
-<h3 id="orga8eb8c5">Proposal</h3>
-<div class="outline-text-3" id="text-orga8eb8c5">
+<div id="outline-container-org3159703" class="outline-3">
+<h3 id="org3159703">Proposal</h3>
+<div class="outline-text-3" id="text-org3159703">
 <p>
 In the following we focus on <i>the symbolic representation of random variables and PRNG states in Aesara's IR</i>. We leave discussions about compilation targets and solution to the previous issues for the end.
 </p>
@@ -462,9 +462,9 @@ So we can write the following code:
 </pre>
 </div>
 </div>
-<div id="outline-container-orgb8feaec" class="outline-4">
-<h4 id="orgb8feaec">Implementation</h4>
-<div class="outline-text-4" id="text-orgb8feaec">
+<div id="outline-container-org288469b" class="outline-4">
+<h4 id="org288469b">Implementation</h4>
+<div class="outline-text-4" id="text-org288469b">
 <p>
 When it comes to practical implementations, this representation is only convenient for counter-based PRNGs like <code>Philox</code> implemented in NumPy: we generate a pair of <code>(key, counter)</code> from our <code>RandState</code>\s and pass these as an input to the generator.
 </p>
@@ -472,8 +472,8 @@ When it comes to practical implementations, this representation is only convenie
 
 
 <ul class="org-ul">
-<li><a id="orga0e2213"></a><code>RandState</code> and <code>split</code> implementation<br />
-<div class="outline-text-5" id="text-orga0e2213">
+<li><a id="org8f06c22"></a><code>RandState</code> and <code>split</code> implementation<br />
+<div class="outline-text-5" id="text-org8f06c22">
 <p>
 The mock implementation of <code>RandState</code> and <code>split</code> above is naive in the sense that the counter space \(\mathcal{S}\) of real PRNGs does not usually extend indefinitely. In practice we will need to compress the state using a hashing function that also increments the <code>key</code>. To be immediately compatible with NumPy in the <code>perform</code> function we can use Philox's hash function to update the state as we build the graph. Since the hash is deterministic we can still walk the <code>RandState</code> tree in our representation and cheaply recompute the states should we need to.
 </p>
@@ -484,8 +484,8 @@ The mock implementation of <code>RandState</code> and <code>split</code> above i
 </div>
 </li>
 
-<li><a id="org1854ff9"></a><code>=RandomVariable</code><br />
-<div class="outline-text-5" id="text-org1854ff9">
+<li><a id="org3fc60df"></a><code>=RandomVariable</code><br />
+<div class="outline-text-5" id="text-org3fc60df">
 <p>
 The modifications to <code>RandomVariable</code> Ops are minimal:
 </p>
@@ -497,8 +497,8 @@ The modifications to <code>RandomVariable</code> Ops are minimal:
 </div>
 </li>
 
-<li><a id="orgeeb4806"></a><code>RandomStream</code><br />
-<div class="outline-text-5" id="text-orgeeb4806">
+<li><a id="org1e7a371"></a><code>RandomStream</code><br />
+<div class="outline-text-5" id="text-org1e7a371">
 <p>
 We can keep the <code>RandomStream</code> API, use a shared variable to hold the <code>RandState</code> and handle the splitting internally. The RNG sub-graphs are now found in the updates' graph.
 </p>
@@ -511,17 +511,17 @@ We can keep the <code>RandomStream</code> API, use a shared variable to hold the
 </ul>
 </div>
 
-<div id="outline-container-org95da08f" class="outline-4">
-<h4 id="org95da08f">Compilation</h4>
-<div class="outline-text-4" id="text-org95da08f">
+<div id="outline-container-org76c8b2b" class="outline-4">
+<h4 id="org76c8b2b">Compilation</h4>
+<div class="outline-text-4" id="text-org76c8b2b">
 <p>
 It is essential that our representation of PRNG states and <code>RandomVariable</code>\s in the graph can be easily transpiled to the existing targets (C, Numba, JAX) and future targets. In the following I outline the transpilation process for the current targets.
 </p>
 </div>
 
 <ul class="org-ul">
-<li><a id="org94c0096"></a>Numba<br />
-<div class="outline-text-5" id="text-org94c0096">
+<li><a id="orge826ccc"></a>Numba<br />
+<div class="outline-text-5" id="text-orge826ccc">
 <p>
 After <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/pull/1245">#1245</a> Aesara will support NumPy's Generator API. Furthermore NumPy has support for <a target='_blank' rel='noopener noreferrer' class='external' href="https://numpy.org/doc/stable/reference/random/bit_generators/philox.html">Philox as a BitGenerator</a>, a <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.thesalmons.org/john/random123/papers/random123sc11.pdf">counter-based PRNG</a> which can easily accomodate <a target='_blank' rel='noopener noreferrer' class='external' href="https://publications.lib.chalmers.se/records/fulltext/183348/local_183348.pdf">splittable PRNG representations</a>. Assuming we can map each path in the PRNG graph to a <code>(key, counter)</code> tuple, the transpilation of <code>RandomStream</code>\s using the Philox <code>BitGenerator</code> should be straighforward. For the explicit splitting interface, we can directly translate the <code>RandomVariable</code>\s to NumPy <code>Generator</code>\s and seed these generators at compile time. So that:
 </p>
@@ -543,8 +543,8 @@ gen.normal(0, 1)
 </div>
 </li>
 
-<li><a id="org0f260b4"></a>JAX<br />
-<div class="outline-text-5" id="text-org0f260b4">
+<li><a id="orgd1c9968"></a>JAX<br />
+<div class="outline-text-5" id="text-orgd1c9968">
 <p>
 Transpilation to JAX would be straightforward, as JAX <a target='_blank' rel='noopener noreferrer' class='external' href="https://jax.readthedocs.io/en/latest/jep/263-prng.html">uses a splittable PRNG representation</a>. We will simply need to perform the following substitutions:
 </p>
@@ -566,9 +566,9 @@ jax.random.split(rng_key, 10)
 </div>
 </div>
 
-<div id="outline-container-org8c8c862" class="outline-3">
-<h3 id="org8c8c862">Back to the motivating issues</h3>
-<div class="outline-text-3" id="text-org8c8c862">
+<div id="outline-container-orgaeceddb" class="outline-3">
+<h3 id="orgaeceddb">Back to the motivating issues</h3>
+<div class="outline-text-3" id="text-orgaeceddb">
 <p>
 The problems linked to the existence of the <code>default_output</code> attribute disappear since <code>RandomVariable</code>\s do not return PRNG states anymore. The one-to-many difficulty we are facing with the relations between etuplized graphs also disappears with a <code>split</code> operator. Using the example from the beginning we can for instance write:
 </p>
@@ -641,9 +641,9 @@ Which is guaranteed to be collision-free by construction of the <code>split</cod
 </div>
 </div>
 
-<div id="outline-container-org0be0ec7" class="outline-3">
-<h3 id="org0be0ec7">Playground</h3>
-<div class="outline-text-3" id="text-org0be0ec7">
+<div id="outline-container-orgee954a5" class="outline-3">
+<h3 id="orgee954a5">Playground</h3>
+<div class="outline-text-3" id="text-orgee954a5">
 <p>
 We would like to be able to control randomness from outside of Aesara. From JAX it is rather clear how that would work:
 </p>
@@ -680,13 +680,13 @@ fn(rng_key)
 </div>
 </div>
 </div>
-<div id="outline-container-orgc4a9f15" class="outline-2">
-<h2 id="orgc4a9f15">AeP: New abstraction for =RandomVariable=s</h2>
-<div class="outline-text-2" id="text-orgc4a9f15">
+<div id="outline-container-org09734dd" class="outline-2">
+<h2 id="org09734dd">AeP: New abstraction for =RandomVariable=s</h2>
+<div class="outline-text-2" id="text-org09734dd">
 </div>
-<div id="outline-container-org1e05755" class="outline-3">
-<h3 id="org1e05755">Problem</h3>
-<div class="outline-text-3" id="text-org1e05755">
+<div id="outline-container-orgb17851c" class="outline-3">
+<h3 id="orgb17851c">Problem</h3>
+<div class="outline-text-3" id="text-orgb17851c">
 <p>
 Truncation is an operator that operates on a random variable and returns a new random variable, so we would intuitively want to write it like:
 </p>
@@ -702,9 +702,9 @@ Although this would currently be an function of elements of the event space \(E\
 </div>
 </div>
 
-<div id="outline-container-orge479c52" class="outline-3">
-<h3 id="orge479c52">We</h3>
-<div class="outline-text-3" id="text-orge479c52">
+<div id="outline-container-org493cb75" class="outline-3">
+<h3 id="org493cb75">Possible solution</h3>
+<div class="outline-text-3" id="text-org493cb75">
 <p>
 Solutions can take inspiration from the <a target='_blank' rel='noopener noreferrer' class='external' href="https://probprog.github.io/anglican/">Anglican</a> probabilistic programming language implemented in Clojure. It makes \((X, \mathbb{P})\) couples like the one implicitly defined by \(\operatorname{normal}(0, 1)\) first-class citizens:
 </p>
@@ -738,7 +738,11 @@ Which with the <code>RandomStream</code> API could be written as:
 <span style="color: #DFAF8F;">x</span> = srng.sample(ar.normal(0, 1))  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">x is a `RandomVariable`</span>
 </pre>
 </div>
+</div>
 
+<div id="outline-container-org628c11f" class="outline-4">
+<h4 id="org628c11f">Logdensity</h4>
+<div class="outline-text-4" id="text-org628c11f">
 <p>
 The log-density it returned by AePPL's <code>logdensity</code> function:
 </p>
@@ -746,14 +750,30 @@ The log-density it returned by AePPL's <code>logdensity</code> function:
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
 
-aeppl.logdensity(ar.normal, x, 0, 1)
+aeppl.logdensity(ar.normal(0, 1), x)
 </pre>
 </div>
 </div>
+</div>
 
-<div id="outline-container-orgdadc6b2" class="outline-4">
-<h4 id="orgdadc6b2">The original problem</h4>
-<div class="outline-text-4" id="text-orgdadc6b2">
+<div id="outline-container-org205d057" class="outline-4">
+<h4 id="org205d057">Summary</h4>
+<div class="outline-text-4" id="text-org205d057">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor.random <span style="color: #F0DFAF; font-weight: bold;">as</span> ar
+
+<span style="color: #DFAF8F;">x_rv</span> = ar.normal(0, 1)
+<span style="color: #DFAF8F;">x</span> = ar.sample(rng, x_rv)
+<span style="color: #DFAF8F;">logdensity</span> = ar.logdensity(x_rv, x)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc8fa94b" class="outline-4">
+<h4 id="orgc8fa94b">Back to the original problem &amp; random variable algebra</h4>
+<div class="outline-text-4" id="text-orgc8fa94b">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor.random <span style="color: #F0DFAF; font-weight: bold;">as</span> ar
 <span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
@@ -764,14 +784,66 @@ aeppl.logdensity(ar.normal, x, 0, 1)
 </pre>
 </div>
 </div>
+
+<ul class="org-ul">
+<li><a id="orge87344f"></a>Mixtures<br />
+<div class="outline-text-5" id="text-orge87344f">
+<p>
+It is not completely obvious how we could define mixtures, however:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor.random <span style="color: #F0DFAF; font-weight: bold;">as</span> ar
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">i</span> = srng.sample(ar.bernoulli(0.5))
+<span style="color: #DFAF8F;">w</span> = srng.sample(at.dirac(1.))
+<span style="color: #DFAF8F;">x</span> = srng.sample(ar.normal(0, 1))
+<span style="color: #DFAF8F;">y</span> = srng.sample(ar.normal(1, 1))
+
+<span style="color: #DFAF8F;">z</span> = at.stack([w, x, y])
+<span style="color: #DFAF8F;">out</span> = z[i]
+
+<span style="color: #DFAF8F;">logprob</span> = aeppl.joint_logdensity(out)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl.random <span style="color: #F0DFAF; font-weight: bold;">as</span> ar  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">includes Aesara random variables</span>
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">i_rv</span> = ar.bernoulli(0.5)
+<span style="color: #DFAF8F;">w_rv</span> = ar.dirac(1)
+<span style="color: #DFAF8F;">x_rv</span> = ar.normal(0, 1)
+<span style="color: #DFAF8F;">y_rv</span> = ar.normal(1, 1)
+
+<span style="color: #DFAF8F;">z_rv</span> = at.stack([w_rv, x_rv, y_rv])
+<span style="color: #DFAF8F;">out_rv</span> = z_rv[i_rv]
+
+<span style="color: #DFAF8F;">logprob</span>, <span style="color: #DFAF8F;">value_variables</span> = aeppl.logprob(z_rv, i_rv, x_rv, w_rv, y_rv)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">How do we sample?</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Does this transform the graph in the same way `logdensity` does?</span>
+<span style="color: #DFAF8F;">out</span> = ar.sample(srng, out_rv)
+
+</pre>
+</div>
+</div>
+</li>
+</ul>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-orgf0f23e5" class="outline-2">
-<h2 id="orgf0f23e5">RandomVariable Ops</h2>
-<div class="outline-text-2" id="text-orgf0f23e5">
+<div id="outline-container-org7d0b0d3" class="outline-2">
+<h2 id="org7d0b0d3">RandomVariable Ops</h2>
+<div class="outline-text-2" id="text-org7d0b0d3">
 <p>
 We have a <code>default_rng</code> function, but the result does not behave as a generator in <code>numpy</code>.
 </p>
@@ -833,9 +905,9 @@ How does <code>RandomGeneratorType</code> work? It looks like it has internal st
 </div>
 </div>
 
-<div id="outline-container-org87a4fc5" class="outline-2">
-<h2 id="org87a4fc5">Define custom random variables</h2>
-<div class="outline-text-2" id="text-org87a4fc5">
+<div id="outline-container-org42b3d49" class="outline-2">
+<h2 id="org42b3d49">Define custom random variables</h2>
+<div class="outline-text-2" id="text-org42b3d49">
 <p>
 It is fairly simple as <code>srng.gen(RV, *args)</code> will call <code>RV()(random_state, *args)</code>.
 </p>
@@ -1053,18 +1125,18 @@ Note that you can also define this random variables' logprob dispatching <code>_
 </div>
 </div>
 
-<div id="outline-container-orgc405228" class="outline-2">
-<h2 id="orgc405228">Sampling vs Logprobability <code>aeppl</code></h2>
-<div class="outline-text-2" id="text-orgc405228">
+<div id="outline-container-org690c850" class="outline-2">
+<h2 id="org690c850">Sampling vs Logprobability <code>aeppl</code></h2>
+<div class="outline-text-2" id="text-org690c850">
 <ul class="org-ul">
 <li>How define the logprob of a custom distribution?</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org28681dc" class="outline-2">
-<h2 id="org28681dc">Shapes</h2>
-<div class="outline-text-2" id="text-org28681dc">
+<div id="outline-container-org74e46c6" class="outline-2">
+<h2 id="org74e46c6">Shapes</h2>
+<div class="outline-text-2" id="text-org74e46c6">
 <p>
 Shapes are always a mess when it comes to random variables. In <code>aesara</code> we note two distinct shapes:
 </p>
@@ -1138,18 +1210,18 @@ See <a target='_blank' rel='noopener noreferrer' class='external' href="https://
 </div>
 </div>
 
-<div id="outline-container-org36db679" class="outline-2">
-<h2 id="org36db679">Problems with <code>RandomStream</code></h2>
-<div class="outline-text-2" id="text-org36db679">
+<div id="outline-container-orgaccf1e0" class="outline-2">
+<h2 id="orgaccf1e0">Problems with <code>RandomStream</code></h2>
+<div class="outline-text-2" id="text-orgaccf1e0">
 <p>
 <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/aesara-devs/aesara/pull/1211#discussion_r985057882">https://github.com/aesara-devs/aesara/pull/1211#discussion_r985057882</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgab11585" class="outline-2">
-<h2 id="orgab11585">Proposal</h2>
-<div class="outline-text-2" id="text-orgab11585">
+<div id="outline-container-org7762fad" class="outline-2">
+<h2 id="org7762fad">Proposal</h2>
+<div class="outline-text-2" id="text-org7762fad">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
 
@@ -1197,9 +1269,9 @@ What does that complicate?
 </div>
 </div>
 
-<div id="outline-container-org02d8495" class="outline-2">
-<h2 id="org02d8495">Links to this note</h2>
-<div class="outline-text-2" id="text-org02d8495">
+<div id="outline-container-org8e59a3d" class="outline-2">
+<h2 id="org8e59a3d">Links to this note</h2>
+<div class="outline-text-2" id="text-org8e59a3d">
 <ul class="org-ul">
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
 <li><a href="./inbox.html">Writing inbox</a></li>

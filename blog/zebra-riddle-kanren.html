@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-01-19 Thu 17:07 -->
+<!-- 2023-01-20 Fri 09:53 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Solve the Zebra puzzle with miniKanren</title>
@@ -50,13 +50,13 @@ In the interest of clarity, it must be added that each of the five houses is pai
 </p>
 </blockquote>
 
-<div id="outline-container-org150776c" class="outline-2">
-<h2 id="org150776c">Implementation</h2>
-<div class="outline-text-2" id="text-org150776c">
+<div id="outline-container-org406f753" class="outline-2">
+<h2 id="org406f753">Implementation</h2>
+<div class="outline-text-2" id="text-org406f753">
 </div>
-<div id="outline-container-org6f8cef7" class="outline-3">
-<h3 id="org6f8cef7">Houses and what's inside them</h3>
-<div class="outline-text-3" id="text-org6f8cef7">
+<div id="outline-container-org38bf470" class="outline-3">
+<h3 id="org38bf470">Houses and what's inside them</h3>
+<div class="outline-text-3" id="text-org38bf470">
 <p>
 The first line states that there are 5 houses. We will represent each house with a <i>logic variable</i> <code>Var</code>; the houses are stored in a tuple where the first element represents the leftmost house and the last element the rightmost house. Each house has 4 characteristics: its color, the nationality of the inhabitant, the kind of drink they're having, the kind of animal they own, and the brand of cigarettes they smoke. Given the structure of the problem, dataclasses where fields default to a new <code>Var</code> seems particularly adapted. We can use <code>unification</code>'s <code>@unifiable</code> decorator to make the dataclass "unifiable" so we can use it with <code>kanren</code>:
 </p>
@@ -104,9 +104,9 @@ membero(House(animal=<span style="color: #CC9393;">"zebra"</span>), houses)
 </div>
 </div>
 
-<div id="outline-container-org50e694d" class="outline-3">
-<h3 id="org50e694d">Houses' location</h3>
-<div class="outline-text-3" id="text-org50e694d">
+<div id="outline-container-org4e79109" class="outline-3">
+<h3 id="org4e79109">Houses' location</h3>
+<div class="outline-text-3" id="text-org4e79109">
 <p>
 Some of the statements are about the houses' <i>location</i>. In particular, statement 6 is aboout a house that is located to the right of another one. We thus need to define a <i>goal</i> that expresses that a house is to the right of another:
 </p>
@@ -147,9 +147,9 @@ eq(House(<span style="color: #CC9393;">"Norwegian"</span>), houses[0])
 </div>
 </div>
 
-<div id="outline-container-orga555cd3" class="outline-2">
-<h2 id="orga555cd3">The solution</h2>
-<div class="outline-text-2" id="text-orga555cd3">
+<div id="outline-container-org19c343e" class="outline-2">
+<h2 id="org19c343e">The solution</h2>
+<div class="outline-text-2" id="text-org19c343e">
 <p>
 Now that we have defined the concepts and objects we need, we can write the full solution:
 </p>
@@ -220,9 +220,9 @@ The Norwegian drinks water and the Japanese owns the zebra!
 </div>
 </div>
 
-<div id="outline-container-org8216943" class="outline-2">
-<h2 id="org8216943">Conclusion</h2>
-<div class="outline-text-2" id="text-org8216943">
+<div id="outline-container-org3993a22" class="outline-2">
+<h2 id="org3993a22">Conclusion</h2>
+<div class="outline-text-2" id="text-org3993a22">
 <p>
 miniKanren's python implementation, <code>kanren</code>, allowed us to provide a very intuitive an easy-to-read solution to the Zebra puzzle. Being able to use python's data structures for relational programming goes a long way making miniKanren user friendly, and I hope this convinced you like it did convince me!
 </p>
