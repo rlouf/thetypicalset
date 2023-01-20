@@ -6,7 +6,7 @@
 <!-- 2023-01-20 Fri 15:59 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Dirichlet distribution</title>
+<title>Samples in Measure Theory</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -45,37 +45,28 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">The Dirichlet distribution</h1>
-<dl class="org-dl">
-<dt>tags</dt><dd><a href="20220105154404-probability_distribution.html#ID-accc4a58-2f96-42da-a43d-c8140996d0d3">Probability distribution</a></dd>
-</dl>
-
+<h1 class="title">Samples in Measure Theory</h1>
 <p>
-<i>Is it to proportions what Multinomial is to number in categories?</i>
+What does the sentence "Let \(x_1, \dots, x_n\) be \(n\) samples from the probability distribution \(f\)" mean mathematically?
 </p>
 
-<div id="outline-container-orgb2a4628" class="outline-2">
-<h2 id="orgb2a4628">Interpretation</h2>
-<div class="outline-text-2" id="text-orgb2a4628">
 <p>
-Let us consider an urn with \(K\) different colors. There are \(\alpha_1\) balls of the first colors, &#x2026;, \(\alpha_K\) balls of the $K$th color. We draw \(N\) balls from this urn using the following protocol:
+Let's define the probability density \(f: \mathbb{R} \to \mathbb{R}\) such that \(\int_\mathbb{R} f(\mu) \mathrm{d}\mu = 1\). \(f\) is a density corresponding to a measure \(\mathbb{P}\) with respect to, e.g., the Lebesgue measure on \(\mathbb{R}\). The rigorous meaning of the above statement is that  \(x_1, \dots, x_n\) are independent <i>random variables</i> with the same associated measure and distribution \(f\). For any \(r_1, \dots, r_n \in \mathbb{R}\), the probability that \(x_i < r_i\) is true for all \(i=1, \dots, n\) is
 </p>
 
-<ol class="org-ol">
-<li>Pick one ball</li>
-<li>Return the ball to the urn</li>
-<li>Add another ball of the same color to the urn</li>
-</ol>
-
 <p>
-When \(N\) is very large, the proportions of balls of different colors are distributed according to \(\operatorname{Dirichlet}(\mathbf{\alpha})\).
+\[
+\prod_{i=1}^n \int_{-\inf}^{r_i} f(x) \mathrm{d}x
+\]
 </p>
+
+<div id="outline-container-orge5eaa16" class="outline-2">
+<h2 id="orge5eaa16">Links to this note</h2>
+<div class="outline-text-2" id="text-orge5eaa16">
+<ul class="org-ul">
+<li><a href="./20220802094127-random_variables_in_aesara.html">Random Variables in Aesara</a></li>
+</ul>
 </div>
-</div>
-
-
-<div id="outline-container-orgeeff8f9" class="outline-2">
-<h2 id="orgeeff8f9">Links to this note</h2>
 </div>
 </div>
 </body>

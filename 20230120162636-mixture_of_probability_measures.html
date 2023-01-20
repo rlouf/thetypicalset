@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-01-20 Fri 15:59 -->
+<!-- 2023-01-20 Fri 16:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Dirichlet distribution</title>
+<title>Mixture of probability measures</title>
 <meta name="author" content="Rémi Louf" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -45,37 +45,34 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">The Dirichlet distribution</h1>
-<dl class="org-dl">
-<dt>tags</dt><dd><a href="20220105154404-probability_distribution.html#ID-accc4a58-2f96-42da-a43d-c8140996d0d3">Probability distribution</a></dd>
-</dl>
-
+<h1 class="title">Mixture of probability measures</h1>
 <p>
-<i>Is it to proportions what Multinomial is to number in categories?</i>
+Let \(\left\{P_\mu: \mu \in \chi\right\}\) be a family of probability measures and \(Q\) a probability measure over \(\chi\). A mixture over \(\mu\) is defined such that \(\forall A \in \sigma(\Omega)\):
 </p>
 
-<div id="outline-container-orgb2a4628" class="outline-2">
-<h2 id="orgb2a4628">Interpretation</h2>
-<div class="outline-text-2" id="text-orgb2a4628">
 <p>
-Let us consider an urn with \(K\) different colors. There are \(\alpha_1\) balls of the first colors, &#x2026;, \(\alpha_K\) balls of the $K$th color. We draw \(N\) balls from this urn using the following protocol:
+\[
+P(A) = \int P_\mu(A)\, Q(\mathrm{d}\mu)
+\]
 </p>
 
-<ol class="org-ol">
-<li>Pick one ball</li>
-<li>Return the ball to the urn</li>
-<li>Add another ball of the same color to the urn</li>
-</ol>
+<p>
+For example, we can consider \(\left\{\operatorname{normal}(0, 1)_\mu, \operatorname{normal}(1, 1)_\mu\right\}\) and \(\mu \sim Bernoulli(0.7)\). Then:
+</p>
 
 <p>
-When \(N\) is very large, the proportions of balls of different colors are distributed according to \(\operatorname{Dirichlet}(\mathbf{\alpha})\).
+\[
+P(A) = 0.7 \operatorname{normal}(0, 1)(A) + 0.3 \operatorname{normal}(1, 1)(A)
+\]
 </p>
+
+<div id="outline-container-org3075bd9" class="outline-2">
+<h2 id="org3075bd9">Links to this note</h2>
+<div class="outline-text-2" id="text-org3075bd9">
+<ul class="org-ul">
+<li><a href="./20220802094127-random_variables_in_aesara.html">Random Variables in Aesara</a></li>
+</ul>
 </div>
-</div>
-
-
-<div id="outline-container-orgeeff8f9" class="outline-2">
-<h2 id="orgeeff8f9">Links to this note</h2>
 </div>
 </div>
 </body>
