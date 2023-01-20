@@ -472,49 +472,217 @@ fn(rng_key)
 
 ** Problem
 
-Truncation is an operator that operates on a random variable and returns a new random variable, so we would intuitively want to write it like:
+With the abstractions that are currently available in Aesara/AePPL [[https://github.com/aesara-devs/aeppl/pull/131][one wants to define the truncation operator]] as:
 
 #+begin_src python
-x_rv = truncate(at.random.normal(0, 1), lower=0)
+import aesara.tensor as at
+import aesara.tensor.random as ar
+from aeppl import truncate
+
+x_rv = truncate(ar.normal(0, 1), lower=0)
 #+end_src
 
-Although this would currently be an function of elements of the event space $E$.
+This reads as defining a new random variable $X'$ such $X' = \operatorname{truncate} \circ X$ where $X \sim \operatorname{Normal}(0, 1)$. As such it is indistinguishable from the existing operator:
 
-** Possible solution
+#+begin_src python
+y_rv = ar.normal(0, 1)
+x_rv = at.clip(y_rv)
+#+end_src
 
-Solutions can take inspiration from the [[https://probprog.github.io/anglican/][Anglican]] probabilistic programming language implemented in Clojure. It makes $(X, \mathbb{P})$ couples like the one implicitly defined by $\operatorname{normal}(0, 1)$ first-class citizens:
+Which also reads as defining a new random variable $X' = \operatorname{clip} \circ X$ with $X \sim \operatorname{Normal}(0, 1)$. However, we want the =truncate= operator here to /mean/ something else, namely an operator that takes a probability measure $\operatorname{Normal}(0, 1)$ and returns a new measure $\hat{\mathbbm{1}}_{[0, \infty[} \operatorname{Normal}(0, 1)$.
+
+** Measures as first class citizens
+
+This issue arises because measures are only implicitly defined in Aesara, where we manipulate =RandomVariable= objects instead. If we want to avoid the kind of ambiguity that we pointed at earlier, we need to treat them as first class citizens. We can thus define:
 
 #+begin_src python
 import aesara.tensor.random as ar
 
-x_rv = ar.normal(0, 1)
-x = ar.sample(rng, x_rv)  # x is a `RandomVariable`
+x_m = ar.normal(0, 1)
+assert isinstance(x_m, ar.Measure)
 #+end_src
 
-=sample(rng, \mathcal{F})= takes a rng key $\in \Omega$, a couple $(X, \mathbb{P})$ and returns an element of $E$. =x_rv= is of type =Measure= and
+where =x_m= is now a =Measure=. To bridge the gap with the existing =RandomVariable= API in Aesara, we define the =aesara.tensor.random.sample= operator which takes a measure and return an independent random variable that admits this measure every time it is called. =sample(rng, \mathcal{F})= takes a rng key $k \in \Omega$, a =Measure= object that represents the measure $\mathbb{P}$ and [[id:070bd8a3-4bf0-486e-ab9d-9eb2285a17df][returns a random variable]] $X: \Omega \to E$ where $E$ is the event space:
 
 #+begin_src haskell
 sample :: Key -> Measure -> RandomVariable
 #+end_src
 
-Which with the =RandomStream= API could be written as:
+So to define a normally-distributed random variable one would write:
+
+#+begin_src python
+import aesara.tensor.random as ar
+
+x = ar.sample(rng, ar.normal(0, 1))
+assert isinstance(x, ar.RandomVariable)
+#+end_src
+
+This is somewhat similar to what is done in the [[https://probprog.github.io/anglican/][Anglican]] probabilistic programming language implemented in Clojure. We retain the existing ambiguity that exists between random variables and their realizations, but that does not matter mathematically speaking.
+
+We can keeps something similar to the =RandomStream= by defining
 
 #+begin_src python
 import aesara.tensor as at
 import aesara.tensor.random as ar
 
-srng = at.random.RandomStream(0)
-x = srng.sample(ar.normal(0, 1))  # x is a `RandomVariable`
+srng = ar.RandomStream(0)
+x = srng.sample(ar.normal(0, 1))
+#+end_src
+
+We will assume in the following that these primitives are available in Aesara.
+
+** Implications
+
+*** Writing probabilistic programs
+
+It cannot hurt to add an example of a simple probabilistic program and define what is supposed to happen in different circumstances. Let's take the example on the homepage of AePPL's documentation:
+
+#+begin_src python
+import aesara
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+srng = ar.RandomStream(0)
+S_rv = srng.sample(ar.invgamma(0.5, 0.5), name="S")
+Y_rv = srng.sample(ar.normal(0, at.sqrt(S_rv)), name="Y")
+
+# This returns samples from the prior distribution
+fn = aesara.function([], [Y_rv])
+#+end_src
+
+*** Transforming measures
+
+It is now possible to apply transformations to =Measure=\s directly, as with the motivating example:
+
+#+begin_src python
+import aesara.tensor.random as ar
+import aeppl.transforms as aet
+
+x_tr = aet.truncate(ar.normal(0, 1), lower=0)
+x = ar.sample(rng, x_tr)
 #+end_src
 
 *** Logdensity
 
-The log-density it returned by AePPL's =logdensity= function:
+Log-densities are associated with measures, so it is natural to write:
 
 #+begin_src python
 import aeppl
 
 aeppl.logdensity(ar.normal(0, 1), x)
+#+end_src
+
+*** Random Variable algebra
+
+We can still perform operations on random variables:
+
+#+begin_src python
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+srng = ar.RandomStream(0)
+x_rv = srng.sample(ar.normal(0, 1))
+y_rv = srng.sample(ar.normal(0, 1))
+z_rv = x_rv + y_rv
+#+end_src
+
+We can still impliclty define mixture distributions with:
+
+#+begin_src python
+import aeppl
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+srng = at.random.RandomStream(0)
+
+i = srng.sample(ar.bernoulli(0.5))
+x = srng.sample(ar.normal(0, 1))
+y = srng.sample(ar.normal(1, 1))
+
+z = at.stack([x, y])
+out_rv = z[i]
+#+end_src
+
+Or maybe now more simply using the [[id:39f2e370-5ebc-4d10-a0b4-288ef031c7af][measure-theoretic definition of mixtures]] as:
+
+#+begin_src python
+import aeppl
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+srng = at.random.RandomStream(0)
+rv = srng.sample(0.5 * ar.normal(0, 1) + 0.5 * ar.normal(0, 1))
+#+end_src
+
+Which has nice properties which follow from the fact that measures can be represented as integrals of the density:
+
+#+begin_src python
+aeppl.logdensity(0.5 * ar.normal(0, 1) + 0.5 * ar.normal(0, 1))
+# is equivalent to
+0.5 * aeppl.logdensity(ar.normal(0, 1)) + 0.5 * aeppl.logdensity(ar.normal(1, 1))
+#+end_src
+
+This begs the question of what to do with the following statement:
+
+#+begin_src python
+z_rv = srng.sample(0.5 * ar.normal(0, 1) + 0.5 * ar.normal(0, 1))
+#+end_src
+
+When doing forward sampling.
+
+*** Disintegration of probabilistic programs
+
+What we are usually interested in, however, is the log-density associated with a probabilistic program, a graph that contains random variables. We could write as before:
+
+#+begin_src python
+import aeppl
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+srng = ar.RandomStream(0)
+
+S_rv = srng.sample(invgamma(0.5, 0.5))
+Y_rv = srng.sample(normal(0., at.sqrt(S_rv)))
+
+logdensity, (y_vv, s_vv) = aeppl.joint_logdensity(Y_rv, S_rv)
+#+end_src
+
+This is slightly awkard before =logdensity= applies to =Measure=\s while =joint_logdensity= works with =RandomVariable=\s. I am not sure if we want to resolve this ambiguity by using a different name that might be confusing to the user.
+
+*** Broadcasting and the =size= argument
+
+#+begin_src python
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+mu = at.as_tensor([-1., 0., 1.])
+x_m = ar.normal(mu, sigma)
+x_rv = ar.sample(rng, x_rm)
+#+end_src
+
+=x_m= here defines an array of three different measures, and =sample= returns one random variable per element of the array. We would need to be careful with definitions and types here but I can get on board with this. The shape of =x_m= is called the /batch shape/. Each sample has the dimensionality of the random variables' event space, so the shape of one sample is called the /event shape/. The shape of =x_rv= is defined as:
+
+=batch_shape + event_shape=
+
+We can define a vector of 10 iid random variables with the =iid= argument to =sample=:
+
+#+begin_src python
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+x_rv = ar.sample(rng, normal(0, 1), iid=(10,))
+#+end_src
+
+In the more complex case:
+
+#+begin_src python
+import aesara.tensor as at
+import aesara.tensor.random as ar
+
+mu = at.as_tensor([-1., 0., 1.])
+x_m = ar.normal(mu, sigma)
+x_rv = ar.sample(rng, x_rm, iid=(10,))
+assert x_rv.shape == (10, 3)
 #+end_src
 
 *** Summary
@@ -526,61 +694,6 @@ import aesara.tensor.random as ar
 x_rv = ar.normal(0, 1)
 x = ar.sample(rng, x_rv)
 logdensity = ar.logdensity(x_rv, x)
-#+end_src
-
-*** Back to the original problem & random variable algebra
-
-#+begin_src python
-import aesara.tensor.random as ar
-import aeppl
-
-x_rv = ar.normal(0, 1)
-x_tr = aeppl.truncate(x_rv, lower=0)
-x = ar.sample(rng, x_tr)
-#+end_src
-
-**** Mixtures
-
-It is not completely obvious how we could define mixtures, however:
-
-#+begin_src python
-import aeppl
-import aesara.tensor as at
-import aesara.tensor.random as ar
-
-srng = at.random.RandomStream(0)
-
-i = srng.sample(ar.bernoulli(0.5))
-w = srng.sample(at.dirac(1.))
-x = srng.sample(ar.normal(0, 1))
-y = srng.sample(ar.normal(1, 1))
-
-z = at.stack([w, x, y])
-out = z[i]
-
-logprob = aeppl.joint_logdensity(out)
-#+end_src
-
-#+begin_src python
-import aeppl.random as ar  # includes Aesara random variables
-import aesara.tensor as at
-
-srng = at.random.RandomStream(0)
-
-i_rv = ar.bernoulli(0.5)
-w_rv = ar.dirac(1)
-x_rv = ar.normal(0, 1)
-y_rv = ar.normal(1, 1)
-
-z_rv = at.stack([w_rv, x_rv, y_rv])
-out_rv = z_rv[i_rv]
-
-logprob, value_variables = aeppl.logprob(z_rv, i_rv, x_rv, w_rv, y_rv)
-
-# How do we sample?
-# Does this transform the graph in the same way `logdensity` does?
-out = ar.sample(srng, out_rv)
-
 #+end_src
 
 
