@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-01-26 Thu 11:25 -->
+<!-- 2023-01-27 Fri 11:38 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Interesting applications of Aesara</title>
@@ -61,9 +61,9 @@ Working on <a href="../20220729163627-aesara.html#ID-5a5e87b1-558c-43db-ad38-32a
 When you work on a project like this many ideas of applications pop up, but time is limited. <i>So I am writing all my ideas out here, hoping someone will take one of them and run with it.</i>
 </p>
 
-<div id="outline-container-orgaf8f6c5" class="outline-2">
-<h2 id="orgaf8f6c5">Deep Learning</h2>
-<div class="outline-text-2" id="text-orgaf8f6c5">
+<div id="outline-container-orgf76ad16" class="outline-2">
+<h2 id="orgf76ad16">Deep Learning</h2>
+<div class="outline-text-2" id="text-orgf76ad16">
 <p>
 Theano was completely oriented towards neural networks, but Aesara kind of departed from this to focus on the core functionalities of a tensor library. I see a couple reasons why a deep learning library written in Aesara would be truly unique.
 </p>
@@ -81,18 +81,18 @@ See <a href="../20220822151156-kaeras.html#ID-ee2b16f2-0d64-4172-90bb-fa3f6dab3e
 </p>
 </div>
 
-<div id="outline-container-org78198a8" class="outline-3">
-<h3 id="org78198a8">AutoML</h3>
-<div class="outline-text-3" id="text-org78198a8">
+<div id="outline-container-org44bb1a2" class="outline-3">
+<h3 id="org44bb1a2">AutoML</h3>
+<div class="outline-text-3" id="text-org44bb1a2">
 <p>
 Tired of always making small changes to your models to get an increase in performance? Aesara can automate that! Implement what you manually do as rewrites (increasing the layer size, adding dropout, etc.) and Aesara will output different versions of your model. This means you will only ever have to touch the model implementation once, but also now you can re-use your rewrites for your next models. You are making cumulative progress instead of having to do the same thing over and over. In addition, Aesara's rewrite system will soon include a form of <a target='_blank' rel='noopener noreferrer' class='external' href="https://arxiv.org/abs/1012.1802">equality saturation</a>, which means that it will be able to return all the possible models that are defined by your rewrite rules. Now that's <i>true automation</i>.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgcf26530" class="outline-3">
-<h3 id="orgcf26530">Higher-level optimizations</h3>
-<div class="outline-text-3" id="text-orgcf26530">
+<div id="outline-container-org1b61e1f" class="outline-3">
+<h3 id="org1b61e1f">Higher-level optimizations</h3>
+<div class="outline-text-3" id="text-org1b61e1f">
 <p>
 Compilers used in deep learning are generally good at optimizing the low-level optimizations (constant folding, loop fusions, etc.), but they cannot reason at the mathematical level. There are however <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/uwplse/tensat/blob/master/single_rules.txt">plenty of optimizations</a> that can be performed by reasoning at the layer level, and an Aesara-based DL library could target layers with rewrites to transform the model into a different but mathematically equivalent representation. This kind of rewrites <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jiazhihao/TASO">has been shown</a> to outperform existing compilers by up to a factor of 3.
 </p>
@@ -100,18 +100,18 @@ Compilers used in deep learning are generally good at optimizing the low-level o
 </div>
 </div>
 
-<div id="outline-container-org18c0c13" class="outline-2">
-<h2 id="org18c0c13">Gaussian processes</h2>
-<div class="outline-text-2" id="text-org18c0c13">
+<div id="outline-container-orga5681f7" class="outline-2">
+<h2 id="orga5681f7">Gaussian processes</h2>
+<div class="outline-text-2" id="text-orga5681f7">
 <p>
 A Gaussian process library could add kernels as types, and implement rewrites that allow to build models automatically by manipulating kernels. This is essentially what David Duvenaud did in <a target='_blank' rel='noopener noreferrer' class='external' href="https://www.cs.toronto.edu/~duvenaud/thesis.pdf">his PhD thesis</a>.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1a96587" class="outline-2">
-<h2 id="org1a96587">Probabilistic circuits</h2>
-<div class="outline-text-2" id="text-org1a96587">
+<div id="outline-container-org2f54ff5" class="outline-2">
+<h2 id="org2f54ff5">Probabilistic circuits</h2>
+<div class="outline-text-2" id="text-org2f54ff5">
 <p>
 Probabilistic circuits rely a lot on <i>structures</i> to be able to do tractable inference, and as you might have gathered from the previous sections, Aesara is great when you need to reason about your model structure. Aesara/AePPL already contain some of the logic relative to building graphs that contain random variables, and get a log-density from a probabilistic graph, so that wouldn't need to be implemented. You can also build <code>Op</code>\s based on an existing computational graphs, so the structure objects found in libraries like <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/SPFlow/SPFlow">SPFlow</a> could be given a type and then manipulated by rewrites.
 </p>
@@ -122,36 +122,36 @@ I think probabilistic circuits would make a great showcase for Aesara's capabili
 </div>
 </div>
 
-<div id="outline-container-orga6e9f89" class="outline-2">
-<h2 id="orga6e9f89">Causal inference on probabilistic models</h2>
-<div class="outline-text-2" id="text-orga6e9f89">
+<div id="outline-container-org9381cac" class="outline-2">
+<h2 id="org9381cac">Causal inference on probabilistic models</h2>
+<div class="outline-text-2" id="text-org9381cac">
 <p>
 An Aesara model is a graph of computations, that can be manipulated at runtime. It would thus be easy to perform <i>interventions</i> on a model without having to modify the original model.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgce0c739" class="outline-2">
-<h2 id="orgce0c739">Target the Triton compiler</h2>
-<div class="outline-text-2" id="text-orgce0c739">
+<div id="outline-container-orge756647" class="outline-2">
+<h2 id="orge756647">Target the Triton compiler</h2>
+<div class="outline-text-2" id="text-orge756647">
 <p>
 The easiest way to use the <a target='_blank' rel='noopener noreferrer' class='external' href="http://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf">Triton compiler</a> for now would be to create a new backend that patches the existing JAX backend and replaces some =Op=s with their Triton implemetation using <a target='_blank' rel='noopener noreferrer' class='external' href="https://github.com/jax-ml/jax-triton">jax-triton</a>.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org5ca5d54" class="outline-2">
-<h2 id="org5ca5d54">Cross-language portability</h2>
-<div class="outline-text-2" id="text-org5ca5d54">
+<div id="outline-container-orgf5d8cef" class="outline-2">
+<h2 id="orgf5d8cef">Cross-language portability</h2>
+<div class="outline-text-2" id="text-orgf5d8cef">
 <p>
 Hey, you could even implement a Julia backend for Aesara. Or whatever language you need in your applications. All that while model manipulations stay at the Python level.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orga3105dc" class="outline-2">
-<h2 id="orga3105dc">Conclusion</h2>
-<div class="outline-text-2" id="text-orga3105dc">
+<div id="outline-container-orga96a6a0" class="outline-2">
+<h2 id="orga96a6a0">Conclusion</h2>
+<div class="outline-text-2" id="text-orga96a6a0">
 <p>
 The nature of Aesara (static graph, possibility to delineate regions in your graph, its rewrite system, switchable backend, etc.) makes it really unique in the Python landscape. It opens the way for applications that were either impossible or tedious with existing framework, and we really hope to see these applications come to life.
 </p>

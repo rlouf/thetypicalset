@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-01-26 Thu 11:24 -->
+<!-- 2023-01-27 Fri 11:38 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Debug an Aesara graph (advanced)</title>
@@ -15,9 +15,9 @@
 <div id="content" class="content">
 <h1 class="title">Debug an Aesara graph (advanced)</h1>
 
-<div id="outline-container-org4bd488f" class="outline-2">
-<h2 id="org4bd488f">The graph compiles, I get an ugly stack trace!</h2>
-<div class="outline-text-2" id="text-org4bd488f">
+<div id="outline-container-orgb3c5166" class="outline-2">
+<h2 id="orgb3c5166">The graph compiles, I get an ugly stack trace!</h2>
+<div class="outline-text-2" id="text-orgb3c5166">
 <div class="org-src-container">
 <pre class="src src-python">E   <span style="color: #7CB8BB;">IndexError</span>: index out of bounds
 E   Apply node that caused the error: Subtensor{int64, ::, int64}(BroadcastTo.0, ScalarConstant{0}, ScalarConstant{39})
@@ -40,9 +40,9 @@ E   Outputs clients: [[InplaceDimShuffle{x,0}(Subtensor{int64, ::, int64}.0)]]
 </div>
 </div>
 
-<div id="outline-container-org8b05e94" class="outline-2">
-<h2 id="org8b05e94">Clear the cache</h2>
-<div class="outline-text-2" id="text-org8b05e94">
+<div id="outline-container-orgaf5fd54" class="outline-2">
+<h2 id="orgaf5fd54">Clear the cache</h2>
+<div class="outline-text-2" id="text-orgaf5fd54">
 <p>
 Sometimes it can be useful to clear the cache manually between different runs
 </p>
@@ -54,9 +54,9 @@ Sometimes it can be useful to clear the cache manually between different runs
 </div>
 </div>
 
-<div id="outline-container-org8bcd464" class="outline-2">
-<h2 id="org8bcd464">Pretty printing the graph</h2>
-<div class="outline-text-2" id="text-org8bcd464">
+<div id="outline-container-orge2eaaf0" class="outline-2">
+<h2 id="orge2eaaf0">Pretty printing the graph</h2>
+<div class="outline-text-2" id="text-orge2eaaf0">
 <p>
 Aeasara can return at a pretty-printed version of the graph:
 </p>
@@ -76,9 +76,9 @@ This <code>dprint</code> function has a couple of interesting keyword arguments:
 </div>
 </div>
 
-<div id="outline-container-orgc062dfe" class="outline-2">
-<h2 id="orgc062dfe">Rewrites applied to the graph</h2>
-<div class="outline-text-2" id="text-orgc062dfe">
+<div id="outline-container-org1e38493" class="outline-2">
+<h2 id="org1e38493">Rewrites applied to the graph</h2>
+<div class="outline-text-2" id="text-org1e38493">
 <p>
 We can change the Logging properties using a context manager, fun.
 </p>
@@ -91,29 +91,29 @@ We can change the Logging properties using a context manager, fun.
 </div>
 </div>
 
-<div id="outline-container-orgb3efa23" class="outline-2">
-<h2 id="orgb3efa23">Disable optimizations</h2>
-<div class="outline-text-2" id="text-orgb3efa23">
+<div id="outline-container-orga660b3d" class="outline-2">
+<h2 id="orga660b3d">Disable optimizations</h2>
+<div class="outline-text-2" id="text-orga660b3d">
 <p>
 After examining the graph, and how the nodes were created you may suspect that a bug was introduced by a rewrite. The best way to confirm this hypothesis is usually to disable all rewrites at once. And then exclude individual rewrites to narrow it down.
 </p>
 </div>
 
-<div id="outline-container-org22d6d9b" class="outline-3">
-<h3 id="org22d6d9b">mode=Mode(optimizer="None")</h3>
+<div id="outline-container-orgf084bc4" class="outline-3">
+<h3 id="orgf084bc4">mode=Mode(optimizer="None")</h3>
 </div>
-<div id="outline-container-org2a3f9b1" class="outline-3">
-<h3 id="org2a3f9b1">FAST<sub>RUN.excluding</sub>("&lt;name&gt;")</h3>
+<div id="outline-container-org3371ca2" class="outline-3">
+<h3 id="org3371ca2">FAST<sub>RUN.excluding</sub>("&lt;name&gt;")</h3>
 </div>
-<div id="outline-container-orgf49111e" class="outline-3">
-<h3 id="orgf49111e">If this is the inner-graph of a <code>Scan</code></h3>
-<div class="outline-text-3" id="text-orgf49111e">
+<div id="outline-container-orgb9b8a0d" class="outline-3">
+<h3 id="orgb9b8a0d">If this is the inner-graph of a <code>Scan</code></h3>
+<div class="outline-text-3" id="text-orgb9b8a0d">
 <p>
 Inner-graphs in <code>Scan</code> need to ave their set of optimizations set separately. It is then easier to use the global <code>aesara.config</code>. This is better done in <code>conftest.py</code> (the config needs to be updated before Aesara is initialized).
 </p>
 
 <div class="org-src-container">
-<pre class="src src-python" id="org21638c7"><span style="color: #F0DFAF; font-weight: bold;">import</span> os
+<pre class="src src-python" id="org6841a91"><span style="color: #F0DFAF; font-weight: bold;">import</span> os
 
 <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">pytest_sessionstart</span>(session):
     <span style="color: #DFAF8F;">os.environ</span>[<span style="color: #CC9393;">"AESARA_FLAGS"</span>] = <span style="color: #CC9393;">","</span>.join(
@@ -130,12 +130,12 @@ We're looking for the <code>optimizer_excluding</code> flag.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc27c3ba" class="outline-3">
-<h3 id="orgc27c3ba"><span class="todo TODO">TODO</span> Rich for graph folding project</h3>
+<div id="outline-container-org5098dd6" class="outline-3">
+<h3 id="org5098dd6"><span class="todo TODO">TODO</span> Rich for graph folding project</h3>
 </div>
-<div id="outline-container-orgef4c2ef" class="outline-3">
-<h3 id="orgef4c2ef"><span class="todo TODO">TODO</span> Add rewrite trajectory to a node's <code>tag</code> in the fully rewritten graph</h3>
-<div class="outline-text-3" id="text-orgef4c2ef">
+<div id="outline-container-orgd409830" class="outline-3">
+<h3 id="orgd409830"><span class="todo TODO">TODO</span> Add rewrite trajectory to a node's <code>tag</code> in the fully rewritten graph</h3>
+<div class="outline-text-3" id="text-orgd409830">
 <p>
 Funny, isn't that something that we could easily deduct if the rewrites were described in an e-graph?
 </p>
@@ -143,9 +143,9 @@ Funny, isn't that something that we could easily deduct if the rewrites were des
 </div>
 </div>
 
-<div id="outline-container-orgb6b4e8b" class="outline-2">
-<h2 id="orgb6b4e8b">Profile Aesara code</h2>
-<div class="outline-text-2" id="text-orgb6b4e8b">
+<div id="outline-container-orga5cd96a" class="outline-2">
+<h2 id="orga5cd96a">Profile Aesara code</h2>
+<div class="outline-text-2" id="text-orga5cd96a">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">Enable profiling for compilation of the outer-function</span>
 <span style="color: #DFAF8F;">f_doubling</span> = aesara.function([A, B, tol, max_iter], gamma[-1], profile=<span style="color: #BFEBBF;">True</span>)
@@ -155,9 +155,9 @@ f_doubling.profile.summary()
 </div>
 </div>
 
-<div id="outline-container-org64d85ea" class="outline-2">
-<h2 id="org64d85ea">Links to this note</h2>
-<div class="outline-text-2" id="text-org64d85ea">
+<div id="outline-container-org3d50d62" class="outline-2">
+<h2 id="org3d50d62">Links to this note</h2>
+<div class="outline-text-2" id="text-org3d50d62">
 <ul class="org-ul">
 <li><a href="./20220729163627-aesara.html">Aesara</a></li>
 </ul>

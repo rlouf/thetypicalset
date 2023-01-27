@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-01-27 Fri 11:38 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The probability monad</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">The probability monad</h1>
+<p>
+Measures are a type constructor \(\mathbb{M}\operatorname{T}\). They map subsets of the event space \(\operatorname{T}\) to \([0, 1]\):
+</p>
+
+<p>
+\[\mathbb{M}\operatorname{T}: \sigma(\operatorname{T}) \to [0, 1]\]
+</p>
+
+<p>
+Measures are functors: if we have a measure of type \(\mathbb{M}\operatorname{T}\) and a function \(f: \operatorname{T} \to \operatorname{U}\) then we can define an object of type \(\mathbb{M}\operatorname{U}\).
+</p>
+
+<p>
+Under certain conditions, measures have a density \(\mathdd{d}\nu: \operatorname{T} \to \mathbb{R}^+\).
+</p>
+
+<p>
+We can also define \(\operatorname{Rand}[\operatorname{T}] : \Omega \to \operatorname{T}\).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aeppl.random <span style="color: #F0DFAF; font-weight: bold;">as</span> ar
+
+<span style="color: #DFAF8F;">mu</span> = at.scalar()
+<span style="color: #DFAF8F;">sigma</span> = at.scalar()
+
+<span style="color: #DFAF8F;">x</span> = ar.normal(mu, sigma)
+<span style="color: #DFAF8F;">y</span> = ar.halfnormal(x, 1.)
+</pre>
+</div>
+
+<p>
+In this case the first <code>ar.normal</code> is a function  \(\operatorname{normal}: \mathbb{R} \times \mathbb{R}^+ \to \mathbb{M}\mathbb{R}\), and the second \(\operatorname{halfnormal}: \mathbb{M}\mathbb{R} \to \mathbb{M}\mathbb{R}^+\).
+</p>
+
+
+<ul class="org-ul">
+<li>We pass from \(\operatorname{halfnormal}\), a probability measure over probability measures to a probabilty measures by defining an <b>evaluation map</b> \(\mu\), \(\mu\) acts by integrating or averaging (or sampling?).</li>
+<li>We define a map \(\mu: \operatorname{T} \to \mathbb{M}\operatorname{T}\) for passing from a space \(T\) to a probability measure over \(T\), typically by sending \(x \in \operatorname{T}\) to the Dirac measure over \(x\).</li>
+<li>We define an <b>assignment</b> \(\mathbb{M}\) on maps so that a map of spaces \(f: T \to U\) extends to a map of spaces of probability measures \(\mathbb{M}f : \mathbb{M}T \to \mathbb{M}U\), this takes the form of the pushforward definition.</li>
+</ul>
+
+
+<div id="outline-container-orgb8e1f13" class="outline-2">
+<h2 id="orgb8e1f13">References</h2>
+<div class="outline-text-2" id="text-orgb8e1f13">
+</div>
+<div id="outline-container-org20f4e83" class="outline-3">
+<h3 id="org20f4e83">Pratical implementations</h3>
+<div class="outline-text-3" id="text-org20f4e83">
+<ul class="org-ul">
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.chrisstucchio.com/blog/2016/probability_the_monad.html">The probability monad and why it's important for data science</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://dennybritz.com/posts/probability-monads-from-scratch/">Probability Monads from scratch in 100 lines of Haskell</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="http://mlg.eng.cam.ac.uk/pub/pdf/SciGhaGor15.pdf">Practical probabilistic programming with monads</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgafe544d" class="outline-3">
+<h3 id="orgafe544d">Theory</h3>
+<div class="outline-text-3" id="text-orgafe544d">
+<ul class="org-ul">
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.chrisstucchio.com/blog_media/2016/probability_the_monad/categorical_probability_giry.pdf">A categorical approach to probability theory</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.chrisstucchio.com/blog_media/2016/probability_the_monad/1205.1488v3.pdf">A categorical foundation for bayesian probability</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="https://www.math.harvard.edu/media/JulianAsilisThesis.pdf">Probability monads</a></li>
+<li><a target='_blank' rel='noopener noreferrer' class='external' href="http://tobiasfritz.science/2019/cps_workshop/slides/tutorial1.pdf">What is a probability monad?</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0f25438" class="outline-2">
+<h2 id="org0f25438">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>
