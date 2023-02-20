@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-02-20 Mon 15:23 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pico GPT2 in Aesara</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Pico GPT2 in Aesara</h1>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+<span style="color: #F0DFAF; font-weight: bold;">import</span> numpy <span style="color: #F0DFAF; font-weight: bold;">as</span> np
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">gelu</span>(x):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> 0.5 * x * (1 + at.tanh(at.sqrt(2 / np.pi)) * (x + 0.044715 * x ** 3))
+
+<span style="color: #DFAF8F;">x</span> = at.scalar(<span style="color: #CC9393;">'x'</span>)
+<span style="color: #DFAF8F;">y</span> = gelu(x)
+
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
+aesara.dprint(y)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #DFAF8F;">x</span> = at.vector(<span style="color: #CC9393;">'x'</span>)
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">softmax</span>(x):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> at.exp(x) / at.<span style="color: #DCDCCC; font-weight: bold;">sum</span>(at.exp(x))
+
+<span style="color: #DFAF8F;">y</span>  = softmax(x)
+<span style="color: #DFAF8F;">fn</span> = aesara.function([x], y)
+aesara.dprint(y)
+aesara.dprint(fn)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">layer_norm</span>(x, g, b, eps = 1e-5):
+    <span style="color: #DFAF8F;">mean</span> = at.mean(x)
+    <span style="color: #DFAF8F;">var</span> = at.var(x)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> g * (x - mean) / at.sqrt(var + eps) + b
+
+<span style="color: #DFAF8F;">x</span> = at.vector(<span style="color: #CC9393;">'x'</span>)
+<span style="color: #DFAF8F;">y</span> = layer_norm(x, 1., 1.)
+aesara.dprint(y)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">linear</span>(x, w, b):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> x @ w + b
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">ffn</span>(x, c_fc, c_proj):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> linear(gelu(linear(x, *c_fc)), *c_proj)
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">attention</span>(q, k, v, mask):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> softmax(q @ k.T / at.sqrt(q.shape[-1]) + mask) @ v
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">mha</span>(x, c_attn, c_proj, n_head):
+    <span style="color: #DFAF8F;">x</span> = linear(x, *c_attn)
+    <span style="color: #DFAF8F;">qkv</span> = at.split(x, 3, axis=-1)
+    <span style="color: #DFAF8F;">qkv_heads</span> =
+    <span style="color: #DFAF8F;">causal_mask</span> =
+    <span style="color: #DFAF8F;">out_heads</span> =
+    <span style="color: #DFAF8F;">x</span> =
+    <span style="color: #DFAF8F;">x</span> = linear(x, *c_proj)
+</pre>
+</div>
+</div>
+</body>
+</html>

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-02-02 Thu 12:00 -->
+<!-- 2023-02-20 Mon 15:23 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cyclical SGLD in Blackjax</title>
@@ -47,9 +47,9 @@
 <div id="content" class="content">
 <h1 class="title">Cyclical SGLD in Blackjax</h1>
 
-<div id="outline-container-org842e8a2" class="outline-3">
-<h3 id="org842e8a2">Cyclical schedule</h3>
-<div class="outline-text-3" id="text-org842e8a2">
+<div id="outline-container-orgd0d8a23" class="outline-3">
+<h3 id="orgd0d8a23">Cyclical schedule</h3>
+<div class="outline-text-3" id="text-orgd0d8a23">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> typing <span style="color: #F0DFAF; font-weight: bold;">import</span> NamedTuple
 
@@ -86,16 +86,16 @@ Let us visualize the schedule for 200k training steps divided in 4 cycles. At ea
 </p>
 
 
-<div id="org7b551d9" class="figure">
+<div id="orgc8f5ad8" class="figure">
 <p><img src="img/cyclical_sgld_schedule.png" alt="cyclical_sgld_schedule.png" width="100%" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgd72aa60" class="outline-3">
-<h3 id="orgd72aa60">Cyclical SGLD step</h3>
-<div class="outline-text-3" id="text-orgd72aa60">
+<div id="outline-container-orgaaa17b8" class="outline-3">
+<h3 id="orgaaa17b8">Cyclical SGLD step</h3>
+<div class="outline-text-3" id="text-orgaaa17b8">
 <p>
 We will reproduce one of the paper's example, sampling from an array of 25 gaussians.
 </p>
@@ -130,7 +130,7 @@ Let's plot the model's density; we will need the plot later to evaluate the samp
 </p>
 
 
-<div id="org1322a7b" class="figure">
+<div id="org8002a66" class="figure">
 <p><img src="img/cyclical_sgld_array_gaussians.png" alt="cyclical_sgld_array_gaussians.png" width="100%" />
 </p>
 </div>
@@ -138,9 +138,9 @@ Let's plot the model's density; we will need the plot later to evaluate the samp
 </div>
 
 
-<div id="outline-container-org8691cbc" class="outline-3">
-<h3 id="org8691cbc">Sample from the mixture of gaussians</h3>
-<div class="outline-text-3" id="text-org8691cbc">
+<div id="outline-container-orgea98d9b" class="outline-3">
+<h3 id="orgea98d9b">Sample from the mixture of gaussians</h3>
+<div class="outline-text-3" id="text-orgea98d9b">
 <p>
 The sampling kernel must be able to alternate between sampling and optimization periods that are determined by the scheduler.
 </p>
@@ -223,9 +223,9 @@ The sampling kernel must be able to alternate between sampling and optimization 
 </div>
 
 
-<div id="outline-container-orga07aa17" class="outline-3">
-<h3 id="orga07aa17">SGLD</h3>
-<div class="outline-text-3" id="text-orga07aa17">
+<div id="outline-container-org5884f5e" class="outline-3">
+<h3 id="org5884f5e">SGLD</h3>
+<div class="outline-text-3" id="text-org5884f5e">
 <p>
 Let's start with SGLD:
 </p>
@@ -260,7 +260,7 @@ Let's plot the trajectory:
 </p>
 
 
-<div id="org99603f3" class="figure">
+<div id="orgedc2526" class="figure">
 <p><img src="img/cyclical_sgld_sgld_samples.png" alt="cyclical_sgld_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -268,9 +268,9 @@ Let's plot the trajectory:
 </div>
 
 
-<div id="outline-container-orgaf29557" class="outline-3">
-<h3 id="orgaf29557">Cyclical SGLD</h3>
-<div class="outline-text-3" id="text-orgaf29557">
+<div id="outline-container-org81a7baf" class="outline-3">
+<h3 id="org81a7baf">Cyclical SGLD</h3>
+<div class="outline-text-3" id="text-org81a7baf">
 <p>
 Now let's sample using Cyclical SGLD.
 </p>
@@ -311,7 +311,7 @@ It looks from the trajectory that the distribution is better explored:
 </p>
 
 
-<div id="org214e3de" class="figure">
+<div id="org1b489ec" class="figure">
 <p><img src="img/cyclical_sgld_samples.png" alt="cyclical_sgld_samples.png" width="70%" />
 </p>
 </div>
@@ -321,16 +321,16 @@ Let's look at the distribution:
 </p>
 
 
-<div id="orgce740d0" class="figure">
+<div id="org1446b1a" class="figure">
 <p><img src="img/cyclical_sgld_distribution.png" alt="cyclical_sgld_distribution.png" width="70%" />
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org0986503" class="outline-2">
-<h2 id="org0986503">What's next</h2>
-<div class="outline-text-2" id="text-org0986503">
+<div id="outline-container-org62610b3" class="outline-2">
+<h2 id="org62610b3">What's next</h2>
+<div class="outline-text-2" id="text-org62610b3">
 <ul class="org-ul">
 <li>As Adrien Corenflos noted, Scott's rule for KDE assumes that the total number of points is the sample size, so is not fit for MCMC samples. We should instead pass the bandwidth manually \(n_{eff}^{(-1/(d+4))}\) with \(d=2\); It should capture more modes.</li>
 <li>Compute the paper's <i>Mode-coverage</i> metric: when the number of samples falling within the radius \(r\) of a mode center is larger than a number \(N\) when we say the mode is covered;</li>
