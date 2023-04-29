@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-04-29 Sat 15:05 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Uncertainty in language model</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Uncertainty in language model</h1>
+<p>
+When people refer to <code>uncertainty</code> they usually refer to "the model being uncertain about its predictions". In the case of natural language, this means that taking many different samples from the distribution that the language model represents leads to widely different answers that are all as likely. To be able to make such statements, we need an equivalence relationship between outputs; different outputs may differ by one word, or be formulated differently but <i>mean</i> the same thing.
+</p>
+
+<p>
+Starting from this definition of uncertainty, the most appropriate measure is a form of entropy, which measures how informative (or opinionated) the output is. A measure that takes into account the semantic equivalence between outputs is called <i>semantic entropy</i>.
+</p>
+
+<p>
+Doing this with a trained model leads to what people call <code>aleatoric uncertainty</code>, which is certainly poorly named.
+</p>
+
+<p>
+There is another form of "uncertainty", called <code>epistemic</code> uncertainty, which is supposed to make up for the fact that models are not bayesian. The underlying assumption is that models must be <i>overconfident</i> about their predictions, due to overfitting on the training data, or just an ill-adapted model.
+</p>
+
+<p>
+This brings back the question of what the <i>distribution</i> that the language models learn actually represent. And I think the best way to understand that is to go back to their training objective.
+</p>
+
+<div id="outline-container-org568a8e6" class="outline-2">
+<h2 id="org568a8e6">Methods</h2>
+<div class="outline-text-2" id="text-org568a8e6">
+<ul class="org-ul">
+<li>Asking the model if the answers are true and then compute % of yes on multiple generations;</li>
+<li>Naively computing the entropy on outputs;</li>
+<li>Use equivalent classes to compute the entropy.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org62e0b2a" class="outline-2">
+<h2 id="org62e0b2a">Entropy</h2>
+<div class="outline-text-2" id="text-org62e0b2a">
+<p>
+(Kuhn et al. 2023)
+</p>
+
+<p>
+\[
+H(Y|x) = - \int P(Y|x)\; \ln P(Y|x) \mathrm{d}x
+\]
+</p>
+
+<p>
+For auto-regressive models:
+</p>
+
+<p>
+\[
+p(\boldsymbol{s}|x) = \sum_i \log p(s_i | s_{<i})
+\]
+Some people use the geometric mean of the token-probability:
+</p>
+
+<p>
+\[
+p(\boldsymbol{s}|x) = \frac{1}{N} \sum_i \log p(s_i | s_{<i})
+\]
+</p>
+
+<p>
+Let's note \(\mathcal{C}\) a meaning equivalence class then we define the probability of the model generating a sequence that share some meaning as:
+</p>
+
+<p>
+\[
+P(c|x) = \sum_{s\in\mathcal{C}} p(\boldsymbol{s}|x)
+\]
+</p>
+
+<p>
+Of course we don't have access to all sentences and need to resort to Monte Carlo integration. For entropy, averages are dominated by low-entropy sentences, which makes Monte-Carlo integration difficult. The estimator we use is:
+</p>
+
+<p>
+\[
+SE(x) \approx - \frac{1}{|C|} \sum_{i=1}^{|C|} \log P(C_i|x)
+\]
+</p>
+
+<p>
+Following (Malinin &amp; Gales 2021), except these authors normalize by the length \(L\) of the sequence. See (Cover &amp; Thomas Chapter on entropy rates to understand what we're dealing with)
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgce29574" class="outline-2">
+<h2 id="orgce29574">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>

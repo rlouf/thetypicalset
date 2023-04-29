@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-04-29 Sat 15:05 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sequence generation</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Sequence generation</h1>
+<p>
+The goal of this note is to better understand and summarize how text sequences are generated.
+</p>
+
+<p>
+Language models represent the density of a probability distribution. Namely, given a sequence of tokens \(\left[x_1, \dots, x_L\right]\) of length \(L\) where \(x_i \in \mathcal{V}\) the vocabulary (typically an integer between 1 and 100,000), they compute the probability of generating the token \(y\):
+</p>
+
+<p>
+\[
+P(y | x_1, \dots, x_L)
+\]
+</p>
+
+<p>
+And we can thus define the associated random variable \(\operatorname{LM}\), which is parametrized by a sequence \(s\) and the model's weights \(\boldsymbol{\theta}\). When the model is trained and just used as a function that computes a log-density we can omit \(\boldsymbol{\theta}\) which is assumed fixed:
+</p>
+
+<p>
+\[
+y \sim LM(s)
+\]
+</p>
+
+<p>
+Using this distribution, we generate sequence by, at each step, concatenating the last drawn token to the input sequence to generate a new token. For a sequence of length \(L\), we can be represent this process by the following graphical model:
+</p>
+
+\begin{align*}
+y_1 &\sim LLM(s)\\
+y_2 &\sim LLM(s + y_1)\\
+y_3 &\sim LLM(s + y_1 + y_2)\\
+&\dots\\
+y_L &\sim LLM(s + y_1 + \dots + y_{L-1})
+\end{align*}
+
+<p>
+where \(+\) is an operator that appends the right operand to the sequence. This can be represented by the following Aesara code for a sequence of length 3, assuming the \(LM\) random variable is defined:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor.random <span style="color: #F0DFAF; font-weight: bold;">as</span> ar
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.RandomStream()
+<span style="color: #DFAF8F;">s</span> = at.string()
+<span style="color: #DFAF8F;">y_1</span> = srng.lm(s)
+<span style="color: #DFAF8F;">y_2</span> = srng.lm(s + y_1)
+<span style="color: #DFAF8F;">y_3</span> = srng.lm(s + y_1 + y_2)
+</pre>
+</div>
+
+<p>
+To generate sequences of arbitrary length we can use the <code>Scan</code> operator:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.scan
+<span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">L</span> = at.itensor()
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">generate_next_token</span>(sequence):
+    <span style="color: #DFAF8F;">y</span> = srng.lm(sequence)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> sequence + y
+
+<span style="color: #DFAF8F;">sequences</span>, <span style="color: #DFAF8F;">updates</span> = aesara.scan(
+    outputs_info = s,
+    num_steps = L
+)
+</pre>
+</div>
+
+<div id="outline-container-orge5bc2ac" class="outline-2">
+<h2 id="orge5bc2ac">Generating sequence as a randomly stopped process</h2>
+<div class="outline-text-2" id="text-orge5bc2ac">
+<p>
+In practice, we stop generating tokens when a special token, the <code>&lt;EOS&gt;</code> token, is found. We cannot anticipate the length \(L\) of the sequence that will be generated, and can thus consider \(L\) as a random variable.
+</p>
+
+<p>
+If we had iid random variables \(X_1, \dots, X_N\) then we could show that the entropy of the sequence is given by:
+</p>
+
+<p>
+\[
+H(X^N|N) = \mathbb{E}(N) H(X_1) + H(N|X^\infty) - H(N)
+\]
+</p>
+
+<p>
+Here we don't have iid random variables, but they are conditionally independent. For a given prompt (i.e. beginning of sequence), \(N\) has a certain distribution which has some level of entropy. What does it mean to divide by the length of the sequence?
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3e9a1b3" class="outline-2">
+<h2 id="org3e9a1b3">Generating sequences as a random walk</h2>
+<div class="outline-text-2" id="text-org3e9a1b3">
+<p>
+We can also see the process of generating sequences as a random walk in the space of sequences. This is not adding much to the formalism, but we can consider all possible paths and have access to a set of tools from network theory that allow us to think differently about the problem. Absorbing walk with a random length.
+</p>
+
+<p>
+Can we embed this network in a metric space? Possibly, by computing the distance between the embedding of the different words that are generated?
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge003085" class="outline-2">
+<h2 id="orge003085">Aesara implementation of the sequence generation</h2>
+<div class="outline-text-2" id="text-orge003085">
+<p>
+We can represent this by the following <code>while</code> loop:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> aesara.scan <span style="color: #F0DFAF; font-weight: bold;">import</span> until
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">is_end_of_sequence</span>(last_token):
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> at.eq(last_token, <span style="color: #CC9393;">"EOS"</span>)
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">generate_next_token</span>(sequence):
+    <span style="color: #DFAF8F;">y</span> = srng.lm(sequence)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> sequence + y, until(is_end_of_sequence(y))
+
+<span style="color: #DFAF8F;">sequences</span>, <span style="color: #DFAF8F;">updates</span> = aesara.scan(
+    outputs_info = s,
+    num_steps = L
+)
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">from</span> aeppl <span style="color: #F0DFAF; font-weight: bold;">import</span> joint_logprob
+
+<span style="color: #DFAF8F;">logprob</span>, <span style="color: #DFAF8F;">value_vars</span> = joint_logprob(sequences[-1])
+</pre>
+</div>
+
+<p>
+To computhe the logdensity of a given sequence we can compile this function and pass it to Aesara. It should compute the complete logprob including the <code>&lt;EOS&gt;</code> token.
+</p>
+</div>
+</div>
+<div id="outline-container-org5295e44" class="outline-2">
+<h2 id="org5295e44">Meaning, etc</h2>
+<div class="outline-text-2" id="text-org5295e44">
+<p>
+We can define equivalence classes in the space of generated sequences. Namely, if two sequences are semantically equivalent, then we can say that they belong to the same equivalence class.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3da1989" class="outline-2">
+<h2 id="org3da1989">Links to this note</h2>
+</div>
+</div>
+</body>
+</html>

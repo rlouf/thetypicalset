@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-04-29 Sat 15:05 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blackjax On Aesara</title>
+<meta name="author" content="Rémi Louf" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="../style.css" /><script data-goatcounter="https://thetypicalset.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Blackjax On Aesara</h1>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara.tensor <span style="color: #F0DFAF; font-weight: bold;">as</span> at
+
+<span style="color: #DFAF8F;">srng</span> = at.random.RandomStream(0)
+
+<span style="color: #DFAF8F;">sigma_rv</span> = srng.normal(1.)
+<span style="color: #DFAF8F;">mu_rv</span> = srng.normal(0, 1)
+<span style="color: #DFAF8F;">Y_rv</span> = srng.normal(mu_rv, sigma_rv)
+</pre>
+</div>
+
+<div id="outline-container-orgf4e2dc4" class="outline-2">
+<h2 id="orgf4e2dc4">Sample prior</h2>
+<div class="outline-text-2" id="text-orgf4e2dc4">
+<p>
+Sampling from the prior predictive distribution is a useful tool for debugging. One thus needs this function to be:
+</p>
+<ul class="org-ul">
+<li><b>fast</b></li>
+<li>Easy to use</li>
+<li>Easy to customize; is it easy to change the value of a parameter.</li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F0DFAF; font-weight: bold;">import</span> aesara
+<span style="color: #F0DFAF; font-weight: bold;">from</span> aesara.graph.basic <span style="color: #F0DFAF; font-weight: bold;">import</span> io_toposort
+<span style="color: #F0DFAF; font-weight: bold;">from</span> aesara.tensor.random.op <span style="color: #F0DFAF; font-weight: bold;">import</span> RandomVariable
+<span style="color: #F0DFAF; font-weight: bold;">import</span> jax
+
+<span style="color: #DFAF8F;">rng_key</span> = jax.random.PRNGKey(3)
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">count_model_rvs</span>(rv_out):
+    <span style="color: #9FC59F;">"""Count the number of `RandomVariable` in a model"""</span>
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> <span style="color: #DCDCCC; font-weight: bold;">len</span>([node <span style="color: #F0DFAF; font-weight: bold;">for</span> node <span style="color: #F0DFAF; font-weight: bold;">in</span> io_toposort([], [rv_out]) <span style="color: #F0DFAF; font-weight: bold;">if</span> <span style="color: #DCDCCC; font-weight: bold;">isinstance</span>(node.op, RandomVariable)])
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">split_to_tuple</span>(rng_key, num):
+    <span style="color: #DFAF8F;">keys</span> = jax.numpy.split(jax.random.split(rng_key, num), num)
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> <span style="color: #DCDCCC; font-weight: bold;">tuple</span>([key.squeeze() <span style="color: #F0DFAF; font-weight: bold;">for</span> key <span style="color: #F0DFAF; font-weight: bold;">in</span> keys])
+
+<span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">prior_sample</span>(rng_key, num_samples, rv_out):
+    <span style="color: #9FC59F;">"""Return prior predictive samples"""</span>
+    <span style="color: #DFAF8F;">prior_fn</span> = aesara.function([], Y_rv, mode=<span style="color: #CC9393;">"JAX"</span>).vm.jit_fn
+    <span style="color: #DFAF8F;">num_rvs</span> = count_model_rvs(Y_rv)
+
+    <span style="color: #F0DFAF; font-weight: bold;">def</span> <span style="color: #93E0E3;">take_one_sample</span>(rng_key):
+        <span style="color: #DFAF8F;">keys</span> = [{<span style="color: #CC9393;">"jax_state"</span>: key} <span style="color: #F0DFAF; font-weight: bold;">for</span> key <span style="color: #F0DFAF; font-weight: bold;">in</span> split_to_tuple(rng_key, num_rvs)]
+        <span style="color: #F0DFAF; font-weight: bold;">return</span> prior_fn(*keys)[0]
+
+    <span style="color: #F0DFAF; font-weight: bold;">return</span> jax.vmap(take_one_sample)(jax.random.split(rng_key, num_samples))
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #DFAF8F;">samples</span> = prior_sample(rng_key, 10, Y_rv)
+samples
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python">prior_sampler(Y_rv, mu_rv).run(rng_key, 1000, {a_tt: 1.})
+</pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
