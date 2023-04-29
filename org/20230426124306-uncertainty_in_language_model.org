@@ -1,0 +1,54 @@
+:PROPERTIES:
+:ID:       40d51df6-1a32-4f64-8e27-2d12f362ed2d
+:END:
+#+title: Uncertainty in language model
+
+
+When people refer to =uncertainty= they usually refer to "the model being uncertain about its predictions". In the case of natural language, this means that taking many different samples from the distribution that the language model represents leads to widely different answers that are all as likely. To be able to make such statements, we need an equivalence relationship between outputs; different outputs may differ by one word, or be formulated differently but /mean/ the same thing.
+
+Starting from this definition of uncertainty, the most appropriate measure is a form of entropy, which measures how informative (or opinionated) the output is. A measure that takes into account the semantic equivalence between outputs is called /semantic entropy/.
+
+Doing this with a trained model leads to what people call =aleatoric uncertainty=, which is certainly poorly named.
+
+There is another form of "uncertainty", called =epistemic= uncertainty, which is supposed to make up for the fact that models are not bayesian. The underlying assumption is that models must be /overconfident/ about their predictions, due to overfitting on the training data, or just an ill-adapted model.
+
+This brings back the question of what the /distribution/ that the language models learn actually represent. And I think the best way to understand that is to go back to their training objective.
+
+* Methods
+
+- Asking the model if the answers are true and then compute % of yes on multiple generations;
+- Naively computing the entropy on outputs;
+- Use equivalent classes to compute the entropy.
+
+* Entropy
+
+(Kuhn et al. 2023)
+
+$$
+H(Y|x) = - \int P(Y|x)\; \ln P(Y|x) \mathrm{d}x
+$$
+
+For auto-regressive models:
+
+$$
+p(\boldsymbol{s}|x) = \sum_i \log p(s_i | s_{<i})
+$$
+Some people use the geometric mean of the token-probability:
+
+$$
+p(\boldsymbol{s}|x) = \frac{1}{N} \sum_i \log p(s_i | s_{<i})
+$$
+
+Let's note $\mathcal{C}$ a meaning equivalence class then we define the probability of the model generating a sequence that share some meaning as:
+
+$$
+P(c|x) = \sum_{s\in\mathcal{C}} p(\boldsymbol{s}|x)
+$$
+
+Of course we don't have access to all sentences and need to resort to Monte Carlo integration. For entropy, averages are dominated by low-entropy sentences, which makes Monte-Carlo integration difficult. The estimator we use is:
+
+$$
+SE(x) \approx - \frac{1}{|C|} \sum_{i=1}^{|C|} \log P(C_i|x)
+$$
+
+Following (Malinin & Gales 2021), except these authors normalize by the length $L$ of the sequence. See (Cover & Thomas Chapter on entropy rates to understand what we're dealing with)

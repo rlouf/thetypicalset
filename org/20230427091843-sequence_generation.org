@@ -1,0 +1,108 @@
+:PROPERTIES:
+:ID:       cd3e646d-b151-458a-b702-ace4b833f9df
+:END:
+#+title: Sequence generation
+
+The goal of this note is to better understand and summarize how text sequences are generated.
+
+Language models represent the density of a probability distribution. Namely, given a sequence of tokens $\left[x_1, \dots, x_L\right]$ of length $L$ where $x_i \in \mathcal{V}$ the vocabulary (typically an integer between 1 and 100,000), they compute the probability of generating the token $y$:
+
+$$
+P(y | x_1, \dots, x_L)
+$$
+
+And we can thus define the associated random variable $\operatorname{LM}$, which is parametrized by a sequence $s$ and the model's weights $\boldsymbol{\theta}$. When the model is trained and just used as a function that computes a log-density we can omit $\boldsymbol{\theta}$ which is assumed fixed:
+
+$$
+y \sim LM(s)
+$$
+
+Using this distribution, we generate sequence by, at each step, concatenating the last drawn token to the input sequence to generate a new token. For a sequence of length $L$, we can be represent this process by the following graphical model:
+
+\begin{align*}
+y_1 &\sim LLM(s)\\
+y_2 &\sim LLM(s + y_1)\\
+y_3 &\sim LLM(s + y_1 + y_2)\\
+&\dots\\
+y_L &\sim LLM(s + y_1 + \dots + y_{L-1})
+\end{align*}
+
+where $+$ is an operator that appends the right operand to the sequence. This can be represented by the following Aesara code for a sequence of length 3, assuming the $LM$ random variable is defined:
+
+#+begin_src python
+import aesara.tensor.random as ar
+import aesara.tensor as at
+
+srng = at.RandomStream()
+s = at.string()
+y_1 = srng.lm(s)
+y_2 = srng.lm(s + y_1)
+y_3 = srng.lm(s + y_1 + y_2)
+#+end_src
+
+To generate sequences of arbitrary length we can use the =Scan= operator:
+
+#+begin_src python
+import aesara.scan
+import aesara.tensor as at
+
+L = at.itensor()
+
+def generate_next_token(sequence):
+    y = srng.lm(sequence)
+    return sequence + y
+
+sequences, updates = aesara.scan(
+    outputs_info = s,
+    num_steps = L
+)
+#+end_src
+
+* Generating sequence as a randomly stopped process
+
+In practice, we stop generating tokens when a special token, the =<EOS>= token, is found. We cannot anticipate the length $L$ of the sequence that will be generated, and can thus consider $L$ as a random variable.
+
+If we had iid random variables $X_1, \dots, X_N$ then we could show that the entropy of the sequence is given by:
+
+$$
+H(X^N|N) = \mathbb{E}(N) H(X_1) + H(N|X^\infty) - H(N)
+$$
+
+Here we don't have iid random variables, but they are conditionally independent. For a given prompt (i.e. beginning of sequence), $N$ has a certain distribution which has some level of entropy. What does it mean to divide by the length of the sequence?
+
+* Generating sequences as a random walk
+
+We can also see the process of generating sequences as a random walk in the space of sequences. This is not adding much to the formalism, but we can consider all possible paths and have access to a set of tools from network theory that allow us to think differently about the problem. Absorbing walk with a random length.
+
+Can we embed this network in a metric space? Possibly, by computing the distance between the embedding of the different words that are generated?
+
+* Aesara implementation of the sequence generation
+
+We can represent this by the following =while= loop:
+
+#+begin_src python
+from aesara.scan import until
+
+def is_end_of_sequence(last_token):
+    return at.eq(last_token, "EOS")
+
+def generate_next_token(sequence):
+    y = srng.lm(sequence)
+    return sequence + y, until(is_end_of_sequence(y))
+
+sequences, updates = aesara.scan(
+    outputs_info = s,
+    num_steps = L
+)
+#+end_src
+
+#+begin_src python
+from aeppl import joint_logprob
+
+logprob, value_vars = joint_logprob(sequences[-1])
+#+end_src
+
+To computhe the logdensity of a given sequence we can compile this function and pass it to Aesara. It should compute the complete logprob including the =<EOS>= token.
+* Meaning, etc
+
+We can define equivalence classes in the space of generated sequences. Namely, if two sequences are semantically equivalent, then we can say that they belong to the same equivalence class.
