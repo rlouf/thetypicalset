@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-01-01 Mon 17:00 -->
+<!-- 2024-01-01 Mon 17:06 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Sequence generation</title>
@@ -119,9 +119,9 @@ To generate sequences of arbitrary length we can use the <code>Scan</code> opera
 </pre>
 </div>
 
-<div id="outline-container-orgf30ea0c" class="outline-2">
-<h2 id="orgf30ea0c">Generating sequence as a randomly stopped process</h2>
-<div class="outline-text-2" id="text-orgf30ea0c">
+<div id="outline-container-org8d311c2" class="outline-2">
+<h2 id="org8d311c2">Generating sequence as a randomly stopped process</h2>
+<div class="outline-text-2" id="text-org8d311c2">
 <p>
 In practice, we stop generating tokens when a special token, the <code>&lt;EOS&gt;</code> token, is found. We cannot anticipate the length \(L\) of the sequence that will be generated, and can thus consider \(L\) as a random variable.
 </p>
@@ -142,9 +142,9 @@ Here we don't have iid random variables, but they are conditionally independent.
 </div>
 </div>
 
-<div id="outline-container-org04d4f84" class="outline-2">
-<h2 id="org04d4f84">Generating sequences as a random walk</h2>
-<div class="outline-text-2" id="text-org04d4f84">
+<div id="outline-container-orga4a0d1b" class="outline-2">
+<h2 id="orga4a0d1b">Generating sequences as a random walk</h2>
+<div class="outline-text-2" id="text-orga4a0d1b">
 <p>
 We can also see the process of generating sequences as a random walk in the space of sequences. This is not adding much to the formalism, but we can consider all possible paths and have access to a set of tools from network theory that allow us to think differently about the problem. Absorbing walk with a random length.
 </p>
@@ -155,9 +155,9 @@ Can we embed this network in a metric space? Possibly, by computing the distance
 </div>
 </div>
 
-<div id="outline-container-orgd3111cd" class="outline-2">
-<h2 id="orgd3111cd">Aesara implementation of the sequence generation</h2>
-<div class="outline-text-2" id="text-orgd3111cd">
+<div id="outline-container-org8ca0043" class="outline-2">
+<h2 id="org8ca0043">Aesara implementation of the sequence generation</h2>
+<div class="outline-text-2" id="text-org8ca0043">
 <p>
 We can represent this by the following <code>while</code> loop:
 </p>
@@ -191,17 +191,17 @@ To computhe the logdensity of a given sequence we can compile this function and 
 </p>
 </div>
 </div>
-<div id="outline-container-org1fb8804" class="outline-2">
-<h2 id="org1fb8804">Meaning, etc</h2>
-<div class="outline-text-2" id="text-org1fb8804">
+<div id="outline-container-org9d106f0" class="outline-2">
+<h2 id="org9d106f0">Meaning, etc</h2>
+<div class="outline-text-2" id="text-org9d106f0">
 <p>
 We can define equivalence classes in the space of generated sequences. Namely, if two sequences are semantically equivalent, then we can say that they belong to the same equivalence class.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org86bc795" class="outline-2">
-<h2 id="org86bc795">Links to this note</h2>
+<div id="outline-container-org0bd3086" class="outline-2">
+<h2 id="org0bd3086">Links to this note</h2>
 </div>
 </div>
 </body>
