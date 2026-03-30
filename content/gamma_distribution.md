@@ -1,0 +1,13 @@
+---
+title: "Gamma distribution"
+aliases:
+  - 5c34d536-2644-4386-ab72-509a274e1378
+---
+
+```latex
+\begin{equation*}
+f(x; \alpha, \beta) = \frac{1}{\Gamma(\alpha)} \beta^\alpha x^{\alpha-1} e^{-\beta x}
+\end{equation*}
+```
+
+# TODO Rederive the value of the normalizing constant (integration by part)

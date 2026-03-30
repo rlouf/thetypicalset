@@ -1,0 +1,9 @@
+---
+title: "The US dollar is a world reserve currency"
+date: 2022-03-21
+lastmod: 2022-03-21
+aliases:
+  - 14f732f9-0d47-4886-8781-aa43b05763f1
+---
+
+Not officially, but in practice is does act as a sort of reserve currency and the Fed would be a kind of Central Bank.

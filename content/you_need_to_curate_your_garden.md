@@ -1,0 +1,7 @@
+---
+title: "You need to curate your garden"
+aliases:
+  - 36a480da-b67f-4f55-8d17-fac346127e40
+---
+
+For your own sake (being able to retrieve information efficiently) and your readers (a cluttered garden is not very pleasant to walk through)

@@ -1,0 +1,13 @@
+---
+title: "Ideas are rarely right or wrong"
+tags:
+  - thoughts
+  - public
+aliases:
+  - f139e256-9a3a-43a9-99d0-03ff7a0c2446
+---
+
+Ideas are rarely completely right or completely wrong but they often have different surface areas over which they're right. Discussion should focus on this, and on whether:
+
+1.  We care in practice about each area covered;
+2.  If we're better off discarding one, or refine both to include the distiction.

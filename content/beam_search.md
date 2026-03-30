@@ -1,0 +1,7 @@
+---
+title: "Beam Search"
+aliases:
+  - 57c3b765-3559-45ce-a3cc-a8a21ed32483
+---
+
+Beam Search can be interpreted as breadth-first search to build a search tree that only contains a fixed number of states.

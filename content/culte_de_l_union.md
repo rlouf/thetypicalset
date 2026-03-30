@@ -1,0 +1,100 @@
+---
+title: "Culte de l'Union"
+tags:
+  - private
+aliases:
+  - 4778519d-4074-4ba7-bfbb-820d1966d56f
+---
+
+tags: [[union_europeenne|Union Européenne]]
+
+Culte de l'Union. Comme si notre monde était produit du *désir*. Ici, la *réalité* n'a plus prise sur rien mais il convient cependant d'être *raisonnable*.
+
+Debouts à coté des chefs d'Etats. On les a disposé bien à part, de façon symmétrique, de sorte à ce que l'équilibre soit conservé s'il fallait procéder à une purge photographique.
+
+Culte de l'Union.
+
+Ayant noté pendant la guerre du Pacifique, les populations de certaines ile de Mélasie ayant constate que les radio-opérateurs de troupes au sol semblaient obtenir
+
+Ils constru
+
+En réponse à la colonisation de la Mélanasie,
+
+Le culte consiste entre à imiter les techniques et la culture occidentale: les
+
+Le culte du cargoen espérant déboucher sur les mêmes effet
+
+Certains seraient tenté de s'en moquer, mais le culte du cargo nous renvoie à nos propres biais. À toutes les situation où nous sommes amenés à agir par mimétisme, sans réelle réflexion sur le bien-fondé de notre démarche. Par pensée magique.
+
+# Thread
+
+> Pas dans l'UE à l'époque. Vous ne pouvez nier que l'Europe a facilité les échanges entre peuples et que l'idée même de faire la guerre entre pays européens maintenant amis (bien que concurrent) parait juste débile.
+
+C'est la bombe nucléaire et la fin de la contestation de la plupart des frontières qui a amené la paix en Europe de l'Ouest. Pas l'UE.
+
+> Oui, mais pas seulement. L'UE a facilité et accéléré un processus de réconciliation et de pardon (notamment Franco Allemand) qui était nécessaire. On a vu après 14 que laisser pourrir des rancoeurs était nocif et promesse d'avenirs sanglants.
+
+Au contraire, je dirais que les institutions du traité de Maastricht et l'Euro ont ravivé les vieilles rancœurs partout en Europe. Il suffit de voir les réactions mêmes des turbo fédéralistes chaque fois que l'Allemagne impose sa volonté au reste de l'Union sur les questions de défense, budget, énergie par exemple. La coopération n'était pas parfaite avant, mais elle existait. Aujourd'hui on est dans une forme de compétition économique généralisée qui risque de dégénérer dans quelques décennies. Comme beaucoup vous assimilez l'Europe à l'UE et ses traités actuels. Or une coopération différente est possible et souhaitable. Peut-être en commençant par s'appuyer sur les points d'accord et en laissant les Etats gérer le reste ?
+
+Euratom(dont ITER), Erasmus, l'ESA, Airbus, le Concorde, tout ça existait avant le traité de Maastricht. Et c'était très bien. Qu'est-ce que l'UE a permis de réaliser depuis concrètement ?
+
+> L'UE et ses multiples coopération a permis de ne pas élever les dernières générations dans la rancoeur, la haine et l'esprit de revanche, avec nos voisins européens. Dans un vieux continent déchiré par les guerres depuis toujours, vous ne réalisez même pas l'avancée que c'est.
+
+Pas du tout. Les grandes coopérations industrielles pre-datent Maastricht. Là on est dans une phase de mise en concurrence généralisée, de démantèlement des conglomérats industriels nationaux sans réelle construction à l'échelle européenne.
+
+> L'histoire de l'UE n'a pas commencée à Maastricht. Mais des les années 50 avec la CECA, puis la CEE. Bien sur, cette construction plus économique que politique doit être améliorée, mais ça ne se fera pas en en sortant.
+
+*Note:* Souvent le meilleur moyen des européistes de rationaliser les problèmes de l'UE est de raccrocher son histoire à celle de la CECA et la CEE. MAIS l'Angleterre ne faisait même pas partie de la CEE.
+
+La différence entre la CEE et l'UE n'est pas une différence de **degré** c'est une différence de **nature**. Lisez les traités et expliquez moi comment on "améliore" les choses sans les dénoncer et revenir à une coopération entre états aux institutions démocratiques. L'UE est une impasse institutionelle. Elle est incapable de transformer la bonne volonté en avancées.
+
+Depuis l'avènement de l'UE les Etats ont perdu l'habitude de faire des coopérations/ accords avec des petits groupe de opays sur des sujets précis. Il n'y a plus de grands projets européens comme il y en avait en 1960.
+
+On essaie de sauver l'Europe d'elle-même.
+
+- Guerre de yougoslavie montre les limites d'un modèle fédéraliste trop poussé.
+
+# Peuple européenne
+
+D'ailleurs, soit dit en passant, il bien un peuple européen : c'est l'aristocratie de l'ancien régime. Et l'UE est, si on veut troller, le moyen pour eu de revenir aux commandes après la Révolution Française
+
+# L'UE meurt, vive l'Europe
+
+Il est difficile de pointer de doigt le moment où le déclic s'est produit. Nés dans les années 80, j'ai été bercé de rêves d'Europe. Je me souviens encore du moment où j'ai reçu 20 euros en pièces, à l'époque où elles ne valaient pas plus que leur poids en métal. Elles n'étaient pas monnaie mais symbolisaient le rêve enfin achevé d'une intégration après tant de siècles d'affrontements sanglants.
+
+L'humanité a cette capacité fantastique à créer des symboles, totems complètement abstraits, autour desquels de large groupes peuvent se retrouver et trouver un intérêt commun. La Nation, la République, l'entreprise sont autant d'entités qui vivent avant tout comme idée: elles ne se touchent pas, elles ne se mangent pas, elles ne peuvent pas être vues. Ces idées, lorsqu'elles se concrétisent, peuvent prendre des formes différentes.
+
+Un ressort psychologique assez fort pour faire accepter une forme d'organisation est donc de lui attacher un symbole. Attaquer l'organisation c'est attaquer le symbole.
+
+Lorsque la forme actuelle que prend l'Union Européenne déclenche ce mécanisme de défense spychologique dès qu'elle est attaquée. Lorsque vous lisez les europhiles dévier les critiques (légitimes) en parlant de "réforme", de "modification en profondeur" c'est bien de cela qu'il est question: croyant l'idée d'Europe même attaquée, ils déploient des efforts intellectuels démesurés pour tenter de sauver la forme dans laquelle elle se concrétise aujourd'hui.
+
+Soyons clair une bonne fois pour toute dans ce texte. Si l'Union Européenne était réformable, ce serait bien évidemment le premier sujet de débat. Elle n'est pas réformable. Les traités imposent que les décisions soient prises à l'unanimité des 27 Etats membres
+
+Je vais être honnête, parce que je suis persuadé que ceux qui vont me lire le pensent aussi: j'ai toujours eu un regard amusé, sinon méprisant, pour les fétichistes du Frexit. Ce n'est pas en lisant leurs analyses prémachées que j'ai changé d'avis, mais bien en m'intéressant aux traités eux-même, aux GOPEs, au fonctionnement des institutions et leur histoire. Quand bien même, je pensais, cela serait nécessaire, ça ne fait pas un programme politique.
+
+Au contraire, c'est lorsque je me suis intéressé au pays qui m'intéressait, aux mauvaises décisions prise que la conclusion est devenue inévitable: il faut sortir du cadre de l'Union Européenne. Il faut retrouver notre souveraineté populaire, économique, monétaire. Ce n'est pas une fin en soi. C'est un moyen, mais ce n'est pas une option.
+
+Peut-être le plus révoltant a été la lecture des GOPEs, ces "recommendations" émises par la Comission Européenne (qui, je le rappelle, n'est pas élue), et de pouvoir calquer dessus les politiques gouvernementales des 30 dernières années.
+
+Jeunesse, réveille toi, tes rêves se meurent et tu regardes ailleurs. Les yeux pleins de bleu et d'étoiles jaunes, le coeur suspendu à un symbole.
+
+On ne peut pas nier qu'il y ait chez beaucoup un *désir* de nation européenne. Mais cette nation n'existe pas encore, elle existera sûrement, mais la transformation prendra du temps, des générations. La brusquer c'est la vouer à l'échec; l'inscrire dans cette union moribonde qui écrase les peuples c'est l'enterrer. Qui aurait idée
+
+C'est la première fois que j'écris au sujet de l'Union Européenne, et je pense que ce sera la dernière. Je préfère parler de ré-industrialisation, de refonte de notre système éducatif, de santé, notre couverture sociale, nos centrales nucléaires, de PME et de souveraineté numérique.
+
+# Discussion avec F
+
+Les institutions sont le libéralisme incarné, et le macronisme un néolibéralisme attardé. Tout le monde est en train d'en revenir, mais Macron essaie de faire revivre l'Europe alors qu'il n'en reste plus rien en-dehors de l'Euro, juste des intérêts divergents. A Bruxelles il y a beaucoup de volonté de lancer des petits projets avec quelques pays, mais la France (Macron et Beaune) bloquent. C'est pourtant le meilleur moyen d'enclencher la marche arrière sur les institutions.
+
+La France perd énormément de choses pour acheter une Europe fédérale, et c'est la raison pour laquelle on perd sur tous oles arbitrages. On pousse pour un budget européen, on perd sur le reste. La seule vraie convition de Macron c'est l'Europe.
+
+Les élites politique françaises ont très vite eu des postes dans la nouvelle élite européenne. Jacques Delors, Moscovici, Breton, Lagarde. En France c'est la même élite dont Macron est presque la quintescence.
+
+On a créé des institutions pour donner l'illusion de l'union en espérant la faire arriver. Psychologiquement c'est un phénomène intéressant: les élites politiques nationales abandonnent leur pouvoir au profit d'une éLite tehcnocrate. Et je vois un parallèle avec ce mouvement de *l'économie comme idéologie* où l'on considère que l'on n'a plus besoin du politique puisque l'économie est une science et que le seul but de l'homme est la satisfaction économique. On peut mesure et optimiser ce que l'on peut mesurer, donc on fait ça. Tu as la même fascination dans les grandes entreprises, et c'est aussi souvent du l'aversion qu'ont les dirigeants aujourd'hui pour la prise de décision. Ca en devient ridicule quand l'OCDE se sent obligée de définir un indicateur de bien ëtre humain. La vie n'existe plus en dehors des dashboards.
+
+[Discussion sur libre echange et chomage, ou macroniste presente chomage comme un detail]. La fascination pour les dashbaords. et les gadgets qui brillent, mais c'est une autre histoire.
+
+# References
+
+- [Critical juncture theory](https://en.wikipedia.org/wiki/Critical_juncture_theory) The causal effect of large, rapid, discontinuous changes, and the historical legacy of these changes.
+- Aquilino Morelle, [[l_opium_des_elites|L'Opium des Élites]].

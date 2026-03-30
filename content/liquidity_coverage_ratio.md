@@ -1,0 +1,22 @@
+---
+title: "Liquidity coverage ratio (LCR)"
+tags:
+  - public
+aliases:
+  - 8f5b3162-687f-47a3-9dfc-aa763212d33d
+source: https://www.bis.org/publ/bcbs188_fr.pdf
+---
+
+Le LCR est un ratio à un mois défini par [[bale_iii|Bâle III]], qui compare les réserves de liquidité en HQLA (High quality liquid assets):
+
+- Cash: 1.
+- Titres de dette d'Etat: 1.
+- [Autres titres](https://www.banque-france.fr/politique-monetaire/cadre-operationnel-de-la-politique-monetaire/remise-dactifs-en-garantie-des-operations-de-refinancement-de-leurosysteme/criteres-deligibilite-des-actifs/eligibilite-des-actifs-0): .85
+
+Aux fuites potentielles de liquidités :
+
+- Prêts aux clients sont renouvbelés à .5
+- Prêts interbancaires non renouvelé.
+- Depots de retail, fuite entre 5% et 10%
+- Depots grandes entreprises entre 25% et 75%
+- Refinancement des marchés à 0%

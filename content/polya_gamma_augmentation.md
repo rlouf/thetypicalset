@@ -1,0 +1,162 @@
+---
+title: "Polya-Gamma augmentation"
+aliases:
+  - 16338bc2-222c-4acf-aa28-38b951dfcb89
+---
+
+Let us consider the binary target $\boldsymbol{y} = \left[ y_1, \dots, y_N\right]$ and the dependant variables $X = \left[\boldsymbol{x}_1, \dots, \boldsymbol{x}_N\right]$ such that
+
+```
+\begin{equation*}
+P\left(\boldsymbol{y} | X, \boldsymbol{\beta} \right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x}_i, \boldsymbol{\beta} \right)
+\end{equation*}
+```
+We further assume that
+
+```
+\begin{align*}
+y_i | \boldsymbol{x_i}, \boldsymbol{\beta} &\sim \operatorname{Bernoulli}\left(p_i\right)\\
+p_i & = \sigma(\boldsymbol{x_i}^T\,\boldsymbol{\beta})\\
+\sigma(x) &= \left(1 + \exp(-x)\right)^{-1}
+\end{align*}
+```
+It can be shown that
+
+```
+\begin{equation*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \frac{\exp\left(y_i\: \boldsymbol{x}_i^T \boldsymbol{\beta}\right)}{1 + \exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)}
+\end{equation*}
+```
+while assuming a normal prior on each coefficient $\beta_j$
+
+```
+\begin{equation*}
+\beta_j \sim \operatorname{N}\left(\mu, \sigma^2\right)
+\end{equation*}
+```
+So the posterior distribution:
+
+$$
+P(\beta|y, X) \propto P(Y| X, \beta) P(\beta)
+$$
+
+does not have a closed-form solution.
+
+But behold! Polson et al. remind us of this neat result:
+
+```
+\begin{align*}
+\frac{\left(e^u\right)^a}{\left(1 + e^u\right)^b} &= \frac{1}{2^b}\, e^{\kappa u}\,\int_0^\infty e^{-\frac{u^2}{2} \omega}\; p(\omega)\, \mathrm{d}\omega\\
+\kappa &= a - \frac{b}{2}\\
+p(\omega) &= \mathrm{PG}\left(\omega|b, 0\right)
+\end{align*}
+```
+So if we set $b=1$, $u = \boldsymbol{x}_i^T \boldsymbol{\beta}$ and $a = y_i$ the following holds:
+
+```
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= \frac{1}{2} \int_0^\infty \exp\left( y_i \boldsymbol{x_i}^T\,\boldsymbol{\beta} - \frac{\left(\boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2}{2} \omega\right)\;P(\omega)\; \mathrm{d}\omega\\
+&= \frac{1}{2} \int_0^\infty \exp\left( -\frac{\omega}{2} \left( \frac{y_i}{\omega} - \boldsymbol{x_i}^T\,\boldsymbol{\beta}\right)^2\right)\;P(\omega)\; \mathrm{d}\omega\\
+\end{align*}
+```
+So if we condition on $\omega_n$ we find that $P(y_i | x_i, \beta, \omega_n)$, and hence $P(\beta|Y, X, \omega_n)$ to be gaaussian (if $\omega_n$ is draws from $\operatorname{PG}(1, 0)$)
+
+# TODO Simple example with a bimodal distribution
+And $Y_i$ indicates which mode the sample belongs to. We can use the `polyagamma` library.
+
+# Appendix
+
+## Likelihood
+
+Let us derive the likelihood $p(\boldsymbol{y} | x, \boldsymbol{\beta} )$ for the [[bernoulli_distribution|Bernoulli]] and [[negative_binomial_distribution|Negative Binomial]] observation distribution. Assuming that the observations are i.i.d. from the same distribution we can write:
+
+```
+\begin{equation*}
+P\left(\boldsymbol{y} | x, \boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right)
+\end{equation*}
+```
+### Bernoulli observation distribution
+
+In this case:
+
+```
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
+p_i &= \frac{\exp(f_i)}{1 + \exp(f_i)}\\
+f_i &= - x_i^T\,\boldsymbol{\beta}
+\end{align*}
+```
+```
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,1-y_i}\,\left(1 - p_i\right)^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,1-y_i}\,\left[1 - \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,1-y_i}\,\left[\frac{1}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \frac{\left( \exp(f_i) \right)^{\,1-y_i}}{1 + \exp(f_i)}\\
+&= \frac{\left( \exp(-f_i) \right)^{\,y_i}}{1 + \exp(-f_i)}\\
+\end{align*}
+```
+So that:
+
+```
+\begin{equation*}
+\mathcal{L}(\boldsymbol{\beta}) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \prod_{i=1}^N \frac{\left(\exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i}}{1 + \exp\left(\boldsymbol{x}_i^T \boldsymbol{\beta}\right)}
+\end{equation*}
+```
+```python
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+X = at.matrix("X")
+beta = at.vector("beta")
+
+p = at.sigmoid(at.dot(X.T, beta))
+Y_rv = srng.bernoulli(p, size=X.shape[0])
+y_vv = Y_rv.clone()
+
+loglikelihood = y.logprob(y_vv)
+```
+
+Is equivalent to:
+
+```python
+X = at.matrix("X")
+beta = at.vector("beta")
+f = at.dot(X.T, beta)
+# loglikelihood = at.prod(at.pow(at.exp(f), y) / (1 + at.dot(exp(f)))...)
+```
+
+### Negative binomial observation distribution
+
+If we note $r$ the [[negative_binomial_distribution|negative binomial]]'s dispersion parameter, and $y_i$ the number of observations in experiment $i$, then:
+
+```
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &= p_i^{\,r}\,\left(1 - p_i\right)^{y_i}\\
+p_i &= \frac{\exp(f_i)}{1 + \exp(f_i)}\\
+f_i &= - x_i^T\,\boldsymbol{\beta}
+\end{align*}
+```
+The previous calculation trivially applies to this as well:
+
+```
+\begin{align*}
+P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) &\propto p_i^{\,r}\,\left(1 - p_i\right)^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,r}\,\left[1 - \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \left[ \frac{\exp(f_i)}{1 + \exp(f_i)}\right]^{\,r}\,\left[\frac{1}{1 + \exp(f_i)}\right]^{y_i}\\
+&= \frac{\left( \exp(f_i) \right)^{\,r}}{\left(1 + \exp(f_i)\right)^{y_i+r}}\\
+\end{align*}
+```
+So that
+
+```
+\begin{equation*}
+\mathcal{L}_i\left(\boldsymbol{\beta}\right) = \prod_{i=1}^N P\left(y_i | \boldsymbol{x_i}, \boldsymbol{\beta}\right) = \prod_{i=1}^N \frac{\left(\exp\left( - \boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{r}}{\left(1 + \exp\left(-\boldsymbol{x}_i^T \boldsymbol{\beta}\right)\right)^{y_i+r}}
+\end{equation*}
+```
+# References
+
+- Dunson, etc. Bayesian inference for logistic models using Polya-Gamma latent variables. (2013)
+- Slides: <http://www.gatsby.ucl.ac.uk/tea/tea_archive/attached_files/polya-gamma-slides.pdf>
+- <https://tiao.io/post/polya-gamma-bayesian-logistic-regression/#i>
+- <https://gregorygundersen.com/blog/2019/09/20/polya-gamma/>
+- [Implementation](https://github.com/aesara-devs/aemcmc) in `AeMCMC`

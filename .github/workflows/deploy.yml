@@ -5,28 +5,58 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  build-and-deploy:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      QUARTZ_VERSION: v4.5.2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Clone Quartz
+        run: git clone --depth 1 --branch $QUARTZ_VERSION https://github.com/jackyzha0/quartz.git /tmp/quartz
+
+      - name: Copy content and config into Quartz
+        run: |
+          cp -r content /tmp/quartz/content
+          cp quartz.config.ts /tmp/quartz/quartz.config.ts
+          cp quartz.layout.ts /tmp/quartz/quartz.layout.ts
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: /tmp/quartz
+
+      - name: Build Quartz
+        run: npx quartz build
+        working-directory: /tmp/quartz
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: /tmp/quartz/public
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2.3.1
-        with:
-          persist-credentials: false
-
-      - name: Set up environment
-        run: |
-          sudo apt-get update
-          sudo apt-get --yes --force-yes install build-essential sqlite3 emacs
-
-      - name: Build the html from org files
-        run: |
-          make publish
-
-      - name: Deploy to gh-pages
-        uses: JamesIves/github-pages-deploy-action@3.6.2
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: _public
-          CLEAN: true
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

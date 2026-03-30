@@ -1,0 +1,43 @@
+---
+title: "AePPL and custom distributions"
+aliases:
+  - 52c4f0cc-e5b4-4880-94e3-5e6e06078e6f
+---
+
+Linked to [[condition_on_transformed_variables|AePPL and transformed variables]]. But we should also investigate the idea of having a `RandomVariableFromGraph` operator, that works similarly to `OpFromGraph`.
+
+We can already condition on and sample from the following:
+
+```python
+import aesara.tensor as at
+import aesara
+import aeppl
+
+srng = at.random.RandomStream()
+
+def pert(srng, a, b, c):
+    r"""Construct a random variable that is PERT-distributed."""
+    alpha = 1 + 4 * (b - a) / (c - a)
+    beta = 1 + 4 * (c - b) / (c - a)
+    X_rv = srng.beta(alpha, beta)
+    z = a + (b - a) * X_rv
+    return z
+
+A_rv = srng.uniform(10, 20, name="A")
+B_rv = srng.uniform(20, 65, name="B")
+C_rv = srng.uniform(65, 100, name="C")
+Y_rv = pert(srng, A_rv, B_rv, C_rv)
+
+logprob, (y_vv, a_vv, b_vv, c_vv) = aeppl.joint_logprob(Y_rv, A_rv, B_rv, C_rv)
+
+# Compile a function that samples from the prior predictive distribution
+sample_fn = aesara.function([], [Y_rv, A_rv, B_rv, C_rv])
+sample = sample_fn()
+print(sample)
+
+# Compile the joint log-density function
+logprob_fn = aesara.function([y_vv, a_vv, b_vv, c_vv], logprob)
+print(logprob_fn(*sample))
+```
+
+This would allow us to reduce the number of elementary distributions in Aesara/AePPL, and allow users to quickly add the distributions they need. By giving them a type we can use them in RV algebra relations.

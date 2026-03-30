@@ -1,0 +1,54 @@
+---
+title: "Estimer l'abstention"
+tags:
+  - public
+  - pollsposition
+aliases:
+  - 8081b4dc-d34e-40c6-8c30-3ade6e424752
+---
+
+Il est difficile d'obtenir une estimation robuste de la participation car les instituts utilisent tous une méthodologie différente pour l'estimer. On peut néanmoins s'en sortir moyennant multiples modèles et une structure hiérarchique pour les valeurs des paramètres.
+
+# Modèle
+
+Nous cherchons à estimer le nombre d'inscrits sur les listes électorales qui ont l'intention d'aller voter. Sur $N$ inscrits nous distinguons :
+
+- Les $n_v$ personnes certaines d'aller voter;
+- Les $n_a$ personnes certaines de ne pas aller voter;
+- Les $n_i$ personnes indécises.
+
+Les $n_i$ personnes se divisent en d'autres sous-catégories $c=1, \dots,C$. En notant $\boldsymbol{p} = \left(p^a, p^{i}_1, \dots, p^{i}_C, p^v\right)$ la probabilité d'appartenir à chaque catégorie nous pouvons écrire en toute généralité:
+
+```latex
+\begin{equation}
+  \boldsymbol{n} \sim \operatorname{Multinomial}(\boldsymbol{p}, N)
+\end{equation}
+```
+
+Chaque sous-catégorie d'indécis regroupe des personnes dont les probabilités d'aller son similaires, et croissantes. Certains instituts demandent aux interrogés d'estimer leur probabilité d'aller voter (Elabe, Ipsos, Opinionway), d'autres leur demande de la qualifier (Ifop, Harris).
+
+On note $\theta_i$ la probabilité d'aller voter d'un indécis. On suppose que la distribution de $\theta_i$ suit un loi Beta
+
+```latex
+\begin{equation}
+ \theta_{i}  \sim \operatorname{Beta}(\alpha, \beta)
+\end{equation}
+```
+
+De sorte que s'il y a $C$ sous-catégories d'indécis, la probabilité $p_c^i$ d'être indécis et d'appartenir à la sous-catégorie $c$ est donnée par:
+
+```latex
+\begin{equation}
+ p_{c}^{i} = \int_{(c-1)/C}^{c/C} P(\theta_{i}=x|\alpha, \beta) \mathrm{d}x
+\end{equation}
+```
+
+Un petit dessin pour comprendre comment [[link_histograms_and_distributions|lier histogrammes (comptes) et distributions (probabilité)]] (?) :
+
+![[img/abstention-diagram.svg]]
+
+Nous pouvons ensuite utiliser le modèle pour estimer les paramètres $p_a$, $p_v$, $\alpha$, $\beta$ qui vont nous permettre ensuite d'estimer le taux de participation moyen et autres quantités d'intérêt.
+
+# Données
+
+Bien évidemment, les questions posées par les instituts de sondages ne sont pas du tout normalisées; nous avons commencé à [recenser les questions posées](https://github.com/pollsposition/data/issues/11). Néanmoins, même si les détails des questions sont différents (et donc bien souvent le nombre de catégories), il sera possible d'utiliser un **modèle hiérarchique** en attribuant un prior commun aux paramètres $\alpha$, $\beta$, $p_a$, $p_v$.

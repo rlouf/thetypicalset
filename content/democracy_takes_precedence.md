@@ -1,0 +1,11 @@
+---
+title: "Democracy takes precedence"
+date: 2022-02-15
+lastmod: 2022-04-06
+aliases:
+  - 894ff6dd-196e-4358-b26b-645b09ca892e
+---
+
+tags: [[democracy|Democracy]]
+
+Democracy takes precedence over many concepts. By that I mean that one does not need anything but democracy as an ideal to justify these concepts. [[progressive_taxes_are_justified_by_the_need_to_preserve_democracy|Progressive taxes are justified by the need to preserve democracy]], for instance: if you don't enforce progressive taxation you risk corruption and people accumulating power that is in competition with people's right to vote. [[states_raising_funds_on_financial_markets_is_a_threat_to_democracy|States raising funds on financial markets is also a threat to democracy]]: while market pundits will argue markets are democratic, in practice you are signing yourself up for oligarchy: 50% of the US' sovereign debt is owned by 1% of the population. And people who loan money to the State are more likely to be heard than others.
