@@ -1,7 +1,0 @@
----
-title: "walko"
-aliases:
-  - f81ea2e9-76e9-4e6a-954d-eea005a18f96
----
-
-

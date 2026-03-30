@@ -1,5 +1,5 @@
 ---
-title: "#+title: AePPL's intermediate representation should be a first-class citizen"
+title: "AePPL's intermediate representation should be a first-class citizen"
 aliases:
   - e6355555-c54b-46c1-8dde-d8608bb2a4ba
 ---

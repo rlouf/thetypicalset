@@ -1,7 +1,0 @@
----
-title: "Python"
-aliases:
-  - 5cbd01f8-88bb-4826-b82d-125ad3c759eb
----
-
-
