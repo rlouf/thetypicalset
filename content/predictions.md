@@ -1,0 +1,9 @@
+---
+title: "Predictions"
+tags:
+  - predictions
+aliases:
+  - 7e693317-efcc-457c-8560-1fa8f390ad10
+---
+
+The idea is that fundamentals are a very good predictor of the final result of elections but that voters take a while to get there (kaplan2012). So to get an accurate prediction we need to handle both time scales: one takes place over times scales of the order of a few monts and that is a response to fundamentals such as the price of gas, median salary, unemployment, etc. The other one handles the fluctuation of opinion and its tendency to "get there". The latter can be handled by a random walk.

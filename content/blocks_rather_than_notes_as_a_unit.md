@@ -1,0 +1,7 @@
+---
+title: "Blocks rather than notes as a unit"
+aliases:
+  - 56f52ba3-c104-4f5a-a114-6a5bde3efaee
+---
+
+

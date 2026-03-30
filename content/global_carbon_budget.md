@@ -1,0 +1,10 @@
+---
+title: "Global Carbon Budget"
+tags:
+  - inprogress
+  - public
+aliases:
+  - 0486c9e9-76a8-402a-a23a-bb4f824928c6
+---
+
+Figrues and data: <https://folk.universitetetioslo.no/roberan/GCB2020.shtml> Atlas with longer time series: <http://www.globalcarbonatlas.org/en/content/welcome-carbon-atlas>

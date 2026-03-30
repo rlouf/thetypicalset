@@ -1,0 +1,48 @@
+---
+title: "The Mythical Swing Voter"
+tags:
+  - literature
+aliases:
+  - 33038660-5177-4730-9682-e164310e4f66
+---
+
+# Summary
+
+*Problem:* Surveys conducted durting presidential elections (here predidential 2012 in the US) show wild swings between candidates.
+
+/<Data:/>
+
+- Traditional cross-sectional surveys
+- Large scale, high frequency survey
+- High response rate panel
+
+*Results:* Sample composition varied more than vote intentions. MRP model with additional variables (party identification, ideological self-placement and past vote) makes selection ignorable. Vote swings are artifacts of sample selection.
+
+# Introduction
+
+A lot of discussion around the existence of swings and persuadable voters. No one has questioned their existence. Polls do swing, but it is hard to find voters who actually switch sides. Plus if the polarization story is accurate, it is implausible that some voters will switch sides.
+
+"phantom swings" appear as a result of sample selection in survey participation. Campaign events change survey participation rather than vote intentions
+
+# Evidence in empirical studies
+
+## Sample selection bias in cross-sectional polls
+
+Obama > Romney (+4) After the first debate, Obama < Romney(-1) After the third debate, Obama > Romney (1)
+
+Story was told that Obama performed poorly in the first debate and recovered later. Consistent with existence of a pool of swing voters.
+
+Figure 1(b) --> People who responded mainly identified as democrats
+
+## Net swing
+
+- Figure 3(a) shows a clear drop in the number of respondents who are democrats at the same time as the drop in Obama support
+- Figure 4 ---> Shows the curves using post-stratification with only demographic data, and with party ID.
+
+## Gross swing
+
+Many scenarios can explain this observed negligible net swing; maybe there are large swings on both sides?
+
+Figure 5 --> Estimated proportion of electorate that switched their support from one electorate to the other
+
+## To read next

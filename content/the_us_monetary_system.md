@@ -1,0 +1,63 @@
+---
+title: "The US Monetary system"
+tags:
+  - public
+aliases:
+  - 1e3f813d-908b-4b1b-b4dd-b6177e6c59b3
+---
+
+To understand the US monetary system one needs to understand the system below, that is the flows and stocks of money.
+
+```latex
+\tikzset{
+    table nodes/.style={
+        rectangle,
+        draw=black,
+        align=center,
+        minimum height=7mm,
+        text depth=0.5ex,
+        text height=2ex,
+        inner xsep=0pt,
+        outer sep=0pt
+    },
+    table/.style={
+        matrix of nodes,
+        row sep=-\pgflinewidth,
+        column sep=-\pgflinewidth,
+        nodes={
+            table nodes
+        },
+        execute at empty cell={\node[draw=none]{};}
+    }
+}
+\begin{tikzpicture}
+  \matrix (first) [table, column sep=2mm, row sep=1mm] {
+    \node [rectangle, draw=black, rounded corners=3, text width=4cm, text centered] {Federal Reserve}; &
+    \\
+    \node (A) [rectangle, draw=black, rounded corners=3, text width=2cm, anchor=east, text centered] {Treasury}; &
+    \node (B) [rectangle, draw=black, rounded corners=3, text width=2cm, anchor=east, text centered] {Banks};
+    \\
+    \node [rectangle, draw=black, rounded corners=3, text width=5cm, text centered] {Corporations and Individuals}; & \\
+  }
+
+\end{tikzpicture}
+```
+
+![[img/us-financial-sytem-drawing.svg]]
+
+Treasury (debt) and Fed (monetary policy) were separated in 1951. See this [article](https://www.investopedia.com/articles/economics/08/treasury-fed-reserve.asp) for an explanation of how they interact with each other in practice.
+
+The **banks**:
+
+- How much money can they loan? What are the reserve requirements?
+- How can they acquire reserve?
+
+For everything related to reserve requirements, you can read the [Fed's explanation of reserve balance requirements](https://www.federalreserve.gov/monetarypolicy/reserve-maintenance-manual-calculation-of-reserve-balance-requirements.htm) ([PDF](https://www.federalreserve.gov/monetarypolicy/files/reserve-maintenance-manual.pdf)). This includes reporting timelines.
+
+The **treasury**:
+
+- How does it get money?
+
+**Individuals** pay taxes, spend money and save money. Saving increases the reserves. Since Bale III banks are required to also hold High Quality Assets as reserve, often sovereign debt.
+
+![[img/us-financial-sytem-individual.svg]]

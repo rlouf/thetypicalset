@@ -1,0 +1,7 @@
+---
+title: "Multinomial sampling"
+aliases:
+  - 412ada6d-997b-4e9e-8940-4c66e92ca00f
+---
+
+

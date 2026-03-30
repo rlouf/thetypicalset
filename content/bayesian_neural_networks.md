@@ -1,0 +1,70 @@
+---
+title: "Classification uncertainty and (Bayesian) Neural Networks"
+aliases:
+  - 5296dc42-edf3-4803-bc4e-1b611a6f254b
+---
+
+This answer is a little longer than I originally expected, but I hope it is clear.
+
+# Bayesian NNs are NN ensembles
+
+It is important to define exactly what it is we are trying to compute, so I am going to briefly go over the difference between bayesian neural nets and others. We train classifiers because we are interested in the probability that an item indexed by $i$ belongs to a category $c$ given a model and a dataset on which we have "trained" the model:
+
+```
+\begin{align*}
+P\left(\hat{y}_i = c | \mathcal{D}\right) = \int P(\hat{y}_i=c|\theta) P(\theta|\mathcal{D})\; \mathrm{d}\theta
+\end{align*}
+```
+Where $\theta$ is a vector that contains the model's weights, $\mathcal{D} = \left\{x_i, y_i \right\}$ the training data. We can interpret the *predictive distribution* as the expection of the likelihood for a single network $P(\hat{y}_i=c|\theta)$ under the *posterior distribution* $P(\theta|\mathcal{D})$. The predictive distribution can therefore be interpreted as an ensemble of neural networks.
+
+In practice, inference for Bayesian Neural Networks consists in drawing samples from the posterior distribution $P(\theta|\mathcal{D})$ to be able to approximate $P\left(\hat{y}_i = c | \mathcal{D}\right)$. Therefore in finding many networks (values of the parameters) that can plausibly explain the observations in $\mathcal{D}$. Inference for non-Bayesian neural networks consists in finding the network (with weights $\theta^*$) that minimizes a given loss function. Hence non-bayesian NNs are more prone to overfitting on the training data.
+
+# How confident can by model be?
+
+Now we can go back to what I understood as your question: how do we estimate how "confused" our model is?
+
+I take it that you consider the value of $p^* = \operatorname{max}_c P(\hat{y}_i=c)$ as an estimator. The closer to 1 the more confident the neural net in its predictions. Ok, but in which of the following situations would you estimate your net is more confident:
+
+This one?
+
+```ascii
+  x
+  x
+  x
+  x   x   x
+  x   x   x   x
+| 1 | 2 | 3 | 4 |
+```
+
+Or this one?
+
+```ascii
+  x   x
+  x   x
+  x   x
+  x   x
+  x   x
+| 1 | 2 | 3 | 4 |
+```
+
+I think most people would say that the result is more certain in the first situation. If I were to work with non-bayesian nets, and without any other information about the downstream requirements, I would use the **entropy of the histogram** as a measure instead. I explained earlier how to compute this histogram with a bayesian net, and we could indeed apply the same entropy measure in the bayesian case. The difference being that this histogram is supposedly more representative of the "true" probability of belonging to either category.
+
+This may sound disappointing so far. But you can do something **much better** with Bayesian nets. We often ask how confident the model is because we are worried about the *consequences* of misclassification. If mis-classification costed us nothing we would just go with the highest-proability class all the time and not think too much about it. To illustrate let's take the example a neural net that takes pictures of machine parts and marks them as defective or good to go. There are two possibilities for misclassification:
+
+- Classifying a part as defective when it isn't. We typically loose the equivalent of the fabrication cost of that piece;
+- Classifying a part as not defective when it is. The cost of such a mistake wildly varies depending on the application. It can get extremely high for commercial airplanes, for instance.
+
+The bayesian way of handling this situation is to *average* each of the cost functions over the posterior distribution $P(\theta|\mathcal{D})$. We can imagine many scenarios in which someone using a standard net would not raise an alarm when the bayesian does so. For instance in situation where $P(\hat{y}_i = \text{defective})$ is concentrated around very small values but with a "long" tail; in scenarios where the cost of mistakes is prohibitive the tail is amplified by the cost function so that the piece ends up being rejected. A classical net would have likely chosen a single value for $P(\hat{y}_i = \text{defective})$ that is close to 0, and you probably would have ended up keeping the piece.
+
+### TL;DR
+
+- Bayesian nets are ensemble models; To compute a given probability we consider *all* the model that could have plausibly explained the data;
+- In theory, estimating uncertainty is probably better done with entropy. In practice, you don't care about uncertainty but about mistakes. Bayesian nets are better equiped for that, see bayesian decision theory.
+- If you don't care about mistakes, NNs are probably fine. If you do, a lot, BNNs are worth the trouble.
+
+# References
+
+- *Why the softmax?* <https://crazyoscarchang.github.io/2018/08/29/why-the-softmax-function/>
+- Dropout as a Bayesian approximation: representing uncertainty in Deep Learning ([ArXiV](https://arxiv.org/abs/1506.02142))
+- Weight Uncertainty in Neural Networks ([ArXiV](https://arxiv.org/abs/1505.05424))
+- "Bayesian Neural Networks" ([David Duvenaud](https://www.cs.toronto.edu/~duvenaud/distill_bayes_net/public/))

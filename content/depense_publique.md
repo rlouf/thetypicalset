@@ -1,0 +1,7 @@
+---
+title: "Dépense publique"
+aliases:
+  - 7a7e47bd-25a2-405f-9441-b5e977d8c15d
+---
+
+La dépense publique représente 56% du PIB... mais celle du privé 200%. Cette mesure est pétée, comprendre pourquoi Les fonds sont aussi réinjecté dans l'économie (redistribution, salaires des fonctionnaires, aides aux entreprises, etc), soit 32% du PIB (boulo2021)

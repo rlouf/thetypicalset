@@ -1,0 +1,26 @@
+---
+title: "AePPL and elements of multi-dimensional random variables"
+aliases:
+  - c57dd926-5e8a-46c0-8af2-44e0dde4beb7
+---
+
+With AePPL/AeMCMC one should be able to condition on *some* components of a multivariate distribution:
+
+```python
+import aeppl
+import aesara.tensor as at
+
+srng = at.random.RandomStream(0)
+
+mu = at.vector("mu")
+sigma = at.matrix("sigma")
+idx = at.iscalar("i")
+X_rv = at.random.multivariate_normal(mu, sigma)
+
+Z_rv = X_rv[:idx]
+Y_rv = X_rv[idx:]
+
+logprob, (z_vv,) = aeppl.joint_logprob(Z_rv, realized={Y_rv: y_obs})
+```
+
+See [these notes](https://cdn.discordapp.com/attachments/894592276184043570/1054454175502704751/doucet_simulationconditionalgaussian.pdf) for applications of this, and how to efficiently do it.

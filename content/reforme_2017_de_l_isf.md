@@ -1,0 +1,11 @@
+---
+title: "Reforme 2017 de l'ISF"
+tags:
+  - public
+aliases:
+  - 308ee9f7-c727-4b41-b0c5-a1ade15b2d96
+---
+
+Voulue par Emmanuel Macron.
+
+Niche fiscale sur l'ISF de 50% pour investissement dans les PME disparait avec la reforme. Exoneration sur tout le patrimoin mobilier. Resultat: Comite de'evaluation des reformes de la fiscalite dit que investissement FIP et FCPI passent de 1 Mds en 2017 a 318 millions en 2019.

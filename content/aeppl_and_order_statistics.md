@@ -1,0 +1,9 @@
+---
+title: "AePPL and order statistics"
+aliases:
+  - 0b32c0da-e00a-467c-b123-9ebc3dc9c66a
+---
+
+# References
+
+<https://github.com/aesara-devs/aeppl/issues/44>

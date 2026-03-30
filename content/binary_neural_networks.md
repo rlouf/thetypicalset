@@ -1,0 +1,28 @@
+---
+title: "Binary Neural Networks"
+aliases:
+  - fe82d130-cb3b-40a1-8d79-fccfe90b3d75
+---
+
+These are neural networks where each weight can only take two values: \$θ~i~ ∈ `\left`{=latex}\\-1, 1`\right`{=latex}\\. This not only decreases memory usage (we only need 1 bit instead of the usual 32 or 64), but also performance improvements as some CPU/GPU instructions can be used to speed up computations on binary variables.
+
+Here are a few questions to start:
+
+- Can I *binarize* training weights? If so, is there a universal recipe?
+- How is performance (in terms of accuracy, etc) affected by binarization? I would like to binarize the weights for [[stable_diffusion|Stable Diffusion]] for insta.ce
+
+Computers only operate using logic operations: AND, OR, XOR, etc. so *any* neural network (even with continous weights) can be interpreted as a series of logic gates. This is **trivially** true, and not very interesting. *But* can't binary neural networks be represented as logic gates?
+
+# References
+
+- Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1 ([ArXiv](https://arxiv.org/abs/1602.02830)) ([Github](https://github.com/MatthieuCourbariaux/BinaryNet), Theano) ([Github](https://github.com/itayhubara/BinaryNet), Torch)
+
+  > We introduce a method to train Binarized Neural Networks (BNNs) - neural networks with binary weights and activations at run-time. At training-time the binary weights and activations are used for computing the parameters gradients. During the forward pass, BNNs drastically reduce memory size and accesses, and replace most arithmetic operations with bit-wise operations, which is expected to substantially improve power-efficiency. To validate the effectiveness of BNNs we conduct two sets of experiments on the Torch7 and Theano frameworks. On both, BNNs achieved nearly state-of-the-art results over the MNIST, CIFAR-10 and SVHN datasets. Last but not least, we wrote a binary matrix multiplication GPU kernel with which it is possible to run our MNIST BNN 7 times faster than with an unoptimized GPU kernel, without suffering any loss in classification accuracy. The code for training and running our BNNs is available on-line.
+
+- Training Binary Neural Networks using the Bayesian Learning Rule ([ArXiv](https://arxiv.org/abs/2002.10778)) ([Github](https://github.com/team-approx-bayes/BayesBiNN))
+
+> Neural networks with binary weights are computation-efficient and hardware-friendly, but their training is challenging because it involves a discrete optimization problem. Surprisingly, ignoring the discrete nature of the problem and using gradient-based methods, such as the Straight-Through Estimator, still works well in practice. This raises the question: are there principled approaches which justify such methods? In this paper, we propose such an approach using the Bayesian learning rule. The rule, when applied to estimate a Bernoulli distribution over the binary weights, results in an algorithm which justifies some of the algorithmic choices made by the previous approaches. The algorithm not only obtains state-of-the-art performance, but also enables uncertainty estimation for continual learning to avoid catastrophic forgetting. Our work provides a principled approach for training binary neural networks which justifies and extends existing approaches.
+
+- Interpretable neural networks based on continuous-valued logic and multicriteria decision operators ([ArXiV](https://arxiv.org/abs/1910.02486))
+
+  > Combining neural networks with continuous logic and multicriteria decision making tools can reduce the black box nature of neural models. In this study, we show that nilpotent logical systems offer an appropriate mathematical framework for a hybridization of continuous nilpotent logic and neural models, helping to improve the interpretability and safety of machine learning. In our concept, perceptrons model soft inequalities; namely membership functions and continuous logical operators. We design the network architecture before training, using continuous logical operators and multicriteria decision tools with given weights working in the hidden layers. Designing the structure appropriately leads to a drastic reduction in the number of parameters to be learned. The theoretical basis offers a straightforward choice of activation functions (the cutting function or its differentiable approximation, the squashing function), and also suggests an explanation to the great success of the rectified linear unit (ReLU). In this study, we focus on the architecture of a hybrid model and introduce the building blocks for future application in deep neural networks. The concept is illustrated with some toy examples taken from an extended version of the tensorflow playground.

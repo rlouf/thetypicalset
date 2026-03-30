@@ -1,0 +1,189 @@
+---
+title: "Solve sudokus with miniKanren"
+date: 2022-06-24
+---
+
+I am reminded today of Peter Norvig's [blog post](http://norvig.com/sudoku.html) on solving every sudoku puzzle using constraint propagation and search. In this essay we will revisit the problem using the python implementation of [miniKanren](http://minikanren.org/), [kanren](https://github.com/pythological/kanren/), a domain-specific language for logic programming.
+
+First a short refresher about sudokus. A sudoku puzzle is a square grid of 81 spaces which we subdivide in 9 squares each containing 9 spaces. For every valid sudoku grid:
+
+- The rows are a permutation of the digits from 1 to 9;
+- The columns are a permutation of the digits from 1 to 9;
+- The squares are a permutation of the digits from 1 to 9;
+
+The following represents a (partially filled) grid with one row, one column, and one square completed:
+
+```asciidoc
+6 1 4 |       |
+9 2 8 | 7 6 5 | 4 3 1
+5 3 6 |       |
+------+-------+------
+  4   |       |
+  5   |       |
+  6   |       |
+------+-------+------
+  7   |       |
+  8   |       |
+  9   |       |
+```
+
+Peter's solution is *imperative*: we implement a series of procedures that will give us the missing values in a Sudoku puzzle. The *nature* of the Sudoku, the rules, are hidden in this code. Here we will instead implement the rules of the Sudoku, i.e. the *relations* that the units must respect and let miniKanren search for the grids that respect these rules (given some hints) for us. Sounds too good to be true?
+
+# Solving sudoku rows
+
+Let us work on a simpler problem first: a sudoku row. We assume that we have a vector with 9 spaces already filled with a few hints. To represent a valid sudoku row the vector must be the permutation of the digits from 1 to 9. Let us consider the following puzzle as an example:
+
+```python
+row = (0, 0, 0, 1, 4, 0, 0, 9, 8)
+```
+
+Where the "0" values are placeholders. We can tell `kanren` these are placeholders using *logic variables*, whose value it will try to compute later:
+
+```python
+from kanren import var
+
+row_expr = tuple(r if r > 0 else var() for r in row)
+row_expr
+```
+
+We now need to express the relation that the elements of the vector must follow. In `kanren` we express these relations in the form of *goals*. `kanren` comes with a handy `permuteo` function which, when applied to two arguments, produces a goal that states that these two arguments must be a permutation of one another.
+
+```python
+from kanren import permuteo
+
+DIGITS = tuple(range(1, 10))
+goal = permuteo(row_expr, DIGITS)
+goal
+```
+
+We are now ready to ask `kanren` to find the missing values for us using the `run` function, which takes an expression---a data structure with logic variables whose value we want to compute---one or several goals and returns results. Here we ask `kanren` for 3 solutions:
+
+```python
+from kanren import run
+
+results = run(3, row_expr, goal)
+results
+```
+
+As you can see, once we have described the relations, `kanren` does all the heavy lifting for us and searches for solutions that satifsy the relations. Let us now move back to our initial problem: solving sudoku grids.
+
+# Solving sudoku grids
+
+We store the sudoku grid as a 81-element list. Since constraints are defined on rows, columns and squares we need to be able to extract those units from a grid:
+
+```python
+def get_rows(grid):
+    """Return a grid's rows."""
+    columns_idx = [[9 * i + j for j in range(9)] for i in range(9)]
+    return tuple(tuple(grid[i] for i in column) for column in columns_idx)
+
+def get_columns(grid):
+    """Return a grid's columns."""
+    rows_idx = [[i + 9 * j for j in range(9)] for i in range(9)]
+    return tuple(tuple(grid[i] for i in row) for row in rows_idx)
+
+def get_squares(grid):
+    """Return a grid's squares."""
+    squares_idx = [
+        [9 * i + j for i in a for j in b]
+        for a in ((0, 1, 2), (3, 4, 5), (6, 7, 8))
+        for b in ((0, 1, 2), (3, 4, 5), (6, 7, 8))
+    ]
+    return tuple(tuple(grid[i] for i in square) for square in squares_idx)
+```
+
+We can now express the relations that define a valid sudoku grid in the form of a `kanren` goal. In addition to `permuteo` we will use the `lall` which produces a goal that states that all the relations passed as arguments must be satisfied at the same time. The solution is fairly simple, and very elegant:
+
+```python
+from kanren import lall
+
+def sudoku(grid):
+    """Define the Sudoku grid as a set on constraints on the rows, columns and squares.
+
+    Parameter
+    ---------
+    grid
+        A list that contains hints and logic variables ("unknown values").
+
+    """
+    rows = get_rows(grid)
+    columns = get_columns(grid)
+    squares = get_squares(grid)
+    return lall(
+        lall(*(permuteo(r, DIGITS) for r in rows)),
+        lall(*(permuteo(c, DIGITS) for c in columns)),
+        lall(*(permuteo(s, DIGITS) for s in squares))
+    )
+
+```
+
+We can now theoretically solve any sudoku grid using the following function (we only ask for one solution):
+
+```python
+def solve_sudoku(grid):
+
+    # Flatten the grid
+    grid_flat = [int(elem) for row in grid for elem in row.split(" ")]
+    assert len(grid_flat) == 81
+    assert max(grid_flat) == 9
+
+    grid_expr = tuple(val if val > 0 else var()  for val in grid_flat)
+    result = run(1, grid_expr, sudoku(grid_expr))
+
+    return result[0]
+```
+
+Let us make sure that our code can solve a trivially easy problems where only a few values are missing:
+
+```python
+ridiculously_easy_puzzle = (
+    "5 0 4 6 7 8 0 1 2",
+    "6 0 2 1 0 5 3 4 8",
+    "1 9 8 3 4 2 5 6 7",
+    "8 5 9 7 0 1 4 2 3",
+    "4 0 6 8 5 3 7 9 0",
+    "7 1 3 9 2 4 8 5 6",
+    "9 6 1 5 3 7 2 8 4",
+    "2 8 7 4 1 9 6 3 5",
+    "3 0 5 2 0 6 0 7 9",
+)
+result = solve_sudoku(ridiculously_easy_puzzle)
+for i in range(9):
+    row = [str(r) for r in result[9*i: 9*i+9]]
+    print(" ".join(row))
+```
+
+This actually works! And since miniKanren does the search for us our solution is much more expressive than Peter's. It is obvious reading the code what the *rules* of the sudoku are. This is the beauty of relational programming and DSLs like miniKanren.
+
+# Limitation
+
+While `kanren` could find the solution for a ridiculously easy grid, the computation hangs on the following (supposedly easy) problem:
+
+```python
+easy_puzzle = (
+    "0 0 3 0 2 0 6 0 0",
+    "9 0 0 3 0 5 0 0 1",
+    "0 0 1 8 0 6 4 0 0",
+    "0 0 8 1 0 2 9 0 0",
+    "7 0 0 0 0 0 0 0 8",
+    "0 0 6 7 0 8 2 0 0",
+    "0 0 2 6 0 9 5 0 0",
+    "8 0 0 2 0 3 0 0 9",
+    "0 0 5 0 1 0 3 0 0",
+)
+result = solve_sudoku(easy_puzzle)
+```
+
+...while Peter Norvig's code solves most grids in less than 1 second. To understand why Peter's solution is orders of magnitude faster than ours, we need to understand how their respective search strategies differ. This is currently out my depth, so I started [implementing the examples](https://github.com/rlouf/reasoned-schemer) from [The Reasoned Schemer](https://mitpress.mit.edu/books/reasoned-schemer) to better understand the way miniKanren works. Expect more blog posts (and more lisp!) on the topic; maybe we can eventually find a way to make `kanren`'s search performance closer to Peter's code's in this example.
+
+# Conclusion
+
+This is a toy example, and miniKanren can be used for much more than solving sudoku puzzles. In [Aemcmc](https://github.com/aesara-devs/aemcmc) we use miniKanren extensively for several purposes, such as:
+
+1.  Describe relations between probabilistic models. The relation between [centered and non-centered representations](https://github.com/aesara-devs/aemcmc/pull/31) in the loc-scale families, [conjugacy relations](https://github.com/aesara-devs/aemcmc/blob/main/aemcmc/conjugates.py), etc. which can be used to rewrite probabilistic models written in [Aesara](https://github.com/aesara-devs/aesara) so they are easier to sample;
+2.  [[assign-gibbs-sampler-horseshoe|Match samplers to models]].
+
+The possibilities are endless, and to my knowledge haven't been explored much in python! This why I am particularly excited about where Aesara, Aeppl and Aemcmc are going---and why you should too. The promise is to make probabilistic programming in python a lot more *efficient* and *easy to use* that it currently is.
+
+# TODO Improve the solver's performance
+# TODO Generate valid sudoku puzzle using an empty grid as an input
