@@ -6,7 +6,6 @@ aliases:
   - d4e7c4bf-d67e-46eb-b721-fab3254b8b86
 ---
 
-tags: [[democracy|Democracy]]
 
 It is somewhat problematic that the french president can be elected with less than 20% support. Something needs to change. But I don't think that with participation levels below 60% you can so easily get people interested in the dmeocratic process.
 

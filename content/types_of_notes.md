@@ -1,8 +1,6 @@
 ---
 title: "All notes are different"
 lastmod: 2022-08-31
-tags:
-  - public
 aliases:
   - ca24d16b-40b8-4c66-b3fb-bc793ecccfdf
 ---

@@ -6,7 +6,6 @@ aliases:
   - 5baed631-d4de-405c-95e3-61845c658756
 ---
 
-tags: [[economics|Economics]]
 
 In neoclassical [[economics|economics]] agent rationality is central in the microfoundations of the supply & demande curve. Not only is the validty of this assumption is shattered by the [[sonnenschein_mantel_debreu_smd_theorem_in_macroeconomics|Sonnenschein-Mantel-Debreu (SMD) theorem]], it is probably not necessary. Unless we have a good reason to assume they are rational (it is a *big* assumption) then we'll have to do as if they were behaving randomly, hoping some emergent behavior appears and can be quantitied (smith2017)
 

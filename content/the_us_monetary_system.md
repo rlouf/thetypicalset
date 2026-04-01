@@ -1,7 +1,5 @@
 ---
 title: "The US Monetary system"
-tags:
-  - public
 aliases:
   - 1e3f813d-908b-4b1b-b4dd-b6177e6c59b3
 ---

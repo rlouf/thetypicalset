@@ -6,7 +6,6 @@ aliases:
   - 9e14abe0-c3eb-4ec1-bcfe-9a1cccc52ad7
 ---
 
-tags: [[markov_chain_monte_carlo_new|Markov Chain Monte Carlo]]
 
 Most MCMC algorithms follow the same procedure[^1]:
 

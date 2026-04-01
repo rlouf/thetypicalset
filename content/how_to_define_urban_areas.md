@@ -1,7 +1,5 @@
 ---
 title: "How to define urban areas"
-tags:
-  - public
 aliases:
   - 62955ba8-482c-4841-86b3-cc6ec373f661
 ---

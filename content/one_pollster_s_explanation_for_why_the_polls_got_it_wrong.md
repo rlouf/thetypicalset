@@ -2,8 +2,6 @@
 title: "One pollster's explanation for why the polls got it wrong"
 date: 2022-03-08
 lastmod: 2022-03-08
-tags:
-  - private
 aliases:
   - bc588621-b365-4b61-a4ba-a3c029a8e514
 ---

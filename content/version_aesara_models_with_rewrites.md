@@ -4,7 +4,6 @@ aliases:
   - 5f787d63-7955-4d44-a682-ca0be7629e7c
 ---
 
-tags: [[aesara|Aesara]]
 
 Hear me out: when we build models we usually progress iteratively by *rewriting* the model. Since we have a computation graph we could totally write the model's evolution as a series of graph rewrites and thus have a diff of the model. We can also perform graph **diffs** to understand exactly what is different between two versions of a graph.
 

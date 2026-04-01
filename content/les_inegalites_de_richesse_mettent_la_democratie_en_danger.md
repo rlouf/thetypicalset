@@ -1,7 +1,5 @@
 ---
 title: "Les inégalités de richesse mettent la démocratie en danger"
-tags:
-  - public
 aliases:
   - 394178f6-5dcf-4e4b-a677-647b13d71899
 ---

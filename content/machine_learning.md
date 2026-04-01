@@ -1,7 +1,5 @@
 ---
 title: "Machine Learning"
-tags:
-  - public
 aliases:
   - 45c083ce-32ab-4758-aa1c-32b0496594b1
 ---

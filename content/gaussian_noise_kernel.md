@@ -1,7 +1,5 @@
 ---
 title: "Ornstein-Uhlenbeck kernel"
-tags:
-  - public
 aliases:
   - 1a08425d-1fa8-4f9f-98d0-423b0d5c0991
 ---

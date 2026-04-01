@@ -1,12 +1,9 @@
 ---
 title: "Dette publique"
-tags:
-  - public
 aliases:
   - 75b82cba-444d-4b8f-a346-a8bd9ec540ad
 ---
 
-tags: [[economie|Économie]] [[politique|Politique]]
 
 # Commentaires de (boulo2021)
 

@@ -4,7 +4,6 @@ aliases:
   - 6085eb76-1331-4485-8e19-5e15fdd3d75d
 ---
 
-tags: [[economics|Economics]]
 
 Is it cargo-cult science? I am reading chapters of macroeconomics textbooks on currencies and it is full of inaccuracies and the models suck.
 

@@ -2,8 +2,6 @@
 title: "Energy"
 date: 2022-01-17
 lastmod: 2022-05-27
-tags:
-  - notebook
 aliases:
   - 3c71113d-e361-4d0a-8ff8-e46a7ee93fdd
 ---

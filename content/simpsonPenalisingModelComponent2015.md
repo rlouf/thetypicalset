@@ -1,8 +1,5 @@
 ---
 title: "Penalising model component complexity: A principled, practical approach to constructing priors"
-tags:
-  - public
-  - inprogress
 aliases:
   - 590f218f-df8b-4658-abf6-b931e1c454c7
 ---

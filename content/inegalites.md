@@ -1,8 +1,5 @@
 ---
 title: "Inegalités"
-tags:
-  - public
-  - politique
 aliases:
   - c5b081da-6903-4f3a-9a46-90c1465c4408
 ---

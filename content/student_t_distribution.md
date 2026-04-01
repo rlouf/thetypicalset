@@ -6,4 +6,3 @@ aliases:
   - 9f774e2f-c51c-443e-bab4-5bd2f831f862
 ---
 
-tags: [[probability_distribution|Probability distribution]]

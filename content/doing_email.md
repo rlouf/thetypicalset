@@ -1,12 +1,9 @@
 ---
 title: "Doing email"
-tags:
-  - public
 aliases:
   - cee24466-b9c5-4c9d-866e-1b757b9fa69b
 ---
 
-tags: [[workflow|Workflow]]
 
 Things I need:
 

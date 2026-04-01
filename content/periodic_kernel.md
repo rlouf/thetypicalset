@@ -1,8 +1,5 @@
 ---
 title: "Periodic kernel"
-tags:
-  - public
-  - inprogress
 aliases:
   - 29e2f739-8736-4189-9e36-a706fd5ec574
 ---

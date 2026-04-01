@@ -1,12 +1,9 @@
 ---
 title: "Inflation"
-tags:
-  - public
 aliases:
   - d0110ef7-f82f-4568-bb0d-9ac077994b8e
 ---
 
-tags: [[economics|Economics]]
 
 Comment est-ce que ça fonctionne? Comment est-ce que ca nous tombe dessus?
 

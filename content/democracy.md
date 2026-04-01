@@ -2,8 +2,6 @@
 title: "Democracy"
 date: 2022-03-06
 lastmod: 2022-05-27
-tags:
-  - notebook
 aliases:
   - bf925a86-18be-4845-ad88-063a28f359f4
 ---

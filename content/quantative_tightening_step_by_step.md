@@ -5,7 +5,6 @@ aliases:
 source: https://fedguy.com/quantitative-tightening-step-by-step/?utm_source=rss&utm_medium=rss&utm_campaign=quantitative-tightening-step-by-step
 ---
 
-tags: [[monetary_systems|Monetary systems]]
 
 This is a follow-up on [[quantitative_easing_step_by_step|Quantitative Easing step-by-step]].
 

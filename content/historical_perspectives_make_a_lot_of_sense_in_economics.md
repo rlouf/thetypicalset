@@ -1,7 +1,5 @@
 ---
 title: "Historical perspectives make a lot of sense in economics"
-tags:
-  - inbox
 aliases:
   - 7b6e6794-7b54-462f-9032-a3baae4440ba
 ---

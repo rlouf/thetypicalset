@@ -2,8 +2,6 @@
 title: "Build an idea factory"
 date: 2022-01-11
 lastmod: 2022-01-21
-tags:
-  - public
 aliases:
   - 911745d6-3628-4a5d-81e3-cb2b154939fe
 ---

@@ -7,7 +7,6 @@ aliases:
 source: https://maroonmacro.substack.com/p/issue-38-milton-friedmans-interest
 ---
 
-tags: [[doxa|Doxa]]
 
 When people think about "easy money" they usually mean high volume of credit, and they make the underlying assumption that if interests rates are low, volumes are going to be high and vice-versa.
 

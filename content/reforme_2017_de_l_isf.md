@@ -1,7 +1,5 @@
 ---
 title: "Reforme 2017 de l'ISF"
-tags:
-  - public
 aliases:
   - 308ee9f7-c727-4b41-b0c5-a1ade15b2d96
 ---

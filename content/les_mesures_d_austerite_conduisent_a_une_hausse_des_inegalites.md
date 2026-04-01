@@ -1,7 +1,5 @@
 ---
 title: "Les mesures d'austérité conduisent à une hausse des inégalités"
-tags:
-  - public
 aliases:
   - 14236af7-7de2-4ff1-9c66-381ef6ea8156
 ---

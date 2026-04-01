@@ -6,4 +6,3 @@ aliases:
   - 41209f8c-5f1e-43e5-83bc-742c25e4d97c
 ---
 
-tags: [[democracy|Democracy]]

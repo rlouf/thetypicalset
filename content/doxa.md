@@ -1,7 +1,5 @@
 ---
 title: "Doxa"
-tags:
-  - public
 aliases:
   - 3971d3ec-85c6-49dc-b1ad-54b935a641d8
 ---

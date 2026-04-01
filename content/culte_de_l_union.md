@@ -1,12 +1,9 @@
 ---
 title: "Culte de l'Union"
-tags:
-  - private
 aliases:
   - 4778519d-4074-4ba7-bfbb-820d1966d56f
 ---
 
-tags: [[union_europeenne|Union Européenne]]
 
 Culte de l'Union. Comme si notre monde était produit du *désir*. Ici, la *réalité* n'a plus prise sur rien mais il convient cependant d'être *raisonnable*.
 

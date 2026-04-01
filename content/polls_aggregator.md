@@ -1,7 +1,5 @@
 ---
 title: "Predict the result of French elections"
-tags:
-  - public
 aliases:
   - ed36fc9d-b164-4024-bd8b-d0906a2f171f
 ---

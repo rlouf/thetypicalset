@@ -6,7 +6,6 @@ aliases:
   - e0af86ab-d961-4113-9a87-055697bdb9fb
 ---
 
-tags: [[decentralized_finance|Decentralized Finance]]
 
 We measure Total Value Locked in smart contracts:
 

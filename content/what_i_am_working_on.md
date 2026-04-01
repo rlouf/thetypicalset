@@ -1,7 +1,5 @@
 ---
 title: "💻 Working on now"
-tags:
-  - public
 aliases:
   - 9980ae28-68d4-4e29-9248-d661ccd85ab8
 ---

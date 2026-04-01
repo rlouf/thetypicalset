@@ -2,8 +2,6 @@
 title: "Central banking 101"
 date: 2022-03-07
 lastmod: 2022-05-03
-tags:
-  - private
 aliases:
   - b88077f0-9914-47ed-8e0b-b44ff2c15777
 ---

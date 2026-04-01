@@ -1,12 +1,9 @@
 ---
 title: "Linear regression is a data smoother"
-tags:
-  - public
 aliases:
   - d25362a3-6f0c-4b00-98fa-13307b2cf217
 ---
 
-tags: [[machine_learning|Machine Learning]]
 
 Let us consider the simpler linear regression $r(x) = \alpha + \beta\, x$. The ordinary least square solution gives
 

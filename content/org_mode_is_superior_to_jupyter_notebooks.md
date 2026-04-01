@@ -1,12 +1,9 @@
 ---
 title: "Org-mode is superior to Jupyter notebooks"
-tags:
-  - public
 aliases:
   - 729275ba-934c-43ca-99dc-487240c14710
 ---
 
-tags: [[workflow|Workflow]]
 
 (for me, and probably for you too if you're reading this!)
 

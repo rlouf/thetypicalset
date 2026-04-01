@@ -1,12 +1,9 @@
 ---
 title: "The Dirichlet distribution"
-tags:
-  - public
 aliases:
   - 32caa45b-3668-493f-b193-a244ced47363
 ---
 
-tags: [[probability_distribution|Probability distribution]]
 
 *Is it to proportions what Multinomial is to number in categories?*
 

@@ -1,7 +1,5 @@
 ---
 title: "Publish your notes instantly"
-tags:
-  - public
 aliases:
   - 9b92383e-727d-4d16-9591-9730222e2d5c
 ---

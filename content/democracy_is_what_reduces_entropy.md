@@ -6,7 +6,6 @@ aliases:
   - 8075ac29-97a9-495a-86c6-c04a0c2aa4d0
 ---
 
-tags: [[democracy|Democracy]]
 
 Democracy (the vote) mediates the opinion of everyone to make a decision over one thing. Where a decentralized system would have led to more chaos. There is a tradeoff to be found between entropy reduction (ultimately authoritarian) and completely chaotic. I guess that's what designing representative systems and voting systems is about. [[complexity_is_an_issue_for_societies|Complexity is an issue for societies]]
 

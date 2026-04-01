@@ -1,8 +1,5 @@
 ---
 title: "Global Carbon Budget"
-tags:
-  - inprogress
-  - public
 aliases:
   - 0486c9e9-76a8-402a-a23a-bb4f824928c6
 ---

@@ -1,8 +1,5 @@
 ---
 title: "Estimer l'abstention"
-tags:
-  - public
-  - pollsposition
 aliases:
   - 8081b4dc-d34e-40c6-8c30-3ade6e424752
 ---

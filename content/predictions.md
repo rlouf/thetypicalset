@@ -1,7 +1,5 @@
 ---
 title: "Predictions"
-tags:
-  - predictions
 aliases:
   - 7e693317-efcc-457c-8560-1fa8f390ad10
 ---

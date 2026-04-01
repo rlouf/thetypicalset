@@ -2,9 +2,6 @@
 title: "La pyramide des votants"
 date: 2022-03-07
 lastmod: 2022-03-10
-tags:
-  - blog
-  - draft
 aliases:
   - 9a8a5c0b-0372-4bb4-82fd-ba9b1768f794
 ---

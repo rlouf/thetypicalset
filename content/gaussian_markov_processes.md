@@ -1,7 +1,5 @@
 ---
 title: "Gaussian Markov processes"
-tags:
-  - public
 aliases:
   - fbde252d-acb4-4a84-bcd9-ee865cdec64c
 ---

@@ -1,7 +1,5 @@
 ---
 title: "Tout découle de l'égalité des droits"
-tags:
-  - public
 aliases:
   - 8cc5ef87-891b-4db0-9629-87e9f64b85b3
 ---

@@ -1,7 +1,5 @@
 ---
 title: "What I am reading"
-tags:
-  - public
 aliases:
   - 6db43c67-bc23-480f-92e8-e8c971f61eb2
 ---

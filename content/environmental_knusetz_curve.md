@@ -1,9 +1,5 @@
 ---
 title: "Environmental Knusetz curve"
-tags:
-  - public
-  - inprogress
-  - economics
 aliases:
   - 06543dc9-9661-4bee-8f9e-d4087d5102e2
 ---
@@ -12,7 +8,6 @@ aliases:
 :ID: 47a4a2ae-b44c-449a-800d-963ef748e05a
 :::
 
-tags: [[economics|Economics]] [[doxa|Doxa]] [[dumb_economics|Dumb economics]]
 
 It's broken because:
 

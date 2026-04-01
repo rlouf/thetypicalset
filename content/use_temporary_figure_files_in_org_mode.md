@@ -1,12 +1,9 @@
 ---
 title: "Temporary figures in org-mode"
-tags:
-  - public
 aliases:
   - d8f8c0db-3bac-4e45-833f-9af161529428
 ---
 
-tags: [[workflow|Workflow]]
 
 When I start exploring a topic I often have to plot figures that I probably won't keep. I thus don't want to have to find a name for these figures. Luckily there is a very simple solution; we can indeed use the `org-babel-temp-file` function to generate a random file location. For instance for a svg file:
 

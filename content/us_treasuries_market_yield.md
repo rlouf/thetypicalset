@@ -1,7 +1,5 @@
 ---
 title: "US Treasuries market yield"
-tags:
-  - inbox
 aliases:
   - d464d4aa-a6cb-4f36-a5be-832bd8d1dc70
 ---

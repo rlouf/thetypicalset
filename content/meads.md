@@ -4,7 +4,6 @@ aliases:
   - 67f5444e-18ec-4fe1-8b86-67eaccf1b0a8
 ---
 
-tags: [[markov_chain_monte_carlo_new|Markov Chain Monte Carlo]]
 
 The kernel is a combination of:
 

@@ -1,8 +1,5 @@
 ---
 title: "Mixtures of Poisson"
-tags:
-  - inprogress
-  - public
 aliases:
   - 3eacc5b3-e0fe-42ce-99fd-49bbcadb78f2
 source: https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjS-av03ZTwAhXDx4UKHZl8Cm4QFjAHegQICxAD&url=http%3A%2F%2Fwww.publications-sfds.fr%2Findex.php%2FJ-SFdS%2Farticle%2Fview%2F556%2F529&usg=AOvVaw2lGLIVq4VG3j-LVmO2EW_D

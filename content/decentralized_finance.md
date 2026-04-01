@@ -1,7 +1,5 @@
 ---
 title: "Decentralized Finance"
-tags:
-  - notebook
 aliases:
   - 45ed757e-662a-4f2a-8b26-69ad59981f95
 ---

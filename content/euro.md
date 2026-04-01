@@ -1,13 +1,9 @@
 ---
 title: "Euro"
-tags:
-  - public
-  - politique
 aliases:
   - f6592dcf-e288-4c9f-a231-2d4a9ea88501
 ---
 
-tags: [[monetary_systems|Monetary systems]]
 
 # Arguments in favor of the euro
 

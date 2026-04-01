@@ -6,7 +6,6 @@ aliases:
   - 1c40703b-58a0-4493-9cc7-b45b6d62ffdc
 ---
 
-tags: [[hamiltonian_monte_carlo|Hamiltonian Monte Carlo]]
 
 Assume we have an estimate $\Sigma$ of the covariance matrix for $q$. One way to improve sampling is to transform the $q$ so their covariance matrix is close to identity. To do this we write the Cholesky decomposition:
 

@@ -1,7 +1,5 @@
 ---
 title: "My daily routine"
-tags:
-  - public
 aliases:
   - 98630aaf-4ed8-4678-87d9-8088f7893a54
 ---

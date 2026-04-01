@@ -1,7 +1,5 @@
 ---
 title: "Liquidity coverage ratio (LCR)"
-tags:
-  - public
 aliases:
   - 8f5b3162-687f-47a3-9dfc-aa763212d33d
 source: https://www.bis.org/publ/bcbs188_fr.pdf

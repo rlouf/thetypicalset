@@ -1,8 +1,5 @@
 ---
 title: "Dragon variation"
-tags:
-  - chess
-  - public
 aliases:
   - 824373a6-873e-4ff8-abcb-3dc401cf0fdf
 ---

@@ -1,8 +1,6 @@
 ---
 title: "Use frequencies to vizualise uncertainty"
 lastmod: 2022-01-10
-tags:
-  - public
 aliases:
   - c83db8cf-2754-4192-b4ed-b6300ff2eda9
 ---

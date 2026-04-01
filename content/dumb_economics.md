@@ -1,13 +1,10 @@
 ---
 title: "Dumb economics"
 lastmod: 2022-04-04
-tags:
-  - public
 aliases:
   - 7999040a-5f23-4968-a254-b7f909e38ecc
 ---
 
-tags: [[economics|Economics]]
 
 Every scientific activity is prone to malpractice. Econonomics gives us prime examples of charting misconduct:
 

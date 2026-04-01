@@ -2,8 +2,6 @@
 title: "Symbolic and relational programming"
 date: 2022-03-06
 lastmod: 2022-08-11
-tags:
-  - notebook
 aliases:
   - f9dc079d-0b83-4ab5-afc4-c3a7045fb6a9
 ---
