@@ -6,7 +6,6 @@ export const sharedPageComponents: SharedLayout = {
   header: [],
   afterBody: [
     Component.Backlinks(),
-    Component.Graph(),
   ],
   footer: Component.Footer({ links: {} }),
 }
@@ -17,7 +16,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.ContentMeta(),
     Component.TagList(),
   ],
-  left: [Component.TrailPanel()],
+  left: [Component.TrailMap()],
   right: [],
 }
 

@@ -1,14 +1,21 @@
 @use "../../styles/variables.scss" as *;
 
 .trail-panel {
-  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: clip;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 15%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   .trail-container {
-    position: sticky;
-    top: 0;
-
     svg {
       overflow: visible;
+      display: block;
     }
   }
 }
@@ -75,9 +82,4 @@
   to {
     opacity: 1;
   }
-}
-
-// Make left sidebar position relative for absolute positioning
-.left.sidebar {
-  position: relative !important;
 }

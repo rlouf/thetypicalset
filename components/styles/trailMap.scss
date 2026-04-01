@@ -1,0 +1,64 @@
+@use "../../styles/variables.scss" as *;
+
+// Widen left sidebar
+#quartz-body {
+  @media all and ($desktop) {
+    grid-template-columns: 480px auto 320px !important;
+  }
+  @media all and ($tablet) {
+    grid-template-columns: 480px auto !important;
+  }
+}
+
+.trail-map {
+  flex: 1;
+  min-height: 0;
+
+  .trail-map-container {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.trail-map-svg {
+  display: block;
+}
+
+.bg-edges line {
+  stroke: var(--gray);
+  stroke-width: 0.5;
+  opacity: 0.5;
+}
+
+.bg-nodes circle {
+  fill: var(--gray);
+  opacity: 0.6;
+}
+
+.trail-edges line {
+  stroke: #c0392b;
+  stroke-width: 2;
+  opacity: 0.9;
+}
+
+.visited-nodes circle {
+  fill: #e74c3c;
+  stroke: #c0392b;
+  stroke-width: 1;
+  opacity: 0.9;
+}
+
+.current-node circle {
+  fill: #e74c3c;
+  animation: trail-map-pulse 3s ease-in-out infinite;
+}
+
+@keyframes trail-map-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
