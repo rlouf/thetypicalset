@@ -1,12 +1,26 @@
 @use "../../styles/variables.scss" as *;
 
-// Widen left sidebar
+// Widen left sidebar, remove empty right sidebar
 #quartz-body {
   @media all and ($desktop) {
-    grid-template-columns: 480px auto 320px !important;
+    grid-template-columns: 500px 600px auto !important;
+    grid-template-rows: auto 1fr auto !important;
+    grid-template-areas:
+      "grid-sidebar-left grid-header ."
+      "grid-sidebar-left grid-center ."
+      "grid-sidebar-left grid-footer ." !important;
   }
   @media all and ($tablet) {
     grid-template-columns: 480px auto !important;
+  }
+
+  & > .sidebar.left {
+    grid-row: 1 / -1;
+    height: 100vh;
+    max-height: 100vh;
+    position: sticky;
+    top: 0;
+    align-self: start;
   }
 }
 
@@ -26,13 +40,14 @@
 
 .bg-edges line {
   stroke: var(--gray);
-  stroke-width: 0.5;
-  opacity: 0.5;
+  stroke-width: 1.5;
+  opacity: 0.4;
 }
 
 .bg-nodes circle {
   fill: var(--gray);
-  opacity: 0.6;
+  opacity: 0.4;
+  cursor: pointer;
 }
 
 .trail-edges line {
@@ -46,19 +61,55 @@
   stroke: #c0392b;
   stroke-width: 1;
   opacity: 0.9;
+  cursor: pointer;
 }
 
 .current-node circle {
   fill: #e74c3c;
-  animation: trail-map-pulse 3s ease-in-out infinite;
+  animation: trail-map-pulse 2s ease-in-out infinite;
+}
+
+.current-node-animate circle {
+  animation: trail-map-node-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+    trail-map-pulse 2s ease-in-out 0.8s infinite;
+  transform-origin: center;
+}
+
+.trail-edge-growing {
+  stroke: #e74c3c;
+  stroke-width: 2.5;
+  opacity: 1;
 }
 
 @keyframes trail-map-pulse {
   0%,
   100% {
     opacity: 1;
+    r: 8;
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.3;
+    r: 5;
+  }
+}
+
+@keyframes trail-map-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes trail-map-node-in {
+  0% {
+    opacity: 0;
+    r: 0;
+  }
+  60% {
+    opacity: 1;
+    r: 12;
+  }
+  100% {
+    opacity: 1;
+    r: 8;
   }
 }

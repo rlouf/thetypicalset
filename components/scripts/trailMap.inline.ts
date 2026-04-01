@@ -179,6 +179,7 @@ function tweenViewBox(svg: SVGSVGElement) {
 // --- State ---
 
 let positions: Record<string, NodePos> = {}
+let titles: Record<string, string> = {}
 let allEdges: GraphLink[] = []
 let allSlugs: string[] = []
 let graphBBox = { minX: -100, minY: -100, maxX: 100, maxY: 100 }
@@ -191,9 +192,182 @@ window.addEventListener("popstate", () => {
   backtracking = true
 })
 
+// --- Render helpers ---
+
+function addTitle(parent: SVGElement, ns: string, slug: string) {
+  const t = document.createElementNS(ns, "title")
+  t.textContent = titles[slug] ?? slug.replace(/[-_]/g, " ")
+  parent.appendChild(t)
+}
+
+function renderBackground(svg: SVGSVGElement, ns: string) {
+  const bgEdges = document.createElementNS(ns, "g")
+  bgEdges.classList.add("bg-edges")
+  for (const edge of allEdges) {
+    const from = positions[edge.source]
+    const to = positions[edge.target]
+    if (!from || !to) continue
+    const line = document.createElementNS(ns, "line")
+    line.setAttribute("x1", String(from.x))
+    line.setAttribute("y1", String(from.y))
+    line.setAttribute("x2", String(to.x))
+    line.setAttribute("y2", String(to.y))
+    bgEdges.appendChild(line)
+  }
+  svg.appendChild(bgEdges)
+
+  const bgNodes = document.createElementNS(ns, "g")
+  bgNodes.classList.add("bg-nodes")
+  for (const slug of allSlugs) {
+    const pos = positions[slug]
+    if (!pos) continue
+    const c = document.createElementNS(ns, "circle")
+    c.setAttribute("cx", String(pos.x))
+    c.setAttribute("cy", String(pos.y))
+    c.setAttribute("r", "2.5")
+    addTitle(c, ns, slug)
+    bgNodes.appendChild(c)
+  }
+  svg.appendChild(bgNodes)
+}
+
+const EDGE_SPEED = 30 // layout units per second
+const MIN_EDGE_MS = 800
+const MAX_EDGE_MS = 2500
+
+function renderTrail(
+  svg: SVGSVGElement,
+  ns: string,
+  trail: string[],
+  currentSlug: string,
+  animate: boolean,
+) {
+  svg.querySelector(".trail-edges")?.remove()
+  svg.querySelector(".visited-nodes")?.remove()
+  svg.querySelector(".current-node")?.remove()
+
+  // Trail edges (all except the newest when animating)
+  const totalSteps = trail.length - 1
+  if (totalSteps > 0) {
+    const trailEdges = document.createElementNS(ns, "g")
+    trailEdges.classList.add("trail-edges")
+    const edgeCount = animate ? totalSteps - 1 : totalSteps
+    for (let i = 0; i < edgeCount; i++) {
+      const from = positions[trail[i]]
+      const to = positions[trail[i + 1]]
+      if (!from || !to) continue
+      const line = document.createElementNS(ns, "line")
+      line.setAttribute("x1", String(from.x))
+      line.setAttribute("y1", String(from.y))
+      line.setAttribute("x2", String(to.x))
+      line.setAttribute("y2", String(to.y))
+      const recency = i / totalSteps
+      const opacity = 0.35 + recency * 0.55
+      line.style.opacity = String(opacity)
+      trailEdges.appendChild(line)
+    }
+    svg.appendChild(trailEdges)
+  }
+
+  // Visited nodes
+  const visited = document.createElementNS(ns, "g")
+  visited.classList.add("visited-nodes")
+  for (let i = 0; i < trail.length - 1; i++) {
+    const pos = positions[trail[i]]
+    if (!pos) continue
+    const c = document.createElementNS(ns, "circle")
+    c.setAttribute("cx", String(pos.x))
+    c.setAttribute("cy", String(pos.y))
+    c.setAttribute("r", "3")
+    const recency = i / totalSteps
+    const opacity = 0.4 + recency * 0.5
+    c.style.opacity = String(opacity)
+    addTitle(c, ns, trail[i])
+    visited.appendChild(c)
+  }
+  svg.appendChild(visited)
+
+  const curPos = positions[currentSlug]
+
+  if (animate && trail.length >= 2) {
+    const from = positions[trail[trail.length - 2]]
+    if (from && curPos) {
+      animateEdgeAndNode(svg, ns, from, curPos, currentSlug)
+      return
+    }
+  }
+
+  // Static current node (no animation)
+  if (curPos) {
+    const cur = document.createElementNS(ns, "g")
+    cur.classList.add("current-node")
+    const c = document.createElementNS(ns, "circle")
+    c.setAttribute("cx", String(curPos.x))
+    c.setAttribute("cy", String(curPos.y))
+    c.setAttribute("r", "5")
+    addTitle(c, ns, currentSlug)
+    cur.appendChild(c)
+    svg.appendChild(cur)
+  }
+}
+
+function animateEdgeAndNode(
+  svg: SVGSVGElement,
+  ns: string,
+  from: NodePos,
+  to: NodePos,
+  slug: string,
+) {
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  const len = Math.sqrt(dx * dx + dy * dy)
+  const duration = Math.min(MAX_EDGE_MS, Math.max(MIN_EDGE_MS, (len / EDGE_SPEED) * 1000))
+
+  // Create the growing edge
+  const line = document.createElementNS(ns, "line")
+  line.classList.add("trail-edge-growing")
+  line.setAttribute("x1", String(from.x))
+  line.setAttribute("y1", String(from.y))
+  line.setAttribute("x2", String(from.x))
+  line.setAttribute("y2", String(from.y))
+
+  const edgeGroup = svg.querySelector(".trail-edges") ?? svg
+  edgeGroup.appendChild(line)
+
+  const start = performance.now()
+
+  function step(now: number) {
+    const t = Math.min(1, (now - start) / duration)
+    // ease-in-out
+    const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+    const cx = from.x + dx * ease
+    const cy = from.y + dy * ease
+    line.setAttribute("x2", String(cx))
+    line.setAttribute("y2", String(cy))
+
+    if (t < 1) {
+      requestAnimationFrame(step)
+    } else {
+      // Edge done — show the node
+      line.classList.remove("trail-edge-growing")
+      const cur = document.createElementNS(ns, "g")
+      cur.classList.add("current-node", "current-node-animate")
+      const c = document.createElementNS(ns, "circle")
+      c.setAttribute("cx", String(to.x))
+      c.setAttribute("cy", String(to.y))
+      c.setAttribute("r", "5")
+      addTitle(c, ns, slug)
+      cur.appendChild(c)
+      svg.appendChild(cur)
+    }
+  }
+
+  requestAnimationFrame(step)
+}
+
 // --- Render ---
 
-function render(trail: string[], currentSlug: string, isFirstRender: boolean) {
+function render(trail: string[], currentSlug: string, isFirstRender: boolean, animate: boolean) {
   const container = document.querySelector(".trail-map .trail-map-container") as HTMLElement
   if (!container || !dataLoaded) return
 
@@ -211,112 +385,75 @@ function render(trail: string[], currentSlug: string, isFirstRender: boolean) {
   }
 
   svg.innerHTML = ""
+  renderBackground(svg, ns)
 
-  // Layer 1: background edges
-  const bgEdges = document.createElementNS(ns, "g")
-  bgEdges.classList.add("bg-edges")
-  for (const edge of allEdges) {
-    const from = positions[edge.source]
-    const to = positions[edge.target]
-    if (!from || !to) continue
-    const line = document.createElementNS(ns, "line")
-    line.setAttribute("x1", String(from.x))
-    line.setAttribute("y1", String(from.y))
-    line.setAttribute("x2", String(to.x))
-    line.setAttribute("y2", String(to.y))
-    bgEdges.appendChild(line)
-  }
-  svg.appendChild(bgEdges)
+  const shouldAnimate = animate && !isFirstRender
 
-  // Layer 2: background nodes
-  const bgNodes = document.createElementNS(ns, "g")
-  bgNodes.classList.add("bg-nodes")
-  for (const slug of allSlugs) {
-    const pos = positions[slug]
-    if (!pos) continue
-    const c = document.createElementNS(ns, "circle")
-    c.setAttribute("cx", String(pos.x))
-    c.setAttribute("cy", String(pos.y))
-    c.setAttribute("r", "1.5")
-    bgNodes.appendChild(c)
-  }
-  svg.appendChild(bgNodes)
+  renderTrail(svg, ns, trail, currentSlug, shouldAnimate)
 
-  // Layer 3: trail edges
-  if (trail.length > 1) {
-    const trailEdges = document.createElementNS(ns, "g")
-    trailEdges.classList.add("trail-edges")
-    for (let i = 0; i < trail.length - 1; i++) {
-      const from = positions[trail[i]]
-      const to = positions[trail[i + 1]]
-      if (!from || !to) continue
-      const line = document.createElementNS(ns, "line")
-      line.setAttribute("x1", String(from.x))
-      line.setAttribute("y1", String(from.y))
-      line.setAttribute("x2", String(to.x))
-      line.setAttribute("y2", String(to.y))
-      trailEdges.appendChild(line)
-    }
-    svg.appendChild(trailEdges)
-  }
-
-  // Layer 4: visited nodes
-  const visited = document.createElementNS(ns, "g")
-  visited.classList.add("visited-nodes")
-  for (let i = 0; i < trail.length - 1; i++) {
-    const pos = positions[trail[i]]
-    if (!pos) continue
-    const c = document.createElementNS(ns, "circle")
-    c.setAttribute("cx", String(pos.x))
-    c.setAttribute("cy", String(pos.y))
-    c.setAttribute("r", "3")
-    visited.appendChild(c)
-  }
-  svg.appendChild(visited)
-
-  // Layer 5: current node
-  const curPos = positions[currentSlug]
-  if (curPos) {
-    const cur = document.createElementNS(ns, "g")
-    cur.classList.add("current-node")
-    const c = document.createElementNS(ns, "circle")
-    c.setAttribute("cx", String(curPos.x))
-    c.setAttribute("cy", String(curPos.y))
-    c.setAttribute("r", "5")
-    cur.appendChild(c)
-    svg.appendChild(cur)
-  }
-
-  // Camera: always show the full graph, centered on the trail
-  const trailPts = trail.map((s) => positions[s]).filter(Boolean) as NodePos[]
-  const tBBox = computeBBox(trailPts, 80)
-
+  // Camera
   const gw = graphBBox.maxX - graphBBox.minX
   const gh = graphBBox.maxY - graphBBox.minY
 
-  // Start with the trail bounding box, but never zoom in past 50% of the graph
-  let w = Math.max(200, tBBox.maxX - tBBox.minX, gw * 0.5)
-  let h = Math.max(200, tBBox.maxY - tBBox.minY, gh * 0.5)
+  function computeTargetVB(pts: NodePos[]): ViewBox {
+    const bbox = computeBBox(pts, 80)
+    let w = Math.max(200, bbox.maxX - bbox.minX, gw * 0.45)
+    let h = Math.max(200, bbox.maxY - bbox.minY, gh * 0.45)
+    w = Math.min(w, gw)
+    h = Math.min(h, gh)
+    const cx = (bbox.minX + bbox.maxX) / 2
+    const cy = (bbox.minY + bbox.maxY) / 2
+    let vx = cx - w / 2
+    let vy = cy - h / 2
+    vx = Math.max(graphBBox.minX, Math.min(vx, graphBBox.maxX - w))
+    vy = Math.max(graphBBox.minY, Math.min(vy, graphBBox.maxY - h))
+    return { x: vx, y: vy, w, h }
+  }
 
-  // Never exceed the full graph (no reason to show empty space)
-  w = Math.min(w, gw)
-  h = Math.min(h, gh)
+  if (shouldAnimate && trail.length >= 2) {
+    // Camera follows the edge: start from the trail without the new node,
+    // end at the trail with the new node. Sync with the edge animation.
+    const prevPts = trail.slice(0, -1).map((s) => positions[s]).filter(Boolean) as NodePos[]
+    const startVB = computeTargetVB(prevPts)
+    const allPts = trail.map((s) => positions[s]).filter(Boolean) as NodePos[]
+    const endVB = computeTargetVB(allPts)
 
-  // Center on the trail center, but clamp so the viewBox stays within the graph bounds
-  const cx = (tBBox.minX + tBBox.maxX) / 2
-  const cy = (tBBox.minY + tBBox.maxY) / 2
-  let vx = cx - w / 2
-  let vy = cy - h / 2
-  vx = Math.max(graphBBox.minX, Math.min(vx, graphBBox.maxX - w))
-  vy = Math.max(graphBBox.minY, Math.min(vy, graphBBox.maxY - h))
-
-  targetVB = { x: vx, y: vy, w, h }
-
-  if (fresh || isFirstRender) {
-    currentVB = { ...targetVB }
+    currentVB = { ...startVB }
+    targetVB = { ...endVB }
     svg.setAttribute("viewBox", `${currentVB.x} ${currentVB.y} ${currentVB.w} ${currentVB.h}`)
+
+    // Sync camera with edge animation duration
+    const newFrom = positions[trail[trail.length - 2]]
+    const newTo = positions[trail[trail.length - 1]]
+    let camDuration = MIN_EDGE_MS
+    if (newFrom && newTo) {
+      const dx = newTo.x - newFrom.x
+      const dy = newTo.y - newFrom.y
+      const len = Math.sqrt(dx * dx + dy * dy)
+      camDuration = Math.min(MAX_EDGE_MS, Math.max(MIN_EDGE_MS, (len / EDGE_SPEED) * 1000))
+    }
+
+    const camStart = performance.now()
+    function camStep(now: number) {
+      const t = Math.min(1, (now - camStart) / camDuration)
+      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+      currentVB.x = startVB.x + (endVB.x - startVB.x) * ease
+      currentVB.y = startVB.y + (endVB.y - startVB.y) * ease
+      currentVB.w = startVB.w + (endVB.w - startVB.w) * ease
+      currentVB.h = startVB.h + (endVB.h - startVB.h) * ease
+      svg!.setAttribute("viewBox", `${currentVB.x} ${currentVB.y} ${currentVB.w} ${currentVB.h}`)
+      if (t < 1) requestAnimationFrame(camStep)
+    }
+    requestAnimationFrame(camStep)
   } else {
-    tweenViewBox(svg)
+    const allPts = trail.map((s) => positions[s]).filter(Boolean) as NodePos[]
+    targetVB = computeTargetVB(allPts)
+    if (isFirstRender) {
+      currentVB = { ...targetVB }
+      svg.setAttribute("viewBox", `${currentVB.x} ${currentVB.y} ${currentVB.w} ${currentVB.h}`)
+    } else {
+      tweenViewBox(svg)
+    }
   }
 }
 
@@ -327,6 +464,7 @@ document.addEventListener("nav", async () => {
   const slug = simplifySlug(fullSlug)
 
   let trail: string[]
+  let animate = false
 
   if (!initialized) {
     initialized = true
@@ -346,12 +484,14 @@ document.addEventListener("nav", async () => {
       trail.length = idx + 1
     } else {
       trail.push(slug)
+      animate = true
     }
     backtracking = false
   } else {
     trail = getTrail()
     if (trail[trail.length - 1] !== slug) {
       trail.push(slug)
+      animate = true
     }
   }
 
@@ -367,6 +507,7 @@ document.addEventListener("nav", async () => {
       for (const [k, v] of Object.entries(data)) {
         const src = simplifySlug(k as FullSlug)
         allSlugs.push(src)
+        if (v.title) titles[src] = v.title
         for (const link of v.links ?? []) {
           allEdges.push({ source: src, target: link })
         }
@@ -393,6 +534,6 @@ document.addEventListener("nav", async () => {
     }
   }
 
-  render(trail, slug, firstRender)
+  render(trail, slug, firstRender, animate)
   firstRender = false
 })
