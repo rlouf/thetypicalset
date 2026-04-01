@@ -17,7 +17,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.ContentMeta(),
     Component.TagList(),
   ],
-  left: [],
+  left: [Component.TrailPanel()],
   right: [],
 }
 
