@@ -3,12 +3,19 @@ import { ContentDetails } from "../../plugins/emitters/contentIndex"
 
 const STORAGE_KEY = "garden-trail"
 const SPINE_X = 62
-const FIRST_Y = 108
+const FIRST_Y = 24
 const STEP_Y = 72
 const DOT_R = 4.5
 const LABEL_X_OFFSET = 15
 const MAX_LABEL = 23
 const WOBBLE = [0, 8, -6, 10, -8, 6, -10, 7, -4, 9]
+
+let backtracking = false
+let initialized = false
+
+window.addEventListener("popstate", () => {
+  backtracking = true
+})
 
 function getTrail(): string[] {
   try {
@@ -20,6 +27,20 @@ function getTrail(): string[] {
 
 function saveTrail(trail: string[]) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(trail))
+}
+
+function getTrailFromURL(): string[] | null {
+  const params = new URL(window.location.href).searchParams.getAll("trail")
+  return params.length > 0 ? params : null
+}
+
+function setTrailInURL(trail: string[]) {
+  const url = new URL(window.location.href)
+  url.searchParams.delete("trail")
+  for (let i = 0; i < trail.length - 1; i++) {
+    url.searchParams.append("trail", trail[i])
+  }
+  history.replaceState(history.state, "", url.toString())
 }
 
 function truncate(s: string, max: number): string {
@@ -38,9 +59,9 @@ function buildSVG(
   trail: string[],
   titles: Map<string, string>,
   currentSlug: string,
-  prevLength: number,
+  animate: boolean,
 ) {
-  const container = document.querySelector(".trail-panel .trail-container")
+  const container = document.querySelector(".trail-panel .trail-container") as HTMLElement
   if (!container) return
 
   if (trail.length < 1) {
@@ -57,7 +78,6 @@ function buildSVG(
   svg.setAttribute("height", String(totalHeight))
   svg.setAttribute("viewBox", `0 0 ${svgWidth} ${totalHeight}`)
 
-  // Draw path segments
   for (let i = 0; i < trail.length - 1; i++) {
     const x1 = SPINE_X + wobbleX(i)
     const y1 = FIRST_Y + i * STEP_Y
@@ -71,8 +91,7 @@ function buildSVG(
     path.setAttribute("d", d)
     path.classList.add("trail-line")
 
-    const isNew = i >= prevLength - 1 && prevLength > 0
-    if (isNew) {
+    if (animate && i === trail.length - 2) {
       const length = path.getTotalLength()
       path.style.strokeDasharray = String(length)
       path.style.strokeDashoffset = String(length)
@@ -82,7 +101,6 @@ function buildSVG(
     svg.appendChild(path)
   }
 
-  // Draw nodes
   trail.forEach((slug, i) => {
     const isCurrent = i === trail.length - 1
     const x = SPINE_X + wobbleX(i)
@@ -91,21 +109,18 @@ function buildSVG(
 
     const group = document.createElementNS(ns, "g")
 
-    const isNew = i >= prevLength && prevLength > 0
-    if (isNew) {
+    if (animate && isCurrent) {
       group.classList.add("trail-node-animate")
     }
 
-    // Clickable link for past nodes
     let wrapper: SVGElement
     if (!isCurrent) {
       const a = document.createElementNS(ns, "a")
-      const currentFullSlug = getFullSlug(window)
-      const href =
-        "/" + slug + (slug.endsWith("/") || slug.includes(".") ? "" : "")
+      const href = "/" + slug
       a.setAttribute("href", href)
       a.classList.add("internal")
       a.setAttribute("data-slug", slug)
+      a.setAttribute("data-trail-backtrack", "true")
       wrapper = a
     } else {
       wrapper = group
@@ -115,22 +130,14 @@ function buildSVG(
     circle.setAttribute("cx", String(x))
     circle.setAttribute("cy", String(y))
     circle.setAttribute("r", String(DOT_R))
-    if (isCurrent) {
-      circle.classList.add("trail-dot-current")
-    } else {
-      circle.classList.add("trail-dot-past")
-    }
+    circle.classList.add(isCurrent ? "trail-dot-current" : "trail-dot-past")
     wrapper.appendChild(circle)
 
     const text = document.createElementNS(ns, "text")
     text.setAttribute("x", String(x + LABEL_X_OFFSET))
     text.setAttribute("y", String(y + 3.5))
     text.textContent = truncate(title, MAX_LABEL)
-    if (isCurrent) {
-      text.classList.add("trail-label-current")
-    } else {
-      text.classList.add("trail-label-past")
-    }
+    text.classList.add(isCurrent ? "trail-label-current" : "trail-label-past")
     wrapper.appendChild(text)
 
     if (wrapper !== group) {
@@ -141,25 +148,67 @@ function buildSVG(
 
   container.innerHTML = ""
   container.appendChild(svg)
+
+  const panel = document.querySelector(".trail-panel") as HTMLElement
+  if (panel) {
+    const delay = animate ? 750 : 0
+    setTimeout(() => {
+      panel.scrollTo({ top: panel.scrollHeight, behavior: animate ? "smooth" : "instant" })
+    }, delay)
+  }
 }
+
+document.addEventListener("click", (e) => {
+  const target = (e.target as Element).closest("[data-trail-backtrack]")
+  if (target) {
+    backtracking = true
+  }
+})
 
 document.addEventListener("nav", async () => {
   const fullSlug = getFullSlug(window)
   const slug = simplifySlug(fullSlug)
 
-  const trail = getTrail()
-  const prevLength = trail.length
-  if (trail[trail.length - 1] !== slug) {
-    trail.push(slug)
-    saveTrail(trail)
+  let trail: string[]
+  let animate = false
+
+  if (!initialized) {
+    initialized = true
+    const urlTrail = getTrailFromURL()
+    if (urlTrail !== null) {
+      trail = [...urlTrail, slug]
+    } else {
+      trail = getTrail()
+      if (trail[trail.length - 1] !== slug) {
+        trail.push(slug)
+        animate = trail.length > 1
+      }
+    }
+  } else if (backtracking) {
+    trail = getTrail()
+    const idx = trail.indexOf(slug)
+    if (idx !== -1) {
+      trail.length = idx + 1
+    } else {
+      trail.push(slug)
+      animate = true
+    }
+    backtracking = false
+  } else {
+    trail = getTrail()
+    if (trail[trail.length - 1] !== slug) {
+      trail.push(slug)
+      animate = true
+    }
   }
 
-  // Render immediately with prettified slugs
+  saveTrail(trail)
+  setTrailInURL(trail)
+
   const tempTitles = new Map<string, string>()
   trail.forEach((s) => tempTitles.set(s, prettify(s)))
-  buildSVG(trail, tempTitles, slug, prevLength)
+  buildSVG(trail, tempTitles, slug, animate)
 
-  // Then resolve real titles from contentIndex
   try {
     const data: Record<string, ContentDetails> = await fetchData
     const realTitles = new Map<string, string>()
@@ -173,9 +222,6 @@ document.addEventListener("nav", async () => {
       }
       realTitles.set(s, title)
     }
-    // Re-render with real titles, no animation this time
-    buildSVG(trail, realTitles, slug, trail.length)
-  } catch {
-    // contentIndex failed to load, keep prettified slugs
-  }
+    buildSVG(trail, realTitles, slug, false)
+  } catch {}
 })

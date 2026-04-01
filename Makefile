@@ -11,6 +11,11 @@ quartz/:
 	rm -rf quartz-tmp
 
 setup: quartz/
+	cp components/*.tsx quartz/components/
+	cp components/scripts/*.ts quartz/components/scripts/
+	cp components/styles/*.scss quartz/components/styles/
+	cp components/index.ts quartz/components/index.ts
+	cp custom.scss quartz/styles/custom.scss
 	npm ci
 
 serve: setup
