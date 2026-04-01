@@ -1,7 +1,5 @@
 ---
 title: "Discovering chess openings: building opening skills from basic principles"
-tags:
-  - public
 aliases:
   - c8732670-f25b-4bb0-9102-5020de539f1a
 ---

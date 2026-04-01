@@ -1,8 +1,6 @@
 ---
 title: "Book reviews and literature notes are different things"
 lastmod: 2022-01-10
-tags:
-  - public
 aliases:
   - ea76698c-b228-4eca-818d-0cb675b05130
 ---

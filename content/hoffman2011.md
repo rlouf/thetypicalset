@@ -1,8 +1,5 @@
 ---
 title: "The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian Monte Carlo"
-tags:
-  - public
-  - inprogress
 aliases:
   - e87a1c79-4d97-48c5-9c0e-9c4ce6abfc6b
 ---

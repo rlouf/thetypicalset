@@ -1,8 +1,5 @@
 ---
 title: "Chess"
-tags:
-  - public
-  - chess
 aliases:
   - 2ce0631d-f92f-4d80-9484-282b54250b4c
 ---

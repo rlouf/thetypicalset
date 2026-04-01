@@ -1,7 +1,5 @@
 ---
 title: "Pour une revolution fiscale: Un impot sur le revenu pour le 21 eme siecle"
-tags:
-  - private
 aliases:
   - 025b3291-4b3f-4a45-bc67-01cf4b2c3a9a
 ---

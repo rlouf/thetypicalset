@@ -1,8 +1,5 @@
 ---
 title: "Ideas are rarely right or wrong"
-tags:
-  - thoughts
-  - public
 aliases:
   - f139e256-9a3a-43a9-99d0-03ff7a0c2446
 ---

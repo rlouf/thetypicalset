@@ -6,7 +6,6 @@ aliases:
   - 45ccc897-f07c-4adc-9142-9ae8870fbddc
 ---
 
-tags: [[probability_distribution|Probability distribution]]
 
 The half-Cauchy is defined on $R^+$ and is [[cauchy_distribution|Cauchy distributed]] on this domain. It can also be interpreted as a mixture of inverse gamma distributions[]]. In other words:
 

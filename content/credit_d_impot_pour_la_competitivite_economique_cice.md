@@ -1,9 +1,5 @@
 ---
 title: "Crédit d'impôt pour la compétitivité économique (CICE)"
-tags:
-  - inprogress
-  - economics
-  - public
 aliases:
   - 0e7c0139-8571-4098-8b01-245a711ec905
 ---

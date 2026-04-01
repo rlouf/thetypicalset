@@ -1,12 +1,9 @@
 ---
 title: "Economics is engineering for policy"
-tags:
-  - public
 aliases:
   - 022ea6fd-29f7-4f89-83e8-7c54b7a04ab7
 ---
 
-tags: [[economics|Economics]]
 
 And politics defines the equivalent of the laws of physics.
 

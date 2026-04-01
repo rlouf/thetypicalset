@@ -1,8 +1,5 @@
 ---
 title: "Wiener kernel"
-tags:
-  - inprogress
-  - public
 aliases:
   - dc211cf2-78b4-4269-91e8-fc88fb49def5
 ---

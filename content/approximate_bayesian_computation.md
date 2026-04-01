@@ -1,13 +1,10 @@
 ---
 title: "Simulation-based inference"
 lastmod: 2022-04-26
-tags:
-  - public
 aliases:
   - 0eefdc2c-544a-47b7-8e3b-05a3c196d2b3
 ---
 
-tags: [[markov_chain_monte_carlo_new|Markov Chain Monte Carlo]]
 
 Algorithm based on that intuition from Rubin (?) that drawing samples from the posterior distribution was equivalent to simulate data from the prior predictive distribution and accept or reject the sample based on the distance to the observed data. You need two ingredients:
 

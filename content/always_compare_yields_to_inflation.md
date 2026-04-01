@@ -1,7 +1,5 @@
 ---
 title: "Always compare yields to inflation"
-tags:
-  - inbox
 aliases:
   - 05892055-b714-4778-b010-8cea60f7f514
 ---

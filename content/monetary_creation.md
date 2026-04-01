@@ -1,7 +1,5 @@
 ---
 title: "Monetary creation"
-tags:
-  - public
 aliases:
   - 0bdd40d5-21a2-4f5e-9f14-8a5738513569
 ---

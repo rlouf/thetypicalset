@@ -1,7 +1,5 @@
 ---
 title: "How I take reading notes"
-tags:
-  - public
 aliases:
   - a9d4499d-b5f4-4676-8ada-f7a5a5c38681
 ---

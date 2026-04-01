@@ -1,13 +1,10 @@
 ---
 title: "Reversible-jump MCMC"
 lastmod: 2022-04-06
-tags:
-  - public
 aliases:
   - d430d6ab-03e8-4d26-b8c3-a4f8a3128cd7
 ---
 
-tags: [[markov_chain_monte_carlo_new|Markov Chain Monte Carlo]]
 
 The Reversible-jump Markov Chain Monte Carlo (RJ-MCMC) algorithm is an extension of the Rosenbluth-Metropolis-Hastings algorithm where the number of dimensions of the parameter space is allowed to change.
 

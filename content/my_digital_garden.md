@@ -1,8 +1,6 @@
 ---
 title: "Navigate linked notes"
 lastmod: 2022-05-31
-tags:
-  - public
 aliases:
   - 7dae4406-eb94-4496-93e1-a989cab14729
 ---

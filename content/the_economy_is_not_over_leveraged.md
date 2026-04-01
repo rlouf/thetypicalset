@@ -6,7 +6,6 @@ aliases:
   - 1fe36abe-f52f-4eab-8131-3409c711865c
 ---
 
-tags: [[economics|Economics]] [[inflation|Inflation]]
 
 While people will point out stuff such as Apple or LVMH borrowing at rock-bottom (when not negative) interest rates, the annual small business loans originations still haven't recovered from 2008:
 

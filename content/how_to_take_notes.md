@@ -1,7 +1,5 @@
 ---
 title: "How to take notes"
-tags:
-  - public
 aliases:
   - d4b6bab5-96f2-417f-902d-c78e7b7d1dca
 ---

@@ -1,14 +1,9 @@
 ---
 title: "Fiscalité"
-tags:
-  - RS
-  - fiscalite
-  - public
 aliases:
   - 517fc476-4e83-4655-8ced-b71fdaf70c7c
 ---
 
-tags: [[economie|Économie]] [[politique|Politique]]
 
 Declaration DDHC article 13
 

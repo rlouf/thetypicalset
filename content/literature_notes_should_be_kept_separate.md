@@ -1,7 +1,5 @@
 ---
 title: "Literature notes should be kept separate"
-tags:
-  - public
 aliases:
   - abce7e33-2662-48fe-ac2a-496df464d106
 ---

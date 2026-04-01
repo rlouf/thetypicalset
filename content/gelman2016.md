@@ -1,7 +1,5 @@
 ---
 title: "The Mythical Swing Voter"
-tags:
-  - literature
 aliases:
   - 33038660-5177-4730-9682-e164310e4f66
 ---

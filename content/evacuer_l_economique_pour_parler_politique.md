@@ -1,7 +1,5 @@
 ---
 title: "Evacuer l'économique pour parler politique"
-tags:
-  - inbox
 aliases:
   - 1c6ffb73-86b9-4332-b3b4-9942a8039168
 ---

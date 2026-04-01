@@ -1,8 +1,5 @@
 ---
 title: "Define user sessions in mobile applications"
-tags:
-  - public
-  - inprogress
 aliases:
   - 5f60be02-f066-421a-87b5-677193755f96
 ---

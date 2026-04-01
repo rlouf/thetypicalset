@@ -1,8 +1,5 @@
 ---
 title: "Chess openings"
-tags:
-  - chess
-  - public
 aliases:
   - ef88b5ed-d028-4bf1-b939-e709c1bbbcf7
 ---

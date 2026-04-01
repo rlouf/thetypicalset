@@ -1,15 +1,9 @@
 ---
 title: "Gaussian process"
-tags:
-  - inprogress
-  - machine_learning
-  - statistics
-  - public
 aliases:
   - f2d80a0e-47f7-4531-a654-8343c72dd962
 ---
 
-tags: [[probability_distribution|Probability distribution]]
 
 We have the follow impractical definition:
 

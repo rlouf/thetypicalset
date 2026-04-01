@@ -1,15 +1,9 @@
 ---
 title: "Chômage"
-tags:
-  - inprogress
-  - public
-  - economics
-  - politique
 aliases:
   - b1942533-ba86-4600-a83a-98d860e5bf32
 ---
 
-tags: [[economie|Économie]] [[politique|Politique]]
 
 Chapitre I.6 (boulo2021)
 

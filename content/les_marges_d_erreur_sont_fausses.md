@@ -1,7 +1,5 @@
 ---
 title: "Les marges d'erreur données par les instituts de sondage sont fausses"
-tags:
-  - pollsposition
 aliases:
   - 94c1d541-855b-49cc-8d88-958b8e5c50a1
 ---

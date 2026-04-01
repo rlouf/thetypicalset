@@ -1,8 +1,6 @@
 ---
 title: "Politics and statistics"
 lastmod: 2022-04-08
-tags:
-  - public
 aliases:
   - 316959ce-43d4-4e25-b445-cd2f5f651a15
 ---

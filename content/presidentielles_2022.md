@@ -1,7 +1,5 @@
 ---
 title: "Presidentielles 2022"
-tags:
-  - pollsposition
 aliases:
   - 93fb8064-3398-4e7f-869c-cb03cc53fc90
 ---

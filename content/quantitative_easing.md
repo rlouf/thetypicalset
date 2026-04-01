@@ -1,13 +1,9 @@
 ---
 title: "Quantitative Easing"
-tags:
-  - notebook
-  - public
 aliases:
   - 8ff4eef8-ed3d-405f-9658-7f390a06ecc1
 ---
 
-tags: [[monetary_systems|Monetary systems]] [[economics|Economics]]
 
 Quantitative Easing in fact makes "good debt" (that would be used as HQLA by banks) disappear from the markets, so banks have to build derivatives with the remaining bonds to create reserve.
 

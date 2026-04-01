@@ -1,13 +1,9 @@
 ---
 title: "Service public citoyen"
-tags:
-  - inprogress
-  - public
 aliases:
   - d3df7965-07d3-46fb-8afe-30681c096f7f
 ---
 
-tags: [[politique|Politique]]
 
 Rapport commandé par ["Digital New Deal Foundation"](https://www.thedigitalnewdeal.org/). Avec le CEO de [Bayes Impact](https://www.bayesimpact.org/fr/) (Bob l'emploi).
 

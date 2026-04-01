@@ -1,10 +1,5 @@
 ---
 title: "Taxation: philosophical perspectives"
-tags:
-  - taxation
-  - economics
-  - philosophy
-  - public
 aliases:
   - 5896070e-8664-41f8-96c0-310925d1c83d
 ---

@@ -6,7 +6,6 @@ aliases:
   - 290974e3-81d9-4748-948d-93b1ec43a09c
 ---
 
-tags: [[economics|Economics]] [[inflation|Inflation]] [[consumer_price_index|Consumer Price Index]]
 
 The Consumer Price Index is often used as a proxy or inflation. It was meant as a desciption, a mere state of affairs. But it is not actionable, it does not tell us exactly what is making the prices increase and how they are increasing. It is all veyr obvious and yet people are using this as a proxy for the general increase in prices levels.
 

@@ -1,8 +1,5 @@
 ---
 title: "Les 10% les plus riches ne gagnent que 3.5x plus que les 10% les plus pauvres"
-tags:
-  - public
-  - inprogress
 aliases:
   - 1cb5c299-7b43-4f6f-8543-f6cda97c3c50
 ---

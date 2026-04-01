@@ -6,7 +6,6 @@ aliases:
   - 00cdf6ad-f3cc-4e9a-a084-c6dcf5681d9c
 ---
 
-tags: [[hamiltonian_monte_carlo|Hamiltonian Monte Carlo]]
 
 Let us consider the following Hamiltonian (corresponds to sampling from a univariate Gaussian with standard deviation $\sigma$):
 

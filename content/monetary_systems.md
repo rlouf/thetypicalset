@@ -1,12 +1,9 @@
 ---
 title: "The Monetary systems"
-tags:
-  - notebook
 aliases:
   - 1a53642d-c03e-4ae9-92e2-e164869927b3
 ---
 
-tags: [[economics|Economics]]
 
 (wang2021) offers a modern account of the monetary system, and although it touches on the Eurodollar a little bit, it is motly US-focused. Reading through this comprehensive account, or any articlet that touches on the topic, I can't help but think "how the hell did we get to something so complicated and so fragile?". This is where a little bit of history cannot hurt. The excellent [Monetary Mechanics](https://maroonmacro.substack.com/) newsletter has a series on the history of the monetary system that does a good job at explaining how we moved from one system to the next.
 

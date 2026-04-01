@@ -4,7 +4,6 @@ aliases:
   - aeef5071-8a7c-4564-b270-c598127882b3
 ---
 
-tags: [[euro|Euro]]
 
 As the argument goes the commonon currency increases the liquidity of obligations on *secondary markets*, which increases the demand and thus lowers the interest rate.
 

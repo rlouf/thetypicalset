@@ -1,12 +1,9 @@
 ---
 title: "The Negative Binomial distribution"
-tags:
-  - public
 aliases:
   - 273bfd3a-7e6e-4971-b422-048f930ae5b0
 ---
 
-tags: [[probability_distribution|Probability distribution]]
 
 # Canonical parametrization
 

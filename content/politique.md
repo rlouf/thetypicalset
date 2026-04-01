@@ -1,7 +1,5 @@
 ---
 title: "Politique"
-tags:
-  - public
 aliases:
   - 4c836563-ceff-4001-8bf0-8c8f3b0b64a0
 ---

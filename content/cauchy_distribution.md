@@ -1,13 +1,9 @@
 ---
 title: "Cauchy distribution"
-tags:
-  - inprogress
-  - public
 aliases:
   - 31c8e78e-892c-4a73-b5d1-1d9b2e8a7fa7
 ---
 
-tags: [[probability_distribution|Probability distribution]]
 
 ```
 \begin{equation*}

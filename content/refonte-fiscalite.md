@@ -1,12 +1,9 @@
 ---
 title: "Refonte de la fiscalite"
-tags:
-  - private
 aliases:
   - d29d7bca-c996-4370-973f-81659db2cf72
 ---
 
-tags: [[fiscalite|Fiscalité]]
 
 Why it does not work.
 

@@ -1,8 +1,6 @@
 ---
 title: "Economics"
 lastmod: 2022-01-16
-tags:
-  - public
 aliases:
   - 5fecd21c-5701-48af-9fd8-a2a2ab9b36a8
 ---

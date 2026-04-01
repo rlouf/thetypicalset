@@ -1,8 +1,5 @@
 ---
 title: "Squared exponential kernel"
-tags:
-  - public
-  - inprogress
 aliases:
   - 338df7ae-048d-4a93-861b-80f75c3b887e
 ---

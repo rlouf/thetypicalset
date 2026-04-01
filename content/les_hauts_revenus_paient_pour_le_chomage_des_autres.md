@@ -1,13 +1,9 @@
 ---
 title: "Les hauts revenus paient pour le chômage des autres"
-tags:
-  - public
-  - inprogress
 aliases:
   - 9b102ff7-98bc-4c73-8f3a-016c74c54f8e
 ---
 
-tags: [[doxa|Doxa]]
 
 Depuis le 1er Octobre 2018 les cotisations chômage sont payées par l'employeur, à un taux constant de 4.05%. Petite subtilité: l'assiette de cette cotisation est plafonnée. C'est-à-dire qu'un taux fixe est appliqué sur l'intégralité de votre salaire, sauf si celui-ci dépasse un certain montant; auquel cas le taux est appliqué sur la partie correspondant au montant du plafond.
 

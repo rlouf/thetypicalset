@@ -6,7 +6,6 @@ aliases:
   - 7be372a6-07f8-4ee7-b12c-5a9747c46c83
 ---
 
-tags: [[consumer_price_index|Consumer Price Index]]
 
 I mean this is quite obvious:
 

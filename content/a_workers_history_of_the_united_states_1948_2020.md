@@ -2,8 +2,6 @@
 title: "A Workers' History of the United States 1948-2020"
 date: 2022-03-07
 lastmod: 2022-04-04
-tags:
-  - private
 aliases:
   - 0e174e18-6203-432b-9b2f-981eecd4767d
 ---

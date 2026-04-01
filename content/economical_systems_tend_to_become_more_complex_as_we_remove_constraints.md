@@ -1,7 +1,5 @@
 ---
 title: "Economical systems tend to become more complex as we remove constraints"
-tags:
-  - inbox
 aliases:
   - 26b12a73-f98e-4beb-80ac-20eceb884242
 ---

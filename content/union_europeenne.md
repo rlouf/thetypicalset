@@ -1,7 +1,5 @@
 ---
 title: "Union Européenne"
-tags:
-  - politique
 aliases:
   - 110eb391-3801-48b7-8533-c7a531e9cd71
 ---

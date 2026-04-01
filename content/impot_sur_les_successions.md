@@ -1,9 +1,5 @@
 ---
 title: "Impôt sur les successions"
-tags:
-  - economics
-  - inprogress
-  - public
 aliases:
   - c4dedbfd-5d5a-45bf-943c-d75106063cfa
 ---

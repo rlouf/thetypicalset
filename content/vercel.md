@@ -1,8 +1,5 @@
 ---
 title: "Vercel"
-tags:
-  - digital_garden
-  - public
 aliases:
   - d90b8cbd-aeb5-46df-b380-520d6ee6a9a6
 ---

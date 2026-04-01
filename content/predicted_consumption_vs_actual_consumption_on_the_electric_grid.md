@@ -2,8 +2,6 @@
 title: "Predicted consumption vs actual consumption on the electric grid"
 date: 2022-01-11
 lastmod: 2022-05-27
-tags:
-  - prompt
 aliases:
   - 58e9b33a-a49b-4277-b613-cca4271acbc4
 ---

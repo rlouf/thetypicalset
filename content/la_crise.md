@@ -1,7 +1,5 @@
 ---
 title: "La Crise"
-tags:
-  - public
 aliases:
   - decf58d3-66ec-4d34-be35-a310d824e89e
 ---

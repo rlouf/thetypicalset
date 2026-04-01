@@ -1,7 +1,5 @@
 ---
 title: "Bayesian statistics"
-tags:
-  - public
 aliases:
   - e75eaea5-311a-431a-be9e-5b100e831470
 ---
