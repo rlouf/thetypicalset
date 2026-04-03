@@ -201,6 +201,9 @@ function addTitle(parent: SVGElement, ns: string, slug: string) {
 }
 
 function renderBackground(svg: SVGSVGElement, ns: string) {
+  const gray =
+    getComputedStyle(document.documentElement).getPropertyValue("--gray").trim() || "#999"
+
   const bgEdges = document.createElementNS(ns, "g")
   bgEdges.classList.add("bg-edges")
   for (const edge of allEdges) {
@@ -212,6 +215,9 @@ function renderBackground(svg: SVGSVGElement, ns: string) {
     line.setAttribute("y1", String(from.y))
     line.setAttribute("x2", String(to.x))
     line.setAttribute("y2", String(to.y))
+    line.setAttribute("stroke", gray)
+    line.setAttribute("stroke-width", "1.5")
+    line.setAttribute("opacity", "0.4")
     bgEdges.appendChild(line)
   }
   svg.appendChild(bgEdges)
