@@ -1,5 +1,6 @@
 ---
 title: "Pico GPT2 in Aesara"
+date: 2023-01-12
 ---
 
 ```python
