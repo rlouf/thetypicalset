@@ -4,7 +4,7 @@ aliases:
   - 9980ae28-68d4-4e29-9248-d661ccd85ab8
 ---
 
-I enjoy work and my personal projects (open source) very much, and they keep me very busy. I am also trying to [[now|do other things with my life]]. My interests have recently shifted towards Large Language Models, but my statistics and symbolic background are still very relevant!
+I enjoy work and my personal projects (open source) very much, and they keep me very busy. I am also trying to do other things with my life. My interests have recently shifted towards Large Language Models, but my statistics and symbolic background are still very relevant!
 
 # Sampling sequences with Large Language Models
 
