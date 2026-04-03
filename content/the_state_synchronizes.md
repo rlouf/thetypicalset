@@ -1,9 +1,0 @@
----
-title: "The State synchronizes"
-date: 2022-05-04
-lastmod: 2022-05-04
-aliases:
-  - 74131584-00dc-4733-b400-7e00b6299919
----
-
-The state can act on the entirety of the economy almost at once, and does so in a *democratic* way, that is to say citizens are supposed to have some say over the decisions that are being made. Unlike in a private company. When modern liberals tend to see the state under the regulation lens I prefer to see it under the synchronization lens. The state is giving directions and providing some freedom to do research and to innovate. It makes decisions wherever synchronization is necessary / centralisation is beneficial: energy, infrastructure, formations.

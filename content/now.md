@@ -24,7 +24,4 @@ I tore my Achilles tendon playing tennis in Feburary; I can now walk almost norm
 
 # Other intellectual wanderings
 
-- I keep coming back to macroeconomics
 - I am currently obsessed with [[blog/solve-sudokus-kanren|relational]] [[blog/zebra-riddle-kanren|programming]]
-- [[democracy|Democracy]]
-- [[monetary_systems|The monetary system]]
