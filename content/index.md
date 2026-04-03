@@ -4,7 +4,7 @@ title: "The typical set"
 
 👋 I am Rémi ([email](mailto:remi@thetypicalset.com), [twitter](https://twitter.com/remilouf), [Github](https://github.com/rlouf/))
 
-You've just set foot on **the typical set**, a subset of my personal notes, [[blog/index|my blog]], some longform write-ups. Feel free to explore. You can start with [[now|what my life is like now]], or [[what_i_am_working_on|what I am working on and thinking about now]].
+You've just set foot on **the typical set**, a subset of my personal notes, [[blog/index|my blog]], some longform write-ups. Feel free to explore. You can start with [[now|what my life is like now]], or [[what_i_am_working_on|what I am working on and thinking about now]]. I am bringing this back to life in 2026 after nearly four years of hibernation.
 
 # I co-founded a company
 
@@ -34,14 +34,6 @@ With this experiment I am also trying to figure out [[how_to_take_notes|how to w
 Notes that are found in the rabbit hole sometimes coalesce into blog posts. Unlike evergreen notes, blog posts are *time-stamped* and are thus allowed (sometimes expected) to become *stale*.
 
 [[blog/index|>> ENTER THE BLOG <<]]
-
-# Currently reading
-
-- The 22 immutable laws of branding
-- The Creative Act: A way of being
-- Are your lights on? How to figure out what the problem really is
-- The art of community
-- Start at the end: How to build products that Create Change
 
 # About this website
 

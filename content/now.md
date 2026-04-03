@@ -1,7 +1,5 @@
 ---
 title: "🌿 Now"
-aliases:
-  - 058ec62c-6022-4eeb-b0a0-e88a75a8b761
 ---
 
 I try to [[books|keep up with reading]]. I'm also trying to improve [[my_daily_routine|my routine]].

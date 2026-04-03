@@ -1,25 +1,21 @@
 ---
 title: "💻 Working on now"
-aliases:
-  - 9980ae28-68d4-4e29-9248-d661ccd85ab8
 ---
 
-I enjoy work and my personal projects (open source) very much, and they keep me very busy. I am also trying to do other things with my life. My interests have recently shifted towards Large Language Models, but my statistics and symbolic background are still very relevant!
-
-# Sampling sequences with Large Language Models
-
-I am convinced that the current way we [[sample_text_sequences|generate sequences]] with Large Language Models is suboptimal. We can do much better than [[greedy_search|greedy search]], [[multinomial_sampling|multinomial sampling]] or [[beam_search|beam search]]. I think that [[smc_steering|SMC steering]] is more promising.
+I am currently the cofoundeur and CEO of [.txt](https://www.dottxt.ai), where we build the reliability layer for AI agents.
 
 # Structured streaming and agent primitives
 
 I think the way we consume LLM output is fundamentally wrong. [[closing-brace-synchronization-point|JSON's closing brace is an unexamined synchronization point]] and [[facts-not-objects|the fundamental unit of LLM output is a fact, not an object]]. Once you see that, [[llm-patch-streaming-coroutine|an LLM with patch streaming is a coroutine]] and [[agent-frameworks-rational-response|agent frameworks are rational responses to an irrational constraint]].
 
-Separately, [[agent-sessions-externalize-reasoning|agent sessions make reasoning explicit]] in a way that changes how we think about [[session-traces-artifact|software artifacts]] and [[code-without-reasoning|code review]].
+# Developer tools for the AI agent era
 
-# Guided generation with Large Language Models
+It is becoming more and more obvious that we will need more tooling to fully take advantage of AI agents.[[agent-sessions-externalize-reasoning|Agent sessions make reasoning explicit]] in a way that changes how I think about [[session-traces-artifact|software artifacts]] and [[code-without-reasoning|code review]].
 
-# Optimizing inference time
+# Agent harnesses 
 
-# Outlines
+The field has been focused on coding agents, and as a result has focused on an interative (TUI) form factor. Agents are also useful when they run in the background, reacting to their environment. We built our own agent harness at [.txt](https://www.dottxt.ai) to orchestrate the background agents we use for R&D, GTM, and generally gathering information.
 
-I am also working on an Open Source library that provides guided generation, [[outlines|Outlines]]. It also helps me learn everything LLMs.
+# Software design
+
+Designing public APIs is one of my favorite things to do, and I still find time to enjoy it.
