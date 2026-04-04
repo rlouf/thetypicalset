@@ -18,4 +18,4 @@ The field has been focused on coding agents, and as a result has focused on an i
 
 # Software design
 
-Designing public APIs is one of my favorite things to do, and I still find time to enjoy it.
+Designing public APIs is one of my favorite things to do, and I still find time to enjoy it. I believe [[software_engineering_is_a_craft]], and approach API design accordingly: [[start_with_designing_the_api_you_want]] and [[design_by_manipulating_mock_code|design by manipulating mock code]] until it feels right.
