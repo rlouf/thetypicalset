@@ -12,7 +12,7 @@ Based on the intermediate representation built by [[aeppl|AePPL]]:
 - NUTS as default
 - Gibbs samplers
 - Closed-form posterior
-- Reversible jump
+- [[reversible_jump_mcmc|Reversible jump]]
 - Walk the space of equivalent representations of the graph
 - Automatic inference
 - Specify that we want a specific sampler from
@@ -27,7 +27,7 @@ srng = at.random.RandomStream(0)
 
 X = at.matrix("X")
 
-# Horseshoe prior for `beta_rv`
+# [[horsehoe|Horseshoe]] prior for `beta_rv`
 tau_rv = srng.halfcauchy(0, 1, name="tau")
 lmbda_rv = srng.halfcauchy(0, 1, size=X.shape[1], name="lambda")
 beta_rv = srng.normal(0, lmbda_rv * tau_rv, size=X.shape[1], name="beta")

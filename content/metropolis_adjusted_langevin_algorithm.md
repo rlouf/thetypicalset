@@ -30,7 +30,7 @@ where
 \end{equation*}
 ```
 
-$k$ is the number of dimension of $\boldsymbol{\theta}$, $\tau$ the step size and $\pi$ the probability density. The idea, like with [[hamiltonian_monte_carlo|Hamiltonian Monte Carlo]], is to use information about the gradient of the probability density funtion to produce a "better" proposal.
+$k$ is the number of dimension of $\boldsymbol{\theta}$, $\tau$ the step size and $\pi$ the probability density. The idea is to use information about the gradient of the probability density function to produce a "better" proposal.
 
 The dynamics defined by the discretized version of the Langevin dynamics only maintain the invariance of $\pi$ approximately and so we need to perform an accept/reject step accepting $\boldsymbol{\theta}_t$ with probability:
 

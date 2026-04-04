@@ -6,7 +6,7 @@ aliases:
   - 5acc4f0f-417e-424f-95a5-1c95e7e822ff
 ---
 
-We are interested in new sampling algorithms, and more interestingly at methods to calibrate the samplers.
+We are interested in new sampling algorithms, and more interestingly at methods to calibrate the samplers. This also connects to [[bayesian_deep_learning|Bayesian Deep Learning]] where approximate inference over neural network weights is the key challenge.
 
 # The motivation behind MCMC algorithms
 

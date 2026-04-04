@@ -43,3 +43,5 @@ We can use [Jethro Kuan's theme](https://github.com/jethrokuan/cortex/blob/5e5fd
 # More
 
 Using the graph and its *properties* to navigate through the notes opens new possibilities. For instance we could design and display a "creativity" score that measures to what extent a note references notes on different topics.
+
+See also [[build_a_collective_brain|Building a collective brain]] for thoughts on collaborative knowledge, and [[automate_decisions_about_what_to_work_on|choosing what to work on]] when navigating many interests.

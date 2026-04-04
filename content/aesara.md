@@ -23,6 +23,7 @@ Aesara is *much more than that*.
 - [[kaeras|AeNN]]
 - [[aeppl|AePPL]]
 - [[aemcmc|AeMCMC]]
+- [[automatic_model_selection_with_aesara_rewrites|Automatic model selection with rewrites]]
 - [[jax_dispatcher|JAX dispatcher]]
 - [[xla_dispatcher|XLA dispatcher]]
 - Aesara's Intermediate representation
