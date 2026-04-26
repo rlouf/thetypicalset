@@ -2,8 +2,6 @@
 title: "Metropolis-Adjusted Langevin Algorithm"
 date: 2022-03-29
 lastmod: 2022-03-29
-aliases:
-  - 2b7665c9-e950-4432-b260-9e30b593b375
 ---
 
 The Metropolis-Adjusted Langevin algorithm updates the position of the chain $\boldsymbol{\theta}_t$ at time $t$ based of the overdamped Langevin diffusion equation:
