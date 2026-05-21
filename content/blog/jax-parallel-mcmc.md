@@ -198,7 +198,7 @@ I consider the following cases:
 
 We fix the number of chains and make the number of samples vary.
 
-![[img/jax-parallel-mcmc-samples.png]]
+![[blog/img/jax-parallel-mcmc-samples.png]]
 
 You will notice the missing point for TFP implementation. Since the TFP algorithm stores all the samples, it runs out of memory for large numbers of samples. This did not happen with the XLA-compiled version, probably because it uses more memory-efficient data structures.
 
@@ -212,7 +212,7 @@ I would recommend to go with JAX in most cases. Sampling in .3 seconds instead o
 
 Here we fix the number of samples and make the number of chains vary.
 
-![[img/jax-parallel-mcmc-chains.png]]
+![[blog/img/jax-parallel-mcmc-chains.png]]
 
 JAX is still a clear winner: it is faster than Numpy as soon as the number of chains reaches 10,000. You will note that there is a bump on the JAX curve, that is entirely due to compilation (the green curve does not have this bump). I do not have an explanation why, so ping me if you have the answer!
 

@@ -35,7 +35,7 @@ def build_schedule(
 
 Let us visualize the schedule for 200k training steps divided in 4 cycles. At each cycle 1/4th of the steps are dedicated to exploration.
 
-![[img/cyclical_sgld_schedule.png]]
+![[blog/img/cyclical_sgld_schedule.png]]
 
 ## Cyclical SGLD step
 
@@ -66,7 +66,7 @@ def sample_fn(rng_key):
 
 Let's plot the model's density; we will need the plot later to evaluate the sampler
 
-![[img/cyclical_sgld_array_gaussians.png]]
+![[blog/img/cyclical_sgld_array_gaussians.png]]
 
 ## Sample from the mixture of gaussians
 
@@ -174,7 +174,7 @@ for i in progress_bar(range(num_training_steps)):
 
 Let's plot the trajectory:
 
-![[img/cyclical_sgld_sgld_samples.png]]
+![[blog/img/cyclical_sgld_sgld_samples.png]]
 
 ## Cyclical SGLD
 
@@ -211,11 +211,11 @@ for i in progress_bar(range(num_training_steps)):
 
 It looks from the trajectory that the distribution is better explored:
 
-![[img/cyclical_sgld_samples.png]]
+![[blog/img/cyclical_sgld_samples.png]]
 
 Let's look at the distribution:
 
-![[img/cyclical_sgld_distribution.png]]
+![[blog/img/cyclical_sgld_distribution.png]]
 
 # What's next
 

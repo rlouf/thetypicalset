@@ -118,7 +118,7 @@ Syntactically, `aesara.tensor` looks like a drop-in replacement to `numpy`. Reme
 
 Let us sample 1000 chains concurrently for an increasing number of samples and compare the running time to NumPy's and JAX's:
 
-![[img/rmh-aesara-comparison.png]]
+![[blog/img/rmh-aesara-comparison.png]]
 
 For small number of samples, Aesara (C backend) and JAX spend most of their time compiling the kernel and NumPy is faster. Past $10^4$ samples NumPy lags behind, with Aesara catching up with JAX around $10^5$ samples.
 

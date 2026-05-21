@@ -18,7 +18,7 @@ It was fun, easy, and only cost $7k for a M5 Max MBP with 128GB of unified memor
 
 Now I can type a comma followed by plain English, a description of what I want to do. A few seconds later I get a short list of commands, each with a one-line explanation. I pick one, it drops onto my prompt line. I read it, maybe edit it, and press Enter myself.
 
-![[img/shell-comma.gif]]
+![[blog/img/shell-comma.gif]]
 
 Of course, being the CEO of the [Structured Outputs Company™](https://dottxt.ai), I had to use a few tricks: [JSON Schema](https://json-schema.org/) to get a list of `{command, note}`, and some grammar fun to force the command prefixes (`ls`, `git`, etc.).
 
@@ -28,7 +28,7 @@ The thing answering my commas is a 27B parameter model running locally through l
 
 The question mark does a different job, so it gets a different tool.
 
-![[img/shell-ask.gif]]
+![[blog/img/shell-ask.gif]]
 
 A question might be answered from what the model already knows, or it might need to read a file on my disk, or check something current on the web. So the question mark hands the prompt to a small local agent instead (the Amazing [Pi](https://pi.dev)). I've given it a deliberately narrow toolset: it can read files and it can search the web, and nothing else. No writing, no editing, no running shell commands. I want it to *look things up*, not erase my hard drive. The answer comes back rendered as markdown, right there in the terminal.
 

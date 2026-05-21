@@ -7,13 +7,13 @@ aliases:
 
 À l'origine de cette note, un [post de blog](https://coulmont.com/blog/2014/10/21/les-notes-du-bac/) de [Baptiste Coulmont](https://twitter.com/coulmont) sur l'évolution des notes du bac dans le temps. Plus particulièrement, cette courbe représentant la distribution de la moyennes des notes obtenues au baccalauréat entre 2006 et 2013:
 
-![[img/notes-bac-ii-repartition-notes-coulmont.png]]
+![[blog/img/notes-bac-ii-repartition-notes-coulmont.png]]
 
 Cette courbe est très éloignée de la gaussienne attendue. Le but de cet exercice de modélisation est de montrer qu'il est néanmoins possible de reproduire cette courbe *en supposant que la distribution des moyennes avant l'intervention du jury est normale.*
 
 Nous n'avons malheureusement à notre disposition que les [données concernant la première session 2016](https://archives-statistiques-depp.education.gouv.fr/Default/digital-viewer/c-13341) (si vous avez accès à plus de données, je vous serais reconnaissant de bien vouloir me [contacter](https://twitter.com/remilouf)) :
 
-![[img/notes-bac-distribution-2016.svg]]
+![[blog/img/notes-bac-distribution-2016.svg]]
 
 Cette courbe-ci est aussi éloignée d'une simple loi normale, avec des pics autour des notes 8, 10, 12, 14, 16 qui correspondent respectivement à la note minimale pour aller au rattrapage, la note d'admission, les mentions AB, B et TB. Nous allons montrer ici que la courbe s'explique très bien en supposant que la distribution des moyennes est normale et en modélisant l'intervention du jury.
 
@@ -66,7 +66,7 @@ def simulate(num_candidats, moyenne=12, sd=2.5):
     return hist
 ```
 
-![[img/bac-premiere-normal_histogram.svg]]
+![[blog/img/bac-premiere-normal_histogram.svg]]
 
 Cette simple gaussienne n'est pas une mauvaise approximation à la courbe de départ. Reste maintenant à comprendre d'où viennent les creux et les pics dans les données.
 
@@ -116,7 +116,7 @@ def simulate_all(mu, sd, alpha):
     return hist
 ```
 
-![[img/bac-premiere-all_histogram.png]]
+![[blog/img/bac-premiere-all_histogram.png]]
 
 Pas mal!
 
@@ -152,13 +152,13 @@ with model:
 
 Regardons la trace et la distribution postérieure des différentes variables pour vérifier que tout s'est déroulé sans problème :
 
-![[img/notes-bac-premiere-trace.svg]]
+![[blog/img/notes-bac-premiere-trace.svg]]
 
 # Résultats
 
 Avant de se lancer dans des inteprétations vérifions que la distribution postérieure prédictive de notre modèle reproduit les données de façon satisfaisante. Chaque courbe bleue correspond à une simulation :
 
-![[img/notes-bac-premiere-posterior-predictive.svg]]
+![[blog/img/notes-bac-premiere-posterior-predictive.svg]]
 
 Le modèle est plutôt bon, mais avec quelques améliorations possibles:
 
@@ -168,11 +168,11 @@ Le modèle est plutôt bon, mais avec quelques améliorations possibles:
 
 On peut s'amuser à tracer la distribution de la moyenne des notes avant intervention du jury, et la courbe correspondant à l'intervention du jury de sorte à ce qu'en sommant les deux courbes on retrouve les données :
 
-![[img/notes-baccalaureat-gaussian-posterior.svg]]
+![[blog/img/notes-baccalaureat-gaussian-posterior.svg]]
 
 La probabilité que le jury intervienne en faveur d'un candidat n'est clairement pas la même en fonction du seuil qui est concerné:
 
-![[img/notes-baccalaureat-proba-repechage_avg.svg]]
+![[blog/img/notes-baccalaureat-proba-repechage_avg.svg]]
 
 Plus précisément on peut regarder la probabilité d'intervention lorsque l'on est à un point du seuil. Avec une moyenne de :
 
